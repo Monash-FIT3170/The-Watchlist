@@ -19,3 +19,7 @@ test commit
 - Peter Roberts
   - prob0006@student.monash.edu
 
+- Aydin Ficker Karci
+    - Release Train Enineer
+    - Team 1
+
