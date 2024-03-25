@@ -21,3 +21,5 @@ To start the project:
 - Aydin Ficker Karci
     - Release Train Enineer
     - Team 1
+- Sineth Fernando
+  - Product Owner/Manager of Agile Team 3 
