@@ -19,6 +19,9 @@ To start the project:
 - Peter Roberts
   - System Architect of Agile Team 1
   - prob0006@student.monash.edu
+- Selsa Sony
+  - Product Manager of Agile Team 2
+  - Email: sson0024@student.monash.edu
 - Brian Nge Jing Hong
   - bnge0001@student.monash.edu
 - Aydin Ficker Karci
