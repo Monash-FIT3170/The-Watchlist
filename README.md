@@ -18,4 +18,7 @@ test commit
 
 - Peter Roberts
   - prob0006@student.monash.edu
+ 
+- Brian Nge Jing Hong
+  - bnge0001@student.monash.edu
 
