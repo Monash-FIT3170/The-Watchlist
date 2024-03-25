@@ -15,3 +15,6 @@ test commit
   - Product Owner/Manager of Agile Team 3 
   - Mobile: 0473370700
   - Email: stefansu3526@gmail.com
+
+- Ishita Gupta
+ - Release Train Engineer of Agile Team 2
