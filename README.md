@@ -9,38 +9,39 @@ To start the project:
 ```meteor run```
 
 ## Team Member Information
-- Stefan Su
-  - Product Owner/Manager of Agile Team 3 
-- Ishita Gupta
-  - Release Train Engineer of Agile Team 2
+
+### Agile Team 1
 - Max Ramm
   - Product Manager
-  - Agile Team 1
-- Peter Roberts
-  - System Architect of Agile Team 1
-  - prob0006@student.monash.edu
-- Miles Rudelic
- - mrud0004@student.monash.edu
-- Selsa Sony
-  - Product Manager of Agile Team 2
-  - Email: sson0024@student.monash.edu
-- Brian Nge Jing Hong
-  - Release Train Engineer of Agile Team 3
-- Aydin Ficker Karci
-    - Release Train Engineer 
-    - Team 1
-- Lachlan Durra
-  - ldur0003@student.monash.edu
-- Sineth Fernando
-  - Product Owner/Manager of Agile Team 3 
-- Geomher Vergara
-  - System Architect of Agile Team 3
-  - Student Email: gver0007@student.monash.edu
-- Ari Feldman
-  - System Architect of Agile Team 2
 - Reya
-  - Product Owner/Manager of Agile Team 1 
+  - Product Owner/Manager
+- Peter Roberts (prob0006@student.monash.edu)
+  - System Architect
+- Miles Rudelic (mrud0004@student.monash.edu)
+  - Release Train Engineer
+
+
+### Agile Team 2
+- Selsa Sony (sson0024@student.monash.edu)
+  - Product Manager 
+- Ari Feldman (afel0004@student.monash.edu)
+  - System Architect 
+- Ishita Gupta
+  - Release Train Engineer
+- Lachlan Durra (ldur0003@student.monash.edu)
+  - Release Train Engineer
+
+
+### Agile Team 3
+- Stefan Su
+  - Product Owner/Manager
+- Sineth Fernando
+  - Product Owner/Manager
+- Geomher Vergara (gver0007@student.monash.edu)
+  - System Architect 
 - Wee Jun Lin (Lucas)
-  - System Architect of Agile Team 3
+  - System Architect
+- Brian Nge Jing Hong
+  - Release Train Engineer
 - Chris How
-  - Release Train Engineer (RTE) of Agile Team 3
+  - Release Train Engineer
