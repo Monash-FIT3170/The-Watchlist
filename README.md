@@ -13,9 +13,8 @@ test commit
 ## Team Member Information
 - Stefan Su
   - Product Owner/Manager of Agile Team 3 
-  - Mobile: 0473370700
-  - Email: stefansu3526@gmail.com
-
+- Max Ramm
+  - Product Manager
+  - Agile Team 1
 - Peter Roberts
   - prob0006@student.monash.edu
-
