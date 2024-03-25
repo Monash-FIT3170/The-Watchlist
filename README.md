@@ -8,11 +8,11 @@ Setup information:
 To start the project:
 ```meteor run```
 
-test commit
-
 ## Team Member Information
 - Stefan Su
   - Product Owner/Manager of Agile Team 3 
+- Ishita Gupta
+ - Release Train Engineer of Agile Team 2
 - Max Ramm
   - Product Manager
   - Agile Team 1
