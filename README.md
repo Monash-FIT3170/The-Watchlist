@@ -12,18 +12,22 @@ To start the project:
 
 ### Agile Team 1
 - Max Ramm
-  - Product Manager
+  - Product Owner/Manager
 - Reya
   - Product Owner/Manager
 - Peter Roberts (prob0006@student.monash.edu)
   - System Architect
 - Miles Rudelic (mrud0004@student.monash.edu)
   - Release Train Engineer
+- Aydin Ficker Karci
+  - Release Train Engineer 
 
 
 ### Agile Team 2
 - Selsa Sony (sson0024@student.monash.edu)
-  - Product Manager 
+  - Product Owner/Manager
+- Maddy
+  - Product Owner/Manager   
 - Ari Feldman (afel0004@student.monash.edu)
   - System Architect 
 - Ishita Gupta
