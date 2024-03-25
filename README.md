@@ -33,3 +33,5 @@ To start the project:
   - Student Email: gver0007@student.monash.edu
 - Ari Feldman
   - System Architect of Agile Team 2
+- Wee Jun Lin (Lucas)
+  - System Architect of Agile Team 3
