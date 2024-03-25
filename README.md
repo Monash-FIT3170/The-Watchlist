@@ -30,3 +30,5 @@ To start the project:
   - System Architect of Agile Team 3
   - Email: geomher.vergara@gmail.com
   - Student Email: gver0007@student.monash.edu
+- Wee Jun Lin (Lucas)
+  - System Architect of Agile Team 3
