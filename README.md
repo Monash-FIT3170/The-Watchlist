@@ -9,3 +9,6 @@ To start the project:
 ```meteor run```
 
 test commit
+
+## Members
+Peter Roberts: prob0006@student.monash.edu
