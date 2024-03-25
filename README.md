@@ -23,3 +23,6 @@ To start the project:
     - Team 1
 - Lachlan Durra
   - ldur0003@student.monash.edu
+- Sineth Fernando
+  - Product Owner/Manager of Agile Team 3 
+
