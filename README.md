@@ -8,18 +8,16 @@ Setup information:
 To start the project:
 ```meteor run```
 
-test commit
-
 ## Team Member Information
 - Stefan Su
   - Product Owner/Manager of Agile Team 3 
-  - Mobile: 0473370700
-  - Email: stefansu3526@gmail.com
-
+- Ishita Gupta
+ - Release Train Engineer of Agile Team 2
+- Max Ramm
+  - Product Manager
+  - Agile Team 1
 - Peter Roberts
   - prob0006@student.monash.edu
-
 - Aydin Ficker Karci
     - Release Train Enineer
     - Team 1
-
