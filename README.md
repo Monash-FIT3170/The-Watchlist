@@ -19,3 +19,5 @@ test commit
 - Peter Roberts
   - prob0006@student.monash.edu
 
+- Lachlan Durra
+  - ldur0003@student.monash.edu
