@@ -19,3 +19,7 @@ test commit
 - Peter Roberts
   - prob0006@student.monash.edu
 
+- Geomher Vergara
+  - System Architect of Agile Team 3
+  - Email: geomher.vergara@gmail.com
+  - Student Email: gver0007@student.monash.edu
