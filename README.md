@@ -18,3 +18,6 @@ To start the project:
   - Agile Team 1
 - Peter Roberts
   - prob0006@student.monash.edu
+- Aydin Ficker Karci
+    - Release Train Enineer
+    - Team 1
