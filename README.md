@@ -26,3 +26,7 @@ To start the project:
 - Sineth Fernando
   - Product Owner/Manager of Agile Team 3 
 
+- Geomher Vergara
+  - System Architect of Agile Team 3
+  - Email: geomher.vergara@gmail.com
+  - Student Email: gver0007@student.monash.edu
