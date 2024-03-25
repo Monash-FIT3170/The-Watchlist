@@ -19,3 +19,5 @@ test commit
 - Peter Roberts
   - prob0006@student.monash.edu
 
+- Miles Rudelic
+ - mrud0004@student.monash.edu
