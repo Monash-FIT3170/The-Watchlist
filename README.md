@@ -12,7 +12,7 @@ To start the project:
 - Stefan Su
   - Product Owner/Manager of Agile Team 3 
 - Ishita Gupta
- - Release Train Engineer of Agile Team 2
+  - Release Train Engineer of Agile Team 2
 - Max Ramm
   - Product Manager
   - Agile Team 1
@@ -21,3 +21,5 @@ To start the project:
 - Aydin Ficker Karci
     - Release Train Enineer
     - Team 1
+- Lachlan Durra
+  - ldur0003@student.monash.edu
