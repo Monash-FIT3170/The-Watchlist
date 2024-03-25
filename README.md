@@ -19,3 +19,6 @@ test commit
 - Peter Roberts
   - prob0006@student.monash.edu
 
+- Selsa Sony
+  - Product Manager of Agile Team 2
+  - Email: sson0024@student.monash.edu
