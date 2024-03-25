@@ -25,7 +25,7 @@ To start the project:
   - Product Manager of Agile Team 2
   - Email: sson0024@student.monash.edu
 - Brian Nge Jing Hong
-  - bnge0001@student.monash.edu
+  - Release Train Engineer of Agile Team 3
 - Aydin Ficker Karci
     - Release Train Enineer
     - Team 1
