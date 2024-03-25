@@ -27,7 +27,7 @@ To start the project:
 - Brian Nge Jing Hong
   - bnge0001@student.monash.edu
 - Aydin Ficker Karci
-    - Release Train Enineer
+    - Release Train Engineer 
     - Team 1
 - Lachlan Durra
   - ldur0003@student.monash.edu
@@ -42,3 +42,5 @@ To start the project:
   - Product Owner/Manager of Agile Team 1 
 - Wee Jun Lin (Lucas)
   - System Architect of Agile Team 3
+- Chris How
+  - Release Train Engineer (RTE) of Agile Team 3
