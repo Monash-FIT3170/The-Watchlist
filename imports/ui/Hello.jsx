@@ -1,16 +1,38 @@
 import React, { useState } from 'react';
 
 export const Hello = () => {
-  const [counter, setCounter] = useState(0);
+  const [title, setTitle] = useState("");
 
-  const increment = () => {
-    setCounter(counter + 1);
-  };
+  handleCreate = () => {
+    if (title == "") return;
+    
+    Meteor.call("content.create", {
+      title: title
+    }, (err, res) => {
+      if (err) {
+        alert(res)
+      } else {
+        alert("Successfully added movie!")
+      }
+    })
+
+  }
+
+  getData = () => {
+    Meteor.call("content.create", {myValue: 5}, (err, res) => {
+      if (err) {
+        alert(err)
+      } else {
+        setCounter(res)
+      }
+    })
+  }
 
   return (
     <div>
-      <button onClick={increment}>Click Me</button>
-      <p>You've pressed the button {counter} times.</p>
+      <p>Add a new movie!</p>
+      <input value={title} onChange={e => setTitle(e.target.value)}/>
+      <button onClick={() => handleCreate()}>Create Movie</button>
     </div>
   );
 };

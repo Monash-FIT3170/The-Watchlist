@@ -1,21 +1,31 @@
 import React from 'react';
-import { useFind, useSubscribe } from 'meteor/react-meteor-data';
-import { LinksCollection } from '../api/links';
+import { useTracker, useSubscribe } from 'meteor/react-meteor-data';
+import Content from '../db/Content';
 
 export const Info = () => {
-  const isLoading = useSubscribe('links');
-  const links = useFind(() => LinksCollection.find());
+  const { content, isLoading } = useTracker(() => {
+    const handler = Meteor.subscribe("content");
 
-  if(isLoading()) {
+    if (!handler.ready()) {
+      return { content: [], isLoading: true };
+    }
+
+    const content = Content.find().fetch()
+
+    return { content: content, isLoading: false }
+
+  })
+
+  if(isLoading) {
     return <div>Loading...</div>;
   }
 
   return (
     <div>
-      <h2>Learn Meteor!</h2>
-      <ul>{links.map(
-        link => <li key={link._id}>
-          <a href={link.url} target="_blank">{link.title}</a>
+      <h2>Content loaded:</h2>
+      <ul>{content.map(
+        con => <li key={con._id}>
+          {con.title}
         </li>
       )}</ul>
     </div>

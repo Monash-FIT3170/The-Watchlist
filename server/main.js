@@ -1,6 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 import { LinksCollection } from '/imports/api/links';
 
+// This import is required to register the Methods and Publishers.
+import ContentHandler from '../imports/api/server/ContentHandler';
+
 async function insertLink({ title, url }) {
   await LinksCollection.insertAsync({ title, url, createdAt: new Date() });
 }
