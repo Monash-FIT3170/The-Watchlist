@@ -277,6 +277,14 @@
         "C:\\Users\\ari\\AppData\\Local/.meteor/packages/jagi_astronomy/2.7.3/web.browser/lib/modules/validators/validators/type/number.js",
         "C:\\Users\\ari\\AppData\\Local/.meteor/packages/jagi_astronomy/2.7.3/web.browser/lib/modules/validators/validators/type/object.js",
         "C:\\Users\\ari\\AppData\\Local/.meteor/packages/jagi_astronomy/2.7.3/web.browser/lib/modules/validators/validators/type/string.js"
+      ],
+      "meteor/dev-error-overlay": [
+        "C:\\Users\\ari\\AppData\\Local/.meteor/packages/dev-error-overlay/0.1.2/web.browser/client.js"
+      ],
+      "meteor/ejson": [
+        "C:\\Users\\ari\\AppData\\Local/.meteor/packages/ejson/1.1.3/web.browser/ejson.js",
+        "C:\\Users\\ari\\AppData\\Local/.meteor/packages/ejson/1.1.3/web.browser/stringify.js",
+        "C:\\Users\\ari\\AppData\\Local/.meteor/packages/ejson/1.1.3/web.browser/utils.js"
       ]
     }
   },

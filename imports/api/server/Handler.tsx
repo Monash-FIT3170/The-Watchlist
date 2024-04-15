@@ -13,34 +13,60 @@ export type HandlerFunc = {
 
 export class Handler {
     
+    // These get read by Meteor during execution, so we don't care that they are not "used" by anything from a linting perspective
     #createMethod
-    #readHandler
-    #updateHandler
-    #deleteHandler
+    #readMethod
+    #updateMethod
+    #deleteMethod
 
     #objectName
 
     constructor(objectName: string) {
         this.#objectName = objectName;
-
     }
 
     get type() { return this.#objectName; }
 
-    get create(){
-        return this.#createMethod
-    }
-
-
-    addCreateHandler(createFuncDetails: HandlerFunc): Handler {
+    addCreateHandler(funcDetails: HandlerFunc): Handler {
         this.#createMethod = new ValidatedMethod({
             name: `${this.#objectName}.create`,
-            validate: createFuncDetails.validate,
-            run: createFuncDetails.run
-        })
+            validate: funcDetails.validate,
+            run: funcDetails.run
+        });
         
-        return this
+        return this;
     }
+
+    addReadHandler(funcDetails: HandlerFunc): Handler {
+        this.#readMethod = new ValidatedMethod({
+            name: `${this.#objectName}.read`,
+            validate: funcDetails.validate,
+            run: funcDetails.run
+        });
+
+        return this;
+    }
+
+    addUpdateHandler(funcDetails: HandlerFunc): Handler {
+        this.#updateMethod = new ValidatedMethod({
+            name: `${this.#objectName}.update`,
+            validate: funcDetails.validate,
+            run: funcDetails.run
+        });
+
+        return this;
+    }
+
+    addDeleteHandler(funcDetails: HandlerFunc): Handler {
+        this.#deleteMethod = new ValidatedMethod({
+            name: `${this.#objectName}.delete`,
+            validate: funcDetails.validate,
+            run: funcDetails.run
+        });
+
+        return this;
+    }
+
 }
 
 export default Handler;

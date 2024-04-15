@@ -7,7 +7,7 @@ import { Class } from 'meteor/jagi:astronomy';
 
 // Create or get the "content" collection
 // The <any, any> is needed to make TypeScript happy when creating the Class, not entirely sure why
-const ContentCollection = new Mongo.Collection<any, any>('content');
+export const ContentCollection = new Mongo.Collection<any, any>('content');
 
 // Define the schema for this collection
 const Content = Class.create({
@@ -16,6 +16,7 @@ const Content = Class.create({
     fields: {
         title: {
             type: String,
+            index: 'text'
         }
     }
 })
