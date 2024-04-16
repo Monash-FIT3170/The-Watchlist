@@ -2,7 +2,8 @@
 Project 9 - FIT3170 - 2024
 
 Setup information:
-- Use node version 14.17.3
+- Windows or Intel-based Mac: Use node version 14.17.3
+- Mac using M1 chip: Use node version 14.15.0
 - Run `npm install -g meteor`
 
 To start the project:
