@@ -74,13 +74,13 @@ export const HomePage = () => {
   }, [searchString])
 
   return (
-    <div>
+    <div className='homepage'>
       <h1>Welcome to Meteor!</h1>
 
       {/* Add movie functionality */}
       <p>Add a new movie!</p>
       <input value={title} onChange={e => setTitle(e.target.value)}/>
-      <button onClick={() => handleCreate()}>Create Movie</button>
+      <button onClick={() => handleCreate()} style={{color:"black"}}>Create Movie</button>
 
       {/* Display content in the database and provide search capability */}
       <h2>Content loaded:</h2>

@@ -1,0 +1,29 @@
+/*
+ Color Scheme:
+    Smoky Black:            #14110F
+    Murrey (Magenta):       #7B1450
+    Robin egg blue (teal):  #0AC2B9
+    Rose quartz (grey):     #B5A6AB
+    Platinum (off-white):   #E2DCDE  
+*/
+
+* {
+    font-family: Tahoma, sans-serif;
+    color: #E2DCDE;
+    box-sizing: border-box; 
+    padding: 0;
+    margin: 0;
+}
+
+
+.homepage, .profile, .aipicks {
+    background-color: #14110F;
+    display: flex;
+    height: 120vh;
+    margin-left: 250px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    font-size: 2rem;
+    padding: 0;
+}   
