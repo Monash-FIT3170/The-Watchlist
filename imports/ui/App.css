@@ -16,7 +16,7 @@
 }
 
 
-.homepage, .profile, .aipicks {
+.homepage, .searchbar, .profile, .aipicks {
     background-color: #14110F;
     display: flex;
     height: 120vh;

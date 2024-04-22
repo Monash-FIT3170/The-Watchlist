@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
-import { FaHome, FaRegUserCircle  } from "react-icons/fa";
+import { FaHome, FaRegUserCircle, FaSearch  } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { IconContext } from 'react-icons';
 import './Navbar.css';
@@ -11,6 +11,12 @@ const navbarData = [
         title: 'Home',
         path: '/',
         icon: <FaHome />,
+        cName: 'navbar-text'
+    },
+    {
+        title: 'Search',
+        path: '/searchbar',
+        icon: <FaSearch />,
         cName: 'navbar-text'
     },
     {
