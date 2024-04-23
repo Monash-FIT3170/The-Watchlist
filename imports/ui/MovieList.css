@@ -1,0 +1,64 @@
+
+/*Will need to be refactored in the case of using Tailwind*/
+.movielist-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 50px;
+  }
+  
+  .movielist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: medium;
+  }
+  
+  h1 {
+    margin-left: 10px;
+  }
+  
+  .plus-button {
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 24px;
+    background: none;
+    border: none;
+  }
+  
+ 
+  .movielist-content {
+    display: flex; 
+    justify-content: space-around; 
+    flex-wrap: nowrap; 
+    align-items: center; 
+  }
+  
+
+  .movielist-content img {
+    flex: 0 0 calc(16.66% - 20px); 
+    margin: 10px; 
+    max-width: 175px;
+    max-height: 100px; 
+    height: auto; 
+    object-fit: cover; 
+    border-radius: 10px; 
+  }
+  
+    .movielist-content img:hover {
+        cursor: pointer; 
+    }
+
+    /* Handle smaller screens*/
+@media (max-width: 768px) {
+    .movielist-content {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .movielist-content img {
+      flex: 0 0 auto; 
+      max-width: 120%; 
+      margin: 10px 0; 
+    }
+  }
