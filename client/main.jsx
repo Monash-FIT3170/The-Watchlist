@@ -9,18 +9,23 @@ import {
 } from "react-router-dom";
 import MovieList from '../imports/ui/MovieList';
 import { HomePage } from '../imports/ui/HomePage';
+import Nav from '../imports/ui/Nav';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <HomePage />,
+    element: <Nav />,
     children: [
+      {
+        path: "homepage",
+        // this does not work
+        element: <HomePage />
+      },
       {
         path: "movielist",
         // this does not work
         element: <MovieList />
       },
-    
     ]
   }
 ])
