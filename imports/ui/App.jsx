@@ -1,21 +1,20 @@
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import HomePage from './HomePage.jsx';
-import { Outlet } from 'react-router-dom';
-// import Navbar from './Navbar.jsx';
-// import { Profile } from './Profile.jsx';
-// import { AIPicks } from './AIPicks.jsx';
-//import './App.css';
+import { HomePage } from './HomePage.jsx';
+import Navbar from './Navbar.jsx';
+import { Profile } from './Profile.jsx';
+import { AIPicks } from './AIPicks.jsx';
+import './App.css';
+import { SearchBar } from './SearchBar.jsx';
 
-
-
-export const App = () => {
-  return (
-    <div>
-      <p> Hello World. </p>
-      <Outlet />
-    </div>
-  )
-}
-
+export const App = () => (
+  <BrowserRouter>
+    <Navbar />
+    <Routes>
+      <Route path="/" exact element={<HomePage /> } />
+      <Route path="/searchbar" element={<SearchBar /> } />
+      <Route path="/profile" element={<Profile /> } />
+      <Route path="/ai-picks" element={<AIPicks /> } />
+    </Routes>
+  </BrowserRouter>
+)

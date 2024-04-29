@@ -1,0 +1,52 @@
+/*
+ Color Scheme:
+    Smoky Black:            #14110F
+    Murrey (Magenta):       #7B1450
+    Robin egg blue (teal):  #0AC2B9
+    Rose quartz (grey):     #B5A6AB
+    Platinum (off-white):   #E2DCDE  
+*/
+
+.navbar {
+    background-color: #7B1450;
+    width: 250px;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.navbar-items {
+    width: 100%;
+}
+
+.navbar-text {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    padding: 8px 0px 8px 16px;
+    height: 60px;
+    list-style: none;
+}
+
+.navbar-text a {
+    text-decoration: none;
+    color: #E2DCDE;
+    font-size: 18px;
+    width: 95%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    border-radius: 4px;
+}
+
+.navbar-text a:hover {
+    background-color: #14110F;
+}
+
+.navbar-span {
+    margin-left: 16px;
+}
