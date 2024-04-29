@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Log } from 'meteor/logging';
 import SearchBar from './SearchBar';
 
@@ -33,7 +33,7 @@ export const HomePage = () => {
   getData = () => {
     setIsLoading(true);
 
-    Meteor.call("content.read", {searchString}, (err, res) => {
+    Meteor.call("content.read", { searchString }, (err, res) => {
       if (err) { alert(err) }
       else {
         Log.debug(res);
@@ -43,15 +43,15 @@ export const HomePage = () => {
       }
     });
 
-    
-  } 
+
+  }
 
   /**
    * Creates a movie in the database using Meteor methods. Passes the title of the movie in before refreshing the content on the page.
    */
   handleCreate = () => {
     if (title == "") return;
-    
+
     Meteor.call("content.create", {
       title: title
     }, (err, res) => {
@@ -76,8 +76,8 @@ export const HomePage = () => {
 
   return (
     <div>
-      
-      <h1 className="text-3xl font-bold underline">Welcome to Meteor!</h1>
+
+      <h1 className="text-3xl font-bold">Search Bar Example</h1>
 
       {/* Add movie functionality */}
       <p>Add a new movie!</p>
