@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { Log } from 'meteor/logging';
+import SearchBar from './SearchBar';
 
 export const HomePage = () => {
 
@@ -75,6 +76,7 @@ export const HomePage = () => {
 
   return (
     <div>
+      <SearchBar />
       <h1 className="text-3xl font-bold underline">Welcome to Meteor!</h1>
 
       {/* Add movie functionality */}
