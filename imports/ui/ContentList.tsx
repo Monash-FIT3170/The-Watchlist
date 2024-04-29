@@ -1,6 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+
+
+  //how to import the images
+
+/*   const images = [
+    { src: './ExampleResources/sienfeld.jpg', alt: 'Seinfeld' },
+    { src: './ExampleResources/friends.jpg', alt: 'Friends' },
+    { src: './ExampleResources/007.jpg', alt: '007' },
+    { src: './ExampleResources/planet-earth.jpeg', alt: 'Planet Earth' },
+    { src: './ExampleResources/fresh-prince.jpg', alt: 'Fresh Prince' }
+  ]; */
+
 interface Image {
   src: string;
   alt: string;
