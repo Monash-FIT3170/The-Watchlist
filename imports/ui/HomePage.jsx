@@ -75,7 +75,7 @@ export const HomePage = () => {
 
   return (
     <div>
-      <h1>Welcome to Meteor!</h1>
+      <h1 className="text-3xl font-bold underline">Welcome to Meteor!</h1>
 
       {/* Add movie functionality */}
       <p>Add a new movie!</p>
