@@ -34,8 +34,34 @@ body {
 .bubble-active {
   background-color: #7B1450;
   color: white;
+  border-color: #7B1450; /* border set when selected */
 }
 
-.border-7B1450:focus {
+
+.focus-custom-border:focus {
   border-color: #7B1450 !important;
+}
+
+.dropdown-menu {
+  border-radius: 20px; /* Adjust this value to increase or decrease the curvature */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background-color: white; /* Ensures the dropdown background is white */
+  width: auto; /* Adjust width as needed */
+  color: black;
+}
+
+.dropdown-menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dropdown-menu li {
+  padding: 10px 20px; /* Adjust padding for better visual spacing */
+  border-radius: 20px; /* Apply rounded corners to each item */
+}
+
+.dropdown-menu li:hover {
+  background-color: #f0f0f0; /* Light grey hover effect */
+  color: black; /* Ensure text does not turn blue */
 }
