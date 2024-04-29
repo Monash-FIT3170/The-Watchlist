@@ -8,6 +8,18 @@ const MovieList = ({ title, images }) => {
   // 'proptypes' to check?
 
 
+  //how to import the images
+
+/*   const images = [
+    { src: './ExampleResources/sienfeld.jpg', alt: 'Seinfeld' },
+    { src: './ExampleResources/friends.jpg', alt: 'Friends' },
+    { src: './ExampleResources/007.jpg', alt: '007' },
+    { src: './ExampleResources/planet-earth.jpeg', alt: 'Planet Earth' },
+    { src: './ExampleResources/fresh-prince.jpg', alt: 'Fresh Prince' }
+  ]; */
+
+
+
   //this will redirect to the page allowing us to
   //see the entire list of movies
   //(or should we handle this differently)
