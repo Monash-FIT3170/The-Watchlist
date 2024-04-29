@@ -76,7 +76,7 @@ export const HomePage = () => {
 
   return (
     <div>
-      <SearchBar />
+      
       <h1 className="text-3xl font-bold underline">Welcome to Meteor!</h1>
 
       {/* Add movie functionality */}
@@ -95,6 +95,7 @@ export const HomePage = () => {
         </li>
       )}</ul>
       </>}
+      <SearchBar />
     </div>
   );
 };

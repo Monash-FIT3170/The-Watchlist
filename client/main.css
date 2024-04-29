@@ -17,3 +17,25 @@ body {
   border-bottom: 2px solid blue;
   /* more styles */
 }
+
+/* main.css */
+
+.bubble {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-right: 8px;
+  border-radius: 9999px; /* to create bubble shape */
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.bubble-active {
+  background-color: #7B1450;
+  color: white;
+}
+
+.border-7B1450:focus {
+  border-color: #7B1450 !important;
+}
