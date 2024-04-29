@@ -27,7 +27,7 @@ export default function Nav() {
           <nav>
             <ul>
               <li>
-                <Link to={`/movielist`} className="text-light hover-text-magenta">Movie List</Link>
+                <Link to={`/TestContentList`} className="text-light hover-text-magenta">Content List</Link>
               </li>
             </ul>
           </nav>

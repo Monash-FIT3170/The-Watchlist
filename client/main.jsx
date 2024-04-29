@@ -7,10 +7,11 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import MovieList from '../imports/ui/MovieList';
+import ContentList from '../imports/ui/ContentList';
 import { HomePage } from '../imports/ui/HomePage';
 import Nav from '../imports/ui/Nav';
 import SearchBar from '../imports/ui/SearchBar';
+import TestContentList from '../imports/ui/TestContentList';
 
 const router = createBrowserRouter([
   {
@@ -19,18 +20,23 @@ const router = createBrowserRouter([
     children: [
       {
         path: "homepage",
-        // this does not work
+        
         element: <HomePage />
       },
       {
-        path: "movielist",
-        // this does not work
-        element: <MovieList />
+        path: "contentlist",
+        
+        element: <ContentList />
       },
       {
         path: "searchbar",
-        // this does not work
+        
         element: <SearchBar />
+      },
+      {
+        path: "TestContentList",
+        
+        element: <TestContentList />
       },
     ]
   }
