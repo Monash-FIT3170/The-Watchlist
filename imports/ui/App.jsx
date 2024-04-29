@@ -5,8 +5,8 @@ import { BsStars } from "react-icons/bs";
 import { AiOutlineHome, AiOutlineSearch  } from "react-icons/ai";
 import HomePage from './HomePage.jsx';
 import Navbar from './Navbar.tsx'; 
-import MovieList from './MovieList.tsx';
 import SearchBar from './SearchBar.jsx'
+import TestContentList from './TestContentList.tsx'
 // import Profile from './Profile.jsx';
 // import AIPicks from './AIPicks.jsx';
 
@@ -63,7 +63,7 @@ export const App = () => {
 
           - FIXME: MovieList component here is currently acting as a demo 
           */}
-          <Route path="/movielist" element={<MovieList /> } />
+          <Route path="/test-content-list" element={<TestContentList /> } />
         </Routes>
       </div>
 

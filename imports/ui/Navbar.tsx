@@ -38,7 +38,7 @@ export default function Navbar(props) {
               { /* TODO: The following ul component will need to be changed similar to above mapping technique, but potentially using a meteor subscribe to know what lists to render */ }
               <ul>
                 <li>
-                  <Link to={`/movielist`} className="text-light hover-text-magenta">Movie List</Link>
+                  <Link to={`/test-content-list`} className="text-light hover-text-magenta">Movie List</Link>
                 </li>
               </ul>
             </nav>
