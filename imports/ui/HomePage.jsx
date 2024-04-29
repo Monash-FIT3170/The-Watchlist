@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { Log } from 'meteor/logging';
+import ContentList from './ContentList';
 
 export const HomePage = () => {
 
@@ -24,6 +25,16 @@ export const HomePage = () => {
     return { content: content, isLoading: false }
 
   })*/
+
+
+const images = [
+  { src: './ExampleResources/sienfeld.jpg', alt: 'Seinfeld' },
+  { src: './ExampleResources/friends.jpg', alt: 'Friends' },
+  { src: './ExampleResources/007.jpg', alt: '007' },
+  { src: './ExampleResources/planet-earth.jpeg', alt: 'Planet Earth' },
+  { src: './ExampleResources/fresh-prince.jpg', alt: 'Fresh Prince' }
+];
+
 
 
   /**
@@ -93,6 +104,10 @@ export const HomePage = () => {
         </li>
       )}</ul>
       </>}
+
+      <ContentList title="Featured Movies" images={images} />
+      <ContentList title="Favourites" images={images} />
+      <ContentList title="To Watch" images={images} />
     </div>
   );
 };

@@ -7,7 +7,6 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import MovieList from '../imports/ui/MovieList';
 import { HomePage } from '../imports/ui/HomePage';
 
 const router = createBrowserRouter([
@@ -16,9 +15,7 @@ const router = createBrowserRouter([
     element: <HomePage />,
     children: [
       {
-        path: "movielist",
-        // this does not work
-        element: <MovieList />
+
       },
     
     ]
