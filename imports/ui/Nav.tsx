@@ -15,6 +15,9 @@ export default function Nav() {
               <li>
                 <Link to={`/movielist`}>Movie List</Link>
               </li>
+              <li>
+                <Link to={`/searchbar`}>Search</Link>
+              </li>
             </ul>
           </nav>
         </div>

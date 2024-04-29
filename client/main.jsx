@@ -10,6 +10,7 @@ import {
 import MovieList from '../imports/ui/MovieList';
 import { HomePage } from '../imports/ui/HomePage';
 import Nav from '../imports/ui/Nav';
+import SearchBar from '../imports/ui/SearchBar';
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,11 @@ const router = createBrowserRouter([
         path: "movielist",
         // this does not work
         element: <MovieList />
+      },
+      {
+        path: "searchbar",
+        // this does not work
+        element: <SearchBar />
       },
     ]
   }
