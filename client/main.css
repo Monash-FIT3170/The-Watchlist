@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 body {
-  padding: 10px;
   font-family: sans-serif;
 }
 
@@ -21,10 +20,12 @@ body {
 .bubble {
   display: inline-block;
   padding: 6px 12px;
+  margin-top: 6px;
+  margin-bottom: 12px;
   margin-right: 8px;
   border-radius: 9999px;
   /* to create bubble shape */
-  background-color: #f0f0f0;
+  background-color: #282525;
   cursor: pointer;
   border: 1px solid transparent;
   transition: all 0.3s ease;
@@ -80,6 +81,7 @@ body {
   padding: 5px 10px;
   margin: 5px;
   font-size: 14px;
+  margin-bottom: 12px;
 }
 
 .tag button {
@@ -88,4 +90,29 @@ body {
   cursor: pointer;
   color: #333;
   margin-left: 10px;
+}
+
+/* main.css */
+.bg-dark {
+  background-color: #282525; /* main background */
+}
+
+.bg-darker {
+  background-color: #181818; /* main background */
+}
+
+.bg-darkest {
+  background-color: #080808; /* darker sections */
+}
+
+.text-magenta {
+  color: #7B1450; /* magenta */
+}
+
+.hover-text-magenta:hover {
+  color: #611240; /* Spotify green on hover */
+}
+
+.text-light {
+  color: #FFFFFF; /* White text color */
 }

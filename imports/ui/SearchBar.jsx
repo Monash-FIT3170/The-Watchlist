@@ -106,7 +106,7 @@ const SearchBar = () => {
                     <div className="relative flex-grow">
                         <input
                             type="text"
-                            className="rounded-full border border-gray-300 pl-10 pr-3 py-3 w-full focus:border-custom-border"
+                            className="rounded-full bg-dark border border-gray-300 pl-10 pr-3 py-3 w-full focus:border-custom-border"
                             placeholder="Search for content, lists, or users"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -127,7 +127,7 @@ const SearchBar = () => {
                     {['movies', 'tv shows', 'users', 'lists'].map((tab) => (
                         <div
                             key={tab}
-                            className={`bubble ${selectedTab === tab ? 'bubble-active' : ''}`}
+                            className={`bubble ${selectedTab === tab ? 'bubble-active' : 'bg-dark'}`}
                             onClick={() => setSelectedTab(tab)}
                         >
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -162,13 +162,13 @@ const SearchBar = () => {
             {/* Display Filter Tags and Clear All Button */}
             <div className="filter-tags">
                 {Object.entries(dropdownStates).filter(([_, value]) => value.selected).map(([key, value]) => (
-                    <div key={key} className="tag">
+                    <div key={key} className="tag bg-dark">
                         {`${key}: ${value.selected}`}
                         <button onClick={() => handleRemoveFilter(key)}>×</button>
                     </div>
                 ))}
                 {Object.values(dropdownStates).some(value => value.selected) && (
-                    <button className="tag" onClick={handleClearFilters}>Clear All Filters</button>
+                    <button className="tag bg-dark" onClick={handleClearFilters}>Clear All Filters</button>
                 )}
             </div>
 
