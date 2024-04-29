@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { Log } from 'meteor/logging';
 
-export const HomePage = () => {
+export default HomePage = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [contentData, setContentData] = useState([]);
