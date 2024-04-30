@@ -19,10 +19,12 @@ const ContentList: React.FC<ContentListProps> = ({ title, images }) => {
   };
 
   return (
-    <div className="flex flex-col mt-12">
+    <div className="flex flex-col mb-4">
       <div className="flex justify-between items-center mb-5 text-base">
-        <h1 className="ml-2.5 font-bold text-3xl text-white leading-tight tracking-tight sm:text-3xl">{title}</h1>
-        <button onClick={handleRedirect} className="mr-2.5 text-3xl bg-transparent border-none cursor-pointer">+</button>
+        <h1 className="font-bold text-2xl text-white leading-tight tracking-tight">{title}</h1>
+        <button onClick={handleRedirect} className="text-lg bg-transparent border-none cursor-pointer hover:underline">
+          Show all
+        </button>
       </div>
       <div className="flex justify-start items-start flex-wrap gap-4">
         {images.map((image, index) => (

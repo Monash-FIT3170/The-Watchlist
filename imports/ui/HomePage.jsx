@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { Log } from 'meteor/logging';
+import TestContentList from './TestContentList';
 
 export default HomePage = () => {
 
@@ -7,6 +8,13 @@ export default HomePage = () => {
   const [contentData, setContentData] = useState([]);
   const [searchString, setSearchString] = useState("");
   const [title, setTitle] = useState("");
+  const images = [
+    { src: './ExampleResources/sienfeld.jpg', alt: 'Seinfeld' },
+    { src: './ExampleResources/friends.jpg', alt: 'Friends' },
+    { src: './ExampleResources/007.jpg', alt: '007' },
+    { src: './ExampleResources/planet-earth.jpeg', alt: 'Planet Earth' },
+    { src: './ExampleResources/fresh-prince.jpg', alt: 'Fresh Prince' }
+  ];
 
 
   // If we wanted to use live updating, which I don't think we do for content. But the below works!
@@ -74,25 +82,11 @@ export default HomePage = () => {
   }, [searchString])
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold underline">Welcome to Meteor!</h1>
-
-      {/* Add movie functionality */}
-      <p>Add a new movie!</p>
-      <input value={title} onChange={e => setTitle(e.target.value)}/>
-      <button onClick={() => handleCreate()}>Create Movie</button>
-
-      {/* Display content in the database and provide search capability */}
-      <h2>Content loaded:</h2>
-      <p>Search for content:</p>
-      <input onChange={(e) => handleSearchChange(e)} />
-      {/* Could change this to have a loading screen, but it looks bad because of the short latency */}
-      { isLoading ? <div>{/* Loading... */}</div> : <><ul>{contentData.map(
-        con => <li key={con._id}>
-          {con.title}
-        </li>
-      )}</ul>
-      </>}
+    <div style={{ minHeight: '100vh', overflowY: 'auto' }}>
+      <TestContentList title="My Favorite Shows" images={images} />
+      <TestContentList title="Must Watch Series" images={images} />
+      <TestContentList title="Top 5 Classics" images={images} />
+      {/* Additional TestContentList components can be added as needed */}
     </div>
   );
 };
