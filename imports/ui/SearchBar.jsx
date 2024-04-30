@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 
+const exampleImages = [  // Make sure to uncomment this and define your actual image paths and alts
+  { src: './ExampleResources/sienfeld.jpg', alt: 'Seinfeld' },
+  { src: './ExampleResources/friends.jpg', alt: 'Friends' },
+  { src: './ExampleResources/007.jpg', alt: '007' },
+  { src: './ExampleResources/planet-earth.jpeg', alt: 'Planet Earth' },
+  { src: './ExampleResources/fresh-prince.jpg', alt: 'Fresh Prince' }
+];
+
 const SearchBar = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTab, setSelectedTab] = useState('movies');
@@ -99,6 +107,19 @@ const SearchBar = () => {
         });
     };
 
+    const repeatedImages = Array.from({ length: 20 }, () => exampleImages).flat();
+
+    const moviesGrid = repeatedImages.map((image, index) => (
+        <div key={index} className="flex flex-col items-center w-1/6 p-2">
+          <img
+            src={image.src}
+            alt={image.alt}
+            className="w-full h-auto object-cover rounded-lg"
+          />
+          <span className="text-white mt-2 text-sm font-bold">{image.alt}</span>
+        </div>
+    ));
+
     return (
         <div className="search-bar-container">
             <form className="flex flex-col items-start w-full">
@@ -187,6 +208,10 @@ const SearchBar = () => {
                 {selectedTab === 'lists' && (filteredData.lists.length > 0 ? filteredData.lists.map(list => (
                     <div key={list.id}>{list.name}</div>
                 )) : <div>No lists available.</div>)}
+            </div>
+
+            <div className="flex flex-wrap justify-center items-start mt-4">
+              {moviesGrid}
             </div>
         </div>
     );
