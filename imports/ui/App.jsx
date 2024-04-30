@@ -6,10 +6,10 @@ import { AiOutlineHome, AiOutlineSearch  } from "react-icons/ai";
 import HomePage from './HomePage.jsx';
 import Navbar from './Navbar.tsx'; 
 import SearchBar from './SearchBar.jsx'
-import TestContentList from './TestContentList.tsx'
+import dummyLists from './DummyLists.jsx';
+import FullContentList from './FullContentList.tsx';
 // import Profile from './Profile.jsx';
 // import AIPicks from './AIPicks.jsx';
-
 
 // Static navbar data, add new entries when required, ensuring that the complimentary Route is created in the App component below
 // ! Currently only search, home, profile and ai picks - don't add more
@@ -43,16 +43,21 @@ const staticNavbarData = [
 export const App = () => {
   return (
     <div className="app flex h-screen overflow-hidden bg-darkest text-light">
-
       <div id="navbar-wrapper">
-        <Navbar staticNavData={staticNavbarData}/>
+        <Navbar staticNavData={staticNavbarData} listData={dummyLists} />
       </div>
 
       <div id="content" className="flex-auto p-4 bg-darker rounded-lg shadow-lg overflow-y-auto" style={{ margin: '1rem',  marginRight: '0.5rem', marginLeft: '0.5rem', height: 'calc(100% - 2rem)' }}>
         <Routes>
           <Route path="/search" element={<SearchBar />} />
-          <Route path="/" exact element={<HomePage /> } />
-
+          <Route path="/" exact element={<HomePage listData={dummyLists} />} />
+          {dummyLists.map((list) => (
+            <Route
+              key={list.id}
+              path={`/${list.id}`}
+              element={<FullContentList title={list.title} images={list.images} />}
+            />
+          ))}
           {/* 
           - Uncomment the following routes and their imports once the Profile and AIPicks components are created:
           <Route path="/profile" exact element={<Profile /> } />
@@ -63,11 +68,9 @@ export const App = () => {
 
           - FIXME: MovieList component here is currently acting as a demo 
           */}
-          <Route path="/test-content-list" element={<TestContentList /> } />
         </Routes>
       </div>
-
     </div>
-  )
-}
+  );
+};
 

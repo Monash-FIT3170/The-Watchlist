@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 
-const exampleImages = [  // Make sure to uncomment this and define your actual image paths and alts
-  { src: './ExampleResources/sienfeld.jpg', alt: 'Seinfeld' },
+const exampleImages = [
+  { src: './ExampleResources/seinfeld.jpg', alt: 'Seinfeld' },
   { src: './ExampleResources/friends.jpg', alt: 'Friends' },
   { src: './ExampleResources/007.jpg', alt: '007' },
   { src: './ExampleResources/planet-earth.jpeg', alt: 'Planet Earth' },

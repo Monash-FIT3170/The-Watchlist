@@ -1,12 +1,9 @@
 import React from "react";
-import { FaRegUserCircle  } from "react-icons/fa";
-import { BsStars } from "react-icons/bs";
-import { AiOutlineHome, AiOutlineSearch  } from "react-icons/ai";
 import { IconContext } from 'react-icons';
 import { Link } from "react-router-dom";
 
 
-export default function Navbar(props) {
+export default function Navbar({ staticNavData, listData }) {
   return (
     <div>
       <IconContext.Provider value={{ size: '20px' }}>
@@ -18,7 +15,7 @@ export default function Navbar(props) {
             <nav>
               <h1 className="text-3xl mb-4">The Watchlist</h1>
               <ul className="flex flex-col w-full">
-                {props.staticNavData.map((item, index) => {
+                {staticNavData.map((item, index) => {
                   return (
                       <li key={index} className={item.cName}>
                           <Link to={item.path} className="w-full flex justify-start items-center space-x-5 h-16">
@@ -35,11 +32,14 @@ export default function Navbar(props) {
           {/* Second Navbar Block - filling remaining space */}
           <div className="bg-darker rounded-lg shadow-lg p-2 flex-grow">
             <nav>
-              { /* TODO: The following ul component will need to be changed similar to above mapping technique, but potentially using a meteor subscribe to know what lists to render */ }
+            <h2 className="text-xl mb-4">Movie Lists</h2>
+              {/* This is temporary and will be changed to fetch data from the database */}
               <ul>
-                <li>
-                  <Link to={`/test-content-list`} className="text-light hover-text-magenta">Movie List</Link>
-                </li>
+                {listData.map((list) => (
+                  <li key={list.id}>
+                    <Link to={`/${list.id}`}>{list.title}</Link>
+                  </li>
+                ))}
               </ul>
             </nav>
           </div>

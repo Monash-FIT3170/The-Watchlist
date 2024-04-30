@@ -1,25 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import { Log } from 'meteor/logging';
-import TestContentList from './TestContentList';
+import ContentList from './ContentList';
 
-export default HomePage = () => {
+export default HomePage = ({ listData }) => {
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [contentData, setContentData] = useState([]);
   const [searchString, setSearchString] = useState("");
   const [title, setTitle] = useState("");
-  const images = [
-    { src: './ExampleResources/sienfeld.jpg', alt: 'Seinfeld' },
-    { src: './ExampleResources/friends.jpg', alt: 'Friends' },
-    { src: './ExampleResources/007.jpg', alt: '007' },
-    { src: './ExampleResources/planet-earth.jpeg', alt: 'Planet Earth' },
-    { src: './ExampleResources/fresh-prince.jpg', alt: 'Fresh Prince' },
-    { src: './ExampleResources/sienfeld.jpg', alt: 'Seinfeld' },
-    { src: './ExampleResources/friends.jpg', alt: 'Friends' },
-    { src: './ExampleResources/007.jpg', alt: '007' },
-    { src: './ExampleResources/planet-earth.jpeg', alt: 'Planet Earth' },
-    { src: './ExampleResources/fresh-prince.jpg', alt: 'Fresh Prince' }
-  ];
+  const [isLoading, setIsLoading] = useState(true);
 
 
   // If we wanted to use live updating, which I don't think we do for content. But the below works!
@@ -88,10 +75,9 @@ export default HomePage = () => {
 
   return (
     <div style={{ minHeight: '100vh', overflowY: 'auto' }}>
-      <TestContentList title="My Favorite Shows" images={images} />
-      <TestContentList title="Must Watch Series" images={images} />
-      <TestContentList title="Top 5 Classics" images={images} />
-      {/* Additional TestContentList components can be added as needed */}
+      {listData.map((list) => (
+        <ContentList id={list.id} title={list.title} images={list.images} />
+      ))}
     </div>
   );
 };

@@ -7,18 +7,19 @@ interface Image {
 }
 
 interface ContentListProps {
+  id: string;
   title: string;
   images: Image[];
 }
 
-const ContentList: React.FC<ContentListProps> = ({ title, images }) => {
+const ContentList: React.FC<ContentListProps> = ({ id, title, images }) => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [visibleImagesCount, setVisibleImagesCount] = useState(0);
 
   const handleRedirect = () => {
-    navigate('/profile'); // Adjust as necessary for actual routing
+    navigate(`/${id}`); 
   };
 
   // Calculate the number of images that fit in the container
