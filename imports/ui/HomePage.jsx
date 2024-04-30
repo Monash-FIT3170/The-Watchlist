@@ -13,6 +13,11 @@ export default HomePage = () => {
     { src: './ExampleResources/friends.jpg', alt: 'Friends' },
     { src: './ExampleResources/007.jpg', alt: '007' },
     { src: './ExampleResources/planet-earth.jpeg', alt: 'Planet Earth' },
+    { src: './ExampleResources/fresh-prince.jpg', alt: 'Fresh Prince' },
+    { src: './ExampleResources/sienfeld.jpg', alt: 'Seinfeld' },
+    { src: './ExampleResources/friends.jpg', alt: 'Friends' },
+    { src: './ExampleResources/007.jpg', alt: '007' },
+    { src: './ExampleResources/planet-earth.jpeg', alt: 'Planet Earth' },
     { src: './ExampleResources/fresh-prince.jpg', alt: 'Fresh Prince' }
   ];
 
