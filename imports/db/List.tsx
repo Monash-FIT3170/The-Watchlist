@@ -8,25 +8,19 @@ const List = Class.create({
     name: 'List',
     collection: ListCollection,
     fields: {
-        userId: {
-            type: String,
-            index: 1 // this means that we use an ascending index
-        },
+        userId: String,
         userName: String,
-        listId: {
-            type: String,
-            optional: true, // Might not be optional - depends if we use MongoDB's _id field instead
-        },
+        listId: String,
         title: String,
         description: {
             type: String,
-            optional: true, // Making it optional in case there's no description provided, might need to change this
+            optional: true,
         },
         listType: {
             type: String,
             validators: [{
                 type: 'choice',
-                param: ['Favorite', 'To Watch', 'Custom'] // Enumerating allowed values, likely to be adding more here - one for Genre?
+                param: ['Favourite', 'To Watch', 'Custom']
             }]
         },
         content: {
@@ -37,12 +31,19 @@ const List = Class.create({
         },
         'content.$': {
             type: Object,
+            fields: {
+                type: {
+                    type: String,
+                    validators: [{
+                        type: 'choice',
+                        param: ['movie', 'tv', 'user']
+                    }]
+                },
+                id: String,
+                title: String,
+                image_url: String,
+            }
         },
-        'content.$.contentId': String,
-        'content.$.title': String,
-        'content.$.rating': Number,
-        'content.$.picture': String,
-        'content.$.description': String,
     },
     behaviors: {
         timestamp: {
