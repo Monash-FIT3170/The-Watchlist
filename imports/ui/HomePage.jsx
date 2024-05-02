@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import { Log } from 'meteor/logging';
 import ContentList from './ContentList';
-
+import Favourites from './Favourites';
+import ToWatch from './ToWatch';
 export default HomePage = ({ listData }) => {
-
+  const [favourites, setFavourites] = useState([]);
+  const [toWatchList, setToWatchList] = useState([]);
   const [searchString, setSearchString] = useState("");
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -78,6 +80,10 @@ export default HomePage = ({ listData }) => {
       {listData.map((list) => (
         <ContentList id={list.id} title={list.title} images={list.images} />
       ))}
+    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Favourites favourites={favourites} />
+      <ToWatch toWatchList={toWatchList} />
+    </div>
     </div>
   );
 };
