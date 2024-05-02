@@ -47,10 +47,10 @@ const ContentList: React.FC<ContentListProps> = ({ id, title, content }) => {
   }, []);
 
   return (
-    <div className="flex flex-col mb-8 bg-slate-500 rounded-lg overflow-hidden shadow-lg">
+    <div className="flex flex-col mb-8 bg-darker rounded-lg overflow-hidden shadow-lg">
       <div className="flex justify-between items-center mb-5 text-base">
-        <h1 className="font-bold text-2xl text-black leading-tight tracking-tight pl-4 pt-2">{title}</h1>
-        <button onClick={handleRedirect} className="text-black text-lg bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
+        <h1 className="font-bold text-2xl text-white leading-tight tracking-tight pl-4 pt-2">{title}</h1>
+        <button onClick={handleRedirect} className="text-white text-lg bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
           Show all
         </button>
       </div>
