@@ -1,37 +1,30 @@
 import React from "react";
-import './HomePage.css'
+import './Home.css';
+import dummyMovies from './DummyMovies';
+import RatingStar from './RatingStar';
 
-const Favourites = ({ favourites }) => {
-  const movies = favourites.length > 0 ? favourites : [
-    {
-      id: 1,
-      image: "https://via.placeholder.com/150",
-      title: "Dummy Movie 1",
-      description: "This is a dummy movie description.",
-    },
-    {
-      id: 2,
-      image: "https://via.placeholder.com/150",
-      title: "Dummy Movie 2",
-      description: "This is another dummy movie description.",
-    },
-  ];
+const Favourites = () => {
+  const favourites = dummyMovies.filter(list => list.listType === 'Favourite');
 
   return (
     <div className="favourites">
       <h1>Favourites</h1>
-      <div className="movie-list">
-        {movies.map((movie) => (
-          <div key={movie.id} className="movie-item">
-            <img src={movie.image} alt={movie.title} />
-            <div>
-              <h3>{movie.title}</h3>
-              <p>{movie.description}</p>
-              <div className="rating">{/* Render rating stars here */}</div>
-            </div>
+      {favourites.map((list) => (
+        <div key={list.listId}>
+          <div className="movie-list">
+            {list.content.map((item) => (
+              <div key={item.id} className="movie-item">
+                <img src={item.image_url} alt={item.title} style={{ width: '100px', borderRadius: '10px' }} />
+                <div className="movie-text">
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                  <RatingStar totalStars={5}  rating={item.rating}  />
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };

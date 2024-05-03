@@ -8,6 +8,7 @@ import Navbar from './Navbar.tsx';
 import SearchBar from './SearchBar.jsx'
 import dummyLists from './DummyLists.jsx';
 import FullContentList from './FullContentList.tsx';
+import Home from './Home.jsx';
 // import Profile from './Profile.jsx';
 // import AIPicks from './AIPicks.jsx';
 
@@ -22,7 +23,7 @@ const staticNavbarData = [
   },
   {
       title: 'Home',
-      path: '/',
+      path: '/home',
       icon: <AiOutlineHome />,
       cName: 'flex text-light hover-text-magenta'
   },
@@ -51,6 +52,7 @@ export const App = () => {
         <Routes>
           <Route path="/search" element={<SearchBar />} />
           <Route path="/" exact element={<HomePage listData={dummyLists} />} />
+          <Route path="/home" element={<Home />} />
           {dummyLists.map((list) => (
             <Route
               key={list.id}

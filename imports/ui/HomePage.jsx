@@ -80,10 +80,6 @@ export default HomePage = ({ listData }) => {
       {listData.map((list) => (
         <ContentList id={list.id} title={list.title} images={list.images} />
       ))}
-    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-      <Favourites favourites={favourites} />
-      <ToWatch toWatchList={toWatchList} />
-    </div>
     </div>
   );
 };
