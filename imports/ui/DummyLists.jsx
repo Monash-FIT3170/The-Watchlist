@@ -19,8 +19,8 @@ const dummyLists = [
     updatedAt: new Date(),
   },
   {
-    userId: 'user2',
-    userName: 'JaneSmith',
+    userId: 'user1',
+    userName: 'JohnDoe',
     listId: 'must-watch',
     title: 'Must Watch Series',
     description: 'Essential series to watch.',
@@ -36,8 +36,8 @@ const dummyLists = [
     updatedAt: new Date(),
   },
   {
-    userId: 'user3',
-    userName: 'EmilyRose',
+    userId: 'user1',
+    userName: 'JohnDoe',
     listId: 'classics',
     title: 'Top 5 Classics',
     description: 'Classic shows that define a generation.',

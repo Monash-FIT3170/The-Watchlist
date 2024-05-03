@@ -18,11 +18,11 @@ export default function UserProfile() {
           <img
             src="./ExampleResources/user-avatar.jpg" // replace with actual URL
             alt="avatar"
-            className="w-16 h-16 rounded-full"
+            className="w-32 h-32 rounded-full shadow-2xl"
           />
           <div>
-            <h2 className="text-lg font-bold">{userLists[0]?.userName || 'Username'}</h2>
-            <div className="flex gap-2">
+            <h2 className="text-2xl font-bold">{userLists[0]?.userName || 'Username'}</h2>
+            <div className="p-2 rounded-md text-lg bg-fuchsia-200 flex gap-2">
               <span>400 Ratings</span>
               <span>400 Followers</span>
               <span>400 Following</span>
