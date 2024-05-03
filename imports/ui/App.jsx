@@ -8,6 +8,7 @@ import Navbar from './Navbar.tsx';
 import SearchBar from './SearchBar.jsx'
 import dummyLists from './DummyLists.jsx';
 import FullContentList from './FullContentList.tsx';
+import UserProfile from './UserProfile.jsx'
 // import Profile from './Profile.jsx';
 // import AIPicks from './AIPicks.jsx';
 
@@ -58,7 +59,10 @@ export const App = () => {
               element={<FullContentList list={list} />} // Updated to pass the entire list object
             />
           ))}
-          {/* 
+          <Route path="/profile" element={<UserProfile />} />
+
+          {
+          /* 
           - Uncomment the following routes and their imports once the Profile and AIPicks components are created:
           <Route path="/profile" exact element={<Profile /> } />
           <Route path="/ai-picks" element={ <AIPicks /> } />
