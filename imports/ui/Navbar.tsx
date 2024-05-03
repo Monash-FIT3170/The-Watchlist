@@ -31,8 +31,19 @@ export default function Navbar({ staticNavData, listData }) {
           </div>
           
           {/* Second Navbar Block - filling remaining space */}
-          <NavBarList listData={listData}/>
-          
+          <div className="bg-darker rounded-lg shadow-lg p-2 flex-grow">
+            <nav>
+            <h2 className="text-xl mb-4">Movie Lists</h2>
+              {/* This is temporary and will be changed to fetch data from the database */}
+              <ul>
+                {listData.map((list) => (
+                  <li key={list.id}>
+                    <Link to={`/${list.listId}`}>{list.title}</Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </div>
         </div>
       </IconContext.Provider>
     </div>

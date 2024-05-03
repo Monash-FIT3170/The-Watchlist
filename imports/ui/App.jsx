@@ -53,9 +53,9 @@ export const App = () => {
           <Route path="/" exact element={<HomePage listData={dummyLists} />} />
           {dummyLists.map((list) => (
             <Route
-              key={list.id}
-              path={`/${list.id}`}
-              element={<FullContentList title={list.title} images={list.images} />}
+              key={list.listId} // Change key to listId which is unique
+              path={`/${list.listId}`} // Change path to use listId
+              element={<FullContentList list={list} />} // Updated to pass the entire list object
             />
           ))}
           {/* 
@@ -73,4 +73,3 @@ export const App = () => {
     </div>
   );
 };
-

@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { Log } from 'meteor/logging';
 import ContentList from './ContentList';
+import RatingStar from './RatingStar';
 
 export default HomePage = ({ listData }) => {
 
@@ -76,7 +77,10 @@ export default HomePage = ({ listData }) => {
   return (
     <div style={{ minHeight: '100vh', overflowY: 'auto' }}>
       {listData.map((list) => (
-        <ContentList id={list.id} title={list.title} images={list.images} />
+        <ContentList
+          key={list.listId}
+          list={list} // Now passing the entire list object
+        />
       ))}
     </div>
   );
