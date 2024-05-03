@@ -15,34 +15,34 @@ import FullContentList from './FullContentList.tsx';
 // ! Currently only search, home, profile and ai picks - don't add more
 const staticNavbarData = [
   {
+    title: 'Home',
+    path: '/',
+    icon: <AiOutlineHome />,
+    cName: 'flex'
+  },
+  {
     title: 'Search',
     path: '/search',
     icon: <AiOutlineSearch  />,
-    cName: 'flex text-light hover-text-magenta'
-  },
-  {
-      title: 'Home',
-      path: '/',
-      icon: <AiOutlineHome />,
-      cName: 'flex text-light hover-text-magenta'
+    cName: 'flex'
   },
   {
       title: 'Profile',
       path: '/profile',
       icon: <FaRegUserCircle />,
-      cName: 'flex text-light hover-text-magenta'
+      cName: 'flex'
   },
   {
       title: 'AI Picks',
       path: '/ai-picks',
       icon: <BsStars />,
-      cName: 'flex text-light hover-text-magenta'
+      cName: 'flex'
   }
 ];
 
 export const App = () => {
   return (
-    <div className="app flex h-screen overflow-hidden bg-darkest text-light">
+    <div className="app flex h-screen overflow-hidden bg-darkest text-white">
       <div id="navbar-wrapper">
         <Navbar staticNavData={staticNavbarData} listData={dummyLists} />
       </div>
