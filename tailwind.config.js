@@ -15,7 +15,7 @@ module.exports = {
         'smoky-black': "14110F",
         'dark': "#282525",
         'darker': "#181818",
-        'darkest': "#080808",
+        'darkest': "#000000",
       },
       boxShadow: {
         'nav': '0 0px 2px rgba(255, 255, 255, 0.4)',
