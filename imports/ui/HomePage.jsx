@@ -77,7 +77,10 @@ export default HomePage = ({ listData }) => {
   return (
     <div style={{ minHeight: '100vh', overflowY: 'auto' }}>
       {listData.map((list) => (
-        <ContentList id={list.id} title={list.title} content={list.images} />
+        <ContentList
+          key={list.listId}
+          list={list} // Now passing the entire list object
+        />
       ))}
     </div>
   );

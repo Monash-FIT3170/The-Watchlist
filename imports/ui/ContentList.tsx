@@ -2,35 +2,34 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ContentItem from './ContentItem';
 
-
-interface ContentData {
-  src: string;
-  alt: string;
+interface ContentItemData {
+  image_url: string;  // Use image_url instead of src
+  title: string;      // Use title as the alt text description
   rating: number;
 }
 
 interface ContentListProps {
-  id: string;
-  title: string;
-  //children in the form of content items
-  content: ContentData[];
+  list: {
+    listId: string;
+    title: string;
+    content: ContentItemData[];
+  };
 }
 
-const ContentList: React.FC<ContentListProps> = ({ id, title, content }) => {
+const ContentList: React.FC<ContentListProps> = ({ list }) => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
   const [visibleContentCount, setVisibleContentCount] = useState(0);
 
   const handleRedirect = () => {
-    navigate(`/${id}`); 
+    navigate(`/${list.listId}`);
   };
 
   // Calculate the number of content panels that fit in the container
   const updateVisibleContent = () => {
     const container = containerRef.current;
     if (container) {
-      const containerWidth = containerRef.current.offsetWidth;
+      const containerWidth = container.offsetWidth;
       const contentWidth = 160 + 16; // Assuming each content pane is 160px wide and has 8px margin on each side
       const visibleContent = Math.floor(containerWidth / contentWidth);
       setVisibleContentCount(visibleContent);
@@ -49,14 +48,14 @@ const ContentList: React.FC<ContentListProps> = ({ id, title, content }) => {
   return (
     <div className="flex flex-col mb-8 bg-darker rounded-lg overflow-hidden shadow-lg">
       <div className="flex justify-between items-center mb-5 text-base">
-        <h1 className="font-bold text-2xl text-white leading-tight tracking-tight pl-4 pt-2">{title}</h1>
+        <h1 className="font-bold text-2xl text-white leading-tight tracking-tight pl-4 pt-2">{list.title}</h1>
         <button onClick={handleRedirect} className="text-white text-lg bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
           Show all
         </button>
       </div>
-      <div ref={containerRef} className="flex justify-center items-start overflow-hidden">
-      {React.Children.toArray(content.map(img => (
-          <ContentItem key={img.alt} src={img.src} alt={img.alt} rating={img.rating} />
+      <div ref={containerRef} className="flex justify-flex-start items-start overflow-hidden">
+        {React.Children.toArray(list.content.map((item, index) => (
+          <ContentItem key={index} src={item.image_url} alt={item.title} rating={item.rating} />
         ))).slice(0, visibleContentCount)}
       </div>
     </div>
