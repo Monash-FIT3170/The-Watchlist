@@ -100,13 +100,14 @@ body {
   gap: 20px; /* space-x-5 equivalent */
   width: 100%;
   padding: 8px 16px; /* px-4 py-2 equivalent */
-  margin-bottom: 12px; /* mb-3 equivalent */
+  margin-bottom: 8px;
   border-radius: 8px; /* rounded-lg equivalent */
   background-color: var(--bg-darker-color); /* adjust your color variable as needed */
   color: grey; /* default text color */
   font-weight: bold; /* font-semibold equivalent */
   text-decoration: none; /* removes underline */
   box-shadow: var(--shadow-nav); /* adjust your shadow variable as needed */
+  font-size: 18px;
 }
 
 .nav-link:hover, .nav-link:focus, .nav-link.active {

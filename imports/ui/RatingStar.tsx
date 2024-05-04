@@ -51,43 +51,48 @@ const RatingStar: React.FC<RatingStarProps> = ({
   };
 
   return (
-    <div className="flex relative w-full justify-center">
-        <div className = "inset-0 flex">
+    <div className="flex relative w-full justify-start" style={{ paddingLeft: '4px' }}> {/* this padding needs to be same as negative margin */}
+      <div className="inset-0 flex">
         {[...Array(totalStars)].map((_, index) => (
-        <span key={index} className="text-fuchsia-800 text-l h-8 w-8 flex items-center justify-center font-bold">&#9734;
-        </span>
-      ))}
-      </div>
-       <div className="flex absolute">
-      {[...Array(totalStars)].map((_, index) => {
-        index += 1;
-        return (
-          <button
+          <span
             key={index}
-            className={`h-8 w-8 ${
-              starType(index) === "full"
-                ? "text-fuchsia-800"
-                : starType(index ) === "half"
-                ? "text-fuchsia-800"
-                : "text-transparent"
-            } transition-colors duration-50`}
-            style={{
-              clipPath:
-                starType(index) === "half"
-                  ? "polygon(0 0, 50% 0, 50% 100%, 0% 100%)"
-                  : "none",
-            }}
-            onClick={() => handleClick(hoverRating || displayRating)}
-            onMouseMove={(e) => handleMouseMove(index + 0.5, e)}
-            onMouseLeave={handleMouseLeave}
-          >
-            <span className="text-l">&#9733;</span>
-          </button>
-        );
-      })}
-      </div> 
+            className="text-fuchsia-800 text-l h-8 w-8 flex items-center justify-center font-bold"
+            style={{ margin: '0 -4px' }}  // Changed to -4px as per your update
+          >&#9734;</span>
+        ))}
+      </div>
+      <div className="flex absolute">
+        {[...Array(totalStars)].map((_, index) => {
+          index += 1;
+          return (
+            <button
+              key={index}
+              className={`h-8 w-8 ${
+                starType(index) === "full"
+                  ? "text-fuchsia-800"
+                  : starType(index) === "half"
+                  ? "text-fuchsia-800"
+                  : "text-transparent"
+              } transition-colors duration-50`}
+              style={{
+                clipPath:
+                  starType(index) === "half"
+                    ? "polygon(0 0, 50% 0, 50% 100%, 0% 100%)"
+                    : "none",
+                margin: '0 -4px'  // Same -4px adjustment here
+              }}
+              onClick={() => handleClick(hoverRating || displayRating)}
+              onMouseMove={(e) => handleMouseMove(index + 0.5, e)}
+              onMouseLeave={handleMouseLeave}
+            >
+              <span className="text-l">&#9733;</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
-  );
+  );  
 };
+  
 
 export default RatingStar;
