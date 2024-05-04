@@ -7,7 +7,6 @@ import { Class, Enum } from 'meteor/jagi:astronomy';
 
 // Create or get the "content" collection
 // The <any, any> is needed to make TypeScript happy when creating the Class, not entirely sure why
-export const ContentCollection = new Mongo.Collection<any, any>('content');
 
 export const MovieCollection = new Mongo.Collection<any, any>('movie');
 export const TVCollection = new Mongo.Collection<any, any>('tv');
@@ -17,9 +16,9 @@ export const TVCollection = new Mongo.Collection<any, any>('tv');
 
 
 // Define the schema for this collection
-const Movie = Class.create({
+export const Movie = Class.create({
     name: "Movie",
-    collection: ContentCollection,
+    collection: MovieCollection,
     fields: {
         id: {
             type: Number
@@ -110,6 +109,4 @@ export const TV = Class.create({
         },
         seasons: [TV_Season]
     }
-})
-
-export default Content;
+});
