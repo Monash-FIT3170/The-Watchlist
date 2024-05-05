@@ -32,7 +32,7 @@ export default function Navbar({ staticNavData, listData }) {
           {/* Second Navbar Block - filling remaining space */}
           <div className="bg-darker rounded-lg shadow-lg p-2 flex-grow">
             <nav>
-              <h2 className="text-xl mb-4">Movie Lists</h2>
+              <h2 className="text-xl mb-4">Your Watchlists</h2>
               {/* This is temporary and will be changed to fetch data from the database */}
               <ul>
                 {listData.map((list) => (

@@ -56,7 +56,7 @@ const ContentList: React.FC<ContentListProps> = ({ list }) => {
       >
         {list.title}
       </button>
-        <button onClick={handleRedirect} className="text-white text-lg bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
+        <button onClick={handleRedirect} className="text-gray-400 text-base bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
           Show all
         </button>
       </div>
