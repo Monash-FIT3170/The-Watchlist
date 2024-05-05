@@ -7,7 +7,11 @@ import HomePage from './HomePage.jsx';
 import Navbar from './Navbar.tsx'; 
 import SearchBar from './SearchBar.jsx'
 import dummyLists from './DummyLists.jsx';
+import dummyMovies from './DummyMovies.jsx';
+import dummyTvs from './DummyTvs.jsx';
 import FullContentList from './FullContentList.tsx';
+import MovieInfo from './MovieInfo.tsx';
+import TvInfo from './TvInfo.tsx';
 // import Profile from './Profile.jsx';
 // import AIPicks from './AIPicks.jsx';
 
@@ -56,6 +60,20 @@ export const App = () => {
               key={list.listId} // Change key to listId which is unique
               path={`/${list.listId}`} // Change path to use listId
               element={<FullContentList list={list} />} // Updated to pass the entire list object
+            />
+          ))}
+          {dummyMovies.map((movie) => (
+            <Route
+              key={movie.id} // Change key to listId which is unique
+              path={`/movie${movie.id}`} // Change path to use listId
+              element={<MovieInfo movie={movie} />} // Updated to pass the entire list object
+            />
+          ))}
+          {dummyTvs.map((tv) => (
+            <Route
+              key={tv.id} // Change key to listId which is unique
+              path={`/tv${tv.id}`} // Change path to use listId
+              element={<TvInfo tv={tv} />} // Updated to pass the entire list object
             />
           ))}
           {/* 
