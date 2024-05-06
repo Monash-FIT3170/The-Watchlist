@@ -50,7 +50,7 @@ export const TV_Episode = Class.create({
     name: "TV_Episode",
     fields: {
         id: {
-            type: String
+            type: Number
         },
         title: {
             type: String,
@@ -94,7 +94,7 @@ export const TV = Class.create({
             type: String,
             index: 'text'
         },
-        description: {
+        overview: {
             type: String
         },
         image_url: {
