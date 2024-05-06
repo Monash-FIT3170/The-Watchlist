@@ -47,7 +47,7 @@ export const App = () => {
         <Navbar staticNavData={staticNavbarData} listData={dummyLists} />
       </div>
 
-      <div id="content" className="flex-auto p-4 bg-darker rounded-lg shadow-lg overflow-y-auto" style={{ margin: '1rem',  marginRight: '0.5rem', marginLeft: '0.5rem', height: 'calc(100% - 2rem)' }}>
+      <div id="content" className="flex-auto p-4 bg-darker rounded-lg shadow-lg overflow-y-auto dark:[color-scheme:dark]" style={{ margin: '1rem',  marginRight: '0.5rem', marginLeft: '0.5rem', height: 'calc(100% - 2rem)' }}>
         <Routes>
           <Route path="/search" element={<SearchBar />} />
           <Route path="/" exact element={<HomePage listData={dummyLists} />} />
