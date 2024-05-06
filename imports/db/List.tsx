@@ -1,16 +1,48 @@
-import { Class } from 'meteor/jagi:astronomy';
+import { Class , Enum } from 'meteor/jagi:astronomy';
 
 // Define the Mongo collection where lists will be stored
 export const ListCollection = new Mongo.Collection<any, any>('list');
+
+export const ContentType = Enum.create({
+    name: "ContentType",
+    identifiers: ["MOVIE", "TV", "EPISODE"]
+});
+
+export const EpisodeDetails = Class.create({
+    name: "EpisodeDetails",
+    fields: {
+        season_number: Number,
+        episode_number: Number
+    }
+});
+
+export const ContentSummary = Class.create({
+    name: "ContentSummary",
+    fields: {
+        id: Number, // internal reference for this content
+        content_id: Number, // lookup id for the content
+        title: String,
+        image_url: String,
+        user_rating: {
+            type: Number,
+            optional: true
+        },
+        type: ContentType,
+        episode_details: {
+            type: EpisodeDetails,
+            optional: true
+        }
+    }
+});
+
 
 // Define the schema for the List
 const List = Class.create({
     name: 'List',
     collection: ListCollection,
     fields: {
-        userId: String,
+        userId: Number,
         userName: String,
-        listId: String,
         title: String,
         description: {
             type: String,
@@ -24,30 +56,11 @@ const List = Class.create({
             }]
         },
         content: {
-            type: Array,
+            type: [ContentSummary],
             default: function() {
                 return [];
             }
-        },
-        'content.$': {
-            type: Object,
-            fields: {
-                type: {
-                    type: String,
-                    validators: [{
-                        type: 'choice',
-                        param: ['movie', 'tv', 'user']
-                    }]
-                },
-                id: String,
-                title: String,
-                image_url: String,
-                rating: {
-                    type: Number,
-                    optional: true  // Optional field, as not all items may have ratings
-                }
-            }
-        },
+        }
     },
     behaviors: {
         timestamp: {
