@@ -19,7 +19,6 @@ export const EpisodeDetails = Class.create({
 export const ContentSummary = Class.create({
     name: "ContentSummary",
     fields: {
-        id: Number, // internal reference for this content
         content_id: Number, // lookup id for the content
         title: String,
         image_url: String,
@@ -27,7 +26,13 @@ export const ContentSummary = Class.create({
             type: Number,
             optional: true
         },
-        type: ContentType,
+        type: {
+            type: String,
+            validators: [{
+                type: 'choice',
+                param: ['Movie', 'TV Show', 'Episode']
+            }]
+        },
         episode_details: {
             type: EpisodeDetails,
             optional: true
