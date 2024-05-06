@@ -105,7 +105,7 @@ export default HomePage = ({ listData }) => {
             <img 
               src={list.content[0]?.image_url || './path_to_default_image.jpg'}  // Use first image in list or a default one
               alt={list.title}
-              style={{ width: '60px', height: '60px', marginRight: '10px' }}  // Adjust size as necessary
+              style={{ width: '60px', height: '60px', marginRight: '10px', borderRadius: '5px' }}  // Adjust size as necessary
             />
             {list.title}
           </div>
