@@ -42,6 +42,10 @@ const List = Class.create({
                 id: String,
                 title: String,
                 image_url: String,
+                rating: {
+                    type: Number,
+                    optional: true  // Optional field, as not all items may have ratings
+                }
             }
         },
     },
