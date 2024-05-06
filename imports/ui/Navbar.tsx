@@ -37,7 +37,7 @@ export default function Navbar({ staticNavData, listData }) {
               <ul>
                 {listData.map((list) => (
                   <li key={list.id}>
-                    <Link to={`/${list.listId}`}>{list.title}</Link>
+                    <Link to={`/${list.listId}`} className="nav-link">{list.title} </Link>
                   </li>
                 ))}
               </ul>
