@@ -51,7 +51,7 @@ const RatingStar: React.FC<RatingStarProps> = ({
   };
 
   return (
-    <div className="flex relative w-full justify-center">
+    <div className="flex relative w-full">
         <div className = "inset-0 flex">
         {[...Array(totalStars)].map((_, index) => (
         <span key={index} className="text-fuchsia-800 text-l h-8 w-8 flex items-center justify-center font-bold">&#9734;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Favourites from './Favourites';
 import ToWatch from './ToWatch';
-import './Home.css';
+import dummyMovies from './DummyMovies';
 
 const HomePage = () => {
   const [favourites, setFavourites] = useState([]);
@@ -10,11 +10,11 @@ const HomePage = () => {
   // Add your logic here to populate favourites and toWatchList
 
   return (
-    <div style={{ minHeight: '100vh', overflowY: 'auto' }}>
-      <h1 className="home-title">Home</h1>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Favourites favourites={favourites} />
-        <ToWatch toWatchList={toWatchList} />
+    <div className="min-h-screen overflow-auto">
+      <h1 className="text-center text-6xl font-bold mb-5">Home</h1>
+      <div className="flex justify-between">
+        <Favourites dummyMovies={dummyMovies} />
+        <ToWatch dummyMovies={dummyMovies} />
       </div>
     </div>
   );
