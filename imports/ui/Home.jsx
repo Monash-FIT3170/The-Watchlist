@@ -10,10 +10,11 @@ const HomePage = () => {
   // Add your logic here to populate favourites and toWatchList
 
   return (
-    <div className="min-h-screen overflow-auto">
-      <h1 className="text-center text-6xl font-bold mb-5">Home</h1>
-      <div className="flex justify-between">
+    <div className="flex justify-between mx-5 my-5 space-x-5">
+      <div className="w-1/2 p-5 bg-darker text-light rounded-lg shadow-md mb-5 h-[90vh] flex justify-center">
         <Favourites dummyMovies={dummyMovies} />
+      </div>
+      <div className="w-1/2 p-5 bg-darker text-light rounded-lg shadow-md mb-5 h-[90vh] flex justify-center">
         <ToWatch dummyMovies={dummyMovies} />
       </div>
     </div>

@@ -40,6 +40,22 @@ const dummyMovies = [
           image_url: './ExampleResources/fresh-prince.jpg',
           rating: 3.5,
           description: 'A sitcom that follows the life of a street-smart teenager from West Philadelphia.'
+        },
+        {
+          type: 'tv',
+          id: '007',
+          title: '007',
+          image_url: './ExampleResources/007.jpg',
+          rating: 4.7,
+          description: 'A series of spy films based on the fictional British Secret Service agent James Bond.'
+        },
+        {
+          type: 'tv',
+          id: 'breaking-bad',
+          title: 'Breaking Bad',
+          image_url: './ExampleResources/007.jpg',
+          rating: 4.9,
+          description: 'A high school chemistry teacher turned methamphetamine producer.'
         }
       ],
       createdAt: new Date(),
@@ -84,6 +100,22 @@ const dummyMovies = [
           image_url: './ExampleResources/fresh-prince.jpg',
           rating: 3.5,
           description: 'A sitcom that follows the life of a street-smart teenager from West Philadelphia.'
+        },
+        {
+          type: 'tv',
+          id: '007',
+          title: '007',
+          image_url: './ExampleResources/007.jpg',
+          rating: 4.7,
+          description: 'A series of spy films based on the fictional British Secret Service agent James Bond.'
+        },
+        {
+          type: 'tv',
+          id: 'breaking-bad',
+          title: 'Breaking Bad',
+          image_url: './ExampleResources/007.jpg',
+          rating: 4.9,
+          description: 'A high school chemistry teacher turned methamphetamine producer.'
         }
       ],
       createdAt: new Date(),
