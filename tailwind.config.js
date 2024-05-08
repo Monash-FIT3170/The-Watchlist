@@ -13,8 +13,8 @@ module.exports = {
         'dark-magenta': "#410227",
         'off-white': "#E2DCDE",
         'smoky-black': "14110F",
-        'dark': "#282525",
-        'darker': "#181818",
+        'dark': "#191919",
+        'darker': "#101010",
         'darkest': "#000000",
       },
       boxShadow: {

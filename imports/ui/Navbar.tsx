@@ -1,7 +1,7 @@
 import React from "react";
 import { IconContext } from 'react-icons';
 import { Link } from "react-router-dom";
-import NavBarList from "./NavbarList";
+import NavbarList from "./NavbarList";
 
 
 export default function Navbar({ staticNavData, listData }) {
@@ -30,19 +30,7 @@ export default function Navbar({ staticNavData, listData }) {
           </div>
 
           {/* Second Navbar Block - filling remaining space */}
-          <div className="bg-darker rounded-lg shadow-lg p-2 flex-grow">
-            <nav>
-              <h2 className="text-xl mb-4">Movie Lists</h2>
-              {/* This is temporary and will be changed to fetch data from the database */}
-              <ul>
-                {listData.map((list) => (
-                  <li key={list.id}>
-                    <Link to={`/${list.listId}`} className="nav-link">{list.title} </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
+          <NavbarList listData={listData}/>
         </div>
       </IconContext.Provider>
     </div>
