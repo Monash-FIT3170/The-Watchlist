@@ -59,7 +59,7 @@ export const App = () => {
               element={<FullContentList list={list} />} // Updated to pass the entire list object
             />
           ))}
-          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/profile" element={<UserProfile/>} />
 
           {
           /* 

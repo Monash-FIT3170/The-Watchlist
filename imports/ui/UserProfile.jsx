@@ -1,7 +1,7 @@
-// UserProfile.jsx
 import React from 'react';
 import dummyLists from './DummyLists'; // Adjust the path if necessary
 import ContentList from './ContentList';
+import ProfileCard from './ProfileCard'; // Import the new ProfileCard component
 
 export default function UserProfile() {
   // Simulate current user (replace this with actual user ID)
@@ -9,30 +9,19 @@ export default function UserProfile() {
 
   // Filter lists to get only the ones associated with the current user
   const userLists = dummyLists.filter(list => list.userId === currentUser);
+  const userInfo = userLists[0] || {};
 
   return (
-<div className="flex flex-col gap-6">
-  {/* Profile Section */}
-  <div className="flex items-center h-72 p-4 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-lg shadow-md">
-    <div className="flex items-center gap-4">
-      <img
-        src="./ExampleResources/user-avatar.jpg" // replace with actual URL
-        alt="avatar"
-        className="w-56 h-56 object-cover rounded-full shadow-2xl"
+    <div className="flex flex-col gap-6">
+      <ProfileCard
+        userName={userInfo.userName}
+        ratings="5" // replace with actual count if available
+        followers="6" // replace with actual count
+        following="9" // replace with actual count
+        avatarUrl="./ExampleResources/user-avatar.jpg" // replace with actual URL
+        userRealName="John"
+        userDescription="Blåhaj is a plush toy manufactured and sold by the Swedish company IKEA. Modeled after a blue shark and made of recycled polyester, the toy has gained prominence on social media as a popular internet meme.        "
       />
-      <div>
-        <h2 className="p-2 text-lg">Profile</h2>
-        <h2 className="p-2 text-6xl font-bold">{userLists[0]?.userName || 'Username'}</h2>
-        <div className="flex gap-2">
-          <span className="p-2 rounded-md text-lg flex-initial gap-2">5 Public Playlists</span>
-          <span className="p-2 rounded-md text-lg flex-initial gap-2">6 Followers</span>
-          <span className="p-2 rounded-md text-lg flex-initial gap-2">9 Following</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
 
       {/* User's Content Lists */}
       {userLists.map(list => (
