@@ -9,7 +9,7 @@ interface ContentItemProps {
 
 const ContentItem: React.FC<ContentItemProps> = ({ src, alt, rating }) => {
     return (
-      <div className="flex flex-col items-start mr-4">
+      <div className="flex flex-col items-start mr-4 mb-2">
         <img
           src={src}
           alt={alt}
@@ -17,7 +17,8 @@ const ContentItem: React.FC<ContentItemProps> = ({ src, alt, rating }) => {
           style={{ width: '160px', height: '160px', objectFit: 'cover', borderRadius: '8px', margin: '8px' }}
         />
         <div className="text-white mt-0 ml-2 text-left flex-1" style={{ fontWeight: 'normal' }}>{alt}</div>
-        <RatingStar totalStars={5} rating={rating} />
+        <div className="ml-1 mt-1"><RatingStar totalStars={5} rating={rating} /></div>
+        
       </div>
     );
 };
