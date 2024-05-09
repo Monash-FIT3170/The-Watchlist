@@ -6,7 +6,7 @@ import ToWatch from './ToWatch';
 import { useNavigate } from 'react-router-dom';
 export default HomePage = ({ listData }) => {
   const [favourites, setFavourites] = useState([]);
-  const [toWatchList, setToWatchList] = useState([]);
+  const [toWatch, setToWatchList] = useState([]);
   const [searchString, setSearchString] = useState("");
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState(true);
