@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import { FaRegUserCircle  } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { AiOutlineHome, AiOutlineSearch  } from "react-icons/ai";
@@ -10,6 +10,7 @@ import dummyLists from './DummyLists.jsx';
 import dummyMovies from './DummyMovies.jsx';
 import dummyTvs from './DummyTvs.jsx';
 import FullContentList from './FullContentList.tsx';
+import Home from './Home.jsx';
 import UserProfile from './UserProfile.jsx'
 import MovieInfo from './MovieInfo.tsx';
 import TvInfo from './TvInfo.tsx';
@@ -20,16 +21,16 @@ import TvInfo from './TvInfo.tsx';
 // ! Currently only search, home, profile and ai picks - don't add more
 const staticNavbarData = [
   {
-    title: 'Home',
-    path: '/',
-    icon: <AiOutlineHome />,
-    cName: 'flex'
-  },
-  {
     title: 'Search',
     path: '/search',
     icon: <AiOutlineSearch  />,
-    cName: 'flex'
+    cName: 'flex text-light hover-text-magenta'
+  },
+  {
+    title: 'Home',
+    path: '/home',
+    icon: <AiOutlineHome />,
+    cName: 'flex text-light hover-text-magenta'
   },
   {
       title: 'Profile',
@@ -55,7 +56,8 @@ export const App = () => {
         <div className="h-custom overflow-y-scroll scrollbar-webkit">
           <Routes>
             <Route path="/search" element={<SearchBar />} />
-            <Route path="/" exact element={<HomePage listData={dummyLists} />} />
+            {/* <Route path="/" exact element={<HomePage listData={dummyLists} />} /> */}
+            <Route path="/home" element={<Home />} />
             {dummyLists.map((list) => (
               <Route
                 key={list.listId} // Change key to listId which is unique
@@ -88,6 +90,7 @@ export const App = () => {
 
             - FIXME: MovieList component here is currently acting as a demo 
             */}
+            <Route path="/" element={<Navigate to="/home" />} />
           </Routes>
         </div>
       </div>
