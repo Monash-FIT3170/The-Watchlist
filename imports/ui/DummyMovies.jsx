@@ -140,9 +140,10 @@ const dummyMovies = [
     },
     // ... more lists as required
   ];
- /*
-  export default dummyMovies;
+ 
+export default dummyMovies;
 
+/*
         id: 1,
         title: "007",
         overview: "Bond, James Bond",
