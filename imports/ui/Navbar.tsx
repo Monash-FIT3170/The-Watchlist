@@ -16,14 +16,14 @@ export default function Navbar({ staticNavData, listData }) {
   return (
     <div className="flex flex-col h-screen"> 
       <IconContext.Provider value={{ size: '20px' }}>
-        <div className="flex flex-col w-64 p-0" style={{ margin: '1rem', marginRight: '0.5rem', marginLeft: '0.5rem', height: 'calc(100vh - 2rem)' }}> {/* Use viewport height (vh) if full height is needed */}
+        <div className="flex flex-col w-64 p-0 mx-2 my-4 h-custom"> {/* Use viewport height (vh) if full height is needed */}
 
           <div className="bg-darker rounded-lg shadow-lg pt-4 px-2 mb-4 flex-none">
             <nav>
               <ul className="flex flex-col w-full">
                 {staticNavData.map((item, index) => (
                   <li key={index} className={item.cName}>
-                    <Link to={item.path} className="nav-link">
+                    <Link to={item.path} className="flex justify-start items-center space-x-5 w-full px-4 py-2 mb-2 font-bold text-grey text-lg hover:text-white">
                       {item.icon}
                       <span>{item.title}</span>
                     </Link>
@@ -35,37 +35,22 @@ export default function Navbar({ staticNavData, listData }) {
 
           <div className="bg-darker rounded-lg shadow-lg p-2 flex-grow overflow-hidden">
             <nav>
-              <h2 className="nav-link"> <MdMovieFilter /> Your Watchlists</h2>
-              <div style={{ height: '100%', overflowY: 'auto' }}>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                  gap: '10px',
-                  padding: '1px',
-                }}>
-                  {listData.map((list) => (
-                    <div key={list.listId} onClick={() => handleNavigate(list.listId)} style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      borderRadius: '5px',
-                      color: 'white',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.3s',
-                      padding: '10px'
-                    }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#3d3838'}
-                      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#181818'}
-                    >
+              <h2 className="flex justify-start items-center space-x-5 w-full px-4 py-2 mb-2 font-bold text-grey text-lg"> <MdMovieFilter size={"20px"}/><span>Your Watchlists</span></h2>
+              {/* Horrendous height calculation below, better solution required */}
+              <ul className="h-[calc(100vh_-_21rem)] overflow-y-hidden hover:overflow-y-scroll hover:scrollbar-webkit">
+                {listData.map((list) => (
+                  <li key={list.listId} className="flex justify-center">
+                    <Link to={`/${list.listId}`} className="w-full flex items-center space-x-5 text-sm text-white font-semibold mb-2.5 p-2 rounded-lg hover:bg-dark">
                       <img
                         src={list.content[0]?.image_url || './path_to_default_image.jpg'}
                         alt={list.title}
-                        style={{ width: '40px', height: '40px', marginRight: '10px', borderRadius: '5px' }}
+                        className="w-10 h-10 mr-2.5 rounded-lg"
                       />
                       {list.title}
-                    </div>
-                  ))}
-                </div>
-              </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </nav>
           </div>
         </div>
