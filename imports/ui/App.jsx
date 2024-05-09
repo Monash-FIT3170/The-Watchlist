@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import { FaRegUserCircle  } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { AiOutlineHome, AiOutlineSearch  } from "react-icons/ai";
@@ -51,7 +51,7 @@ export const App = () => {
       <div id="content" className="flex-auto p-4" style={{ margin: '1rem',  marginRight: '0.5rem', marginLeft: '0.5rem', height: 'calc(100% - 4rem)' }}>
         <Routes>
           <Route path="/search" element={<SearchBar />} />
-          <Route path="/" exact element={<HomePage listData={dummyLists} />} />
+          {/* <Route path="/" exact element={<HomePage listData={dummyLists} />} /> */}
           <Route path="/home" element={<Home />} />
           {dummyLists.map((list) => (
             <Route
@@ -70,6 +70,7 @@ export const App = () => {
 
           - FIXME: MovieList component here is currently acting as a demo 
           */}
+          <Route path="/" element={<Navigate to="/home" />} />
         </Routes>
       </div>
     </div>
