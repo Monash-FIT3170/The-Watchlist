@@ -47,46 +47,47 @@ const staticNavbarData = [
 export const App = () => {
   return (
     <div className="app flex h-screen overflow-hidden bg-darkest text-white">
-      <div id="navbar-wrapper">
+      <div>
         <Navbar staticNavData={staticNavbarData} listData={dummyLists} />
       </div>
+      <div className="flex-auto p-1 bg-darker rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
+        <div className="h-custom overflow-y-scroll scrollbar-webkit">
+          <Routes>
+            <Route path="/search" element={<SearchBar />} />
+            <Route path="/" exact element={<HomePage listData={dummyLists} />} />
+            {dummyLists.map((list) => (
+              <Route
+                key={list.listId} // Change key to listId which is unique
+                path={`/${list.listId}`} // Change path to use listId
+                element={<FullContentList list={list} />} // Updated to pass the entire list object
+              />
+            ))}
+            {dummyMovies.map((movie) => (
+              <Route
+                key={movie.id} // Change key to listId which is unique
+                path={`/movie${movie.id}`} // Change path to use listId
+                element={<MovieInfo movie={movie} />} // Updated to pass the entire list object
+              />
+            ))}
+            {dummyTvs.map((tv) => (
+              <Route
+                key={tv.id} // Change key to listId which is unique
+                path={`/tv${tv.id}`} // Change path to use listId
+                element={<TvInfo tv={tv} />} // Updated to pass the entire list object
+              />
+            ))}
+            {/* 
+            - Uncomment the following routes and their imports once the Profile and AIPicks components are created:
+            <Route path="/profile" exact element={<Profile /> } />
+            <Route path="/ai-picks" element={ <AIPicks /> } />
 
-      <div id="content" className="flex-auto p-4 bg-darker rounded-lg shadow-lg overflow-y-auto" style={{ margin: '1rem',  marginRight: '0.5rem', marginLeft: '0.5rem', height: 'calc(100% - 2rem)' }}>
-        <Routes>
-          <Route path="/search" element={<SearchBar />} />
-          <Route path="/" exact element={<HomePage listData={dummyLists} />} />
-          {dummyLists.map((list) => (
-            <Route
-              key={list.listId} // Change key to listId which is unique
-              path={`/${list.listId}`} // Change path to use listId
-              element={<FullContentList list={list} />} // Updated to pass the entire list object
-            />
-          ))}
-          {dummyMovies.map((movie) => (
-            <Route
-              key={movie.id} // Change key to listId which is unique
-              path={`/movie${movie.id}`} // Change path to use listId
-              element={<MovieInfo movie={movie} />} // Updated to pass the entire list object
-            />
-          ))}
-          {dummyTvs.map((tv) => (
-            <Route
-              key={tv.id} // Change key to listId which is unique
-              path={`/tv${tv.id}`} // Change path to use listId
-              element={<TvInfo tv={tv} />} // Updated to pass the entire list object
-            />
-          ))}
-          {/* 
-          - Uncomment the following routes and their imports once the Profile and AIPicks components are created:
-          <Route path="/profile" exact element={<Profile /> } />
-          <Route path="/ai-picks" element={ <AIPicks /> } />
+            - If your component is rendered from INSIDE one of the main pages, DO NOT add here. You should create a new <Routes> within said page to avoid bloat. 
+              https://ui.dev/react-router-nested-routes
 
-          - If your component is rendered from INSIDE one of the main pages, DO NOT add here. You should create a new <Routes> within said page to avoid bloat. 
-            https://ui.dev/react-router-nested-routes
-
-          - FIXME: MovieList component here is currently acting as a demo 
-          */}
-        </Routes>
+            - FIXME: MovieList component here is currently acting as a demo 
+            */}
+          </Routes>
+        </div>
       </div>
     </div>
   );
