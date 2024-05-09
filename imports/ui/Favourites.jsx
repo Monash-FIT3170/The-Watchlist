@@ -22,11 +22,13 @@ const Favourites = ({ dummyMovies }) => {
   const favourites = dummyMovies.filter(list => list.listType === 'Favourite');
 
   return (
-    <div className="favourites w-full mx-5 my-5 rounded-lg flex flex-col items-center overflow-y-auto">
+    <div className="favourites w-full mx-5 my-5 rounded-lg flex flex-col items-center ">
       <hr className="w-full" />
       <h1 className="font-bold text-4xl my-4">Favourites</h1>
       <hr className="w-full" />
-      {favourites.map((list) => <List list={list} />)}
+      <div className="overflow-y-auto scrollbar-webkit">
+        {favourites.map((list) => <List list={list} />)}
+      </div>
     </div>
   );
 };
