@@ -10,8 +10,12 @@ import dummyLists from './DummyLists.jsx';
 import dummyMovies from './DummyMovies.jsx';
 import dummyTvs from './DummyTvs.jsx';
 import FullContentList from './FullContentList.tsx';
+<<<<<<< frontend-userprofile
+import UserProfile from './UserProfile.jsx'
+=======
 import MovieInfo from './MovieInfo.tsx';
 import TvInfo from './TvInfo.tsx';
+>>>>>>> frontend-homepage-userprofile
 // import Profile from './Profile.jsx';
 // import AIPicks from './AIPicks.jsx';
 
@@ -62,6 +66,7 @@ export const App = () => {
                 element={<FullContentList list={list} />} // Updated to pass the entire list object
               />
             ))}
+            <Route path="/profile" element={<UserProfile/>} />
             {dummyMovies.map((movie) => (
               <Route
                 key={movie.id} // Change key to listId which is unique

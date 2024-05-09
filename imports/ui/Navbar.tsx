@@ -1,6 +1,7 @@
 import React from "react";
 import { IconContext } from 'react-icons';
 import { Link } from "react-router-dom";
+import NavbarList from "./NavbarList";
 import { MdMovieFilter } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';
 
@@ -53,6 +54,7 @@ export default function Navbar({ staticNavData, listData }) {
               </ul>
             </nav>
           </div>
+
         </div>
       </IconContext.Provider>
     </div>
