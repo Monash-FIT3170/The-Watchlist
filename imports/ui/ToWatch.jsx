@@ -22,11 +22,11 @@ const ToWatch = ({ dummyMovies }) => {
   const toWatchList = dummyMovies.filter(list => list.listType === 'To Watch');
 
   return (
-    <div className="to-watch w-full mx-5 my-5 rounded-lg flex flex-col items-center">
+    <div className="w-full mx-5 my-5 rounded-lg flex flex-col items-center">
       <hr className="w-full" />
       <h1 className="font-bold text-4xl my-4">To Watch</h1>
       <hr className="w-full" />
-      <div className="overflow-y-auto scrollbar-webkit">
+      <div className="overflow-y-scroll scrollbar-webkit">
         {toWatchList.map((list) => <List list={list} />)}
       </div>
     </div>
