@@ -10,12 +10,9 @@ import dummyLists from './DummyLists.jsx';
 import dummyMovies from './DummyMovies.jsx';
 import dummyTvs from './DummyTvs.jsx';
 import FullContentList from './FullContentList.tsx';
-<<<<<<< frontend-userprofile
 import UserProfile from './UserProfile.jsx'
-=======
 import MovieInfo from './MovieInfo.tsx';
 import TvInfo from './TvInfo.tsx';
->>>>>>> frontend-homepage-userprofile
 // import Profile from './Profile.jsx';
 // import AIPicks from './AIPicks.jsx';
 
