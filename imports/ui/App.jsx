@@ -21,15 +21,15 @@ import TvInfo from './TvInfo.tsx';
 // ! Currently only search, home, profile and ai picks - don't add more
 const staticNavbarData = [
   {
-    title: 'Search',
-    path: '/search',
-    icon: <AiOutlineSearch  />,
-    cName: 'flex text-light hover-text-magenta'
-  },
-  {
     title: 'Home',
     path: '/home',
     icon: <AiOutlineHome />,
+    cName: 'flex text-light hover-text-magenta'
+  },
+  {
+    title: 'Search',
+    path: '/search',
+    icon: <AiOutlineSearch  />,
     cName: 'flex text-light hover-text-magenta'
   },
   {
