@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 body {
-  font-family: sans-serif;
+  /* font-family: sans-serif; */
+  font-family: "Roboto", sans-serif;
 }
 
 .tab {
@@ -90,29 +91,4 @@ body {
   cursor: pointer;
   color: #333;
   margin-left: 10px;
-}
-
-/* main.css */
-.bg-dark {
-  background-color: #282525; /* main background */
-}
-
-.bg-darker {
-  background-color: #181818; /* main background */
-}
-
-.bg-darkest {
-  background-color: #080808; /* darker sections */
-}
-
-.text-magenta {
-  color: #7B1450; /* magenta */
-}
-
-.hover-text-magenta:hover {
-  color: #611240; /* Spotify green on hover */
-}
-
-.text-light {
-  color: #FFFFFF; /* White text color */
 }

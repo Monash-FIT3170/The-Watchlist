@@ -5,87 +5,79 @@ interface RatingStarProps {
   rating: number;
 }
 
+const roundToNearestHalf = (num: number) => Math.round(num * 2) / 2;
+
+const StarSVG = ({ fill }) => {
+  let gradientId = "grad-" + Math.random().toString(36).substr(2, 9);
+
+  return (
+    <svg width="16" height="16" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id={gradientId}>
+          <stop offset={fill === 1 ? "50%" : fill === 2 ? "100%" : "0%"} stopColor="#7B1450" />
+          <stop offset={fill === 1 ? "50%" : "0%"} stopColor="transparent" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M20.388,10.918L32,12.118l-8.735,7.749L25.914,31.4l-9.893-6.088L6.127,31.4l2.695-11.533L0,12.118 l11.547-1.2L16.026,0.6L20.388,10.918z"
+        fill={`url(#${gradientId})`}
+        stroke="#7B1450" 
+        strokeWidth="1" 
+      />
+    </svg>
+  );
+};
+
 const RatingStar: React.FC<RatingStarProps> = ({
   totalStars = 5,
   rating: initialRating,
 }) => {
-  //handle randing for if we are pulling from api
-  const roundedRating = Math.round(initialRating * 2) / 2 + 0.5;
-
-  const [displayRating, setDisplayRating] = useState<number>(roundedRating);
-  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [displayRating, setDisplayRating] = useState(roundToNearestHalf(initialRating));
 
   useEffect(() => {
-    setDisplayRating(roundedRating);
-  }, [roundedRating]);
+    setDisplayRating(roundToNearestHalf(initialRating));
+  }, [roundToNearestHalf(initialRating)]);
 
+  //handle a mouse leaving, let's not do anything for now
   const handleMouseLeave = () => {
-    setHoverRating(roundedRating);
+    setDisplayRating((roundToNearestHalf(initialRating)));
   };
 
-  const handleClick = (rating: number) => {
-    //pass the user rating to the back end??
 
-    //handle the rating as is 0.5 too high.
-    rating = rating - 0.5;
-    //alert for testing
-    alert("User rating: " + rating);
+  
+  const handleClick = (index: number) => {
+    const fillType = getStarFill(index);
+    const rating = fillType === 1 ? index + 0.5 : index + 1;
+    alert(`User rating: ${rating}`);
   };
 
-  const handleMouseMove = (
-    index: number,
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
+  const handleMouseMove = (index: number, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const isHalf = event.clientX - rect.left < rect.width / 2;
-    setHoverRating(index - (isHalf ? 0.5 : 0));
+    setDisplayRating(index + (isHalf ? 0.5 : 1));
   };
-
-  const starType = (index: number): "full" | "half" | "empty" => {
-    const rating = hoverRating || displayRating;
-    return index <= rating
-      ? index <= rating && index > rating - 0.5
-        ? "half"
-        : "full"
-      : "empty";
+  const getStarFill = (index: number) => {
+    if (displayRating >= index + 1) return 2; 
+    if (displayRating >= index + 0.5) return 1; 
+    return 0; 
   };
 
   return (
-    <div className="flex relative w-full">
-        <div className = "inset-0 flex">
-        {[...Array(totalStars)].map((_, index) => (
-        <span key={index} className="text-fuchsia-800 text-l h-8 w-8 flex items-center justify-center font-bold">&#9734;
-        </span>
-      ))}
-      </div>
-       <div className="flex absolute">
+    <div className="flex relative w-full justify-start"
+    onMouseLeave={handleMouseLeave} >
       {[...Array(totalStars)].map((_, index) => {
-        index += 1;
         return (
-          <button
+          <div
             key={index}
-            className={`h-8 w-8 ${
-              starType(index) === "full"
-                ? "text-fuchsia-800"
-                : starType(index ) === "half"
-                ? "text-fuchsia-800"
-                : "text-transparent"
-            } transition-colors duration-50`}
-            style={{
-              clipPath:
-                starType(index) === "half"
-                  ? "polygon(0 0, 50% 0, 50% 100%, 0% 100%)"
-                  : "none",
-            }}
-            onClick={() => handleClick(hoverRating || displayRating)}
-            onMouseMove={(e) => handleMouseMove(index + 0.5, e)}
-            onMouseLeave={handleMouseLeave}
+            className="cursor-pointer"
+            style={{ margin: '0 4px' }}
+            onMouseMove={(e) => handleMouseMove(index, e)}
+            onClick={() => handleClick(index)}
           >
-            <span className="text-l">&#9733;</span>
-          </button>
+            <StarSVG fill={getStarFill(index)} />
+          </div>
         );
       })}
-      </div> 
     </div>
   );
 };

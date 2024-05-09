@@ -7,8 +7,13 @@ import HomePage from './HomePage.jsx';
 import Navbar from './Navbar.tsx'; 
 import SearchBar from './SearchBar.jsx'
 import dummyLists from './DummyLists.jsx';
+import dummyMovies from './DummyMovies.jsx';
+import dummyTvs from './DummyTvs.jsx';
 import FullContentList from './FullContentList.tsx';
 import Home from './Home.jsx';
+import UserProfile from './UserProfile.jsx'
+import MovieInfo from './MovieInfo.tsx';
+import TvInfo from './TvInfo.tsx';
 // import Profile from './Profile.jsx';
 // import AIPicks from './AIPicks.jsx';
 
@@ -22,56 +27,72 @@ const staticNavbarData = [
     cName: 'flex text-light hover-text-magenta'
   },
   {
-      title: 'Home',
-      path: '/home',
-      icon: <AiOutlineHome />,
-      cName: 'flex text-light hover-text-magenta'
+    title: 'Home',
+    path: '/home',
+    icon: <AiOutlineHome />,
+    cName: 'flex text-light hover-text-magenta'
   },
   {
       title: 'Profile',
       path: '/profile',
       icon: <FaRegUserCircle />,
-      cName: 'flex text-light hover-text-magenta'
+      cName: 'flex'
   },
   {
       title: 'AI Picks',
       path: '/ai-picks',
       icon: <BsStars />,
-      cName: 'flex text-light hover-text-magenta'
+      cName: 'flex'
   }
 ];
 
 export const App = () => {
   return (
-    <div className="app flex h-screen overflow-hidden bg-darkest text-light">
-      <div id="navbar-wrapper">
+    <div className="app flex h-screen overflow-hidden bg-darkest text-white">
+      <div>
         <Navbar staticNavData={staticNavbarData} listData={dummyLists} />
       </div>
+      <div className="flex-auto p-1 bg-darker rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
+        <div className="h-custom overflow-y-scroll scrollbar-webkit">
+          <Routes>
+            <Route path="/search" element={<SearchBar />} />
+            {/* <Route path="/" exact element={<HomePage listData={dummyLists} />} /> */}
+            <Route path="/home" element={<Home />} />
+            {dummyLists.map((list) => (
+              <Route
+                key={list.listId} // Change key to listId which is unique
+                path={`/${list.listId}`} // Change path to use listId
+                element={<FullContentList list={list} />} // Updated to pass the entire list object
+              />
+            ))}
+            <Route path="/profile" element={<UserProfile/>} />
+            {dummyMovies.map((movie) => (
+              <Route
+                key={movie.id} // Change key to listId which is unique
+                path={`/movie${movie.id}`} // Change path to use listId
+                element={<MovieInfo movie={movie} />} // Updated to pass the entire list object
+              />
+            ))}
+            {dummyTvs.map((tv) => (
+              <Route
+                key={tv.id} // Change key to listId which is unique
+                path={`/tv${tv.id}`} // Change path to use listId
+                element={<TvInfo tv={tv} />} // Updated to pass the entire list object
+              />
+            ))}
+            {/* 
+            - Uncomment the following routes and their imports once the Profile and AIPicks components are created:
+            <Route path="/profile" exact element={<Profile /> } />
+            <Route path="/ai-picks" element={ <AIPicks /> } />
 
-      <div id="content" className="flex-auto p-4" style={{ margin: '1rem',  marginRight: '0.5rem', marginLeft: '0.5rem', height: 'calc(100% - 4rem)' }}>
-        <Routes>
-          <Route path="/search" element={<SearchBar />} />
-          {/* <Route path="/" exact element={<HomePage listData={dummyLists} />} /> */}
-          <Route path="/home" element={<Home />} />
-          {dummyLists.map((list) => (
-            <Route
-              key={list.id}
-              path={`/${list.id}`}
-              element={<FullContentList title={list.title} images={list.images} />}
-            />
-          ))}
-          {/* 
-          - Uncomment the following routes and their imports once the Profile and AIPicks components are created:
-          <Route path="/profile" exact element={<Profile /> } />
-          <Route path="/ai-picks" element={ <AIPicks /> } />
+            - If your component is rendered from INSIDE one of the main pages, DO NOT add here. You should create a new <Routes> within said page to avoid bloat. 
+              https://ui.dev/react-router-nested-routes
 
-          - If your component is rendered from INSIDE one of the main pages, DO NOT add here. You should create a new <Routes> within said page to avoid bloat. 
-            https://ui.dev/react-router-nested-routes
-
-          - FIXME: MovieList component here is currently acting as a demo 
-          */}
-          <Route path="/" element={<Navigate to="/home" />} />
-        </Routes>
+            - FIXME: MovieList component here is currently acting as a demo 
+            */}
+            <Route path="/" element={<Navigate to="/home" />} />
+          </Routes>
+        </div>
       </div>
     </div>
   );

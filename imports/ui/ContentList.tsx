@@ -1,67 +1,69 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ContentItem from './ContentItem';
 
-interface Image {
-  src: string;
-  alt: string;
+interface ContentItemData {
+  image_url: string;  // Use image_url instead of src
+  title: string;      // Use title as the alt text description
+  rating: number;
+  id: number;
+  type: string;
 }
 
 interface ContentListProps {
-  id: string;
-  title: string;
-  images: Image[];
+  list: {
+    listId: string;
+    title: string;
+    content: ContentItemData[];
+  };
 }
 
-const ContentList: React.FC<ContentListProps> = ({ id, title, images }) => {
+const ContentList: React.FC<ContentListProps> = ({ list }) => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [visibleImagesCount, setVisibleImagesCount] = useState(0);
+  const [visibleContentCount, setVisibleContentCount] = useState(0);
 
   const handleRedirect = () => {
-    navigate(`/${id}`); 
+    navigate(`/${list.listId}`);
   };
 
-  // Calculate the number of images that fit in the container
-  const updateVisibleImages = () => {
+  // Calculate the number of content panels that fit in the container
+  const updateVisibleContent = () => {
     const container = containerRef.current;
     if (container) {
-      const containerWidth = containerRef.current.offsetWidth;
-      const imageWidth = 160 + 16; // Assuming each image is 160px wide and has 8px margin on each side
-      const visibleImages = Math.floor(containerWidth / imageWidth);
-      setVisibleImagesCount(visibleImages);
+      const containerWidth = container.offsetWidth;
+      const contentWidth = 160 + 16; // Assuming each content pane is 160px wide and has 8px margin on each side
+      const visibleContent = Math.floor(containerWidth / contentWidth);
+      setVisibleContentCount(visibleContent);
     }
   };
 
-  // Update visible images on resize
+  // Update visible content on resize
   useEffect(() => {
-    window.addEventListener('resize', updateVisibleImages);
-    updateVisibleImages(); // Initial update
+    window.addEventListener('resize', updateVisibleContent);
+    updateVisibleContent(); // Initial update
     return () => {
-      window.removeEventListener('resize', updateVisibleImages);
+      window.removeEventListener('resize', updateVisibleContent);
     };
   }, []);
 
   return (
-    <div className="flex flex-col mb-4">
-      <div className="flex justify-between items-center mb-5 text-base">
-        <h1 className="font-bold text-2xl text-white leading-tight tracking-tight">{title}</h1>
-        <button onClick={handleRedirect} className="text-lg bg-transparent border-none cursor-pointer hover:underline">
+    <div className="flex flex-col mb-8 bg-darker rounded-lg overflow-hidden shadow-lg">
+      <div className="flex justify-between items-center mb-2 text-base">
+      <button
+        onClick={handleRedirect} // Same click handler as "Show all"
+        className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 pt-2 hover:underline cursor-pointer bg-transparent border-none" // Styling to make it look like the original h1 plus hover effect
+      >
+        {list.title}
+      </button>
+        <button onClick={handleRedirect} className="text-gray-400 text-base bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
           Show all
         </button>
       </div>
-      <div ref={containerRef} className="flex justify-start items-start overflow-hidden">
-        {images.slice(0, visibleImagesCount).map((image, index) => (
-          <div key={index} className="flex flex-col items-start mr-4">
-            <img
-              src={image.src}
-              alt={image.alt}
-              className="transition-transform duration-200 ease-in-out transform hover:scale-110 cursor-pointer"
-              style={{ width: '160px', height: '160px', objectFit: 'cover', borderRadius: '8px', margin: '8px' }}
-            />
-            <div className="text-white mt-2 text-left">{image.alt}</div>
-          </div>
-        ))}
+      <div ref={containerRef} className="flex justify-flex-start items-start overflow-hidden">
+        {React.Children.toArray(list.content.map((item, index) => (
+          <ContentItem key={index} id={item.id} type={item.type} src={item.image_url} alt={item.title} rating={item.rating} />
+        ))).slice(0, visibleContentCount)}
       </div>
     </div>
   );
