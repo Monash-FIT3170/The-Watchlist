@@ -2,11 +2,12 @@ import React from 'react';
 import ContentItem from './ContentItem';
 
 const FullContentList = ({ list }) => {
-    const repeatedContent = Array.from({ length: 20 }, () => list.content).flat();
+    const contentarr = list.content;
 
-    const content = repeatedContent.map((item, index) => (
-        <ContentItem key={index} src={item.image_url} alt={item.title} rating={item.rating} />
+    const content = contentarr.map((item, index) => (
+        <ContentItem key={index} id={item.id} type={item.type} src={item.image_url} alt={item.title} rating={item.rating} />
     ));
+
 
     return (
         <div>

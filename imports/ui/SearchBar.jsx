@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai';
-import { dummyMovies } from './DummyMovies';
-import { dummyTVs } from './DummyTvs';
+import dummyMovies from './DummyMovies';
+import dummyTVs from './DummyTvs';
 import ContentItem from './ContentItem'; // Adjust the path if necessary
 
 
@@ -86,11 +86,11 @@ const SearchBar = () => {
             {/* Display Filtered Data */}
             <div className="search-results-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                 {selectedTab === 'movies' && (filteredData.movies.length > 0 ? filteredData.movies.map(movie => (
-                    <ContentItem key={movie.id} src={movie.image_url} alt={movie.title} rating={movie.rating} />
+                    <ContentItem key={movie.id} id={movie.id} type="movie" src={movie.image_url} alt={movie.title} rating={movie.rating} />
                 )) : <div>No movies available.</div>)}
 
                 {selectedTab === 'tv shows' && (filteredData.tvShows.length > 0 ? filteredData.tvShows.map(tv => (
-                    <ContentItem key={tv.id} src={tv.image_url} alt={tv.title} rating={tv.rating || undefined} /> // Assume TV shows may not always have ratings
+                    <ContentItem key={tv.id} id={tv.id} type="tv" src={tv.image_url} alt={tv.title} rating={tv.rating || undefined} /> // Assume TV shows may not always have ratings
                 )) : <div>No TV shows available.</div>)}
 
                 {/* Similarly for users and lists */}

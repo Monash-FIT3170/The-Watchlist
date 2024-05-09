@@ -1,5 +1,6 @@
 // DummyMovies.js
-export const dummyMovies = [
+
+const dummyMovies = [
     {
         id: 1,
         title: "007",
@@ -19,3 +20,5 @@ export const dummyMovies = [
         rating: 8.7
     }
 ];
+
+export default dummyMovies;
