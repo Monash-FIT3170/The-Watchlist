@@ -47,7 +47,7 @@ const SearchBar = () => {
 
     return (
         <div className="search-bar-container">
-            <form className="flex flex-col items-start w-full">
+            <form className="p-2 flex flex-col items-start w-full">
                 <div className="flex justify-between items-center w-full max-w-xl">
                     <div className="relative flex-grow">
                         <input
