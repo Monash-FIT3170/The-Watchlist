@@ -37,7 +37,7 @@ module.exports = {
             borderRadius: "20px",
           },
           "&::-webkit-scrollbar-track" : {
-            background:"#101010"
+            background:"transparent"
           },
           "&::-webkit-scrollbar-thumb" : {
             background:"#3F3F3F",

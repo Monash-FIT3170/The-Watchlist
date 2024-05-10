@@ -48,11 +48,11 @@ const ContentList: React.FC<ContentListProps> = ({ list }) => {
   }, []);
 
   return (
-    <div className="flex flex-col mb-8 bg-darker rounded-lg overflow-hidden shadow-lg">
+    <div className="flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2">
       <div className="flex justify-between items-center mb-2 text-base">
       <button
         onClick={handleRedirect} // Same click handler as "Show all"
-        className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 pt-2 hover:underline cursor-pointer bg-transparent border-none" // Styling to make it look like the original h1 plus hover effect
+        className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 hover:underline cursor-pointer bg-transparent border-none" // Styling to make it look like the original h1 plus hover effect
       >
         {list.title}
       </button>
