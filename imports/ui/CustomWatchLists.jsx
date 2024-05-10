@@ -22,7 +22,7 @@ export default function CustomWatchLists({listData: watchlists}) {
     }
 
     return (
-        <div>
+        <div className="bg-darker px-2 py-5 rounded-lg">
             <h2 className="text-white text-2xl font-bold mb-4">Custom Watchlists</h2>
             {rows.map((row, index) => (
                 <div key={index} className="flex justify-between">
