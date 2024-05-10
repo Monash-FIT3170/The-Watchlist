@@ -125,8 +125,8 @@ const dummyLists = [
     updatedAt: new Date(),
   },
   {
-    userId: 'user5',
-    userName: 'BobWhite',
+    userId: 'user1',
+    userName: 'JohnDoe',
     listId: 'comedy-nights',
     title: 'Comedy Nights',
     description: 'Laugh out loud with these hilarious sitcoms.',
@@ -139,8 +139,8 @@ const dummyLists = [
     updatedAt: new Date(),
   },
   {
-    userId: 'user6',
-    userName: 'ClaraBlue',
+    userId: 'user1',
+    userName: 'JohnDoe',
     listId: 'nature-lovers',
     title: 'Nature Lovers',
     description: 'Explore the beauty of our planet with these documentaries.',
@@ -152,8 +152,8 @@ const dummyLists = [
     updatedAt: new Date(),
   },
   {
-    userId: 'user7',
-    userName: 'DerekSmith',
+    userId: 'user1',
+    userName: 'JohnDoe',
     listId: 'family-fun',
     title: 'Family Fun Nights',
     description: 'Family-friendly movies and shows everyone will enjoy.',
@@ -166,8 +166,8 @@ const dummyLists = [
     updatedAt: new Date(),
   },
   {
-    userId: 'user8',
-    userName: 'EvaGreen',
+    userId: 'user1',
+    userName: 'JohnDoe',
     listId: 'chill-weekends',
     title: 'Chill Weekends',
     description: 'Perfect picks for a relaxed weekend binge.',
