@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Favourites from './Favourites';
 import ToWatch from './ToWatch';
-import dummyMovies from './DummyMovies';
+import dummyLists from './DummyLists';
 
 const HomePage = () => {
   const [favourites, setFavourites] = useState([]);
@@ -12,10 +12,10 @@ const HomePage = () => {
   return (
     <div className="flex justify-between space-x-5">
       <div className="w-1/2 p-5 bg-darker text-light rounded-lg shadow-md h-custom flex justify-center">
-        <Favourites dummyMovies={dummyMovies} />
+        <Favourites dummyMovies={dummyLists} />
       </div>
       <div className="w-1/2 p-5 bg-darker text-light rounded-lg shadow-md h-custom flex justify-center">
-        <ToWatch dummyMovies={dummyMovies} />
+        <ToWatch dummyMovies={dummyLists} />
       </div>
     </div>
   );
