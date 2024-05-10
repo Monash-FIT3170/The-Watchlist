@@ -26,7 +26,7 @@ const ToWatch = ({ dummyMovies }) => {
       <hr className="w-full" />
       <h1 className="font-bold text-4xl my-4">To Watch</h1>
       <hr className="w-full" />
-      <div className="overflow-y-scroll scrollbar-webkit">
+      <div className="w-full overflow-y-scroll scrollbar-webkit">
         {toWatchList.map((list) => <List list={list} />)}
       </div>
     </div>
