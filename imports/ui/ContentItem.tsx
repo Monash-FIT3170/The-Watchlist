@@ -18,6 +18,7 @@ const ContentItem: React.FC<ContentItemProps> = ({ id, type, src, alt, rating })
     };
 
     return (
+
       <div className="flex flex-col items-start mr-4">
         <button
         onClick={handleRedirect}
@@ -29,8 +30,10 @@ const ContentItem: React.FC<ContentItemProps> = ({ id, type, src, alt, rating })
             style={{ width: '160px', height: '160px', objectFit: 'cover', borderRadius: '8px', margin: '8px' }}
           />
         </button>
+
         <div className="text-white mt-0 ml-2 text-left flex-1" style={{ fontWeight: 'normal' }}>{alt}</div>
-        <RatingStar totalStars={5} rating={rating} />
+        <div className="ml-1 mt-1"><RatingStar totalStars={5} rating={rating} /></div>
+        
       </div>
     );
 };

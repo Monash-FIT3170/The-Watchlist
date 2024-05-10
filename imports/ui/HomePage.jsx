@@ -1,10 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import { Log } from 'meteor/logging';
 import ContentList from './ContentList';
+import Favourites from './Favourites';
+import ToWatch from './ToWatch';
 import { useNavigate } from 'react-router-dom';
-
 export default HomePage = ({ listData }) => {
-
+  const [favourites, setFavourites] = useState([]);
+  const [toWatch, setToWatchList] = useState([]);
   const [searchString, setSearchString] = useState("");
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState(true);
