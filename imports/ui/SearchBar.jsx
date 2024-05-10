@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai';
 import dummyMovies from './DummyMovies';
 import dummyTVs from './DummyTvs';
-import ContentItem from './ContentItem'; // Adjust the path if necessary
-
+import ContentItem from './ContentItem';
+import dummyLists from './DummyLists';
+import CustomWatchLists from './CustomWatchLists';
+import ListDisplay from './ListDisplay';
 
 const SearchBar = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -29,25 +31,37 @@ const SearchBar = () => {
         movies: dummyMovies,
         tvShows: dummyTVs,
         users: [], // there will be a similar dummy data array for users
-        lists: []  // there will be a similar dummy data array for lists
+        lists: dummyLists  // there will be a similar dummy data array for lists
     });
 
     const handleSearchChange = (e) => {
         const value = e.target.value.toLowerCase();
         setSearchTerm(value);
-        const filter = (item) => item.title.toLowerCase().includes(value);
-
-        setFilteredData({
-            movies: dummyMovies.filter(filter),
-            tvShows: dummyTVs.filter(filter),
-            users: [], // Apply similar logic with user data
-            lists: []  // Apply similar logic with list data
-        });
+    
+        if (!value) {
+            setFilteredData({
+                movies: dummyMovies,
+                tvShows: dummyTVs,
+                users: [], // Reset or update according to available user data
+                lists: dummyLists
+            });
+        } else {
+            const filterContent = (item) => item.title.toLowerCase().includes(value);
+            const filterLists = (list) => list.title.toLowerCase().includes(value) || list.description.toLowerCase().includes(value);
+    
+            setFilteredData({
+                movies: dummyMovies.filter(filterContent),
+                tvShows: dummyTVs.filter(filterContent),
+                users: [], // Filter user data
+                lists: dummyLists.filter(filterLists)
+            });
+        }
     };
+    
 
     return (
-        <div className="search-bar-container">
-            <form className="flex flex-col items-start w-full">
+        <div className="flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
+            <form className="flex flex-col items-start w-full pl-2">
                 <div className="flex justify-between items-center w-full max-w-xl">
                     <div className="relative flex-grow">
                         <input
@@ -70,7 +84,7 @@ const SearchBar = () => {
                     </button>
                 </div>
                 <div className="bubbles-container flex justify-end mt-2">
-                    {['movies', 'tv shows', 'users', 'lists'].map((tab) => (
+                    {['movies', 'tv shows', 'lists', 'users'].map((tab) => (
                         <div
                             key={tab}
                             className={`bubble ${selectedTab === tab ? 'bubble-active' : 'bg-dark'}`}
@@ -84,7 +98,7 @@ const SearchBar = () => {
             </form>
 
             {/* Display Filtered Data */}
-            <div className="search-results-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+            <div className="search-results-container flex flex-grow overflow-auto">
                 {selectedTab === 'movies' && (filteredData.movies.length > 0 ? filteredData.movies.map(movie => (
                     <ContentItem key={movie.id} id={movie.id} type="movie" src={movie.image_url} alt={movie.title} rating={movie.rating} />
                 )) : <div>No movies available.</div>)}
@@ -93,7 +107,10 @@ const SearchBar = () => {
                     <ContentItem key={tv.id} id={tv.id} type="tv" src={tv.image_url} alt={tv.title} rating={tv.rating || undefined} /> // Assume TV shows may not always have ratings
                 )) : <div>No TV shows available.</div>)}
 
-                {/* Similarly for users and lists */}
+                {selectedTab === 'lists' && (filteredData.lists.length > 0 ?
+                    <ListDisplay listData={filteredData.lists} />
+                    : <div>No lists available.</div>)
+                }
             </div>
         </div>
     );
