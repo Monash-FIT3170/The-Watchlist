@@ -7,7 +7,7 @@ const ProfileCard = ({ userName, ratings, followers, following, avatarUrl, userR
         <img
           src={avatarUrl}
           alt="avatar"
-          className="w-56 h-56 object-cover rounded-full shadow-2xl"
+          className="aspect-square w-56 h-56 object-cover rounded-full shadow-2xl"
         />
         
         <div>

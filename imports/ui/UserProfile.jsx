@@ -2,6 +2,7 @@ import React from 'react';
 import dummyLists from './DummyLists'; // Adjust the path if necessary
 import ContentList from './ContentList';
 import ProfileCard from './ProfileCard'; // Import the new ProfileCard component
+import CustomWatchLists from './CustomWatchLists';
 
 export default function UserProfile() {
   // Simulate current user (replace this with actual user ID)
@@ -27,6 +28,9 @@ export default function UserProfile() {
       {userLists.map(list => (
         <ContentList key={list.listId} list={list} />
       ))}
+
+      {/* User's Watchlists */}
+      <CustomWatchLists listData={dummyLists} />
     </div>
   );
 }
