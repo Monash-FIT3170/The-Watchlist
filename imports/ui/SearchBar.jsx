@@ -37,7 +37,7 @@ const SearchBar = () => {
     const handleSearchChange = (e) => {
         const value = e.target.value.toLowerCase();
         setSearchTerm(value);
-    
+
         if (!value) {
             setFilteredData({
                 movies: dummyMovies,
@@ -48,7 +48,7 @@ const SearchBar = () => {
         } else {
             const filterContent = (item) => item.title.toLowerCase().includes(value);
             const filterLists = (list) => list.title.toLowerCase().includes(value) || list.description.toLowerCase().includes(value);
-    
+
             setFilteredData({
                 movies: dummyMovies.filter(filterContent),
                 tvShows: dummyTVs.filter(filterContent),
@@ -57,7 +57,7 @@ const SearchBar = () => {
             });
         }
     };
-    
+
 
     return (
         <div className="flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
@@ -87,9 +87,11 @@ const SearchBar = () => {
                     {['movies', 'tv shows', 'lists', 'users'].map((tab) => (
                         <div
                             key={tab}
-                            className={`bubble ${selectedTab === tab ? 'bubble-active' : 'bg-dark'}`}
+                            className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
+                                } border-transparent border`}
                             onClick={() => setSelectedTab(tab)}
                         >
+
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </div>
                     ))}
