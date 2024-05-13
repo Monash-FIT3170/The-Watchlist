@@ -41,6 +41,9 @@ export const Movie = Class.create({
         },
         rating: {
             type: Number // this will 100% need to be changed later
+        },
+        genres: {
+            type: [String]
         }
         
     }
@@ -106,6 +109,9 @@ export const TV = Class.create({
         last_aired: {
             type: Date,
             optional: true
+        },
+        genres: {
+            type: [String]
         },
         seasons: [TV_Season]
     }

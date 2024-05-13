@@ -5,6 +5,7 @@ import ContentHandler from '../imports/api/server/ContentHandler';
 import List from '../imports/db/List';
 
 import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content';
+import { APIIngestor } from './APIIngestor.js';
 
 
 const movieData = {
@@ -86,4 +87,9 @@ Meteor.startup(async () => {
         });
     }
 
+    ingestor = new APIIngestor();
+    ingestor.authenticate();
+
 });
+
+
