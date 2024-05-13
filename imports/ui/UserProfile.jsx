@@ -12,6 +12,10 @@ export default function UserProfile() {
   const userLists = dummyLists.filter(list => list.userId === currentUser);
   const userInfo = userLists[0] || {};
 
+  const favouritesList = userLists.find(list => list.listId == "favorite-shows")
+  const toWatchList = userLists.find(list => list.listId == "must-watch")
+  const customWatchlists = userLists.filter(list => list.listId != "favorite-shows" && list.listId != "must-watch")
+
   return (
     <div className="flex flex-col gap-6">
       <ProfileCard
@@ -25,12 +29,14 @@ export default function UserProfile() {
       />
 
       {/* User's Content Lists */}
-      {userLists.map(list => (
+      <ContentList key={favouritesList.listId} list={favouritesList} />
+      <ContentList key={toWatchList.listId} list={toWatchList} />
+      {/* {userLists.map(list => (
         <ContentList key={list.listId} list={list} />
-      ))}
+      ))} */}
 
       {/* User's Watchlists */}
-      <CustomWatchLists listData={dummyLists} />
+      <CustomWatchLists listData={customWatchlists} />
     </div>
   );
 }
