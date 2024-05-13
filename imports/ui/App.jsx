@@ -15,7 +15,7 @@ import UserProfile from './UserProfile.jsx'
 import MovieInfo from './MovieInfo.tsx';
 import TvInfo from './TvInfo.tsx';
 // import Profile from './Profile.jsx';
-// import AIPicks from './AIPicks.jsx';
+import AIPicks from './AIPicks.jsx';
 
 // Static navbar data, add new entries when required, ensuring that the complimentary Route is created in the App component below
 // ! Currently only search, home, profile and ai picks - don't add more
@@ -66,6 +66,8 @@ export const App = () => {
               />
             ))}
             <Route path="/profile" element={<UserProfile/>} />
+            <Route path="/ai-picks" element={ <AIPicks/> } />
+
             {dummyMovies.map((movie) => (
               <Route
                 key={movie.id} // Change key to listId which is unique
@@ -83,7 +85,6 @@ export const App = () => {
             {/* 
             - Uncomment the following routes and their imports once the Profile and AIPicks components are created:
             <Route path="/profile" exact element={<Profile /> } />
-            <Route path="/ai-picks" element={ <AIPicks /> } />
 
             - If your component is rendered from INSIDE one of the main pages, DO NOT add here. You should create a new <Routes> within said page to avoid bloat. 
               https://ui.dev/react-router-nested-routes
