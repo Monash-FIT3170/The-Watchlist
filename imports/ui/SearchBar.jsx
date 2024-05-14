@@ -27,8 +27,7 @@ const SearchBar = () => {
             ],
             selected: []
         },
-
-        sortBy: {
+        "sort by": {
             options: ["rating", "runtime"],
             selected: "" // this is string as opposed to arrays above due to lack of multi-select
         }
@@ -53,9 +52,10 @@ const SearchBar = () => {
         setFilters({
             year: { ...filters.year, selected: [] },
             genres: { ...filters.genres, selected: [] },
-            sortBy: { ...filters.sortBy, selected: '' }
+            "sort by": { ...filters["sort by"], selected: '' }
         });
     };
+
 
     const handleFilterChange = (filterType, value) => {
         console.log("handleFilterChange called");
@@ -123,16 +123,17 @@ const SearchBar = () => {
         }
 
         // Sorting logic
-        if (filters.sortBy.selected) {
+        if (filters["sort by"].selected) {
             filtered = filtered.sort((a, b) => {
-                if (filters.sortBy.selected === 'rating') {
+                if (filters["sort by"].selected === 'rating') {
                     return b.rating - a.rating;
-                } else if (filters.sortBy.selected === 'runtime') {
+                } else if (filters["sort by"].selected === 'runtime') {
                     return b.runtime - a.runtime;
                 }
                 return 0;
             });
         }
+
 
         return filtered;
     };
@@ -228,9 +229,9 @@ const SearchBar = () => {
                                 onFilterChange={handleFilterChange}
                             />
                             <FilterDropdown
-                                label="sortBy"
-                                options={filters.sortBy.options}
-                                selected={filters.sortBy.selected}
+                                label="sort by"
+                                options={filters["sort by"].options}
+                                selected={filters["sort by"].selected}
                                 onFilterChange={handleFilterChange}
                             />
                             <FilterDropdown
@@ -240,7 +241,6 @@ const SearchBar = () => {
                                 onFilterChange={handleFilterChange}
                             />
                         </div>
-
                     )}
                     {/* Filter Tags and Clear All Button */}
                     {showFilters && (
