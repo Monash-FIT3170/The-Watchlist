@@ -9,13 +9,11 @@ const dummyLists = [
     description: 'A personal list of favorite TV shows.',
     listType: 'Favourite',
     content: [
-      { type: 'tv', id: '1', title: 'Seinfeld', image_url: './ExampleResources/seinfeld.jpg', rating: 4.5 },
-      { type: 'tv', id: '2', title: 'Friends', image_url: './ExampleResources/friends.jpg', rating: 4.0 },
-      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.8 },
-      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5 },
-      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9 },
-      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9 },
-      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9 }
+      { type: 'tv', id: '1', title: 'Seinfeld', image_url: './ExampleResources/seinfeld.jpg', rating: 4.5, overview: "A stand-up comedian and his three offbeat friends weather the pitfalls and payoffs of life in New York City in the '90s." },
+      { type: 'tv', id: '2', title: 'Friends', image_url: './ExampleResources/friends.jpg', rating: 4.0,overview: "Follows the personal and professional lives of six twenty to thirty-something-year-old friends living in Manhattan."},
+      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.8, overview: "A groundbreaking series narrated by David Attenborough, exploring the wild and beautiful parts of our planet like never before." },
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -28,11 +26,11 @@ const dummyLists = [
     description: 'Essential series to watch.',
     listType: 'To Watch',
     content: [
-      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 4.2 },
-      { type: 'tv', id: '1', title: 'Seinfeld', image_url: './ExampleResources/seinfeld.jpg', rating: 4.6 },
-      { type: 'tv', id: '2', title: 'Friends', image_url: './ExampleResources/friends.jpg', rating: 4.3 },
-      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 4.5 },
-      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.9 }
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
+      { type: 'tv', id: '1', title: 'Seinfeld', image_url: './ExampleResources/seinfeld.jpg', rating: 4.5, overview: "A stand-up comedian and his three offbeat friends weather the pitfalls and payoffs of life in New York City in the '90s." },
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -45,10 +43,11 @@ const dummyLists = [
     description: 'Classic shows that define a generation.',
     listType: 'Custom',
     content: [
-      { type: 'tv', id: '2', title: 'Friends', image_url: './ExampleResources/friends.jpg', rating: 4.2 },
-      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.4 },
-      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.8 },
-      { type: 'tv', id: '1', title: 'Seinfeld', image_url: './ExampleResources/seinfeld.jpg', rating: 4.7 }
+      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.8, overview: "A groundbreaking series narrated by David Attenborough, exploring the wild and beautiful parts of our planet like never before." },
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -61,8 +60,8 @@ const dummyLists = [
     description: 'High-octane shows and movies for thrill-seekers.',
     listType: 'Custom',
     content: [
-      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 4.1 },
-      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 4.0 }
+      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.8, overview: "A groundbreaking series narrated by David Attenborough, exploring the wild and beautiful parts of our planet like never before." },
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -75,8 +74,9 @@ const dummyLists = [
     description: 'Laugh out loud with these hilarious sitcoms.',
     listType: 'Custom',
     content: [
-      { type: 'tv', id: '1', title: 'Seinfeld', image_url: './ExampleResources/seinfeld.jpg', rating: 4.8 },
-      { type: 'tv', id: '2', title: 'Friends', image_url: './ExampleResources/friends.jpg', rating: 4.5 }
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -89,7 +89,7 @@ const dummyLists = [
     description: 'Explore the beauty of our planet with these documentaries.',
     listType: 'Custom',
     content: [
-      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.9 }
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." }
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -102,8 +102,8 @@ const dummyLists = [
     description: 'Family-friendly movies and shows everyone will enjoy.',
     listType: 'Custom',
     content: [
-      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 4.3 },
-      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9 }
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -116,10 +116,10 @@ const dummyLists = [
     description: 'Perfect picks for a relaxed weekend binge.',
     listType: 'Custom',
     content: [
-      { type: 'tv', id: '1', title: 'Seinfeld', image_url: './ExampleResources/seinfeld.jpg', rating: 4.6 },
-      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.7 },
-      { type: 'tv', id: '2', title: 'Friends', image_url: './ExampleResources/friends.jpg', rating: 4.3 },
-      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 4.0 }
+      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.8, overview: "A groundbreaking series narrated by David Attenborough, exploring the wild and beautiful parts of our planet like never before." },
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
+      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.8, overview: "A groundbreaking series narrated by David Attenborough, exploring the wild and beautiful parts of our planet like never before." },
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -132,8 +132,8 @@ const dummyLists = [
     description: 'Laugh out loud with these hilarious sitcoms.',
     listType: 'Custom',
     content: [
-      { type: 'tv', id: '1', title: 'Seinfeld', image_url: './ExampleResources/seinfeld.jpg', rating: 4.8 },
-      { type: 'tv', id: '2', title: 'Friends', image_url: './ExampleResources/friends.jpg', rating: 4.5 }
+      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.8, overview: "A groundbreaking series narrated by David Attenborough, exploring the wild and beautiful parts of our planet like never before." },
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -146,7 +146,7 @@ const dummyLists = [
     description: 'Explore the beauty of our planet with these documentaries.',
     listType: 'Custom',
     content: [
-      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.9 }
+      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.8, overview: "A groundbreaking series narrated by David Attenborough, exploring the wild and beautiful parts of our planet like never before." },
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -159,8 +159,8 @@ const dummyLists = [
     description: 'Family-friendly movies and shows everyone will enjoy.',
     listType: 'Custom',
     content: [
-      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 4.3 },
-      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9 }
+      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.8, overview: "A groundbreaking series narrated by David Attenborough, exploring the wild and beautiful parts of our planet like never before." },
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -173,10 +173,11 @@ const dummyLists = [
     description: 'Perfect picks for a relaxed weekend binge.',
     listType: 'Custom',
     content: [
-      { type: 'tv', id: '1', title: 'Seinfeld', image_url: './ExampleResources/seinfeld.jpg', rating: 4.6 },
-      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.7 },
-      { type: 'tv', id: '2', title: 'Friends', image_url: './ExampleResources/friends.jpg', rating: 4.3 },
-      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 4.0 }
+      { type: 'tv', id: '3', title: 'Planet Earth', image_url: './ExampleResources/planet-earth.jpeg', rating: 4.8, overview: "A groundbreaking series narrated by David Attenborough, exploring the wild and beautiful parts of our planet like never before." },
+      { type: 'tv', id: '4', title: 'Fresh Prince', image_url: './ExampleResources/fresh-prince.jpg', rating: 3.5, overview: "The misadventures of a wealthy family where Will Smith, the Philadelphia-born wise-cracking teen, is sent to live with his aunt and uncle." },
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
+      { type: 'movie', id: '1', title: '007', image_url: './ExampleResources/007.jpg', rating: 3.9, overview: "A British spy with a license to kill, James Bond is a suave, sophisticated super-spy with a taste for fast cars."},
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
