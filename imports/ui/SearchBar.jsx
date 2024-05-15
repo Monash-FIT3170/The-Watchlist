@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai';
-import dummyMovies from './DummyMovies';
-import dummyTVs from './DummyTvs';
 import ContentItem from './ContentItem';
-import dummyLists from './DummyLists';
 import ListDisplay from './ListDisplay';
 
-const SearchBar = () => {
+const SearchBar = ({ dummyMovies, dummyTvs, dummyLists }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTab, setSelectedTab] = useState('movies');
     const [showFilters, setShowFilters] = useState(false);
@@ -142,7 +139,7 @@ const SearchBar = () => {
     useEffect(() => {
         const newFilteredData = {
             movies: applyFilters(dummyMovies),
-            tvShows: applyFilters(dummyTVs),
+            tvShows: applyFilters(dummyTvs),
             users: [], // Apply similar filtering logic if required
             lists: applyFilters(dummyLists)
         };
@@ -151,7 +148,7 @@ const SearchBar = () => {
 
     const [filteredData, setFilteredData] = useState({
         movies: dummyMovies,
-        tvShows: dummyTVs,
+        tvShows: dummyTvs,
         users: [], // there will be a similar dummy data array for users
         lists: dummyLists  // there will be a similar dummy data array for lists
     });
@@ -163,7 +160,7 @@ const SearchBar = () => {
         if (!value) {
             setFilteredData({
                 movies: dummyMovies,
-                tvShows: dummyTVs,
+                tvShows: dummyTvs,
                 users: [], // Reset or update according to available user data
                 lists: dummyLists
             });
@@ -173,7 +170,7 @@ const SearchBar = () => {
 
             setFilteredData({
                 movies: dummyMovies.filter(filterContent),
-                tvShows: dummyTVs.filter(filterContent),
+                tvShows: dummyTvs.filter(filterContent),
                 users: [], // Filter user data
                 lists: dummyLists.filter(filterLists)
             });

@@ -55,7 +55,14 @@ export const App = () => {
       <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
         <div className="h-custom overflow-y-scroll scrollbar-webkit">
           <Routes>
-            <Route path="/search" element={<SearchBar />} />
+            <Route 
+              path="/search" 
+              element={<SearchBar 
+                dummyMovies={dummyMovies} 
+                dummyTvs={dummyTvs} 
+                dummyLists={dummyLists} 
+              />} 
+            />
             {/* <Route path="/" exact element={<HomePage listData={dummyLists} />} /> */}
             <Route path="/home" element={<Home />} />
             {dummyLists.map((list) => (
