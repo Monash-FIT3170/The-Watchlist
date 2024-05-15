@@ -3,7 +3,6 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import { FaRegUserCircle  } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { AiOutlineHome, AiOutlineSearch  } from "react-icons/ai";
-import HomePage from './HomePage.jsx';
 import Navbar from './Navbar.tsx'; 
 import SearchBar from './SearchBar.jsx'
 import dummyLists from './DummyLists.jsx';
@@ -63,8 +62,12 @@ export const App = () => {
                 dummyLists={dummyLists} 
               />} 
             />
-            {/* <Route path="/" exact element={<HomePage listData={dummyLists} />} /> */}
-            <Route path="/home" element={<Home />} />
+            <Route 
+              path="/home" 
+              element={<Home 
+                dummyLists={dummyLists} 
+              />} 
+            />
             {dummyLists.map((list) => (
               <Route
                 key={list.listId} // Change key to listId which is unique
