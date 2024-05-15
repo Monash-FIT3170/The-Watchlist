@@ -3,7 +3,7 @@ import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai'
 import ContentItem from './ContentItem';
 import ListDisplay from './ListDisplay';
 
-const SearchBar = ({ dummyMovies, dummyTvs, dummyLists }) => {
+const SearchBar = ({ movies, tvs, lists }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTab, setSelectedTab] = useState('movies');
     const [showFilters, setShowFilters] = useState(false);
@@ -138,19 +138,19 @@ const SearchBar = ({ dummyMovies, dummyTvs, dummyLists }) => {
 
     useEffect(() => {
         const newFilteredData = {
-            movies: applyFilters(dummyMovies),
-            tvShows: applyFilters(dummyTvs),
+            movies: applyFilters(movies),
+            tvShows: applyFilters(tvs),
             users: [], // Apply similar filtering logic if required
-            lists: applyFilters(dummyLists)
+            lists: applyFilters(lists)
         };
         setFilteredData(newFilteredData);
     }, [filters]);
 
     const [filteredData, setFilteredData] = useState({
-        movies: dummyMovies,
-        tvShows: dummyTvs,
+        movies: movies,
+        tvShows: tvs,
         users: [], // there will be a similar dummy data array for users
-        lists: dummyLists  // there will be a similar dummy data array for lists
+        lists: lists  // there will be a similar dummy data array for lists
     });
 
     const handleSearchChange = (e) => {
@@ -159,20 +159,20 @@ const SearchBar = ({ dummyMovies, dummyTvs, dummyLists }) => {
 
         if (!value) {
             setFilteredData({
-                movies: dummyMovies,
-                tvShows: dummyTvs,
+                movies: movies,
+                tvShows: tvs,
                 users: [], // Reset or update according to available user data
-                lists: dummyLists
+                lists: lists
             });
         } else {
             const filterContent = (item) => item.title.toLowerCase().includes(value);
             const filterLists = (list) => list.title.toLowerCase().includes(value) || list.description.toLowerCase().includes(value);
 
             setFilteredData({
-                movies: dummyMovies.filter(filterContent),
-                tvShows: dummyTvs.filter(filterContent),
+                movies: movies.filter(filterContent),
+                tvShows: tvs.filter(filterContent),
                 users: [], // Filter user data
-                lists: dummyLists.filter(filterLists)
+                lists: lists.filter(filterLists)
             });
         }
     };

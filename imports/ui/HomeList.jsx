@@ -11,7 +11,7 @@ const List = ({ list }) => {
     };
 
     return (
-        <div key={list.listId} className="space-y-8">
+        <div key={list._id} className="space-y-8">
             {list.content.map((item) => (
                 <div key={item.id} className="relative" onClick={() => handleRedirect(item.type, item.id)}>
                     <div className="relative rounded-lg shadow-lg cursor-pointer overflow-visible">
@@ -36,8 +36,8 @@ const List = ({ list }) => {
     );
 };
 
-const HomeList = ({ dummyMovies, title, listType }) => {
-    const filteredMovies = dummyMovies.filter(list => list.listType === listType);
+const HomeList = ({ lists, title, listType }) => {
+    const filteredMovies = lists.filter(list => list.listType === listType);
 
     return (
         <div className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl overflow-auto scrollbar-thumb-gray-900 scrollbar-track-gray-100 scrollbar-thin">

@@ -79,7 +79,7 @@ const List = Class.create({
         listIndex: {
             fields: {
                 userId: 1,
-                listId: 1
+                title: 1
             },
             options: {
                 unique: true
