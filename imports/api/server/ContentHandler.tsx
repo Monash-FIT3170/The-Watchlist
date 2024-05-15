@@ -33,8 +33,8 @@ type GetContentResults = {
 // }
 
 function GetContent(searchObject: object): GetContentResults {
-    const movieData = Movie.find(searchObject).fetch();
-    const tvData = TV.find(searchObject).fetch();
+    const movieData = Movie.find(searchObject).fetch().map(doc => doc.raw()); // Convert each document to a raw object
+    const tvData = TV.find(searchObject).fetch().map(doc => doc.raw()); // Convert each document to a raw object
 
     return {
         movie: movieData,
@@ -43,24 +43,30 @@ function GetContent(searchObject: object): GetContentResults {
 }
 
 
+
+// In your /imports/api/server/ContentHandler.tsx file, within the readContent function
 const readContent: HandlerFunc = {
     validate: null,
     run: ({searchString}: GetContentOptions) => {
+        console.log('Search string received:', searchString);
+
+        let searchCriteria = {};
 
         if (searchString == null) {
-            // Don't use "Content" (which is an Astrology object) here because it doesn't send properly
-            // So we can pull straight from the collection instead.
-            // This shouldn't be the case, I'll try figure out why it doesn't work properly.
-
-            return GetContent({});
+            console.log('Fetching all content...');
+            searchCriteria = {};
+        } else {
+            console.log('Performing search with:', searchString);
+            searchCriteria = { "$text": { "$search": searchString } };
         }
 
-        return GetContent({
-            // TODO implement substring search using regex, but this is okay for MVP
-            "$text": { "$search": searchString }
-        })
+        // Fetch content using the updated search criteria and convert to raw objects
+        const results = GetContent(searchCriteria);
+        // console.log('Fetched content:', results);
+        return results;
     }
 }
+
 
 const ContentHandler = new Handler("content")
     .addReadHandler(readContent)
