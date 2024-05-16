@@ -26,7 +26,7 @@ const movieData = [
         "release_year": 1999,
         "runtime": 136,
         "rating": 8.7,
-        "image_url": "https://artworks.thetvdb.com/banners/posters/311.jpg"
+        "image_url": "https://artworks.thetvdb.com/banners/movies/169/posters/5f274c00c85c1.jpg"
     },
     {
         "id": 3,
@@ -35,7 +35,7 @@ const movieData = [
         "release_year": 2010,
         "runtime": 148,
         "rating": 8.8,
-        "image_url": "https://artworks.thetvdb.com/banners/posters/483.jpg"
+        "image_url": "https://artworks.thetvdb.com/banners/movies/113/posters/2195447.jpg"
     },
     {
         "id": 4,
@@ -44,7 +44,7 @@ const movieData = [
         "release_year": 2014,
         "runtime": 169,
         "rating": 8.6,
-        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/3444/posters/5d939ae94e35b.jpg"
+        "image_url": "https://artworks.thetvdb.com/banners/movies/131079/posters/1846628.jpg"
     },
     {
         "id": 5,
@@ -53,7 +53,7 @@ const movieData = [
         "release_year": 1994,
         "runtime": 142,
         "rating": 9.3,
-        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/15/posters/5d9328bdf1855.jpg"
+        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/190/posters/6089f8cd44f59.jpg"
     }
 ];
 
@@ -288,6 +288,18 @@ Meteor.startup(async () => {
         listType: "Favourite",
         content: favouriteData
     });
+
+    // List.upsert({
+    //     userId: 1,
+    //     title: "My Second Test List"
+    // }, {
+    //     userId: 1,
+    //     userName: "Test User",
+    //     title: "My Second Test List",
+    //     description: "Another example description, still might be a lot longer!",
+    //     listType: "Favourite",
+    //     content: toWatchData
+    // });
 
     List.upsert({
         userId: 2,
