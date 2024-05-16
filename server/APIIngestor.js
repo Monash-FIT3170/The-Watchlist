@@ -1,7 +1,9 @@
 require('dotenv').config();
 const axios = require('axios').default;
 
-class APIIngestor {
+const { MovieCollection } = require("../imports/db/Content");
+
+export class APIIngestor {
 
     #baseURL = "https://api4.thetvdb.com/v4";
 
@@ -34,7 +36,7 @@ class APIIngestor {
             config["headers"] = { "Authorization": `Bearer ${this.#bearerToken}` }
         }
 
-        data = await this.#instance.request(config)
+        let req_data = await this.#instance.request(config)
         .catch((error) => {
             if (error.response) {
                 console.log(error.response.data);
@@ -50,15 +52,18 @@ class APIIngestor {
             console.log(error.config);
         });
 
+        if (!("data" in req_data)) {
+            return this.fetch(url, type, data);
+        }
 
-        return data.data;
+        return req_data.data;
     }
     /**
      * Authenticates against the API using the TVDB_KEY environment variable
      */
     async authenticate() {
         const data = await this.fetch("/login", "POST", {
-            apikey: process.env.TVDB_KEY
+            apikey: INSERT_API_KEY_HERE
         })
         
         this.#bearerToken = data["data"]["token"];
@@ -68,29 +73,53 @@ class APIIngestor {
 
     async getAllMovies() {
         let page = 0;
-        let next = "/movies?page=0&limit=20";
+        let next = "/movies?page=0";
 
         while (next != null) {
             console.log(`Retrieving URL: ${next}`)
             let currentData = await this.fetch(next);
-            console.log(currentData.data);
 
             for (const movie of currentData.data) {
-                console.log(movie);
                 const movieData = {
                     id: movie.id,
                     title: movie.name,
                     release_year: parseInt(movie.year),
-                    image_url: movie.image,
+                    
                     runtime: movie.runtime,
-                    rating: movie.score
+                    rating: movie.score,
+
+                    // Provide defaults for values that may not be part of the API
+                    overview: "", 
+                    genres: []
                 };
 
-                console.log(`Getting extended data for movie: ${movie.id}`)
+                // console.log(`Getting extended data for movie: ${movie.id}`)
                 // Get the extended movie data, which also includes the overviews.
                 let extendedData = await this.fetch(`/movies/${movie.id}/extended?meta=translations&short=true`);
 
-                console.log(extendedData);
+                // Iterate over each overview translation until we find the english one (or choose the first)
+                if (extendedData["data"]["translations"]["overviewTranslations"] != null) {
+                    movieData["overview"] = extendedData["data"]["translations"]["overviewTranslations"][0]["overview"]
+
+                    for (const overviewTranslation of extendedData["data"]["translations"]["overviewTranslations"]) {
+                        if (overviewTranslation["language"] == "eng") { 
+                            movieData["overview"] = overviewTranslation["overview"];
+                            break;
+                        }
+                    }
+                }
+                
+
+                // Store the genre names only
+                if (extendedData["data"]["genres"] != null) {
+                    movieData["genres"] = extendedData["data"]["genres"].map((genreData) => genreData["name"]);
+                }
+
+                // Store the full image
+                movieData["image_url"] = extendedData["data"]["image"];
+                // console.log(movieData);
+
+                MovieCollection.insertAsync(movieData);
             }
 
         
@@ -103,9 +132,9 @@ class APIIngestor {
     }
 }
 
-const ingestor = new APIIngestor();
-ingestor.authenticate()
-    .then(async () => {
-        data = ingestor.getAllMovies();
-    })
+// const ingestor = new APIIngestor();
+// ingestor.authenticate()
+//     .then(async () => {
+//         data = ingestor.getAllMovies();
+// });
 
