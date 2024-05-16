@@ -288,11 +288,11 @@ Meteor.startup(async () => {
     console.log("Inserting list data...")
     List.upsert({
         userId: 1,
-        title: "My First Test List"
+        title: "Your Favourites"
     }, {
         userId: 1,
         userName: "Test User",
-        title: "My First Test List",
+        title: "Your Favourites",
         description: "Here is an example description, but it might be a lot longer!",
         listType: "Favourite",
         content: favouriteData
@@ -300,33 +300,33 @@ Meteor.startup(async () => {
 
     List.upsert({
         userId: 1,
-        title: "My Second Test List"
+        title: "Your Watchlist"
     }, {
         userId: 1,
         userName: "Test User",
-        title: "My Second Test List",
-        description: "Another example description, still might be a lot longer!",
-        listType: "Favourite",
-        content: toWatchData
-    });
-
-    List.upsert({
-        userId: 2,
-        title: "My Watchlist"
-    }, {
-        userId: 2,
-        userName: "Test User",
-        title: "My Watchlist",
+        title: "Your Watchlist",
         description: "Movies and shows I want to watch.",
         listType: "To Watch",
         content: toWatchData
     });
 
     List.upsert({
-        userId: 3,
+        userId: 1,
+        title: "Action Comedies"
+    }, {
+        userId: 1,
+        userName: "Test User",
+        title: "Action Comedies",
+        description: "Another example description, still might be a lot longer!",
+        listType: "Custom",
+        content: toWatchData
+    });
+
+    List.upsert({
+        userId: 1,
         title: "Sci-Fi Favorites"
     }, {
-        userId: 3,
+        userId: 1,
         userName: "Test User",
         title: "Sci-Fi Favorites",
         description: "Best Sci-Fi movies and TV shows.",
@@ -335,10 +335,10 @@ Meteor.startup(async () => {
     });
 
     List.upsert({
-        userId: 4,
+        userId: 1,
         title: "Dramatic Picks"
     }, {
-        userId: 4,
+        userId: 1,
         userName: "Test User",
         title: "Dramatic Picks",
         description: "Top dramatic movies and series.",
@@ -347,10 +347,10 @@ Meteor.startup(async () => {
     });
 
     List.upsert({
-        userId: 5,
+        userId: 1,
         title: "Highly Rated"
     }, {
-        userId: 5,
+        userId: 1,
         userName: "Test User",
         title: "Highly Rated",
         description: "Top rated movies and TV shows.",
