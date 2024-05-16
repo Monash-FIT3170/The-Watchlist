@@ -14,6 +14,7 @@ import Home from './Home.jsx';
 import UserProfile from './UserProfile.jsx'
 import MovieInfo from './MovieInfo.tsx';
 import TvInfo from './TvInfo.tsx';
+import  UserDiscovery from './UserDiscovery.jsx';
 // import Profile from './Profile.jsx';
 // import AIPicks from './AIPicks.jsx';
 
@@ -90,6 +91,7 @@ export const App = () => {
 
             - FIXME: MovieList component here is currently acting as a demo 
             */}
+            {/* <Route path="/user-discovery" element={<UserDiscovery />}/>  */}
             <Route path="/" element={<Navigate to="/home" />} />
           </Routes>
         </div>
