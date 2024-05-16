@@ -7,3 +7,4 @@ const UserDiscovery = () => {
     </div>
   );
 }
+export default UserDiscovery;

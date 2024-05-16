@@ -91,7 +91,7 @@ export const App = () => {
 
             - FIXME: MovieList component here is currently acting as a demo 
             */}
-            {/* <Route path="/user-discovery" element={<UserDiscovery />}/>  */}
+            <Route path="/user-discovery" element={<UserDiscovery />}/> 
             <Route path="/" element={<Navigate to="/home" />} />
           </Routes>
         </div>
