@@ -3,7 +3,7 @@ import { Meteor } from 'meteor/meteor';
 // This import is required to register the Methods and Publishers.
 import ContentHandler from '../imports/api/server/ContentHandler';
 import ListHandler from '../imports/api/server/ListHandler';
-import List from '../imports/db/List';
+import List, { ListCollection } from '../imports/db/List';
 
 import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content';
 
@@ -171,6 +171,14 @@ const tvData = [
 ];
 
 Meteor.startup(async () => {
+    
+    // We drop the collection to make sure a broken index is removed.
+    // This will eventually need to be removed for obvious reasons!
+    console.log("[DEV] DROPPING LIST COLLECTION IN main.js");
+    console.log("[DEV] THIS SHOULD BE REMOVED IN FUTURE.")
+    await ListCollection.dropCollectionAsync()
+
+
     console.log('Inserting movie data...');
     movieData.forEach(movie => {
         Movie.upsert({ id: movie.id }, { $set: movie });
@@ -277,6 +285,7 @@ Meteor.startup(async () => {
         }
     ];
 
+    console.log("Inserting list data...")
     List.upsert({
         userId: 1,
         title: "My First Test List"
@@ -289,17 +298,17 @@ Meteor.startup(async () => {
         content: favouriteData
     });
 
-    // List.upsert({
-    //     userId: 1,
-    //     title: "My Second Test List"
-    // }, {
-    //     userId: 1,
-    //     userName: "Test User",
-    //     title: "My Second Test List",
-    //     description: "Another example description, still might be a lot longer!",
-    //     listType: "Favourite",
-    //     content: toWatchData
-    // });
+    List.upsert({
+        userId: 1,
+        title: "My Second Test List"
+    }, {
+        userId: 1,
+        userName: "Test User",
+        title: "My Second Test List",
+        description: "Another example description, still might be a lot longer!",
+        listType: "Favourite",
+        content: toWatchData
+    });
 
     List.upsert({
         userId: 2,
