@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import NavbarList from "./NavbarList";
 import { MdMovieFilter } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';
+import Scrollbar from './ScrollBar';
+
 
 
 export default function Navbar({ staticNavData, listData }) {
@@ -38,20 +40,22 @@ export default function Navbar({ staticNavData, listData }) {
             <nav>
               <h2 className="flex justify-start items-center space-x-5 w-full px-4 py-2 mb-2 font-bold text-grey text-lg"> <MdMovieFilter size={"20px"}/><span>Your Watchlists</span></h2>
               {/* Horrendous height calculation below, better solution required */}
-              <ul className="h-[calc(100vh_-_21rem)] overflow-y-hidden hover:overflow-y-scroll hover:scrollbar-webkit">
-                {listData.map((list) => (
-                  <li key={list.listId} className="flex justify-center">
-                    <Link to={`/${list.listId}`} className="w-full flex items-center space-x-5 text-sm text-white font-semibold mb-2.5 p-2 rounded-lg hover:bg-dark">
-                      <img
-                        src={list.content[0]?.image_url || './path_to_default_image.jpg'}
-                        alt={list.title}
-                        className="w-10 h-10 mr-2.5 rounded-lg"
-                      />
-                      {list.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <Scrollbar className="h-[calc(100vh_-_21rem)]">
+                <ul className="h-full">
+                  {listData.map((list) => (
+                    <li key={list.listId} className="flex justify-center">
+                      <Link to={`/${list.listId}`} className="w-full flex items-center space-x-5 text-sm text-white font-semibold mb-2.5 p-2 rounded-lg hover:bg-dark">
+                        <img
+                          src={list.content[0]?.image_url || './path_to_default_image.jpg'}
+                          alt={list.title}
+                          className="w-10 h-10 mr-2.5 rounded-lg"
+                        />
+                        {list.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </Scrollbar>
             </nav>
           </div>
 
