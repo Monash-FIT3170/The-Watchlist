@@ -23,47 +23,48 @@ export class Handler {
 
     constructor(objectName: string) {
         this.#objectName = objectName;
+        console.log(`Handler created for ${objectName}`);
     }
 
     get type() { return this.#objectName; }
 
     addCreateHandler(funcDetails: HandlerFunc): Handler {
+        console.log(`Adding create handler for ${this.#objectName}`);
         this.#createMethod = new ValidatedMethod({
             name: `${this.#objectName}.create`,
             validate: funcDetails.validate,
             run: funcDetails.run
         });
-        
         return this;
     }
 
     addReadHandler(funcDetails: HandlerFunc): Handler {
+        console.log(`Adding read handler for ${this.#objectName}`);
         this.#readMethod = new ValidatedMethod({
             name: `${this.#objectName}.read`,
             validate: funcDetails.validate,
             run: funcDetails.run
         });
-
         return this;
     }
 
     addUpdateHandler(funcDetails: HandlerFunc): Handler {
+        console.log(`Adding update handler for ${this.#objectName}`);
         this.#updateMethod = new ValidatedMethod({
             name: `${this.#objectName}.update`,
             validate: funcDetails.validate,
             run: funcDetails.run
         });
-
         return this;
     }
 
     addDeleteHandler(funcDetails: HandlerFunc): Handler {
+        console.log(`Adding delete handler for ${this.#objectName}`);
         this.#deleteMethod = new ValidatedMethod({
             name: `${this.#objectName}.delete`,
             validate: funcDetails.validate,
             run: funcDetails.run
         });
-
         return this;
     }
 

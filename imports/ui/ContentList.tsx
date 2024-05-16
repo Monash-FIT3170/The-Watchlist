@@ -6,7 +6,7 @@ interface ContentItemData {
   image_url: string;  // Use image_url instead of src
   title: string;      // Use title as the alt text description
   rating: number;
-  id: number;
+  content_id: number;
   type: string;
 }
 
@@ -62,7 +62,7 @@ const ContentList: React.FC<ContentListProps> = ({ list }) => {
       </div>
       <div ref={containerRef} className="flex justify-flex-start items-start overflow-hidden">
         {React.Children.toArray(list.content.map((item, index) => (
-          <ContentItem key={index} id={item.id} type={item.type} src={item.image_url} alt={item.title} rating={item.rating} />
+          <ContentItem key={index} id={item.content_id} type={item.type} src={item.image_url} alt={item.title} rating={item.rating} />
         ))).slice(0, visibleContentCount)}
       </div>
     </div>

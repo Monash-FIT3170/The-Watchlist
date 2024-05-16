@@ -1,18 +1,10 @@
 import React from "react";
 import { IconContext } from 'react-icons';
 import { Link } from "react-router-dom";
-import NavbarList from "./NavbarList";
 import { MdMovieFilter } from "react-icons/md";
-import { useNavigate } from 'react-router-dom';
 
 
 export default function Navbar({ staticNavData, listData }) {
-
-  const navigate = useNavigate();
-
-  const handleNavigate = (listId) => {
-    navigate(`/${listId}`);
-  };
 
   return (
     <div className="flex flex-col h-screen"> 
@@ -40,8 +32,8 @@ export default function Navbar({ staticNavData, listData }) {
               {/* Horrendous height calculation below, better solution required */}
               <ul className="h-[calc(100vh_-_21rem)] overflow-y-hidden hover:overflow-y-scroll hover:scrollbar-webkit">
                 {listData.map((list) => (
-                  <li key={list.listId} className="flex justify-center">
-                    <Link to={`/${list.listId}`} className="w-full flex items-center space-x-5 text-sm text-white font-semibold mb-2.5 p-2 rounded-lg hover:bg-dark">
+                  <li key={list._id} className="flex justify-center">
+                    <Link to={`/${list._id}`} className="w-full flex items-center space-x-5 text-sm text-white font-semibold mb-2.5 p-2 rounded-lg hover:bg-dark">
                       <img
                         src={list.content[0]?.image_url || './path_to_default_image.jpg'}
                         alt={list.title}

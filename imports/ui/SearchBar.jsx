@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai';
-import dummyMovies from './DummyMovies';
-import dummyTVs from './DummyTvs';
 import ContentItem from './ContentItem';
-import dummyLists from './DummyLists';
 import ListDisplay from './ListDisplay';
 
-const SearchBar = () => {
+const SearchBar = ({ movies, tvs, lists }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTab, setSelectedTab] = useState('movies');
     const [showFilters, setShowFilters] = useState(false);
@@ -27,8 +24,7 @@ const SearchBar = () => {
             ],
             selected: []
         },
-
-        sortBy: {
+        "sort by": {
             options: ["rating", "runtime"],
             selected: "" // this is string as opposed to arrays above due to lack of multi-select
         }
@@ -53,9 +49,10 @@ const SearchBar = () => {
         setFilters({
             year: { ...filters.year, selected: [] },
             genres: { ...filters.genres, selected: [] },
-            sortBy: { ...filters.sortBy, selected: '' }
+            "sort by": { ...filters["sort by"], selected: '' }
         });
     };
+
 
     const handleFilterChange = (filterType, value) => {
         console.log("handleFilterChange called");
@@ -123,16 +120,17 @@ const SearchBar = () => {
         }
 
         // Sorting logic
-        if (filters.sortBy.selected) {
+        if (filters["sort by"].selected) {
             filtered = filtered.sort((a, b) => {
-                if (filters.sortBy.selected === 'rating') {
+                if (filters["sort by"].selected === 'rating') {
                     return b.rating - a.rating;
-                } else if (filters.sortBy.selected === 'runtime') {
+                } else if (filters["sort by"].selected === 'runtime') {
                     return b.runtime - a.runtime;
                 }
                 return 0;
             });
         }
+
 
         return filtered;
     };
@@ -140,19 +138,19 @@ const SearchBar = () => {
 
     useEffect(() => {
         const newFilteredData = {
-            movies: applyFilters(dummyMovies),
-            tvShows: applyFilters(dummyTVs),
+            movies: applyFilters(movies),
+            tvShows: applyFilters(tvs),
             users: [], // Apply similar filtering logic if required
-            lists: applyFilters(dummyLists)
+            lists: applyFilters(lists)
         };
         setFilteredData(newFilteredData);
     }, [filters]);
 
     const [filteredData, setFilteredData] = useState({
-        movies: dummyMovies,
-        tvShows: dummyTVs,
+        movies: movies,
+        tvShows: tvs,
         users: [], // there will be a similar dummy data array for users
-        lists: dummyLists  // there will be a similar dummy data array for lists
+        lists: lists  // there will be a similar dummy data array for lists
     });
 
     const handleSearchChange = (e) => {
@@ -161,20 +159,20 @@ const SearchBar = () => {
 
         if (!value) {
             setFilteredData({
-                movies: dummyMovies,
-                tvShows: dummyTVs,
+                movies: movies,
+                tvShows: tvs,
                 users: [], // Reset or update according to available user data
-                lists: dummyLists
+                lists: lists
             });
         } else {
             const filterContent = (item) => item.title.toLowerCase().includes(value);
             const filterLists = (list) => list.title.toLowerCase().includes(value) || list.description.toLowerCase().includes(value);
 
             setFilteredData({
-                movies: dummyMovies.filter(filterContent),
-                tvShows: dummyTVs.filter(filterContent),
+                movies: movies.filter(filterContent),
+                tvShows: tvs.filter(filterContent),
                 users: [], // Filter user data
-                lists: dummyLists.filter(filterLists)
+                lists: lists.filter(filterLists)
             });
         }
     };
@@ -228,9 +226,9 @@ const SearchBar = () => {
                                 onFilterChange={handleFilterChange}
                             />
                             <FilterDropdown
-                                label="sortBy"
-                                options={filters.sortBy.options}
-                                selected={filters.sortBy.selected}
+                                label="sort by"
+                                options={filters["sort by"].options}
+                                selected={filters["sort by"].selected}
                                 onFilterChange={handleFilterChange}
                             />
                             <FilterDropdown
@@ -240,7 +238,6 @@ const SearchBar = () => {
                                 onFilterChange={handleFilterChange}
                             />
                         </div>
-
                     )}
                     {/* Filter Tags and Clear All Button */}
                     {showFilters && (

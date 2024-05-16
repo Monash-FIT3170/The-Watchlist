@@ -1,5 +1,5 @@
 // DummyTVs.js
-const dummyTVs = [
+const dummyTvs = [
   {
     id: 1,
     title: "Seinfeld",
@@ -42,4 +42,4 @@ const dummyTVs = [
   }
 ];
 
-export default dummyTVs;
+export default dummyTvs;

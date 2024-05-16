@@ -5,7 +5,7 @@ const FullContentList = ({ list }) => {
     const contentarr = list.content;
 
     const content = contentarr.map((item, index) => (
-        <ContentItem key={index} id={item.id} type={item.type} src={item.image_url} alt={item.title} rating={item.rating} />
+        <ContentItem key={index} id={item.content_id} type={item.type} src={item.image_url} alt={item.title} rating={item.rating} />
     ));
 
 
