@@ -3,6 +3,7 @@ import RatingStar from "./RatingStar";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import RenameListModal from "./RenameListModal";
+import { Meteor } from 'meteor/meteor';
 
 interface ContentItemData {
   image_url: string;
@@ -34,6 +35,10 @@ const ListPopup: React.FC<ContentListProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [contentDetails, setContentDetails] = useState<{ [key: number]: any }>({});
+  const [loadingDetails, setLoadingDetails] = useState<{ [key: number]: boolean }>({});
+  const [errorDetails, setErrorDetails] = useState<{ [key: number]: boolean }>({});
+
 
   const handleClickOutside = (event: MouseEvent) => {
     const target = event.target as Element;
@@ -63,8 +68,34 @@ const ListPopup: React.FC<ContentListProps> = ({
     }
   }, [list]);
 
-  const handleExpandClick = (id: number) => {
-    setExpandedItem(expandedItem === id ? null : id);
+  const handleExpandClick = (id: number, title: string) => {
+    if (expandedItem === id) {
+      setExpandedItem(null);
+    } else {
+      setExpandedItem(id);
+      if (!contentDetails[id]) {
+        fetchContentDetails(title,id);
+      }
+    }
+  };
+
+  const fetchContentDetails = (title: string, contentId: number) => {
+    setLoadingDetails(prev => ({ ...prev, [contentId]: true }));
+    setErrorDetails(prev => ({ ...prev, [contentId]: false }));
+
+    console.log(`Fetching details for title: ${title}`);
+    Meteor.call("content.read", { searchString: title }, (error, result) => {
+      setLoadingDetails(prev => ({ ...prev, [contentId]: false }));
+      if (error) {
+        console.error("Error fetching content details:", error);
+        setErrorDetails(prev => ({ ...prev, [contentId]: true }));
+      } else {
+        console.log("Fetch result:", result);
+        const content = result.movie.concat(result.tv).find(item => item.title === title);
+        console.log("Content found:", content);
+        setContentDetails(prevDetails => ({ ...prevDetails, [contentId]: content || null }));
+      }
+    });
   };
 
   const handleDeleteList = (listId: string) => {
@@ -123,7 +154,7 @@ const ListPopup: React.FC<ContentListProps> = ({
                     </div>
                     <button
                       className="absolute bottom-4 right-4 text-white text-2xl"
-                      onClick={() => handleExpandClick(item.content_id)}
+                      onClick={() => handleExpandClick(item.content_id, item.title)}
                     >
                       {expandedItem === item.content_id ? (
                         <FaChevronUp />
@@ -136,12 +167,22 @@ const ListPopup: React.FC<ContentListProps> = ({
               </div>
               {expandedItem === item.content_id && (
                 <div className="mt-4 p-4 bg-gray-900 rounded-lg">
-                  <p>
-                    <strong>Synopsis:</strong> {item.overview}
-                  </p>
-                  <p>
-                    <strong>Director:</strong> Director McDirector
-                  </p>
+                  {loadingDetails[item.content_id] ? (
+                    <p>Loading...</p>
+                  ) : errorDetails[item.content_id] ? (
+                    <p>Error loading details.</p>
+                  ) : contentDetails[item.content_id] ? (
+                    <>
+                      <p>
+                        <strong>Synopsis:</strong> {contentDetails[item.content_id].overview}
+                      </p>
+                      <p>
+                        <strong>Director:</strong> Example Director
+                      </p>
+                    </>
+                  ) : (
+                    <p>No details available.</p>
+                  )}
                 </div>
               )}
             </div>

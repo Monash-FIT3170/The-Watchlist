@@ -268,6 +268,13 @@ Meteor.startup(async () => {
             user_rating: 4.8
         },
         {
+            content_id: movieData[1].id,
+            title: movieData[1].title,
+            image_url: movieData[1].image_url,
+            type: "Movie",
+            user_rating: 4.5
+        },
+        {
             content_id: tvData[1].id,
             title: tvData[1].title,
             image_url: tvData[1].image_url,
