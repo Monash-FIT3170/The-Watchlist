@@ -3,12 +3,14 @@ import RatingStar from "./RatingStar";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import RenameListModal from "./RenameListModal";
+import { Meteor } from 'meteor/meteor';
+import { useNavigate } from 'react-router-dom';
 
 interface ContentItemData {
   image_url: string;
   title: string;
   rating: number;
-  id: number;
+  content_id: number;
   type: string;
   overview: string;
 }
@@ -32,15 +34,33 @@ const ListPopup: React.FC<ContentListProps> = ({
 }) => {
   const popupRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const confirmDialogRef = useRef<HTMLDivElement>(null);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [contentDetails, setContentDetails] = useState<{ [key: number]: any }>({});
+  const [loadingDetails, setLoadingDetails] = useState<{ [key: number]: boolean }>({});
+  const [errorDetails, setErrorDetails] = useState<{ [key: number]: boolean }>({});
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [contentToDelete, setContentToDelete] = useState<number | null>(null);
+  const [listToDelete, setListToDelete] = useState<string | null>(null);
+
+  const [localContent, setLocalContent] = useState(list.content);
+
+  const navigate = useNavigate();
+
+  const handleRedirect = (type: string, id: number) => {
+    console.log("REDIRECT", `/${type}${id}`);
+    onClose();
+    navigate(`/${type}${id}`);
+  };
 
   const handleClickOutside = (event: MouseEvent) => {
     const target = event.target as Element;
     if (
       popupRef.current &&
       !popupRef.current.contains(target) &&
-      !target.closest(".rename-modal")
+      !target.closest(".rename-modal") &&
+      (!confirmDialogRef.current || !confirmDialogRef.current.contains(target))
     ) {
       onClose();
     }
@@ -63,8 +83,32 @@ const ListPopup: React.FC<ContentListProps> = ({
     }
   }, [list]);
 
-  const handleExpandClick = (id: number) => {
-    setExpandedItem(expandedItem === id ? null : id);
+  const handleExpandClick = (id: number, title: string) => {
+    if (expandedItem === id) {
+      setExpandedItem(null);
+    } else {
+      setExpandedItem(id);
+      if (!contentDetails[id]) {
+        fetchContentDetails(title, id);
+      }
+    }
+  };
+
+  const fetchContentDetails = (title: string, contentId: number) => {
+    setLoadingDetails(prev => ({ ...prev, [contentId]: true }));
+    setErrorDetails(prev => ({ ...prev, [contentId]: false }));
+
+    Meteor.call("content.read", { searchString: title }, (error, result) => {
+      setLoadingDetails(prev => ({ ...prev, [contentId]: false }));
+      if (error) {
+        setErrorDetails(prev => ({ ...prev, [contentId]: true }));
+      } else {
+        const movie = result.movie.find(item => item.title.toLowerCase() === title.toLowerCase());
+        const tv = result.tv.find(item => item.title.toLowerCase() === title.toLowerCase());
+        const content = movie || tv;
+        setContentDetails(prevDetails => ({ ...prevDetails, [contentId]: content || null }));
+      }
+    });
   };
 
   const handleDeleteList = (listId: string) => {
@@ -72,11 +116,54 @@ const ListPopup: React.FC<ContentListProps> = ({
     onClose();
   };
 
+  const handleRemoveContent = (contentId: number) => {
+    if (contentId !== null) {
+      Meteor.call("list.removeContent", { listId: list._id, contentId }, (error) => {
+        if (error) {
+          console.error("Error removing content:", error);
+        } else {
+          const updatedContent = localContent.filter(item => item.content_id !== contentId);
+          setLocalContent(updatedContent);
+          setShowConfirmDialog(false); // Close the confirmation dialog
+        }
+      });
+    }
+  };
+
+  const confirmRemoveContent = (contentId: number) => {
+    setContentToDelete(contentId);
+    setListToDelete(null);
+    setShowConfirmDialog(true);
+  };
+
+  const confirmDeleteList = (listId: string) => {
+    setListToDelete(listId);
+    setContentToDelete(null);
+    setShowConfirmDialog(true);
+  };
+
+  const handleDeleteConfirmed = () => {
+    if (contentToDelete !== null) {
+      handleRemoveContent(contentToDelete);
+    } else if (listToDelete !== null) {
+      onDeleteList(listToDelete);
+      onClose();
+    }
+    resetConfirmationState();
+  };
+
+  const resetConfirmationState = () => {
+    setShowConfirmDialog(false);
+    setContentToDelete(null);
+    setListToDelete(null);
+  };
+
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div
         ref={popupRef}
-        className="bg-black p-6 rounded-lg w-11/12 md:w-3/4 lg:w-1/2 max-h-3/4 overflow-y-auto relative"
+        className="bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">{list.title}</h2>
@@ -89,7 +176,7 @@ const ListPopup: React.FC<ContentListProps> = ({
               <FiEdit className="text-lg" />
             </button>
             <button
-              onClick={() => handleDeleteList(list._id)}
+              onClick={() => confirmDeleteList(list._id)}
               className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded-full"
               title="Delete List"
             >
@@ -105,43 +192,69 @@ const ListPopup: React.FC<ContentListProps> = ({
         </div>
         <div
           ref={scrollContainerRef}
-          className="space-y-8 overflow-y-auto max-h-[calc(100vh-5rem)]"
+          className="space-y-8 overflow-y-auto max-h-[calc(100vh-10rem)]"
         >
-          {list.content.map((item) => (
-            <div key={item.id} className="block relative">
+          {localContent.map((item) => (
+            <div key={item.content_id} className="block relative">
               <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
                 <div className="relative">
                   <img
                     src={item.image_url}
                     alt={item.title}
-                    className="w-full h-[35vh] object-cover"
+                    className="w-full h-[35vh] object-cover cursor-pointer"
+                    onClick={() => {
+                      console.log(`Image clicked: ${item.type}, ${item.content_id}`);
+                      handleRedirect(item.type, item.content_id);
+                    }}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60">
-                    <div className={"absolute bottom-4 left-4 text-white"}>
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60" style={{ pointerEvents: 'none' }}>
+                    <div className="absolute bottom-4 left-4 text-white" style={{ pointerEvents: 'auto' }}>
                       <h3 className="text-xl font-bold ml-1">{item.title}</h3>
-                      <RatingStar totalStars={5} rating={item.rating} />
+                      <RatingStar totalStars={5} rating={3.5} />
                     </div>
                     <button
                       className="absolute bottom-4 right-4 text-white text-2xl"
-                      onClick={() => handleExpandClick(item.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent the click from propagating to the image
+                        handleExpandClick(item.content_id, item.title);
+                      }}
+                      style={{ pointerEvents: 'auto' }}
                     >
-                      {expandedItem === item.id ? (
-                        <FaChevronUp />
-                      ) : (
-                        <FaChevronDown />
-                      )}
+                      {expandedItem === item.content_id ? <FaChevronUp /> : <FaChevronDown />}
+                    </button>
+                    <button
+                      className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent the click from propagating to the image
+                        confirmRemoveContent(item.content_id);
+                      }}
+                      title="Remove from List"
+                      style={{ pointerEvents: 'auto' }}
+                    >
+                      <FiTrash2 />
                     </button>
                   </div>
                 </div>
+
               </div>
-              {expandedItem === item.id && (
+              {expandedItem === item.content_id && (
                 <div className="mt-4 p-4 bg-gray-900 rounded-lg">
-                  <p>
-                    <strong>Synopsis:</strong> {item.overview}
-                  </p>
-                  <p>
-                    <strong>Director:</strong> Director McDirector
-                  </p>
+                  {loadingDetails[item.content_id] ? (
+                    <p>Loading...</p>
+                  ) : errorDetails[item.content_id] ? (
+                    <p>Error loading details.</p>
+                  ) : contentDetails[item.content_id] ? (
+                    <>
+                      <p>
+                        <strong>Synopsis:</strong> {contentDetails[item.content_id].overview}
+                      </p>
+                      <p>
+                        <strong>Director:</strong> Example Director
+                      </p>
+                    </>
+                  ) : (
+                    <p>No details available.</p>
+                  )}
                 </div>
               )}
             </div>
@@ -161,6 +274,29 @@ const ListPopup: React.FC<ContentListProps> = ({
           />
         )}
       </div>
+      {showConfirmDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div ref={confirmDialogRef} className="bg-darker p-6 rounded-lg">
+            <p className="text-white mb-4">
+              Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="bg-gray-500 hover:bg-gray-700 text-white font-bold p-2 rounded"
+                onClick={resetConfirmationState}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded"
+                onClick={handleDeleteConfirmed}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

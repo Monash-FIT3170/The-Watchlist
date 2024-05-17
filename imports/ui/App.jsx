@@ -179,7 +179,7 @@ export const App = () => {
             {tvs.map((tv) => (
               <Route
                 key={tv.id} // Change key to listId which is unique
-                path={`/tv${tv.id}`} // Change path to use listId
+                path={`/TV Show${tv.id}`} // Change path to use listId
                 element={<TvInfo tv={tv} />} // Updated to pass the entire list object
               />
             ))}

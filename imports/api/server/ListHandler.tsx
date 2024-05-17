@@ -90,12 +90,24 @@ const deleteList: HandlerFunc = {
     }
 }
 
+const removeContent: HandlerFunc = {
+    validate: null,
+    run: ({ listId, contentId }) => {
+        ListCollection.update(
+            { _id: listId },
+            { $pull: { content: { content_id: contentId } } }
+        );
+        return;
+    }
+};
+
 // Instantiate the handler and add all handler functions
 const ListHandler = new Handler("list")
     .addCreateHandler(createList)
     .addReadHandler(readList)
     .addUpdateHandler(updateList)
-    .addDeleteHandler(deleteList);
+    .addDeleteHandler(deleteList)
+    .addUpdateHandler(removeContent, 'removeContent') // Using a custom method name
 
 console.log('ListHandler setup complete.');
 

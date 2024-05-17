@@ -5,6 +5,7 @@ import { MdMovieFilter } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
 import ListPopup from "./ListPopup";
 import NewListModal from "./NewListModal";
+import usePopup from './usePopup';
 
 const popcornUrl="./ExampleResources/popcorn.png"
 
@@ -15,23 +16,13 @@ export default function Navbar({
   onDeleteList,
   onRenameList,
 }) {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedList, setSelectedList] = useState(null);
+  const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
   const [isAddListModalOpen, setIsAddListModalOpen] = useState(false);
 
   const handleAddList = () => {
     setIsAddListModalOpen(true);
   };
 
-  const handleItemClick = (list) => {
-    setSelectedList(list);
-    setIsPopupOpen(true);
-  };
-
-  const handleClosePopup = () => {
-    setIsPopupOpen(false);
-    setSelectedList(null);
-  };
 
   return (
     <div className="flex flex-col h-screen">
