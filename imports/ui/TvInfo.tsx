@@ -12,8 +12,11 @@ const TvInfo = ({ tv }) => {
                     {/* Left column */}
                     <div className="flex flex-col items-start w-2/5 gap-4">
                         <img src={tv.image_url} alt={tv.title} className="w-full h-auto rounded-lg mb-5 ml-6" />
-                        <button className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 mb-5 ml-6">+</button>
-                    </div>
+                        <div className="flex items-center">
+                        <p className="text-xl font-semibold text-center  mr-2">ADD TO LIST: </p>
+                        <button className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 ">+</button>
+                        </div>
+                   </div>
                     
                     {/* Right column */}
                     <div className="flex flex-col items-start w-1/2">
