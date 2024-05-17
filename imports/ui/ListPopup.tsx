@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import RatingStar from "./RatingStar";
-import { FaChevronDown, FaChevronUp, FaEllipsisV } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FiEdit, FiTrash2 } from "react-icons/fi";
 import RenameListModal from "./RenameListModal";
 
 interface ContentItemData {
@@ -32,7 +33,6 @@ const ListPopup: React.FC<ContentListProps> = ({
   const popupRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
 
   const handleClickOutside = (event: MouseEvent) => {
@@ -77,17 +77,19 @@ const ListPopup: React.FC<ContentListProps> = ({
           <h2 className="text-2xl font-bold">{list.title}</h2>
           <div className="flex space-x-2">
             <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="text-2xl font-bold text-gray-500 hover:text-gray-800"
+              onClick={handleRenameListClick}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 rounded-full"
+              title="Rename List"
             >
-              <FaEllipsisV />
+              <FiEdit className="text-lg" />
             </button>
-            {isDropdownOpen && (
-              <div className="dropdown-content bg-black text-white p-2">
-                <button onClick={handleRenameListClick}>Rename List</button>
-                <button onClick={() => onDeleteList(list._id)}>Delete List</button>
-              </div>
-            )}
+            <button
+              onClick={() => onDeleteList(list._id)}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded-full"
+              title="Delete List"
+            >
+              <FiTrash2 className="text-lg" />
+            </button>
             <button
               className="text-2xl font-bold text-gray-500 hover:text-gray-800"
               onClick={onClose}
