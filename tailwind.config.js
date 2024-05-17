@@ -13,6 +13,7 @@ module.exports = {
         'dark-magenta': "#410227",
         'off-white': "#E2DCDE",
         'smoky-black': "14110F",
+        'less-dark': "#252525",
         'dark': "#1C1C1C",
         'darker': "#101010",
         'darkest': "#000000",
@@ -24,6 +25,7 @@ module.exports = {
       },
       height: {
         'custom': 'calc(100vh - 2rem)',
+        '35vh': '35vh',
       },
     },
     

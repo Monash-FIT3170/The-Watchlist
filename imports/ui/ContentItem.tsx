@@ -31,7 +31,7 @@ const ContentItem: React.FC<ContentItemProps> = ({ id, type, src, alt, rating })
           />
         </button>
 
-        <div className="text-white mt-0 ml-2 text-left flex-1" style={{ fontWeight: 'normal' }}>{alt}</div>
+        <div className="text-white mt-0 ml-2 text-left" style={{ fontWeight: 'normal' }}>{alt}</div>
         <div className="ml-1 mt-1"><RatingStar totalStars={5} rating={rating} /></div>
         
       </div>

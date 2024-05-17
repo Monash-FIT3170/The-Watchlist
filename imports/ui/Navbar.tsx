@@ -7,6 +7,7 @@ import ListPopup from "./ListPopup";
 
 
 
+
 export default function Navbar({ staticNavData, listData }) {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [selectedList, setSelectedList] = useState(null);
@@ -21,6 +22,7 @@ export default function Navbar({ staticNavData, listData }) {
       setSelectedList(null);
     };
   
+
 
   return (
     <div className="flex flex-col h-screen"> 
