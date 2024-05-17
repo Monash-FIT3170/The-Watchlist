@@ -67,6 +67,11 @@ const ListPopup: React.FC<ContentListProps> = ({
     setExpandedItem(expandedItem === id ? null : id);
   };
 
+  const handleDeleteList = (listId: string) => {
+    onDeleteList(listId);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
       <div
@@ -84,7 +89,7 @@ const ListPopup: React.FC<ContentListProps> = ({
               <FiEdit className="text-lg" />
             </button>
             <button
-              onClick={() => onDeleteList(list._id)}
+              onClick={() => handleDeleteList(list._id)}
               className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded-full"
               title="Delete List"
             >
@@ -148,7 +153,10 @@ const ListPopup: React.FC<ContentListProps> = ({
           <RenameListModal
             isOpen={isRenameModalOpen}
             onClose={() => setIsRenameModalOpen(false)}
-            onRename={(newName) => onRenameList(list._id, newName)}
+            onRename={(newName) => {
+              onRenameList(list._id, newName);
+              list.title = newName; // Update the list title locally
+            }}
             currentName={list.title}
           />
         )}

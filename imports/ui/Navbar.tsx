@@ -6,6 +6,8 @@ import { AiOutlinePlus } from "react-icons/ai";
 import ListPopup from "./ListPopup";
 import NewListModal from "./NewListModal";
 
+const popcornUrl="./ExampleResources/popcorn.png"
+
 export default function Navbar({
   staticNavData,
   listData,
@@ -71,7 +73,7 @@ export default function Navbar({
                       <img
                         src={
                           list.content[0]?.image_url ||
-                          "./path_to_default_image.jpg"
+                          popcornUrl
                         }
                         alt={list.title}
                         className="w-10 h-10 mr-2.5 rounded-lg"

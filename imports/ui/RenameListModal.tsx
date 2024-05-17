@@ -1,8 +1,11 @@
-import React from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 function RenameListModal({ isOpen, onClose, onRename, currentName }) {
   const [newName, setNewName] = useState(currentName);
+
+  useEffect(() => {
+    setNewName(currentName);
+  }, [currentName]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
