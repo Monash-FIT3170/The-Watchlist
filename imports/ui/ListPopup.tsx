@@ -23,11 +23,6 @@ interface ContentListProps {
   onRenameList: (listId: string, newName: string) => void;
 }
 
-/*
-React component which displays a popup list of items which has been passed to it,
-is generated from the navbar when it is clicked.
-*/
-
 const ListPopup: React.FC<ContentListProps> = ({
   list,
   onClose,
@@ -40,21 +35,21 @@ const ListPopup: React.FC<ContentListProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
 
-  //close the popup when clicking outside of it
   const handleClickOutside = (event: MouseEvent) => {
-    if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
-      if (!isRenameModalOpen) {
-        // Add this condition
-        onClose();
-      }
+    const target = event.target as Element;
+    if (
+      popupRef.current &&
+      !popupRef.current.contains(target) &&
+      !target.closest(".rename-modal")
+    ) {
+      onClose();
     }
   };
 
   const handleRenameListClick = () => {
-    setIsRenameModalOpen(true); // Open RenameListModal when the button is clicked
+    setIsRenameModalOpen(true);
   };
 
-  //listen for the mouse being clicked outside the popup
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -62,20 +57,17 @@ const ListPopup: React.FC<ContentListProps> = ({
     };
   }, []);
 
-  //ensure we are going to scroll on the popup rather than the items below it.
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
   }, [list]);
 
-  //handle an expansion of an item
   const handleExpandClick = (id: number) => {
     setExpandedItem(expandedItem === id ? null : id);
   };
 
   return (
-    //header of the popup list
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
       <div
         ref={popupRef}
@@ -84,13 +76,11 @@ const ListPopup: React.FC<ContentListProps> = ({
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">{list.title}</h2>
           <div className="flex space-x-2">
-            {" "}
-            {/* Wrap the buttons in a div */}
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="text-2xl font-bold text-gray-500 hover:text-gray-800"
             >
-              <FaEllipsisV /> {/* Use FaEllipsisV for the "..." button */}
+              <FaEllipsisV />
             </button>
             {isDropdownOpen && (
               <div className="dropdown-content bg-black text-white p-2">
@@ -108,8 +98,6 @@ const ListPopup: React.FC<ContentListProps> = ({
             </button>
           </div>
         </div>
-
-        {/*content of the popup list*/}
         <div
           ref={scrollContainerRef}
           className="space-y-8 overflow-y-auto max-h-[calc(100vh-5rem)]"
@@ -160,8 +148,8 @@ const ListPopup: React.FC<ContentListProps> = ({
           <RenameListModal
             isOpen={isRenameModalOpen}
             onClose={() => setIsRenameModalOpen(false)}
-            onRename={onRenameList}
-            currentName={list.title} // Pass the current list title
+            onRename={(newName) => onRenameList(list.listId, newName)}
+            currentName={list.title}
           />
         )}
       </div>

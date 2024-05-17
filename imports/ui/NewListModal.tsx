@@ -21,7 +21,7 @@ function NewListModal({ isOpen, onClose, onCreate }) {
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75"
       onClick={handleBackdropClick}
     >
-      <div className="bg-darker rounded-lg shadow-lg p-6">
+      <div className="bg-darker rounded-lg shadow-lg p-6" onClick={(e) => e.stopPropagation()}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block text-white">
             List Title:

@@ -17,9 +17,12 @@ function RenameListModal({ isOpen, onClose, onRename, currentName }) {
   return isOpen ? (
     <div
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-      onClick={handleModalClick}
+      onClick={onClose}
     >
-      <div className="bg-darker rounded-lg shadow-lg p-6">
+      <div
+        className="bg-darker rounded-lg shadow-lg p-6 rename-modal"
+        onClick={handleModalClick}
+      >
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block text-white">
             New List Name:
