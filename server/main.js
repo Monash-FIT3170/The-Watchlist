@@ -306,7 +306,7 @@ Meteor.startup(async () => {
             content_id: tvData[0].id,
             title: tvData[0].title,
             image_url: tvData[0].image_url,
-            type: "Episode",
+            type: "TV Show",
             user_rating: 4.7,
             episode_details: {
                 season_number: tvData[0].seasons[0].season_number,

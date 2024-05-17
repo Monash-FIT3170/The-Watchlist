@@ -16,7 +16,7 @@ export class Handler {
     // These get read by Meteor during execution, so we don't care that they are not "used" by anything from a linting perspective
     #createMethod
     #readMethod
-    #updateMethod
+    #updateMethods = {}; // Change to support multiple update methods
     #deleteMethod
 
     #objectName
@@ -48,10 +48,14 @@ export class Handler {
         return this;
     }
 
-    addUpdateHandler(funcDetails: HandlerFunc): Handler {
+    addUpdateHandler(funcDetails: HandlerFunc, methodName = 'update'): Handler {
+        const fullName = `${this.#objectName}.${methodName}`;
+        if (this.#updateMethods[fullName]) {
+            throw new Error(`A method named '${fullName}' is already defined`);
+        }
         console.log(`Adding update handler for ${this.#objectName}`);
-        this.#updateMethod = new ValidatedMethod({
-            name: `${this.#objectName}.update`,
+        this.#updateMethods[fullName] = new ValidatedMethod({
+            name: fullName,
             validate: funcDetails.validate,
             run: funcDetails.run
         });

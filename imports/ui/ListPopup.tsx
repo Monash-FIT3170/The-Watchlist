@@ -33,19 +33,24 @@ const ListPopup: React.FC<ContentListProps> = ({
 }) => {
   const popupRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const confirmDialogRef = useRef<HTMLDivElement>(null);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [contentDetails, setContentDetails] = useState<{ [key: number]: any }>({});
   const [loadingDetails, setLoadingDetails] = useState<{ [key: number]: boolean }>({});
   const [errorDetails, setErrorDetails] = useState<{ [key: number]: boolean }>({});
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [contentToDelete, setContentToDelete] = useState<number | null>(null);
 
+  const [localContent, setLocalContent] = useState(list.content);
 
   const handleClickOutside = (event: MouseEvent) => {
     const target = event.target as Element;
     if (
       popupRef.current &&
       !popupRef.current.contains(target) &&
-      !target.closest(".rename-modal")
+      !target.closest(".rename-modal") &&
+      (!confirmDialogRef.current || !confirmDialogRef.current.contains(target))
     ) {
       onClose();
     }
@@ -74,7 +79,7 @@ const ListPopup: React.FC<ContentListProps> = ({
     } else {
       setExpandedItem(id);
       if (!contentDetails[id]) {
-        fetchContentDetails(title,id);
+        fetchContentDetails(title, id);
       }
     }
   };
@@ -82,7 +87,7 @@ const ListPopup: React.FC<ContentListProps> = ({
   const fetchContentDetails = (title: string, contentId: number) => {
     setLoadingDetails(prev => ({ ...prev, [contentId]: true }));
     setErrorDetails(prev => ({ ...prev, [contentId]: false }));
-  
+
     Meteor.call("content.read", { searchString: title }, (error, result) => {
       setLoadingDetails(prev => ({ ...prev, [contentId]: false }));
       if (error) {
@@ -95,19 +100,36 @@ const ListPopup: React.FC<ContentListProps> = ({
       }
     });
   };
-  
-  
 
   const handleDeleteList = (listId: string) => {
     onDeleteList(listId);
     onClose();
   };
 
+  const handleRemoveContent = (contentId: number) => {
+    if (contentId !== null) {
+      Meteor.call("list.removeContent", { listId: list._id, contentId }, (error) => {
+        if (error) {
+          console.error("Error removing content:", error);
+        } else {
+          const updatedContent = localContent.filter(item => item.content_id !== contentId);
+          setLocalContent(updatedContent);
+          setShowConfirmDialog(false); // Close the confirmation dialog
+        }
+      });
+    }
+  };
+
+  const confirmRemoveContent = (contentId: number) => {
+    setContentToDelete(contentId);
+    setShowConfirmDialog(true);
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div
         ref={popupRef}
-        className="bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-1/2 max-h-3/4 overflow-y-auto relative"
+        className="bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">{list.title}</h2>
@@ -136,9 +158,9 @@ const ListPopup: React.FC<ContentListProps> = ({
         </div>
         <div
           ref={scrollContainerRef}
-          className="space-y-8 overflow-y-auto max-h-[calc(100vh-5rem)]"
+          className="space-y-8 overflow-y-auto max-h-[calc(100vh-10rem)]"
         >
-          {list.content.map((item) => (
+          {localContent.map((item) => (
             <div key={item.content_id} className="block relative">
               <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
                 <div className="relative">
@@ -161,6 +183,13 @@ const ListPopup: React.FC<ContentListProps> = ({
                       ) : (
                         <FaChevronDown />
                       )}
+                    </button>
+                    <button
+                      className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
+                      onClick={() => confirmRemoveContent(item.content_id)}
+                      title="Remove from List"
+                    >
+                      <FiTrash2 />
                     </button>
                   </div>
                 </div>
@@ -202,6 +231,31 @@ const ListPopup: React.FC<ContentListProps> = ({
           />
         )}
       </div>
+      {showConfirmDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div ref={confirmDialogRef} className="bg-darker p-6 rounded-lg">
+            <p className="text-white mb-4">Are you sure you want to remove this content?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                className="bg-gray-500 hover:bg-gray-700 text-white font-bold p-2 rounded"
+                onClick={() => setShowConfirmDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded"
+                onClick={() => {
+                  if (contentToDelete !== null) {
+                    handleRemoveContent(contentToDelete);
+                  }
+                }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
