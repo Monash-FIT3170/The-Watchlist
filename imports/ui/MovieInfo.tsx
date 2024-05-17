@@ -1,14 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Modal from './Modal'; 
 
 const MovieInfo = ({ movie }) => {
+    const [showModal, setShowModal] = useState(false);
+    
+
     return (
-        <div className="flex flex-col items-center justify-end h-screen text-white bg-cover bg-center p-0 relative">
+        <div className="flex flex-col items-center justify-end h-screen text-white bg-cover bg-center p-0 relative" style={{ backgroundImage: `url(${movie.image_url})` }}>
             <div className="absolute inset-0 w-full h-full bg-cover bg-center opacity-30" style={{ backgroundImage: `url(${movie.image_url})` }}></div>
             <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center">
-                <div className="w-full h-3/4 rounded-xl shadow-md overflow-hidden md:max-w-4xl bg-black bg-opacity-100 text-white flex flex-row items-center justify-between px-5">
+                <div className="w-full h-3/4 rounded-xl shadow-md overflow-hidden md:max-w-4xl bg-black bg-opacity-90 text-white flex flex-row items-center justify-between px-5">
                     <div className="flex flex-col items-start w-2/5 gap-4">
-                    <img src={movie.image_url} alt={movie.title} className="w-full h-auto rounded-lg mb-5 ml-6" />
-                        <button className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 mb-5 ml-6">+</button>
+                        <img src={movie.image_url} alt={movie.title} className="w-full h-auto rounded-lg mb-5 ml-6" />
+                        <button 
+                            className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 mb-5 ml-6"
+                            onClick={() => setShowModal(true)}
+                        >
+                            +
+                        </button>
                     </div>
                     <div className="flex flex-col items-start w-1/2">
                         <h1 className="text-6xl font-bold text-center">{movie.title} ({movie.release_year})</h1>
@@ -21,6 +30,7 @@ const MovieInfo = ({ movie }) => {
                     </div>
                 </div>
             </div>
+            <Modal show={showModal} onClose={() => setShowModal(false)}/>
         </div>
     );
 };
