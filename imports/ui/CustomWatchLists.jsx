@@ -31,7 +31,7 @@ export default function CustomWatchLists({listData: watchlists}) {
                 <div key={index} className="flex justify-between">
                     {row.map(watchlist => (
                         <div key={watchlist._id} className="w-1/4 px-2">
-                            <button onClick={() => handleItemClick(watchlist)} className=" mb-4 flex items-center rounded-lg hover:bg-dark">
+                            <button onClick={() => handleItemClick(watchlist)} className=" mb-4 flex px-4 items-center rounded-lg hover:bg-dark">
                                 <img
                                     src={watchlist.content[0]?.image_url || './path_to_default_image.jpg'}
                                     alt={watchlist.title}
