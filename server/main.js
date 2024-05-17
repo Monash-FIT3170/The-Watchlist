@@ -268,9 +268,9 @@ Meteor.startup(async () => {
             user_rating: 4.8
         },
         {
-            content_id: tvData[0].id,
-            title: tvData[0].title,
-            image_url: tvData[0].image_url,
+            content_id: tvData[1].id,
+            title: tvData[1].title,
+            image_url: tvData[1].image_url,
             type: "TV Show",
             user_rating: 4.5
         },

@@ -25,7 +25,7 @@ const List = ({ list }) => {
                                 <div className="text-white">
                                     <h3 className="text-xl font-bold">{item.title}</h3>
                                     <p className="text-sm">{item.description}</p>
-                                    <RatingStar totalStars={5} rating={item.rating} />
+                                    <RatingStar totalStars={5} rating={4} />
                                 </div>
                             </div>
                         </div>
