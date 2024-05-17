@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Favourites from './Favourites';
 import ToWatch from './ToWatch';
-import dummyLists from './DummyLists';
+import dummyLists from './movie.json';
 
 const HomePage = () => {
   const [favourites, setFavourites] = useState([]);
