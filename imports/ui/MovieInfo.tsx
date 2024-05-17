@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import Modal from './Modal'; 
 
-const MovieInfo = ({ movie }) => {
+const MovieInfo = ({ movie, listData }) => { 
     const [showModal, setShowModal] = useState(false);
     
-
     return (
         <div className="flex flex-col items-center justify-end h-screen text-white bg-cover bg-center p-0 relative" style={{ backgroundImage: `url(${movie.image_url})` }}>
             <div className="absolute inset-0 w-full h-full bg-cover bg-center opacity-30" style={{ backgroundImage: `url(${movie.image_url})` }}></div>
@@ -30,7 +29,7 @@ const MovieInfo = ({ movie }) => {
                     </div>
                 </div>
             </div>
-            <Modal show={showModal} onClose={() => setShowModal(false)}/>
+            <Modal show={showModal} onClose={() => setShowModal(false)} listData={listData}/>
         </div>
     );
 };

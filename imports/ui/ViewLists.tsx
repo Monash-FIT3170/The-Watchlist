@@ -36,7 +36,7 @@ const List = ({ list }) => {
     );
 };
 
-const HomeList = ({ lists, title, listType }) => {
+const ViewLists = ({ lists, title, listType }) => {
     const filteredMovies = lists.filter(list => list.listType === listType);
 
     return (
@@ -49,4 +49,4 @@ const HomeList = ({ lists, title, listType }) => {
     );
 };
 
-export default HomeList;
+export default ViewLists;
