@@ -82,21 +82,21 @@ const ListPopup: React.FC<ContentListProps> = ({
   const fetchContentDetails = (title: string, contentId: number) => {
     setLoadingDetails(prev => ({ ...prev, [contentId]: true }));
     setErrorDetails(prev => ({ ...prev, [contentId]: false }));
-
-    console.log(`Fetching details for title: ${title}`);
+  
     Meteor.call("content.read", { searchString: title }, (error, result) => {
       setLoadingDetails(prev => ({ ...prev, [contentId]: false }));
       if (error) {
-        console.error("Error fetching content details:", error);
         setErrorDetails(prev => ({ ...prev, [contentId]: true }));
       } else {
-        console.log("Fetch result:", result);
-        const content = result.movie.concat(result.tv).find(item => item.title === title);
-        console.log("Content found:", content);
+        const movie = result.movie.find(item => item.title.toLowerCase() === title.toLowerCase());
+        const tv = result.tv.find(item => item.title.toLowerCase() === title.toLowerCase());
+        const content = movie || tv;
         setContentDetails(prevDetails => ({ ...prevDetails, [contentId]: content || null }));
       }
     });
   };
+  
+  
 
   const handleDeleteList = (listId: string) => {
     onDeleteList(listId);
