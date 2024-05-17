@@ -13,17 +13,43 @@ module.exports = {
         'dark-magenta': "#410227",
         'off-white': "#E2DCDE",
         'smoky-black': "14110F",
-        'dark': "#282525",
-        'darker': "#181818",
+        'less-dark': "#252525",
+        'dark': "#1C1C1C",
+        'darker': "#101010",
         'darkest': "#000000",
+        'grey': "#808080"
       },
       boxShadow: {
         'nav': '0 0px 2px rgba(255, 255, 255, 0.4)',
         'nav-inner': 'inset 0 0px 4px rgba(255, 255, 255, 0.4)'
-      }
+      },
+      height: {
+        'custom': 'calc(100vh - 2rem)',
+        '35vh': '35vh',
+      },
     },
     
   },
-  plugins: [],
+  plugins: [
+    function ({addUtilities}) {
+      const newUtilities = {
+        ".scrollbar-webkit": {
+          "&::-webkit-scrollbar" : {
+            width:"8px",
+            borderRadius: "20px",
+          },
+          "&::-webkit-scrollbar-track" : {
+            background:"transparent"
+          },
+          "&::-webkit-scrollbar-thumb" : {
+            background:"#3F3F3F",
+            borderRadius: "20px",
+          },
+        }
+      }
+
+      addUtilities(newUtilities, ["responsive", "hover"])
+    }
+  ],
 }
 

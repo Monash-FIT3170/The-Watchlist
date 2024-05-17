@@ -6,7 +6,7 @@ interface ContentItemData {
   image_url: string;  // Use image_url instead of src
   title: string;      // Use title as the alt text description
   rating: number;
-  id: number;
+  content_id: number;
   type: string;
 }
 
@@ -48,11 +48,11 @@ const ContentList: React.FC<ContentListProps> = ({ list }) => {
   }, []);
 
   return (
-    <div className="flex flex-col mb-8 bg-darker rounded-lg overflow-hidden shadow-lg">
+    <div className="flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2">
       <div className="flex justify-between items-center mb-2 text-base">
       <button
         onClick={handleRedirect} // Same click handler as "Show all"
-        className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 pt-2 hover:underline cursor-pointer bg-transparent border-none" // Styling to make it look like the original h1 plus hover effect
+        className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 hover:underline cursor-pointer bg-transparent border-none" // Styling to make it look like the original h1 plus hover effect
       >
         {list.title}
       </button>
@@ -62,7 +62,7 @@ const ContentList: React.FC<ContentListProps> = ({ list }) => {
       </div>
       <div ref={containerRef} className="flex justify-flex-start items-start overflow-hidden">
         {React.Children.toArray(list.content.map((item, index) => (
-          <ContentItem key={index} id={item.id} type={item.type} src={item.image_url} alt={item.title} rating={item.rating} />
+          <ContentItem key={index} id={item.content_id} type={item.type} src={item.image_url} alt={item.title} rating={item.rating} />
         ))).slice(0, visibleContentCount)}
       </div>
     </div>

@@ -3,22 +3,116 @@
  * This defines the schema used
  */
 
-import { Class } from 'meteor/jagi:astronomy';
+import { Class, Enum } from 'meteor/jagi:astronomy';
 
 // Create or get the "content" collection
 // The <any, any> is needed to make TypeScript happy when creating the Class, not entirely sure why
-export const ContentCollection = new Mongo.Collection<any, any>('content');
+
+export const MovieCollection = new Mongo.Collection<any, any>('movie');
+export const TVCollection = new Mongo.Collection<any, any>('tv');
+
+// https://api4.thetvdb.com/v4/movies/filter?sort=score
+// https://api4.thetvdb.com/v4/movies/148/translations/eng
+
 
 // Define the schema for this collection
-const Content = Class.create({
-    name: "Content",
-    collection: ContentCollection,
+export const Movie = Class.create({
+    name: "Movie",
+    collection: MovieCollection,
     fields: {
+        id: {
+            type: Number
+        },
         title: {
             type: String,
             index: 'text'
+        },
+        overview: {
+            type: String
+        },
+        release_year: {
+            type: Number
+        },
+        image_url: {
+            type: String
+        },
+        runtime: {
+            type: Number
+        },
+        rating: {
+            type: Number // this will 100% need to be changed later
+        },
+        genres: {
+            type: [String]
+        }
+        
+    }
+});
+
+export const TV_Episode = Class.create({
+    name: "TV_Episode",
+    fields: {
+        id: {
+            type: Number
+        },
+        title: {
+            type: String,
+            index: 'text'
+        },
+        overview: {
+            type: String
+        },
+        runtime: {
+            type: Number
+        },
+        image_url: {
+            type: String
         }
     }
 })
 
-export default Content;
+export const TV_Season = Class.create({
+    name: "TV_Season",
+    fields: {
+        season_number: {
+            type: Number
+        },
+        episodes: [TV_Episode]
+    }
+})
+
+// https://api4.thetvdb.com/v4/series
+// https://api4.thetvdb.com/v4/series/70327 for description
+// https://api4.thetvdb.com/v4/series/70327/episodes/official for episodes but filter on aired != null
+// number = episode number in season
+// seasonNumber = as named
+export const TV = Class.create({
+    name: "TV",
+    collection: TVCollection,
+    fields: {
+        id: {
+            type: Number
+        },
+        title: {
+            type: String,
+            index: 'text'
+        },
+        overview: {
+            type: String
+        },
+        image_url: {
+            type: String
+        },
+        first_aired: {
+            type: Date
+        },
+        last_aired: {
+            type: Date,
+            optional: true
+        },
+        genres: {
+            type: [String]
+        },
+        seasons: [TV_Season]
+    }
+});

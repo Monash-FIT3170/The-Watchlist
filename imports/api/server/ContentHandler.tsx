@@ -4,15 +4,15 @@
  */
 
 import { Handler, HandlerFunc } from './Handler';
-import Content, {ContentCollection} from "../../db/Content";
-
-
-type CreateContentOptions = {
-    title: string
-}
+import { Movie, TV } from "../../db/Content";
 
 type GetContentOptions = {
     searchString: string | null
+}
+
+type GetContentResults = {
+    movie: typeof Movie[] | null
+    tv: typeof TV[] | null
 }
 
 /**
@@ -20,39 +20,55 @@ type GetContentOptions = {
  * validate - a validation function to check that the provided parameters are acceptable. Can be null for no validation.
  * run - the function that should run when Meteor.call()'ed. This will return a callback in the form (err, res).
  */
-const createContent: HandlerFunc = {
-    validate: null,
-    run: ({title}: CreateContentOptions) => {
-        // Insert a new document into the Content collection 
-        Content.insert({
-            title: title
-        })
+// const createContent: HandlerFunc = {
+//     validate: null,
+//     run: ({title}: CreateContentOptions) => {
+//         // Insert a new document into the Content collection 
+//         Content.insert({
+//             title: title
+//         })
 
-        return
+//         return
+//     }
+// }
+
+function GetContent(searchObject: object): GetContentResults {
+    const movieData = Movie.find(searchObject).fetch().map(doc => doc.raw()); // Convert each document to a raw object
+    const tvData = TV.find(searchObject).fetch().map(doc => doc.raw()); // Convert each document to a raw object
+
+    return {
+        movie: movieData,
+        tv: tvData,
     }
 }
 
 
+
+// In your /imports/api/server/ContentHandler.tsx file, within the readContent function
 const readContent: HandlerFunc = {
     validate: null,
     run: ({searchString}: GetContentOptions) => {
+        console.log('Search string received:', searchString);
 
-        if (!searchString == null) {
-            // Don't use "Content" (which is an Astrology object) here because it doesn't send properly
-            // So we can pull straight from the collection instead.
-            // This shouldn't be the case, I'll try figure out why it doesn't work properly.
-            return ContentCollection.find().fetch();
+        let searchCriteria = {};
+
+        if (searchString == null) {
+            console.log('Fetching all content...');
+            searchCriteria = {};
+        } else {
+            console.log('Performing search with:', searchString);
+            searchCriteria = { "$text": { "$search": searchString } };
         }
 
-        return ContentCollection.find({
-            // TODO implement substring search using regex, but this is okay for MVP
-            "$text": { "$search": searchString }
-        }).fetch()
+        // Fetch content using the updated search criteria and convert to raw objects
+        const results = GetContent(searchCriteria);
+        // console.log('Fetched content:', results);
+        return results;
     }
 }
 
+
 const ContentHandler = new Handler("content")
-    .addCreateHandler(createContent)
     .addReadHandler(readContent)
 
 
