@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { IconContext } from "react-icons";
 import { Link } from "react-router-dom";
 import { MdMovieFilter } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { AiOutlinePlus } from "react-icons/ai";
 import ListPopup from "./ListPopup";
 import NewListModal from "./NewListModal";
-import { AiOutlinePlus } from "react-icons/ai";
 
 export default function Navbar({
   staticNavData,
@@ -36,8 +35,6 @@ export default function Navbar({
     <div className="flex flex-col h-screen">
       <IconContext.Provider value={{ size: "20px" }}>
         <div className="flex flex-col w-64 p-0 mx-2 my-4 h-custom">
-          {" "}
-          {/* Use viewport height (vh) if full height is needed */}
           <div className="bg-darker rounded-lg shadow-lg pt-4 px-2 mb-4 flex-none">
             <nav>
               <ul className="flex flex-col w-full">
@@ -64,10 +61,9 @@ export default function Navbar({
                   <AiOutlinePlus size={"12px"} />
                 </button>
               </h2>
-              {/* Horrendous height calculation below, better solution required */}
               <ul className="h-[calc(100vh_-_21rem)] overflow-y-hidden hover:overflow-y-scroll hover:scrollbar-webkit">
                 {listData.map((list) => (
-                  <li key={list.listId} className="flex justify-center">
+                  <li key={list._id} className="flex justify-center">
                     <button
                       onClick={() => handleItemClick(list)}
                       className="w-full flex items-center space-x-5 text-sm text-white font-semibold mb-2.5 p-2 rounded-lg hover:bg-dark"
@@ -96,7 +92,6 @@ export default function Navbar({
             onRenameList={onRenameList}
           />
         )}
-
         {isAddListModalOpen && (
           <div className="z-50">
             <NewListModal

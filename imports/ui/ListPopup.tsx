@@ -14,7 +14,7 @@ interface ContentItemData {
 
 interface ContentListProps {
   list: {
-    listId: string;
+    _id: string;
     title: string;
     content: ContentItemData[];
   };
@@ -85,9 +85,7 @@ const ListPopup: React.FC<ContentListProps> = ({
             {isDropdownOpen && (
               <div className="dropdown-content bg-black text-white p-2">
                 <button onClick={handleRenameListClick}>Rename List</button>
-                <button onClick={() => onDeleteList(list.listId)}>
-                  Delete List
-                </button>
+                <button onClick={() => onDeleteList(list._id)}>Delete List</button>
               </div>
             )}
             <button
@@ -148,7 +146,7 @@ const ListPopup: React.FC<ContentListProps> = ({
           <RenameListModal
             isOpen={isRenameModalOpen}
             onClose={() => setIsRenameModalOpen(false)}
-            onRename={(newName) => onRenameList(list.listId, newName)}
+            onRename={(newName) => onRenameList(list._id, newName)}
             currentName={list.title}
           />
         )}

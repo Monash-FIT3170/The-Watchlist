@@ -66,34 +66,54 @@ export const App = () => {
   const [lists, setLists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const fetchLists = () => {
+    Meteor.call("list.read", { userId: 1 }, (error, response) => { // Temporary userId: 1
+      if (error) {
+        console.error("Error fetching lists:", error);
+      } else {
+        setLists(response);
+      }
+    });
+  };
+
   const handleCreateList = (title) => {
-    const listId = title.toLowerCase().split(" ").join("-");
-    const newList = { listId, title, content: [] };
-    setLists([...lists, newList]);
+    const userId = 1; // Temporary userId: 1
+    // const userId = Meteor.userId(); // Uncomment this when user authentication is implemented
+    const listType = "Custom";
+    const newList = { userId, title, listType, content: [] };
+    Meteor.call("list.create", newList, (error) => {
+      if (error) {
+        console.error("Error creating list:", error);
+      } else {
+        fetchLists();
+      }
+    });
   };
 
   const handleDeleteList = (listId) => {
-    if (listId === "favorite-shows" || listId === "must-watch") {
-      console.log("This list cannot be deleted.");
-      return;
-    }
-    const newList = lists.filter((list) => list.listId !== listId);
-    setLists(newList);
+    const userId = 1; // Temporary userId: 1
+    // const userId = Meteor.userId(); // Uncomment this when user authentication is implemented
+    Meteor.call("list.delete", { listId, userId }, (error) => {
+      if (error) {
+        console.error("Error deleting list:", error);
+      } else {
+        fetchLists();
+      }
+    });
   };
 
   const handleRenameList = (listId, newName) => {
-    if (listId === "favorite-shows" || listId === "must-watch") {
-      console.log("This list cannot be renamed.");
-      return;
-    }
-    const newListId = newName.toLowerCase().split(" ").join("-");
-    const newList = lists.map((list) =>
-      list.listId === listId
-        ? { ...list, title: newName, listId: newListId }
-        : list
-    );
-    setLists(newList);
+    const userId = 1; // Temporary userId: 1
+    // const userId = Meteor.userId(); // Uncomment this when user authentication is implemented
+    Meteor.call("list.update", { listId, userId, updateFields: { title: newName } }, (error) => {
+      if (error) {
+        console.error("Error renaming list:", error);
+      } else {
+        fetchLists();
+      }
+    });
   };
+
 
   useEffect(() => {
     // Fetch content from the Meteor backend
@@ -111,13 +131,7 @@ export const App = () => {
     });
 
     // Fetch lists from the backend
-    Meteor.call("list.read", {}, (error, response) => {
-      if (error) {
-        console.error("Error fetching lists:", error);
-      } else {
-        setLists(response); // Assuming the response directly contains the list array
-      }
-    });
+    fetchLists();
   }, []);
 
   return (
