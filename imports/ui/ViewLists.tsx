@@ -1,52 +1,26 @@
-import React from "react";
-import { useNavigate } from 'react-router-dom';
-import RatingStar from './RatingStar';
+// ViewLists.js
+import React from 'react';
+import { MdMovieFilter } from 'react-icons/md';
 
-const List = ({ list }) => {
-    const navigate = useNavigate();
-
-    // Function to handle redirection
-    const handleRedirect = (type, id) => {
-        navigate(`/${type}${id}`);
-    };
-
-    return (
-        <div key={list._id} className="space-y-8">
-            {list.content.map((item) => (
-                <div key={item.id} className="relative" onClick={() => handleRedirect(item.type, item.content_id)}>
-                    <div className="relative rounded-lg shadow-lg cursor-pointer overflow-visible">
-                        <div className="transition-transform duration-300 ease-in-out transform hover:scale-110">
-                            <img
-                                src={item.image_url}
-                                alt={item.title}
-                                className="w-full h-35vh object-cover rounded-lg"
-                            />
-                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60">
-                                <div className="text-white">
-                                    <h3 className="text-xl font-bold">{item.title}</h3>
-                                    <p className="text-sm">{item.description}</p>
-                                    <RatingStar totalStars={5} rating={item.rating} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-};
-
-const ViewLists = ({ lists, title, listType }) => {
-    const filteredMovies = lists.filter(list => list.listType === listType);
-
-    return (
-        <div className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl overflow-auto scrollbar-thumb-gray-900 scrollbar-track-gray-100 scrollbar-thin">
-            <h1 className="font-sans font-bold text-4xl my-4 mt-0 mb-4">{title}</h1>
-            <div className="w-full overflow-visible">
-                {filteredMovies.map((list) => <List list={list} />)}
-            </div>
-        </div>
-    );
-};
-
-export default ViewLists;
+export default function ViewLists({ listData }) {
+  return (
+    <div className="bg-darker rounded-lg shadow-lg p-2 flex-grow overflow-hidden">
+      <nav>
+        <h2 className="flex justify-start items-center space-x-5 w-full px-4 py-2 mb-2 font-bold text-grey text-lg">
+          <MdMovieFilter size={"20px"} /><span>Your Watchlists</span></h2>
+        <ul className="h-[calc(100vh_-_21rem)] overflow-y-hidden hover:overflow-y-scroll hover:scrollbar-webkit">
+          {listData.map((list) => (
+            <li key={list.listId} className="flex justify-center">
+              <img
+                src={list.content[0]?.image_url || './path_to_default_image.jpg'}
+                alt={list.title}
+                className="w-10 h-10 mr-2.5 rounded-lg"
+              />
+              {list.title}
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  );
+}

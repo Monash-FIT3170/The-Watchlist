@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from './Modal'; 
 
-const MovieInfo = ({ movie, listData }) => { 
+const MovieInfo = ({ movie, lists }) => { 
     const [showModal, setShowModal] = useState(false);
     
     return (
@@ -29,7 +29,7 @@ const MovieInfo = ({ movie, listData }) => {
                     </div>
                 </div>
             </div>
-            <Modal show={showModal} onClose={() => setShowModal(false)} listData={listData}/>
+            <Modal show={showModal} onClose={() => setShowModal(false)} lists={lists}/>
         </div>
     );
 };
