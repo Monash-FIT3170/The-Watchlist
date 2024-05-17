@@ -11,50 +11,90 @@ import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content'
 
 const movieData = [
     {
-        "id": 1,
+        "_id": "6piyaMiuooSvb4N7B",
+        "id": 231,
         "title": "Titanic",
-        "overview": "Jack and Rose are young lovers who find one another on the maiden voyage of the unsinkable R.M.S. Titanic. But when the doomed luxury liner collides with an iceberg in the frigid North Atlantic, their passionate love affair becomes a thrilling race for survival.",
         "release_year": 1997,
         "runtime": 194,
-        "rating": 7.8,
+        "rating": 5002480,
+        "overview": "Jack and Rose are young lovers who find one another on the maiden voyage of the unsinkable R.M.S. Titanic. But when the doomed luxury liner collides with an iceberg in the frigid North Atlantic, their passionate love affair becomes a thrilling race for survival.\r\n",
+        "genres": [
+            "Action",
+            "Adventure",
+            "Drama",
+            "Romance"
+        ],
         "image_url": "https://artworks.thetvdb.com/banners/v4/movie/231/posters/642d748b22859.jpg"
     },
     {
-        "id": 2,
+        "_id": "svwSqHhg93QzPgRsE",
+        "id": 169,
         "title": "The Matrix",
-        "overview": "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
         "release_year": 1999,
         "runtime": 136,
-        "rating": 8.7,
+        "rating": 1173680,
+        "overview": "An unassuming programmer comes to the attention of a rebel alliance who seek to overthrow their sentient AI overlords and upset the world's status quo.",
+        "genres": [
+            "Action",
+            "Science Fiction"
+        ],
         "image_url": "https://artworks.thetvdb.com/banners/movies/169/posters/5f274c00c85c1.jpg"
     },
     {
-        "id": 3,
+        "_id": "NwQ3BRRTTR3Tk8SZi",
+        "id": 113,
         "title": "Inception",
-        "overview": "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
         "release_year": 2010,
         "runtime": 148,
-        "rating": 8.8,
+        "rating": 1680146,
+        "overview": "In a world where technology exists to enter the human mind through dream invasion, a highly skilled thief is given a final chance at redemption, which involves executing his toughest and most risky job to date.",
+        "genres": [
+            "Science Fiction",
+            "Thriller"
+        ],
         "image_url": "https://artworks.thetvdb.com/banners/movies/113/posters/2195447.jpg"
     },
     {
-        "id": 4,
-        "title": "Interstellar",
-        "overview": "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
-        "release_year": 2014,
-        "runtime": 169,
-        "rating": 8.6,
-        "image_url": "https://artworks.thetvdb.com/banners/movies/131079/posters/1846628.jpg"
+        "_id": "qzK5ryKQS7XRqbkP9",
+        "id": 497,
+        "title": "Loop (the mind reigns)",
+        "release_year": 2019,
+        "runtime": 5,
+        "rating": 2,
+        "overview": "In this hyper-low budget short movie, a guy finds himself trapped in a delirious trip in black and white.",
+        "genres": [
+            "Horror",
+            "Drama"
+        ],
+        "image_url": "https://artworks.thetvdb.com/banners/movies/497/posters/497.jpg"
     },
     {
-        "id": 5,
-        "title": "The Shawshank Redemption",
-        "overview": "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-        "release_year": 1994,
-        "runtime": 142,
-        "rating": 9.3,
-        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/190/posters/6089f8cd44f59.jpg"
-    }
+        "_id": "JhqHM2c5dNQBoSdmF",
+        "id": 498,
+        "title": "Disobedience",
+        "release_year": 2018,
+        "runtime": 114,
+        "rating": 33904,
+        "overview": "A woman learns about the death of her Orthodox Jewish father, a rabbi. She returns home and has romantic feelings rekindled for her best childhood friend, who is now married to her cousin.",
+        "genres": [
+            "Drama"
+        ],
+        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/498/posters/65898f0810283.jpg"
+    },
+    {
+        "_id": "wrBetYGXfLnZxuTQW",
+        "id": 499,
+        "title": "Hairspray",
+        "release_year": 2007,
+        "runtime": 117,
+        "rating": 119696,
+        "overview": "In 1962, Tracy Turnblad, a heavy-set teen living in Baltimore, is given the opportunity of a lifetime to become a dancer on a popular tv show. However, once she is thrust into the limelight, she cannot help but speak out on the taboo subject of racial integration and she unwittingly ignites a nation.",
+        "genres": [
+            "Comedy",
+            "Family"
+        ],
+        "image_url": "https://artworks.thetvdb.com/banners/movies/499/posters/499.jpg"
+    },
 ];
 
 const tvData = [
@@ -65,6 +105,12 @@ const tvData = [
         "image_url": "https://artworks.thetvdb.com/banners/posters/70327-1.jpg",
         "first_aired": new Date('1997-03-10'),
         "last_aired": new Date('2003-05-20'),
+        "genres": [
+            "Action",
+            "Adventure",
+            "Drama",
+            "Romance"
+        ],
         "seasons": [
             {
                 "season_number": 1,
@@ -87,6 +133,12 @@ const tvData = [
         "image_url": "https://artworks.thetvdb.com/banners/posters/81189-1.jpg",
         "first_aired": new Date('2008-01-20'),
         "last_aired": new Date('2013-09-29'),
+        "genres": [
+            "Action",
+            "Adventure",
+            "Drama",
+            "Romance"
+        ],
         "seasons": [
             {
                 "season_number": 1,
@@ -109,6 +161,12 @@ const tvData = [
         "image_url": "https://artworks.thetvdb.com/banners/posters/121361-1.jpg",
         "first_aired": new Date('2011-04-17'),
         "last_aired": new Date('2019-05-19'),
+        "genres": [
+            "Action",
+            "Adventure",
+            "Drama",
+            "Romance"
+        ],
         "seasons": [
             {
                 "season_number": 1,
@@ -131,6 +189,12 @@ const tvData = [
         "image_url": "https://artworks.thetvdb.com/banners/posters/305288-1.jpg",
         "first_aired": new Date('2016-07-15'),
         "last_aired": new Date('2022-07-01'),
+        "genres": [
+            "Action",
+            "Adventure",
+            "Drama",
+            "Romance"
+        ],
         "seasons": [
             {
                 "season_number": 1,
@@ -153,6 +217,12 @@ const tvData = [
         "image_url": "https://artworks.thetvdb.com/banners/posters/73244-1.jpg",
         "first_aired": new Date('2005-03-24'),
         "last_aired": new Date('2013-05-16'),
+        "genres": [
+            "Action",
+            "Adventure",
+            "Drama",
+            "Romance"
+        ],
         "seasons": [
             {
                 "season_number": 1,
@@ -171,7 +241,7 @@ const tvData = [
 ];
 
 Meteor.startup(async () => {
-    
+
     // We drop the collection to make sure a broken index is removed.
     // This will eventually need to be removed for obvious reasons!
     console.log("[DEV] DROPPING LIST COLLECTION IN main.js");

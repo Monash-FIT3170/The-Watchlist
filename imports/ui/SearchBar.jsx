@@ -10,7 +10,7 @@ const SearchBar = ({ movies, tvs, lists }) => {
 
     const dropdownData = {
         year: {
-            options: [2023, 2022, 2021, 2020],
+            options: [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000, 1999, 1998, 1997, 1996, 1995, 1994, 1993, 1992, 1991, 1990],
             selected: []
         },
         genres: {
@@ -114,9 +114,10 @@ const SearchBar = ({ movies, tvs, lists }) => {
 
         // Filter by genre if any genre is selected and the tab is either 'movies' or 'tv shows'
         if (filters.genres.selected.length > 0 && (selectedTab === 'movies' || selectedTab === 'tv shows')) {
-            filtered = filtered.filter(item =>
-                Array.isArray(item.genres) && item.genres.some(genre => filters.genres.selected.includes(genre))
-            );
+            filtered = filtered.filter(item => {
+                console.log("Checking genres for item:", item);
+                return Array.isArray(item.genres) && item.genres.some(genre => filters.genres.selected.includes(genre));
+            });
         }
 
         // Sorting logic
@@ -268,19 +269,28 @@ const SearchBar = ({ movies, tvs, lists }) => {
             </form>
 
             {/* Display Filtered Data */}
-            <div className="search-results-container flex flex-grow overflow-auto">
-                {selectedTab === 'movies' && (filteredData.movies.length > 0 ? filteredData.movies.map(movie => (
-                    <ContentItem key={movie.id} id={movie.id} type="movie" src={movie.image_url} alt={movie.title} rating={movie.rating} />
-                )) : <div>No movies available.</div>)}
-
-                {selectedTab === 'tv shows' && (filteredData.tvShows.length > 0 ? filteredData.tvShows.map(tv => (
-                    <ContentItem key={tv.id} id={tv.id} type="tv" src={tv.image_url} alt={tv.title} rating={tv.rating || undefined} /> // Assume TV shows may not always have ratings
-                )) : <div>No TV shows available.</div>)}
-
-                {selectedTab === 'lists' && (filteredData.lists.length > 0 ?
-                    <ListDisplay listData={filteredData.lists} />
-                    : <div>No lists available.</div>)
-                }
+            <div className="search-results-container flex-grow overflow-auto">
+                {selectedTab === 'movies' && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {filteredData.movies.length > 0 ? filteredData.movies.map(movie => (
+                            <ContentItem key={movie.id} id={movie.id} type="movie" src={movie.image_url} alt={movie.title} rating={movie.rating} />
+                        )) : <div>No movies available.</div>}
+                    </div>
+                )}
+                {selectedTab === 'tv shows' && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {filteredData.tvShows.length > 0 ? filteredData.tvShows.map(tv => (
+                            <ContentItem key={tv.id} id={tv.id} type="tv" src={tv.image_url} alt={tv.title} rating={tv.rating || undefined} />
+                        )) : <div>No TV shows available.</div>}
+                    </div>
+                )}
+                {selectedTab === 'lists' && (
+                    filteredData.lists.length > 0 ? (
+                        <ListDisplay listData={filteredData.lists} />
+                    ) : (
+                        <div>No lists available.</div>
+                    )
+                )}
             </div>
         </div>
     );
