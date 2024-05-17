@@ -4,6 +4,7 @@ import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import RenameListModal from "./RenameListModal";
 import { Meteor } from 'meteor/meteor';
+import { useNavigate } from 'react-router-dom';
 
 interface ContentItemData {
   image_url: string;
@@ -41,8 +42,17 @@ const ListPopup: React.FC<ContentListProps> = ({
   const [errorDetails, setErrorDetails] = useState<{ [key: number]: boolean }>({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [contentToDelete, setContentToDelete] = useState<number | null>(null);
+  const [listToDelete, setListToDelete] = useState<string | null>(null);
 
   const [localContent, setLocalContent] = useState(list.content);
+
+  const navigate = useNavigate();
+
+  const handleRedirect = (type: string, id: number) => {
+    console.log("REDIRECT", `/${type}${id}`);
+    onClose();
+    navigate(`/${type}${id}`);
+  };
 
   const handleClickOutside = (event: MouseEvent) => {
     const target = event.target as Element;
@@ -122,8 +132,32 @@ const ListPopup: React.FC<ContentListProps> = ({
 
   const confirmRemoveContent = (contentId: number) => {
     setContentToDelete(contentId);
+    setListToDelete(null);
     setShowConfirmDialog(true);
   };
+
+  const confirmDeleteList = (listId: string) => {
+    setListToDelete(listId);
+    setContentToDelete(null);
+    setShowConfirmDialog(true);
+  };
+
+  const handleDeleteConfirmed = () => {
+    if (contentToDelete !== null) {
+      handleRemoveContent(contentToDelete);
+    } else if (listToDelete !== null) {
+      onDeleteList(listToDelete);
+      onClose();
+    }
+    resetConfirmationState();
+  };
+
+  const resetConfirmationState = () => {
+    setShowConfirmDialog(false);
+    setContentToDelete(null);
+    setListToDelete(null);
+  };
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -142,7 +176,7 @@ const ListPopup: React.FC<ContentListProps> = ({
               <FiEdit className="text-lg" />
             </button>
             <button
-              onClick={() => handleDeleteList(list._id)}
+              onClick={() => confirmDeleteList(list._id)}
               className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded-full"
               title="Delete List"
             >
@@ -167,32 +201,41 @@ const ListPopup: React.FC<ContentListProps> = ({
                   <img
                     src={item.image_url}
                     alt={item.title}
-                    className="w-full h-[35vh] object-cover"
+                    className="w-full h-[35vh] object-cover cursor-pointer"
+                    onClick={() => {
+                      console.log(`Image clicked: ${item.type}, ${item.content_id}`);
+                      handleRedirect(item.type, item.content_id);
+                    }}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60">
-                    <div className={"absolute bottom-4 left-4 text-white"}>
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60" style={{ pointerEvents: 'none' }}>
+                    <div className="absolute bottom-4 left-4 text-white" style={{ pointerEvents: 'auto' }}>
                       <h3 className="text-xl font-bold ml-1">{item.title}</h3>
                       <RatingStar totalStars={5} rating={3.5} />
                     </div>
                     <button
                       className="absolute bottom-4 right-4 text-white text-2xl"
-                      onClick={() => handleExpandClick(item.content_id, item.title)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent the click from propagating to the image
+                        handleExpandClick(item.content_id, item.title);
+                      }}
+                      style={{ pointerEvents: 'auto' }}
                     >
-                      {expandedItem === item.content_id ? (
-                        <FaChevronUp />
-                      ) : (
-                        <FaChevronDown />
-                      )}
+                      {expandedItem === item.content_id ? <FaChevronUp /> : <FaChevronDown />}
                     </button>
                     <button
                       className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
-                      onClick={() => confirmRemoveContent(item.content_id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent the click from propagating to the image
+                        confirmRemoveContent(item.content_id);
+                      }}
                       title="Remove from List"
+                      style={{ pointerEvents: 'auto' }}
                     >
                       <FiTrash2 />
                     </button>
                   </div>
                 </div>
+
               </div>
               {expandedItem === item.content_id && (
                 <div className="mt-4 p-4 bg-gray-900 rounded-lg">
@@ -234,21 +277,19 @@ const ListPopup: React.FC<ContentListProps> = ({
       {showConfirmDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
           <div ref={confirmDialogRef} className="bg-darker p-6 rounded-lg">
-            <p className="text-white mb-4">Are you sure you want to remove this content?</p>
+            <p className="text-white mb-4">
+              Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
+            </p>
             <div className="flex justify-end space-x-4">
               <button
                 className="bg-gray-500 hover:bg-gray-700 text-white font-bold p-2 rounded"
-                onClick={() => setShowConfirmDialog(false)}
+                onClick={resetConfirmationState}
               >
                 Cancel
               </button>
               <button
                 className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded"
-                onClick={() => {
-                  if (contentToDelete !== null) {
-                    handleRemoveContent(contentToDelete);
-                  }
-                }}
+                onClick={handleDeleteConfirmed}
               >
                 Confirm
               </button>
