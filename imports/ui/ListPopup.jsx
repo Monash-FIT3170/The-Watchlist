@@ -6,6 +6,7 @@ import RenameListModal from "./RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';
 import { useLists } from './ListContext';
+import { getImageUrl } from "./imageUtils";
 
 const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const { handleRemoveContent, fetchLists, lists } = useLists();
@@ -167,7 +168,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
               <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
                 <div className="relative">
                   <img
-                    src={item.image_url}
+                    src={getImageUrl(item.image_url)}
                     alt={item.title}
                     className="w-full h-[35vh] object-cover cursor-pointer"
                     onClick={() => {
