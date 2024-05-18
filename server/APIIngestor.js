@@ -68,7 +68,7 @@ export class APIIngestor {
      */
     async authenticate() {
         const data = await this.fetch("/login", "POST", {
-            apikey: INSERT_API_KEY_HERE
+            apikey: Meteor.settings.TVDB_KEY || process.env.TVDB_KEY
         })
         
         this.#bearerToken = data["data"]["token"];
@@ -165,7 +165,7 @@ export class APIIngestor {
         
     }
 
-    async getAllTV() {
+    async populateTVResults() {
 
     }
 }

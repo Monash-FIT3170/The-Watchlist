@@ -42,7 +42,7 @@ const tvData = {
 }
 
 Meteor.startup(async () => {
-    await TVCollection.dropCollectionAsync();
+    //await TVCollection.dropCollectionAsync();
     // if (await MovieCollection.find().countAsync() === 0 ) {
     //     Movie.insert(movieData);
     // }
