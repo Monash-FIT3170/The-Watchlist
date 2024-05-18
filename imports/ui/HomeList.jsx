@@ -14,11 +14,11 @@ const List = ({ list }) => {
     return (
         <div key={list._id} className="space-y-8">
             {list.map((item) => (
-                <div key={item._id} className="relative w-1/2 h-1/2 mx-auto" onClick={() => handleRedirect(item._id)}>
+                <div key={item._id} className="relative mx-auto" onClick={() => handleRedirect(item._id)}>
                     <div className="relative rounded-lg shadow-lg cursor-pointer overflow-visible">
                         <div className="transition-transform duration-300 ease-in-out transform hover:scale-110">
                             <img
-                                src={item.image_url}
+                                src={item.background_url}
                                 alt={item.title}
                                 className="w-full h-50vh object-cover rounded-lg"
                             />
