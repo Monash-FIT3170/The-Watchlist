@@ -17,6 +17,37 @@ type GetListOptions = {
     userId: string
 }
 
+type AddContentToListOptions = {
+    listId: string,
+    userId: string,
+    content: {
+        content_id: number,
+        title: string,
+        image_url: string,
+        user_rating?: number,
+        type: 'Movie' | 'TV Show' | 'Episode',
+        episode_details?: {
+            season_number: number,
+            episode_number: number
+        }
+    }
+};
+
+const addContentToList: HandlerFunc = {
+    validate: null,
+    run: ({ listId, userId, content }: AddContentToListOptions) => {
+        // Ensure content is in the correct format
+        const contentSummary = new ContentSummary(content).raw();
+
+        ListCollection.update(
+            { _id: listId, userId },  // Ensuring that only the owner can update the list
+            { $push: { content: contentSummary } }
+        );
+        
+        return;
+    }
+};
+
 /**
  * Defines two functions:
  * validate - a validation function to check that the provided parameters are acceptable. Can be null for no validation.
@@ -95,7 +126,8 @@ const ListHandler = new Handler("list")
     .addCreateHandler(createList)
     .addReadHandler(readList)
     .addUpdateHandler(updateList)
-    .addDeleteHandler(deleteList);
+    .addDeleteHandler(deleteList)
+    .addUpdateHandler(addContentToList, "addContent");
 
 console.log('ListHandler setup complete.');
 

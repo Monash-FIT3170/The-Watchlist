@@ -1,8 +1,35 @@
 import React, { useState } from 'react';
 import Modal from './Modal'; 
 
-const MovieInfo = ({ movie, lists }) => { 
+const MovieInfo = ({ movie, initialLists }) => { 
     const [showModal, setShowModal] = useState(false);
+    const [lists, setLists] = useState(initialLists);
+
+    const handleAddContent = (listId, content) => {
+        // UNCOMMENT THIS WHEN WE IMPLEMENT USERS
+        // const userId = Meteor.userId();
+        const userId = 1;
+        
+        Meteor.call('list.addContent', { listId, userId, content }, (error, result) => {
+            if (error) {
+                console.error("Error adding content to list:", error);
+            } else {
+                console.log("Content added to list successfully:", result);
+                
+                // Update the state with the new content
+                setLists(lists.map(list => {
+                    if (list._id === listId) {
+                        return {
+                            ...list,
+                            content: [...list.content, content]
+                        };
+                    }
+                    return list;
+                }));
+                setShowModal(false);
+            }
+        });
+    };
     
     return (
         <div className="flex flex-col items-center justify-end h-screen text-white bg-cover bg-center p-0 relative" style={{ backgroundImage: `url(${movie.image_url})` }}>
@@ -29,7 +56,7 @@ const MovieInfo = ({ movie, lists }) => {
                     </div>
                 </div>
             </div>
-            <Modal show={showModal} onClose={() => setShowModal(false)} lists={lists}/>
+            <Modal show={showModal} onClose={() => setShowModal(false)} lists={lists} movie={movie} onAddContent={handleAddContent} />
         </div>
     );
 };
