@@ -9,7 +9,7 @@ import SearchBar from "./SearchBar.jsx";
 import FullContentList from "./FullContentList.tsx";
 import Home from "./Home.jsx";
 import UserProfile from "./UserProfile.jsx";
-import MovieInfo from "./MovieInfo.tsx";
+import MovieInfo from "./MovieInfo.jsx";
 import TvInfo from "./TvInfo.tsx";
 import NewListModal from "./NewListModal.tsx";
 import { ListsProvider } from './ListContext';

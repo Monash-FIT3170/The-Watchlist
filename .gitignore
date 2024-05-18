@@ -1,3 +1,4 @@
 node_modules/
 .env
 .vscode
+development_secrets.json

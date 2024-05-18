@@ -63,12 +63,31 @@ export const ListsProvider = ({ children }) => {
     });
   };
 
+  const handleAddContent = (listId, content) => {
+    const userId = 1; // Temporary userId: 1
+
+    // Check if the content already exists in the list
+    const list = lists.find(list => list._id === listId);
+    if (list && list.content.some(item => item.content_id === content.content_id)) {
+      console.warn("Content already exists in the list.");
+      return;
+    }
+
+    Meteor.call("list.addContent", { listId, userId, content }, (error) => {
+      if (error) {
+        console.error("Error adding content:", error);
+      } else {
+        fetchLists();
+      }
+    });
+  };
+
   useEffect(() => {
     fetchLists();
   }, []);
 
   return (
-    <ListContext.Provider value={{ lists, fetchLists, handleCreateList, handleDeleteList, handleRenameList, handleRemoveContent }}>
+    <ListContext.Provider value={{ lists, handleAddContent, fetchLists, handleCreateList, handleDeleteList, handleRenameList, handleRemoveContent }}>
       {children}
     </ListContext.Provider>
   );

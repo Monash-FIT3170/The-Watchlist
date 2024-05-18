@@ -7,18 +7,6 @@ import List, { ListCollection } from '../imports/db/List';
 
 import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content';
 
-if (TVCollection.find().count() === 0) {
-    TVCollection.insert({
-        id: 1,
-        title: 'Game of Thrones',
-        overview: 'Nine noble families fight for control over the lands of Westeros, while an ancient enemy returns after being dormant for millennia.',
-        image_url: 'https://example.com/game_of_thrones.jpg',
-        first_aired: new Date('2011-04-17'),
-        genres: ['Drama', 'Fantasy'],
-        seasons: [],
-    });
-}
-
 // Example data sourced from a database similar to TVDB
 
 const movieData = [
@@ -121,8 +109,8 @@ const tvData = [
         "id": 1004,
         "title": "Buffy the Vampire Slayer",
         "overview": "In every generation there is a Chosen One. She alone will stand against the vampires, the demons and the forces of darkness. She is the Slayer.\r\n\r\nBuffy Summers is The Chosen One, the one girl in all the world with the strength and skill to fight the vampires. With the help of her close friends, Willow, Xander, and her Watcher Giles she balances slaying, family, friendships, and relationships.",
-        "image_url": "https://artworks.thetvdb.com/banners/posters/70327-1.jpg",
         "background_url": "https://artworks.thetvdb.com/banners/fanart/original/70327-3.jpg",
+        "image_url": "/banners/posters/70327-1.jpg",
         "first_aired": new Date('1997-03-10'),
         "last_aired": new Date('2003-05-20'),
         "genres": [
@@ -140,7 +128,7 @@ const tvData = [
                         "title": "Welcome to the Hellmouth (1)",
                         "overview": "When teen vampire slayer Buffy tries to start a new life at Sunnydale High, she discovers that the school sits atop a demonic dimensional portal.",
                         "runtime": 43,
-                        "image_url": "https://artworks.thetvdb.com/banners/episodes/70327/2.jpg"
+                        "image_url": "/banners/episodes/70327/2.jpg"
                     }
                 ]
             }
@@ -151,8 +139,8 @@ const tvData = [
         "id": 1005,
         "title": "Breaking Bad",
         "overview": "A high school chemistry teacher turned methamphetamine producer in New Mexico partners with a former student to secure his family's financial future while avoiding detection from law enforcement.",
-        "image_url": "https://artworks.thetvdb.com/banners/posters/81189-1.jpg",
         "background_url": "https://artworks.thetvdb.com/banners/fanart/original/81189-21.jpg",
+        "image_url": "/banners/posters/81189-1.jpg",
         "first_aired": new Date('2008-01-20'),
         "last_aired": new Date('2013-09-29'),
         "genres": [
@@ -170,7 +158,7 @@ const tvData = [
                         "title": "Pilot",
                         "overview": "When an unassuming high school chemistry teacher discovers he has a rare form of lung cancer, he teams up with a former student to create and sell methamphetamine in order to secure his family's future.",
                         "runtime": 58,
-                        "image_url": "https://artworks.thetvdb.com/banners/episodes/81189/335388.jpg"
+                        "image_url": "/banners/episodes/81189/335388.jpg"
                     }
                 ]
             }
@@ -180,8 +168,8 @@ const tvData = [
         "id": 1006,
         "title": "Game of Thrones",
         "overview": "Nine noble families fight for control over the lands of Westeros, while an ancient enemy returns after being dormant for millennia.",
-        "image_url": "https://artworks.thetvdb.com/banners/posters/121361-1.jpg",
         "background_url": "https://artworks.thetvdb.com/banners/fanart/original/121361-15.jpg",
+        "image_url": "/banners/posters/121361-1.jpg",
         "first_aired": new Date('2011-04-17'),
         "last_aired": new Date('2019-05-19'),
         "genres": [
@@ -199,7 +187,7 @@ const tvData = [
                         "title": "Winter Is Coming",
                         "overview": "Eddard Stark is torn between his family and an old friend when asked to serve at the side of King Robert Baratheon; Viserys Targaryen forges a new allegiance to strengthen his quest for the Iron Throne.",
                         "runtime": 62,
-                        "image_url": "https://artworks.thetvdb.com/banners/episodes/121361/2590861.jpg"
+                        "image_url": "/banners/episodes/121361/2590861.jpg"
                     }
                 ]
             }
@@ -209,8 +197,8 @@ const tvData = [
         "id": 1007,
         "title": "Stranger Things",
         "overview": "When a young boy disappears, his mother, a police chief, and his friends must confront terrifying supernatural forces in order to get him back.",
-        "image_url": "https://artworks.thetvdb.com/banners/posters/305288-1.jpg",
         "background_url": "https://artworks.thetvdb.com/banners/v4/series/305288/backgrounds/62907d929e73d.jpg",
+        "image_url": "/banners/posters/305288-1.jpg",
         "first_aired": new Date('2016-07-15'),
         "last_aired": new Date('2022-07-01'),
         "genres": [
@@ -228,7 +216,7 @@ const tvData = [
                         "title": "Chapter One: The Vanishing of Will Byers",
                         "overview": "On his way home from a friend's house, young Will sees something terrifying. Nearby, a sinister secret lurks in the depths of a government lab.",
                         "runtime": 47,
-                        "image_url": "https://artworks.thetvdb.com/banners/episodes/305288/1.jpg"
+                        "image_url": "/banners/episodes/305288/1.jpg"
                     }
                 ]
             }
@@ -238,8 +226,8 @@ const tvData = [
         "id": 1008,
         "title": "The Office",
         "overview": "A mockumentary on a group of typical office workers, where the workday consists of ego clashes, inappropriate behavior, and tedium.",
-        "image_url": "https://artworks.thetvdb.com/banners/posters/73244-1.jpg",
         "background_url": "https://artworks.thetvdb.com/banners/fanart/original/78107-3.jpg",
+        "image_url": "/banners/posters/73244-1.jpg",
         "first_aired": new Date('2005-03-24'),
         "last_aired": new Date('2013-05-16'),
         "genres": [
@@ -257,7 +245,7 @@ const tvData = [
                         "title": "Pilot",
                         "overview": "A documentary crew films the office in this sitcom that portrays the everyday lives of the workers at Dunder Mifflin.",
                         "runtime": 23,
-                        "image_url": "https://artworks.thetvdb.com/banners/episodes/73244/1.jpg"
+                        "image_url": "/banners/episodes/73244/1.jpg"
                     }
                 ]
             }

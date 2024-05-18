@@ -6,9 +6,7 @@ const MovieInfo = ({ movie, initialLists }) => {
     const [lists, setLists] = useState(initialLists);
 
     const handleAddContent = (listId, content) => {
-        // UNCOMMENT THIS WHEN WE IMPLEMENT USERS
-        // const userId = Meteor.userId();
-        const userId = 1;
+        const userId = 1; // Temporary userId: 1
         
         Meteor.call('list.addContent', { listId, userId, content }, (error, result) => {
             if (error) {
@@ -56,7 +54,7 @@ const MovieInfo = ({ movie, initialLists }) => {
                     </div>
                 </div>
             </div>
-            <Modal show={showModal} onClose={() => setShowModal(false)} lists={lists} movie={movie} onAddContent={handleAddContent} />
+            <Modal show={showModal} onClose={() => setShowModal(false)} content={movie} type="Movie" />
         </div>
     );
 };
