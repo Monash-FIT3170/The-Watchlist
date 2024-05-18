@@ -14,7 +14,7 @@ import TvInfo from "./TvInfo.tsx";
 import NewListModal from "./NewListModal.tsx";
 import { ListsProvider } from './ListContext';
 // import Profile from './Profile.jsx';
-// import AIPicks from './AIPicks.jsx';
+import AIPicks from './AIPicks.jsx';
 
 const FetchTest = () => {
   useEffect(() => {
@@ -60,6 +60,7 @@ const staticNavbarData = [
 ];
 
 export const App = () => {
+
   // State to hold movies from the backend
 
   const [movies, setMovies] = useState([]);
@@ -96,6 +97,7 @@ export const App = () => {
               <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} />} />
               <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<UserProfile />} />
+              <Route path="/ai-picks" element={ <AIPicks/> } />
               {movies.map((movie) => (
                 <Route key={movie.id} path={`/Movie${movie.id}`} element={<MovieInfo movie={movie} />} />
               ))}
