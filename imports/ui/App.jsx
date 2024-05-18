@@ -97,7 +97,7 @@ export const App = () => {
               <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} />} />
               <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<UserProfile />} />
-              <Route path="/ai-picks" element={ <AIPicks/> } />
+              <Route path="/ai-picks" element={ <AIPicks movies={movies} tvs={tvs}/>}  />
               {movies.map((movie) => (
                 <Route key={movie.id} path={`/Movie${movie.id}`} element={<MovieInfo movie={movie} />} />
               ))}

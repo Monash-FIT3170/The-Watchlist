@@ -3,11 +3,10 @@ import dummyLists from './DummyLists.jsx';
 import ContentList from './ContentList.tsx';
 import { useLists } from './ListContext'; // Import the context
 
-export default function AIPicks() {
+export default function AIPicks({ movies, tvs }) {
     const currentUser = 1;
-
-    console.log("movies and tvs")
-    // console.log(movies)
+    console.log("Movies")
+    console.log(movies)
     // console.log(tvs)
 
     // Use react "state" to keep track of whether the component is displaying movies or TV shows
@@ -18,14 +17,20 @@ export default function AIPicks() {
 
     // Filter lists to get only the ones associated with the current user
     const { lists } = useLists(); // Use lists from context
-    console.log("lists:");
-    console.log(lists);
+    // console.log("lists:");
+    // console.log(lists);
+
+    const actionMovies = movies.filter(item => item.genres.includes("Action")).slice(0,10);
+    const horrorMovies = movies.filter(item => item.genres.includes("Horror")).slice(0,10);
+    const comedyMovies = movies.filter(item => item.genres.includes("Comedy")).slice(0,10);
+    console.log("Action Movies");
+    console.log(actionMovies);
 
     useEffect(() => {
-        if (lists && lists.length > 0) {
+        if (movies && movies > 0) {
             setIsLoading(false); // Set loading to false when lists are loaded
         }
-    }, [lists]);
+    }, [movies]);
 
     if (isLoading) {
         return <div>Loading...</div>; // Show loading indicator while lists are loading
