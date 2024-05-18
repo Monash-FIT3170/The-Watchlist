@@ -7,6 +7,18 @@ import List, { ListCollection } from '../imports/db/List';
 
 import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content';
 
+if (TVCollection.find().count() === 0) {
+    TVCollection.insert({
+        id: 1,
+        title: 'Game of Thrones',
+        overview: 'Nine noble families fight for control over the lands of Westeros, while an ancient enemy returns after being dormant for millennia.',
+        image_url: 'https://example.com/game_of_thrones.jpg',
+        first_aired: new Date('2011-04-17'),
+        genres: ['Drama', 'Fantasy'],
+        seasons: [],
+    });
+}
+
 // Example data sourced from a database similar to TVDB
 
 const movieData = [
@@ -99,7 +111,7 @@ const movieData = [
 
 const tvData = [
     {
-        "id": 1,
+        "id": 1004,
         "title": "Buffy the Vampire Slayer",
         "overview": "In every generation there is a Chosen One. She alone will stand against the vampires, the demons and the forces of darkness. She is the Slayer.\r\n\r\nBuffy Summers is The Chosen One, the one girl in all the world with the strength and skill to fight the vampires. With the help of her close friends, Willow, Xander, and her Watcher Giles she balances slaying, family, friendships, and relationships.",
         "image_url": "https://artworks.thetvdb.com/banners/posters/70327-1.jpg",
@@ -127,7 +139,7 @@ const tvData = [
         ]
     },
     {
-        "id": 2,
+        "id": 1005,
         "title": "Breaking Bad",
         "overview": "A high school chemistry teacher turned methamphetamine producer in New Mexico partners with a former student to secure his family's financial future while avoiding detection from law enforcement.",
         "image_url": "https://artworks.thetvdb.com/banners/posters/81189-1.jpg",
@@ -155,7 +167,7 @@ const tvData = [
         ]
     },
     {
-        "id": 3,
+        "id": 1006,
         "title": "Game of Thrones",
         "overview": "Nine noble families fight for control over the lands of Westeros, while an ancient enemy returns after being dormant for millennia.",
         "image_url": "https://artworks.thetvdb.com/banners/posters/121361-1.jpg",
@@ -183,7 +195,7 @@ const tvData = [
         ]
     },
     {
-        "id": 4,
+        "id": 1007,
         "title": "Stranger Things",
         "overview": "When a young boy disappears, his mother, a police chief, and his friends must confront terrifying supernatural forces in order to get him back.",
         "image_url": "https://artworks.thetvdb.com/banners/posters/305288-1.jpg",
@@ -211,7 +223,7 @@ const tvData = [
         ]
     },
     {
-        "id": 5,
+        "id": 1008,
         "title": "The Office",
         "overview": "A mockumentary on a group of typical office workers, where the workday consists of ego clashes, inappropriate behavior, and tedium.",
         "image_url": "https://artworks.thetvdb.com/banners/posters/73244-1.jpg",
@@ -248,6 +260,15 @@ Meteor.startup(async () => {
     console.log("[DEV] THIS SHOULD BE REMOVED IN FUTURE.")
     await ListCollection.dropCollectionAsync()
 
+    try {
+        TVCollection._dropIndex('seasons.episodes.title');
+    } catch (error) {
+        console.log('Index seasons.episodes.title does not exist or already dropped');
+    }
+
+    // Log the indexes to verify
+    TVCollection.rawCollection().indexes().then(indexList => console.log('TV Collection Indexes:', indexList));
+
 
     console.log('Inserting movie data...');
     movieData.forEach(movie => {
@@ -268,9 +289,16 @@ Meteor.startup(async () => {
             user_rating: 4.8
         },
         {
-            content_id: tvData[0].id,
-            title: tvData[0].title,
-            image_url: tvData[0].image_url,
+            content_id: movieData[1].id,
+            title: movieData[1].title,
+            image_url: movieData[1].image_url,
+            type: "Movie",
+            user_rating: 4.5
+        },
+        {
+            content_id: tvData[1].id,
+            title: tvData[1].title,
+            image_url: tvData[1].image_url,
             type: "TV Show",
             user_rating: 4.5
         },
@@ -278,7 +306,7 @@ Meteor.startup(async () => {
             content_id: tvData[0].id,
             title: tvData[0].title,
             image_url: tvData[0].image_url,
-            type: "Episode",
+            type: "TV Show",
             user_rating: 4.7,
             episode_details: {
                 season_number: tvData[0].seasons[0].season_number,

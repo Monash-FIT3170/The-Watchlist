@@ -2,9 +2,11 @@ import React from 'react';
 import ContentList from './ContentList';
 import ProfileCard from './ProfileCard'; // Import the new ProfileCard component
 import CustomWatchLists from './CustomWatchLists';
+import { useLists } from './ListContext'; // Import the context
 
-export default function UserProfile({ lists }) {
+export default function UserProfile() { // Remove lists prop
   const currentUser = 1;
+  const { lists } = useLists(); // Use lists from context
 
   const userLists = lists.filter(list => list.userId === currentUser);
   const userInfo = userLists[0] || {};
