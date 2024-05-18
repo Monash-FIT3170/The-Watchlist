@@ -88,7 +88,7 @@ Meteor.startup(async () => {
     //     });
     // }
 
-    if (Meteor.isServer) {
+    if (Meteor.isServer && Meteor.settings.TVDB_KEY) {
         const ingestor = new APIIngestor();
         ingestor.authenticate()
             .then(() => {

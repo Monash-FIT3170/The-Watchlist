@@ -9,6 +9,11 @@ Setup information:
 To start the project:
 ```meteor run```
 
+### Running the Ingestor:
+You will need to put a TVDB key API key in a `development_secrets.json` file in the root directory (see the example file).
+
+Then, run the ingestor by starting Meteor with `meteor run --settings development_secrets.json`.
+
 ## Team Member Information
 
 ### Agile Team 1
