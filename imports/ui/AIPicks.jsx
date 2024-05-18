@@ -8,8 +8,8 @@ export default function AIPicks() {
     const currentUser = 1;
 
     console.log("movies and tvs")
-    console.log(movies)
-    console.log(tvs)
+    // console.log(movies)
+    // console.log(tvs)
 
     // Use react "state" to keep track of whether the component is displaying movies or TV shows
     const DISPLAY_MOVIES = "Display Movie"
@@ -27,10 +27,10 @@ export default function AIPicks() {
 
     const userInfo = userLists[0] || {};
 
-    const actionComedyList = userLists.find(list => list.title === "Action Comedies");
-    const sciFiList = userLists.find(list => list.title === "Sci-Fi Favorites");
-    const toWatchList = userLists.find(list => list.listType === "To Watch");
-    const customWatchlists = userLists.filter(list => list.listId != "favorite-shows" && list.listId != "must-watch")
+    // const actionComedyList = userLists.find(list => list.title === "Action Comedies");
+    // const sciFiList = userLists.find(list => list.title === "Sci-Fi Favorites");
+    // const toWatchList = userLists.find(list => list.listType === "To Watch");
+    const customWatchlists = userLists.filter(list => list.listType === "Custom");
 
     // Method to get movies within content list
     function filterForMovies(watchList) {
@@ -84,16 +84,18 @@ export default function AIPicks() {
                 {/* Display Movies */}
                 {display === DISPLAY_MOVIES && (
                     <>
-                        <ContentList key={filterForMovies(actionComedyList)._id} list={filterForMovies(actionComedyList)} />
-                        <ContentList key={filterForMovies(sciFiList)._id} list={filterForMovies(sciFiList)} />
+                        {customWatchlists.map(list => (
+                            <ContentList key={filterForMovies(list)._id} list={filterForMovies(list)} />
+                        ))}
                     </>
                 )}
 
                 {/* Display TV Shows */}
                 {display === DISPLAY_SHOWS && (
                     <>
-                        <ContentList key={filterForShows(actionComedyList)._id} list={filterForShows(actionComedyList)} />
-                        <ContentList key={filterForShows(sciFiList)._id} list={filterForShows(sciFiList)} />
+                        {customWatchlists.map(list => (
+                            <ContentList key={filterForShows(list)._id} list={filterForShows(list)} />
+                        ))}
                     </>
                 )}
             </div>
