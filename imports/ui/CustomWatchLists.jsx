@@ -1,11 +1,14 @@
 import React from 'react';
 import { Link } from "react-router-dom";
+import ListPopup from './ListPopup';
+import usePopup from './usePopup';
 
 export default function CustomWatchLists({listData: watchlists}) {
     // Divide the listData into rows of 4 
     const itemsPerRow = 4;
     let rows = [];
     let currentRow = []; 
+    const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
 
     for (let i = 0; i < watchlists.length; i++) {
         // Push the current watchlist to the current row array
@@ -27,19 +30,27 @@ export default function CustomWatchLists({listData: watchlists}) {
             {rows.map((row, index) => (
                 <div key={index} className="flex justify-between">
                     {row.map(watchlist => (
-                        <div key={watchlist.listId} className="w-1/4 px-2">
-                            <Link to={`/${watchlist.listId}`} className="block mb-4 flex items-center rounded-lg hover:bg-dark">
+                        <div key={watchlist._id} className="w-1/4 px-2">
+                            <button onClick={() => handleItemClick(watchlist)} className=" mb-4 flex px-4 items-center rounded-lg hover:bg-dark">
                                 <img
                                     src={watchlist.content[0]?.image_url || './path_to_default_image.jpg'}
                                     alt={watchlist.title}
                                     className="w-16 h-16 rounded-lg mr-2"
                                 />
                                 <p className="text-white text-sm font-semibold">{watchlist.title}</p>
-                            </Link>
+                            </button>
                         </div>
                     ))}
                 </div>
             ))}
+            {isPopupOpen && selectedList && (
+        <ListPopup
+          list={selectedList}
+          onClose={handleClosePopup}
+          onDeleteList={() => console.log("Delete list")}
+          onRenameList={() => console.log("Rename list")}
+        />
+      )}
         </div>
     );
 }

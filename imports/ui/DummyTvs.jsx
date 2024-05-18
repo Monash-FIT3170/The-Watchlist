@@ -7,8 +7,14 @@ const dummyTVs = [
     image_url: "./ExampleResources/seinfeld.jpg",
     first_aired: new Date("1989-07-05"),
     last_aired: new Date("1998-05-14"),
-    seasons: [], // Example placeholder, no detailed seasons/episodes provided
-    genres: ["Comedy"]
+    rating: 9.0,
+    age_rating: "PG",
+    seasons: [
+      "Season 1",
+      "Season 2",
+      "Season 3"
+      // Add more seasons as needed
+    ]
   },
   {
     id: 2,
@@ -17,8 +23,14 @@ const dummyTVs = [
     image_url: "./ExampleResources/friends.jpg",
     first_aired: new Date("1994-09-22"),
     last_aired: new Date("2004-05-06"),
-    seasons: [], // Example placeholder, no detailed seasons/episodes provided
-    genres: ["Comedy", "Drama"]
+    rating: 8.5,
+    age_rating: "PG",
+    seasons: [
+      "Season 1",
+      "Season 2",
+      "Season 3"
+      // Add more seasons as needed
+    ] // Example placeholder, no detailed seasons/episodes provided
   },
   {
     id: 3,
@@ -27,8 +39,9 @@ const dummyTVs = [
     image_url: "./ExampleResources/planet-earth.jpeg",
     first_aired: new Date("2006-03-05"),
     last_aired: new Date("2006-12-10"),
-    seasons: [], // Example placeholder, no detailed seasons/episodes provided
-    genres: ["Documentary", "Nature"]
+    rating: 9.7,
+    age_rating: "G",
+    seasons: [] // Example placeholder, no detailed seasons/episodes provided
   },
   {
     id: 4,
@@ -37,8 +50,9 @@ const dummyTVs = [
     image_url: "./ExampleResources/fresh-prince.jpg",
     first_aired: new Date("1990-09-10"),
     last_aired: new Date("1996-05-20"),
-    seasons: [], // Example placeholder, no detailed seasons/episodes provided
-    genres: ["Comedy", "Family"]
+    rating: 8.8,
+    age_rating: "PG",
+    seasons: [] // Example placeholder, no detailed seasons/episodes provided
   }
 ];
 

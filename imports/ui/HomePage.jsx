@@ -92,7 +92,7 @@ export default HomePage = ({ listData }) => {
       {/* Displaying Custom lists */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px', padding: '10px' }}>
         {customLists.map(list => (
-          <div key={list.listId} onClick={() => handleNavigate(list.listId)} style={{
+          <div key={list._id} onClick={() => handleNavigate(list._id)} style={{
             display: 'flex', 
             alignItems: 'center', 
             backgroundColor: '#282525',  // Dark background
@@ -116,10 +116,10 @@ export default HomePage = ({ listData }) => {
 
       {/* Displaying Favourite and To Watch lists */}
       {favoriteList.map(list => (
-        <ContentList key={list.listId} list={list} />
+        <ContentList key={list._id} list={list} />
       ))}
       {toWatchList.map(list => (
-        <ContentList key={list.listId} list={list} />
+        <ContentList key={list._id} list={list} />
       ))}
 
       

@@ -25,6 +25,7 @@ module.exports = {
       },
       height: {
         'custom': 'calc(100vh - 2rem)',
+        '35vh': '35vh',
       },
     },
     
