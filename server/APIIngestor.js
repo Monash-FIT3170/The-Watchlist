@@ -147,7 +147,7 @@ export class APIIngestor {
                     id: series.id,
                     title: series.name,
                     overview: series.overview.replace(/(\r\n|\n|\r)/gm, " "),
-                    image_url: series.image,
+                    image_url: series.image ? `https://artworks.thetvdb.com${series.image}` : "",
                     first_aired: Date.parse(series.firstAired),
                     last_aired: Date.parse(series.lastAired),
                     
@@ -166,8 +166,79 @@ export class APIIngestor {
     }
 
     async populateTVResults() {
-        
+        const cursor = TVCollection.find({}, {fields: {_id: 0, id: 1}});
+        let count = 1;
 
+        let mongoOperations = [];
+
+        for await (const series of cursor) {
+
+            // Retrieve and process episode data
+            const episodeURL = `/series/${series.id}/episodes/official`;
+            console.log(`Retrieving URL: ${episodeURL}`);
+            let episodeData = await this.fetch(episodeURL);
+
+            let seasonData = {}
+            for (const episode of episodeData.data.episodes) {
+                // Ignore extra episodes that were not aired
+                if (episode.aired == null) { continue; }
+
+                if (!(episode.seasonNumber in seasonData)) {
+                    seasonData[episode.seasonNumber] = { season_number: episode.seasonNumber, episodes: []}
+                } 
+
+                const episodeData = {
+                    id: episode.id,
+                    title: episode.name,
+                    overview: episode.overview,
+                    runtime: parseInt(episode.runtime),
+                    image_url: episode.image
+                }
+
+                seasonData[episode.seasonNumber].episodes.push(episodeData);
+            }
+
+
+            // Retrieve and process genre data
+            const genreURL = `/series/${series.id}/extended?short=true`
+            console.log(`Retrieving URL: ${genreURL}`);
+            let genreData = await this.fetch(genreURL);
+
+            let genres = []
+
+            if (genreData["data"]["genres"] != null) {
+                genres = genreData["data"]["genres"].map((genre) => genre["name"]);
+            }
+
+            // Store the operation to perform with a bulk write at the end
+
+            const mongoOperation = {
+                "updateOne": {
+                    "filter": { "id": series.id },
+                    "update": { "$set": { seasons: seasonData, genres: genres } }
+                }
+            }
+
+            // Add this operation to the overall Mongo operations to perform
+            mongoOperations.push(mongoOperation);
+
+            // Check if we should now bulk write
+
+            if (count % 100 == 0) {
+                console.log("Performing Mongo Bulk Write")
+                await TVCollection.rawCollection().bulkWrite(mongoOperations);
+                count = 0;
+            }
+
+            count += 1;
+
+        }
+
+        // Write any remaining changes
+        console.log("Performing final Mongo Bulk Write")
+        await TVCollection.rawCollection.bulkWrite(mongoOperations);
+
+        print("Finished populating all episode and genre data for TV shows")
     }
 }
 
