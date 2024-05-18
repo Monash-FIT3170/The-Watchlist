@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ContentItem from './ContentItem';
 import usePopup from './usePopup';
 import ListPopup from './ListPopup';
+import { getImageUrl } from './imageUtils';
 
 interface ContentItemData {
   image_url: string;  // Use image_url instead of src
@@ -65,7 +66,7 @@ const ContentList: React.FC<ContentListProps> = ({ list }) => {
       </div>
       <div ref={containerRef} className="flex justify-flex-start items-start overflow-hidden">
         {React.Children.toArray(list.content.map((item, index) => (
-          <ContentItem key={index} id={item.content_id} type={item.type} src={item.image_url} alt={item.title} rating={4} />
+          <ContentItem key={index} id={item.content_id} type={item.type} src={getImageUrl(item.image_url)} alt={item.title} rating={4} />
         ))).slice(0, visibleContentCount)}
       </div>
       {isPopupOpen && selectedList && (

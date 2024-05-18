@@ -6,6 +6,7 @@ import RenameListModal from "./RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';
 import { useLists } from './ListContext';
+import { getImageUrl } from "./imageUtils";
 
 const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const { handleRemoveContent, fetchLists, lists } = useLists();
@@ -21,6 +22,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const [contentToDelete, setContentToDelete] = useState(null);
   const [listToDelete, setListToDelete] = useState(null);
   const [updatedList, setUpdatedList] = useState(list); // Track updated list
+  const [selectedTab, setSelectedTab] = useState('all'); // Track selected tab
   const navigate = useNavigate();
 
   const handleRedirect = (type, id) => {
@@ -127,6 +129,12 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
     setListToDelete(null);
   };
 
+  const filteredContent = updatedList.content.filter(item => 
+    selectedTab === 'all' || 
+    (selectedTab === 'movies' && item.type === 'Movie') || 
+    (selectedTab === 'tv shows' && item.type === 'TV Show')
+  );
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div
@@ -158,16 +166,28 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
             </button>
           </div>
         </div>
+        <div className="bubbles-container flex justify-start mt-2">
+          {['all', 'movies', 'tv shows'].map((tab) => (
+            <div
+              key={tab}
+              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
+                  } border-transparent border`}
+              onClick={() => setSelectedTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </div>
+          ))}
+        </div>
         <div
           ref={scrollContainerRef}
           className="space-y-8 overflow-y-auto max-h-[calc(100vh-10rem)]"
         >
-          {updatedList.content.map((item) => (
+          {filteredContent.map((item) => (
             <div key={item.content_id} className="block relative">
               <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
                 <div className="relative">
                   <img
-                    src={item.image_url}
+                    src={getImageUrl(item.image_url)}
                     alt={item.title}
                     className="w-full h-[35vh] object-cover cursor-pointer"
                     onClick={() => {

@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from 'react-router-dom';
 import RatingStar from './RatingStar';
 import { useLists } from './ListContext'; // Import the context
+import { getImageUrl } from "./imageUtils";
 
 const List = ({ list }) => {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ const List = ({ list }) => {
                     <div className="relative rounded-lg shadow-lg cursor-pointer overflow-visible">
                         <div className="transition-transform duration-300 ease-in-out transform hover:scale-110">
                             <img
-                                src={item.image_url}
+                                src={getImageUrl(item.image_url)}
                                 alt={item.title}
                                 className="w-full h-35vh object-cover rounded-lg"
                             />

@@ -3,6 +3,7 @@ import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai'
 import ContentItem from './ContentItem';
 import ListDisplay from './ListDisplay';
 import { useLists } from './ListContext'
+import { getImageUrl } from './imageUtils';
 
 const SearchBar = ({ movies, tvs }) => {
     const { lists } = useLists();
@@ -282,7 +283,7 @@ const SearchBar = ({ movies, tvs }) => {
                 {selectedTab === 'tv shows' && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {filteredData.tvShows.length > 0 ? filteredData.tvShows.map(tv => (
-                            <ContentItem key={tv.id} id={tv.id} type="TV Show" src={tv.image_url} alt={tv.title} rating={tv.rating || undefined} />
+                            <ContentItem key={tv.id} id={tv.id} type="TV Show" src={getImageUrl(tv.image_url)} alt={tv.title} rating={tv.rating || undefined} />
                         )) : <div>No TV shows available.</div>}
                     </div>
                 )}
