@@ -43,56 +43,13 @@ const tvData = {
 
 Meteor.startup(async () => {
     //await TVCollection.dropCollectionAsync();
-    // if (await MovieCollection.find().countAsync() === 0 ) {
-    //     Movie.insert(movieData);
-    // }
-
-    // if (await TVCollection.find().countAsync() === 0) {
-    //     TV.insert(tvData);
-    // }
-
-    // if (await List.find().countAsync() === 0) {
-    //     data = [
-    //         {
-    //             content_id: movieData.id,
-    //             title: movieData.title,
-    //             image_url: movieData.image_url,
-    //             type: "Movie",
-    //         },
-    //         {
-    //             content_id: tvData.id,
-    //             title: tvData.title,
-    //             image_url: tvData.image_url,
-    //             type: "TV Show",
-    //             user_rating: 3.1
-    //         },
-    //         {
-    //             content_id: tvData.id,
-    //             title: tvData.title,
-    //             image_url: tvData.image_url,
-    //             type: "Episode",
-    //             user_rating: 3.1,
-    //             episode_details: {
-    //                 season_number: tvData.seasons[0].season_number,
-    //                 episode_number: tvData.seasons[0].episodes[0].id
-    //             }
-    //         }
-    //     ];
-    //     List.insert({
-    //         userId: 1,
-    //         userName: "Test User",
-    //         title: "My First Test List",
-    //         description: "Here is an example description, but it might be a lot longer!",
-    //         listType: "Favourite",
-    //         content: data
-    //     });
-    // }
 
     if (Meteor.isServer && Meteor.settings.TVDB_KEY) {
         const ingestor = new APIIngestor();
         ingestor.authenticate()
             .then(() => {
-                ingestor.populateTVResults();
+                //ingestor.populateTVResults();
+                //ingestor.getArtwork();
             });
     }
 

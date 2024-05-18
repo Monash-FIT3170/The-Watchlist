@@ -36,6 +36,9 @@ export const Movie = Class.create({
         image_url: {
             type: String
         },
+        background_url: {
+            type: String
+        },
         runtime: {
             type: Number
         },
@@ -111,6 +114,9 @@ export const TV = Class.create({
             type: String
         },
         image_url: {
+            type: String
+        },
+        background_url: {
             type: String
         },
         first_aired: {

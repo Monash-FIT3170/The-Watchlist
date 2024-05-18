@@ -1,6 +1,8 @@
 require('dotenv').config();
 const axios = require('axios').default;
 
+const fs = require("node:fs");
+
 const { MovieCollection, TVCollection } = require("../imports/db/Content");
 
 export class APIIngestor {
@@ -13,6 +15,8 @@ export class APIIngestor {
     });
 
     #bearerToken;
+
+    #failures = []
 
     /**
      * Utility method to make a HTTP request, catching and displaying any errors.
@@ -36,9 +40,15 @@ export class APIIngestor {
             config["headers"] = { "Authorization": `Bearer ${this.#bearerToken}` }
         }
 
+        let properFail = false;
+
         let req_data = await this.#instance.request(config)
         .catch((error) => {
             if (error.response) {
+                if (error.response.status == 500) {
+                    this.#failures.push(config.url);
+                    properFail = true;
+                }
                 console.log(error.response.data);
                 console.log(error.response.status);
                 console.log(error.response.headers);
@@ -51,6 +61,10 @@ export class APIIngestor {
 
             console.log(error.config);
         });
+
+
+        // Can't recover from some errors (due to API issues), so give up on this request.
+        if (properFail) { return null; }
 
         // Retry some queries when the API decides to randomly die on us
         if (!req_data) {
@@ -83,6 +97,8 @@ export class APIIngestor {
             console.log(`Retrieving URL: ${next}`)
             let currentData = await this.fetch(next);
 
+            
+
             for (const movie of currentData.data) {
                 const movieData = {
                     id: movie.id,
@@ -100,6 +116,11 @@ export class APIIngestor {
                 // console.log(`Getting extended data for movie: ${movie.id}`)
                 // Get the extended movie data, which also includes the overviews.
                 let extendedData = await this.fetch(`/movies/${movie.id}/extended?meta=translations&short=true`);
+
+                if (extendedData == null) {
+                    console.log("[FAIL] Unsalvagable error on fetch request. Continuing.");
+                    continue;
+                }
 
                 // Iterate over each overview translation until we find the english one (or choose the first)
                 if (extendedData["data"]["translations"]["overviewTranslations"] != null) {
@@ -166,7 +187,7 @@ export class APIIngestor {
     }
 
     async populateTVResults() {
-        const cursor = TVCollection.find({}, {fields: {_id: 0, id: 1}});
+        const cursor = TVCollection.find({"seasons": {"$ne": []}}, {fields: {_id: 0, id: 1}});
         let count = 1;
 
         let mongoOperations = [];
@@ -177,6 +198,11 @@ export class APIIngestor {
             const genreURL = `/series/${series.id}/extended?meta=episodes&short=true`
             console.log(`Retrieving URL: ${genreURL}`);
             let extendedData = await this.fetch(genreURL);
+
+            if (extendedData == null) {
+                console.log("[FAIL] Unsalvagable error on fetch request. Continuing.");
+                continue;
+            }
 
             let genres = []
 
@@ -216,7 +242,7 @@ export class APIIngestor {
             const mongoOperation = {
                 "updateOne": {
                     "filter": { "id": series.id },
-                    "update": { "$set": { seasons: seasonData, genres: genres } }
+                    "update": { "$set": { seasons: Object.values(seasonData), genres: genres } }
                 }
             }
 
@@ -235,10 +261,79 @@ export class APIIngestor {
         }
 
         // Write any remaining changes
-        console.log("Performing final Mongo Bulk Write")
-        await TVCollection.rawCollection.bulkWrite(mongoOperations);
+        if (mongoOperations.length > 0) {
+            console.log("Performing final Mongo Bulk Write")
+            await TVCollection.rawCollection().bulkWrite(mongoOperations);
+        }
 
-        print("Finished populating all episode and genre data for TV shows")
+        console.log("Finished populating all episode and genre data for TV shows")
+
+        this.appendFailures();
+    }
+
+    async getArtwork() {
+        const cursor = TVCollection.find({"background_url": {"$exists": false}}, {fields: {_id: 0, id: 1}});
+        let count = 1;
+
+        let mongoOperations = [];
+
+        for await (const series of cursor) {
+
+            // Get the background artwork for this series
+            const artworkRequestURL = `/series/${series.id}/artworks?type=3`
+            console.log(`Retrieving URL: ${artworkRequestURL}`);
+            let artworkData = await this.fetch(artworkRequestURL);
+
+            if (artworkData == null) {
+                console.log("[FAIL] Unsalvagable error on fetch request. Continuing.");
+                continue;
+            }
+
+            if (artworkData["data"]["artworks"] != null && artworkData["data"]["artworks"].length > 0) {
+                const mongoOperation = {
+                    "updateOne": {
+                        "filter": { "id": series.id },
+                        "update": { "$set": { "background_url": artworkData["data"]["artworks"][0]["image"] } }
+                    }
+                }
+    
+                // Add this operation to the overall Mongo operations to perform
+                mongoOperations.push(mongoOperation);
+            }
+
+            
+
+            // Check if we should now bulk write
+
+            if (count % 100 == 0) {
+                console.log("Performing Mongo Bulk Write")
+                await TVCollection.rawCollection().bulkWrite(mongoOperations);
+            }
+
+            count += 1;
+
+        }
+
+        // Write any remaining changes
+        if (mongoOperations.length > 0) {
+            console.log("Performing final Mongo Bulk Write")
+            await TVCollection.rawCollection().bulkWrite(mongoOperations);
+        }
+
+        console.log("Finished populating all background artworks for TV shows")
+
+        this.appendFailures();
+
+    }
+
+    async appendFailures() {
+        fs.appendFile("./ingestor_errors.json", JSON.stringify(this.#failures), err => {
+            if (err) {
+                console.error(err);
+            }
+        });
+
+        this.#failures = [];
     }
 }
 
