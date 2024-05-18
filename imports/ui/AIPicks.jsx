@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import dummyLists from './DummyLists.jsx';
 import ContentList from './ContentList.tsx';
-import { useLists } from './ListContext'; // Import the context
 
 export default function AIPicks({ movies, tvs }) {
-    const currentUser = 1;
-    console.log("Movies")
-    console.log(movies)
+    // console.log("Movies")
+    // console.log(movies)
     // console.log(tvs)
 
     // Use react "state" to keep track of whether the component is displaying movies or TV shows
@@ -15,57 +12,44 @@ export default function AIPicks({ movies, tvs }) {
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
     const [isLoading, setIsLoading] = useState(true); // Loading state
 
-    // Filter lists to get only the ones associated with the current user
-    const { lists } = useLists(); // Use lists from context
-    // console.log("lists:");
-    // console.log(lists);
-
-    const actionMovies = movies.filter(item => item.genres.includes("Action")).slice(0,10);
-    const horrorMovies = movies.filter(item => item.genres.includes("Horror")).slice(0,10);
-    const comedyMovies = movies.filter(item => item.genres.includes("Comedy")).slice(0,10);
-    console.log("Action Movies");
-    console.log(actionMovies);
-
-    useEffect(() => {
-        if (movies && movies > 0) {
-            setIsLoading(false); // Set loading to false when lists are loaded
+    // Create content lists for each genre
+    genres = [
+        "Action", "Adventure", "Animation", "Anime", "Awards Show", "Children",
+        "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "Food",
+        "Game Show", "History", "Home and Garden", "Horror", "Indie", "Martial Arts",
+        "Mini-Series", "Musical", "Mystery", "News", "Podcast", "Reality",
+        "Romance", "Science Fiction", "Soap", "Sport", "Suspense", "Talk Show",
+        "Thriller", "Travel", "War", "Western"
+    ]
+    let movieContentLists = []
+    let showContentLists = []
+    genres.forEach(genre => {
+        const genreMovies = movies.filter(item => item.genres.includes(genre)).slice(0, 10)
+        const movieContentList = {
+            listId: genre + "Movies",
+            title: genre,
+            content: genreMovies
         }
-    }, [movies]);
+        movieContentLists.push(movieContentList)
 
-    if (isLoading) {
-        return <div>Loading...</div>; // Show loading indicator while lists are loading
-    }
+        const genreShows = tvs.filter(item => item.genres.includes(genre)).slice(0, 10)
+        const showContentList = {
+            listId: genre + "Shows",
+            title: genre,
+            content: genreShows
+        }
+        showContentLists.push(showContentList)
+    })
 
-    const userLists = lists.filter(list => list.userId === currentUser);
-    console.log("userLists");
-    console.log(userLists);
+    // useEffect(() => {
+    //     if (movies && movies > 0) {
+    //         setIsLoading(false); // Set loading to false when lists are loaded
+    //     }
+    // }, [movies]);
 
-    const userInfo = userLists[0] || {};
-
-    // const actionComedyList = userLists.find(list => list.title === "Action Comedies");
-    // const sciFiList = userLists.find(list => list.title === "Sci-Fi Favorites");
-    // const toWatchList = userLists.find(list => list.listType === "To Watch");
-    const customWatchlists = userLists.filter(list => list.listType === "Custom");
-
-    // Method to get movies within content list
-    function filterForMovies(watchList) {
-        if (!watchList || !watchList.content) return { content: [] }; // Check for null or undefined watchList
-        const movies = watchList.content.filter(item => item.type === 'Movie');
-        return {
-            ...watchList,
-            content: movies
-        };
-    }
-
-    // Method to get tv shows within content list
-    function filterForShows(watchList) {
-        if (!watchList || !watchList.content) return { content: [] }; // Check for null or undefined watchList
-        const shows = watchList.content.filter(item => item.type === 'TV Show');
-        return {
-            ...watchList,
-            content: shows
-        };
-    }
+    // if (isLoading) {
+    //     return <div>Loading...</div>; // Show loading indicator while lists are loading
+    // }
 
     return (
         <div className="flex flex-col gap-6 overflow-y-hidden h-custom">
@@ -89,19 +73,19 @@ export default function AIPicks({ movies, tvs }) {
             </div>
             <div className="overflow-y-auto scrollbar-webkit">
                 {/* Display Movies */}
-                {display === DISPLAY_MOVIES && customWatchlists && (
+                {display === DISPLAY_MOVIES && movieContentLists && (
                     <>
-                        {customWatchlists.map(list => (
-                            <ContentList key={filterForMovies(list)._id} list={filterForMovies(list)} />
+                        {movieContentLists.map(list => (
+                            <ContentList key={list._id} list={list} />
                         ))}
                     </>
                 )}
 
                 {/* Display TV Shows */}
-                {display === DISPLAY_SHOWS && customWatchlists && (
+                {display === DISPLAY_SHOWS && showContentLists && (
                     <>
-                        {customWatchlists.map(list => (
-                            <ContentList key={filterForShows(list)._id} list={filterForShows(list)} />
+                        {showContentLists.map(list => (
+                            <ContentList key={list._id} list={list} />
                         ))}
                     </>
                 )}
