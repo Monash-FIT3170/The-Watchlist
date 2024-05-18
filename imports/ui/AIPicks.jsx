@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import MovieList from './MovieList.jsx';
 import dummyLists from './DummyLists.jsx';
 import ContentList from './ContentList.tsx';
 
