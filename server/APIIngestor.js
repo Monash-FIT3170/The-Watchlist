@@ -1,7 +1,7 @@
 require('dotenv').config();
 const axios = require('axios').default;
 
-const { MovieCollection } = require("../imports/db/Content");
+const { MovieCollection, TVCollection } = require("../imports/db/Content");
 
 export class APIIngestor {
 
@@ -72,7 +72,6 @@ export class APIIngestor {
 
 
     async getAllMovies() {
-        let page = 0;
         let next = "/movies?page=0";
 
         while (next != null) {
@@ -127,7 +126,41 @@ export class APIIngestor {
         }
     }
 
-    async getMovie() {
+    // Retrieves all the series entities, without getting the individual metadata for every series.
+    // There will be a second step afterwards to add data to each season.
+    async getAllSeries() {
+        let next = "/series?page=0";
+
+        while (next != null) {
+            console.log(`Retrieving URL: ${next}`);
+
+            let currentData = await this.fetch(next);
+            //console.log(currentData);
+
+            for (const series of currentData.data) {
+                const seriesData = {
+                    id: series.id,
+                    title: series.name,
+                    overview: series.overview.replace(/(\r\n|\n|\r)/gm, " "),
+                    image_url: series.image,
+                    first_aired: Date.parse(series.firstAired),
+                    last_aired: Date.parse(series.lastAired),
+                    
+                    // Neither of these fields will be filled yet, but so they they get added to the schema correctly:
+                    genres: [],
+                    seasons: []
+                }
+
+                TVCollection.insert(seriesData);
+            }
+
+            next = currentData["links"]["next"].replace(this.#baseURL, "");
+        
+        }
+        
+    }
+
+    async getAllTV() {
 
     }
 }
@@ -135,6 +168,7 @@ export class APIIngestor {
 // const ingestor = new APIIngestor();
 // ingestor.authenticate()
 //     .then(async () => {
-//         data = ingestor.getAllMovies();
+//         //data = ingestor.getAllMovies();
+//         //ingestor.getAllSeries();
 // });
 
