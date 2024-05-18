@@ -11,7 +11,6 @@ import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content'
 
 const movieData = [
     {
-        "_id": "6piyaMiuooSvb4N7B",
         "id": 231,
         "title": "Titanic",
         "release_year": 1997,
@@ -28,7 +27,6 @@ const movieData = [
         "background_url": "https://artworks.thetvdb.com/banners/v4/movie/231/backgrounds/64191cfe1f7b3.jpg"
     },
     {
-        "_id": "svwSqHhg93QzPgRsE",
         "id": 169,
         "title": "The Matrix",
         "release_year": 1999,
@@ -43,7 +41,6 @@ const movieData = [
         "background_url": "https://artworks.thetvdb.com/banners/movies/169/posters/5f274c00c85c1.jpg"
     },
     {
-        "_id": "NwQ3BRRTTR3Tk8SZi",
         "id": 113,
         "title": "Inception",
         "release_year": 2010,
@@ -58,7 +55,6 @@ const movieData = [
         "image_url": "https://artworks.thetvdb.com/banners/movies/113/posters/2195447.jpg"
     },
     {
-        "_id": "qzK5ryKQS7XRqbkP9",
         "id": 497,
         "title": "Loop (the mind reigns)",
         "release_year": 2019,
@@ -73,7 +69,6 @@ const movieData = [
         "image_url": "https://artworks.thetvdb.com/banners/movies/497/posters/497.jpg"
     },
     {
-        "_id": "JhqHM2c5dNQBoSdmF",
         "id": 498,
         "title": "Disobedience",
         "release_year": 2018,
@@ -88,7 +83,6 @@ const movieData = [
         
     },
     {
-        "_id": "wrBetYGXfLnZxuTQW",
         "id": 499,
         "title": "Hairspray",
         "release_year": 2007,
