@@ -46,6 +46,16 @@ export const Movie = Class.create({
             type: [String]
         }
         
+    },
+    indexes: {
+        movie_id_unique: {
+            fields: {
+                id: 1
+            },
+            options: {
+                unique: true
+            }
+        }
     }
 });
 
@@ -114,5 +124,15 @@ export const TV = Class.create({
             type: [String]
         },
         seasons: [TV_Season]
+    },
+    indexes: {
+        tv_series_id_unique: {
+            fields: {
+                id: 1
+            },
+            options: {
+                unique: true
+            }
+        }
     }
 });
