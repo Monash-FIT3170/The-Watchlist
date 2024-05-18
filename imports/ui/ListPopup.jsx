@@ -23,6 +23,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const [listToDelete, setListToDelete] = useState(null);
   const [updatedList, setUpdatedList] = useState(list); // Track updated list
   const [selectedTab, setSelectedTab] = useState('all'); // Track selected tab
+  const [imageStyles, setImageStyles] = useState({});
   const navigate = useNavigate();
 
   const handleRedirect = (type, id) => {
@@ -129,6 +130,15 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
     setListToDelete(null);
   };
 
+  const handleImageLoad = (event, id) => {
+    const { naturalWidth, naturalHeight } = event.target;
+    if (naturalHeight > naturalWidth) {
+      setImageStyles(prev => ({ ...prev, [id]: { height: '50vh', width: '100%' } }));
+    } else {
+      setImageStyles(prev => ({ ...prev, [id]: { width: '100%', height: 'auto' } }));
+    }
+  };
+
   const filteredContent = updatedList.content.filter(item =>
     selectedTab === 'all' ||
     (selectedTab === 'movies' && item.type === 'Movie') ||
@@ -189,7 +199,9 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
                   <img
                     src={getImageUrl(item.background_url)}
                     alt={item.title}
-                    className="w-full h-auto object-contain cursor-pointer" // Change to maintain aspect ratio
+                    className="cursor-pointer" // Change to maintain aspect ratio
+                    style={imageStyles[item.content_id] || {}}
+                    onLoad={(e) => handleImageLoad(e, item.content_id)}
                     onClick={() => {
                       console.log(`Image clicked: ${item.type}, ${item.content_id}`);
                       handleRedirect(item.type, item.content_id);

@@ -11,96 +11,98 @@ import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content'
 
 const movieData = [
     {
-        "_id": "6piyaMiuooSvb4N7B",
-        "id": 231,
-        "title": "Titanic",
-        "release_year": 1997,
-        "runtime": 194,
-        "rating": 5002480,
-        "overview": "Jack and Rose are young lovers who find one another on the maiden voyage of the unsinkable R.M.S. Titanic. But when the doomed luxury liner collides with an iceberg in the frigid North Atlantic, their passionate love affair becomes a thrilling race for survival.\r\n",
-        "genres": [
-            "Action",
-            "Adventure",
-            "Drama",
-            "Romance"
-        ],
-        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/231/posters/642d748b22859.jpg",
-        "background_url": "https://artworks.thetvdb.com/banners/v4/movie/231/posters/642d748b22859.jpg",
-    },
-    {
-        "_id": "svwSqHhg93QzPgRsE",
-        "id": 169,
-        "title": "The Matrix",
-        "release_year": 1999,
-        "runtime": 136,
-        "rating": 1173680,
-        "overview": "An unassuming programmer comes to the attention of a rebel alliance who seek to overthrow their sentient AI overlords and upset the world's status quo.",
+        "_id": "7srE5mWdr6nA5aEdy",
+        "id": 1,
+        "title": "Alita: Battle Angel",
+        "release_year": 2019,
+        "runtime": 122,
+        "rating": 392783,
+        "overview": "In the 23rd century, a catastrophic interplanetary war known as \"The Fall\" has left Earth devastated and while scouting the junkyard metropolis of Iron City, scientist Dr. Dyson Ido, discovers a disembodied female cyborg with a fully intact human brain. Soon known as Alita, she's trained to become a fearsome bounty hunter who tracks down criminals with her martial arts expertise in order to protect the innocent.",
         "genres": [
             "Action",
             "Science Fiction"
         ],
-        "image_url": "https://artworks.thetvdb.com/banners/movies/169/posters/5f274c00c85c1.jpg",
-        "background_url": "https://artworks.thetvdb.com/banners/movies/169/posters/5f274c00c85c1.jpg"
+        "background_url": "https://artworks.thetvdb.com/banners/v4/movie/1/clearart/6124b4f3718f0.png",
+        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/1/posters/6621c12de19a3.jpg"
     },
     {
-        "_id": "NwQ3BRRTTR3Tk8SZi",
-        "id": 113,
-        "title": "Inception",
-        "release_year": 2010,
-        "runtime": 148,
-        "rating": 1680146,
-        "overview": "In a world where technology exists to enter the human mind through dream invasion, a highly skilled thief is given a final chance at redemption, which involves executing his toughest and most risky job to date.",
+        "_id": "GygpbZsNCKyxJvkWy",
+        "id": 2,
+        "title": "Bohemian Rhapsody",
+        "release_year": 2018,
+        "runtime": 135,
+        "rating": 1203685,
+        "overview": "The story of the band Queen, from their union with electrifying singer Freddie Mercury to their meteoric rise to fame that culminated in an epic Live Aid performance, and finally to Freddie’s brave fight against AIDS.",
         "genres": [
-            "Science Fiction",
+            "Drama",
+            "Musical"
+        ],
+        "background_url": "https://artworks.thetvdb.com/banners/movies/2/backgrounds/22394912.jpg",
+        "image_url": "https://artworks.thetvdb.com/banners/movies/2/posters/2.jpg"
+    },
+    {
+        "_id": "c9DQxbmKiJYBwziXy",
+        "id": 3,
+        "title": "Ralph Breaks the Internet",
+        "release_year": 2018,
+        "runtime": 112,
+        "rating": 899785,
+        "overview": "Video game bad guy Ralph teams up with Vanellope von Schweetz and together they must risk it all by entering the world wide web in search of a replacement part, in the hopes of salvaging Vanellope’s video game.",
+        "genres": [
+            "Adventure",
+            "Animation"
+        ],
+        "background_url": "https://artworks.thetvdb.com/banners/movies/3/posters/5f4061419e994.jpg",
+        "image_url": "https://artworks.thetvdb.com/banners/movies/3/posters/5f4061419e994.jpg"
+    },
+    {
+        "_id": "3m5qGxZYgKmCdRzwF",
+        "id": 4,
+        "title": "Serenity",
+        "release_year": 2019,
+        "runtime": 106,
+        "rating": 26884,
+        "overview": "Baker Dill is a fishing boat captain living a quiet and sheltered life on an island off the coast of Florida. He spends his days leading tours off a tranquil, tropical enclave called Plymouth Island and is obsessed with catching \"Justice\", an evasive giant tuna fish.",
+        "genres": [
+            "Drama",
             "Thriller"
         ],
-        "image_url": "https://artworks.thetvdb.com/banners/movies/113/posters/2195447.jpg",
-        "background_url": "https://artworks.thetvdb.com/banners/movies/113/posters/2195447.jpg"
+        "background_url": "https://artworks.thetvdb.com/banners/movies/4/backgrounds/4.jpg",
+        "image_url": "https://artworks.thetvdb.com/banners/movies/4/posters/4.jpg"
     },
     {
-        "_id": "qzK5ryKQS7XRqbkP9",
-        "id": 497,
-        "title": "Loop (the mind reigns)",
-        "release_year": 2019,
-        "runtime": 5,
-        "rating": 2,
-        "overview": "In this hyper-low budget short movie, a guy finds himself trapped in a delirious trip in black and white.",
-        "genres": [
-            "Horror",
-            "Drama"
-        ],
-        "image_url": "https://artworks.thetvdb.com/banners/movies/497/posters/497.jpg",
-        "background_url": "https://artworks.thetvdb.com/banners/movies/497/posters/497.jpg"
-    },
-    {
-        "_id": "JhqHM2c5dNQBoSdmF",
-        "id": 498,
-        "title": "Disobedience",
+        "_id": "LPNHz2fsPnpPbJNjB",
+        "id": 5,
+        "title": "Fantastic Beasts: The Crimes of Grindelwald",
         "release_year": 2018,
-        "runtime": 114,
-        "rating": 33904,
-        "overview": "A woman learns about the death of her Orthodox Jewish father, a rabbi. She returns home and has romantic feelings rekindled for her best childhood friend, who is now married to her cousin.",
+        "runtime": 134,
+        "rating": 744916,
+        "overview": "In an effort to thwart Grindelwald's plans of raising pure-blood wizards to rule over all non-magical beings, Albus Dumbledore enlists his former student Newt Scamander, who agrees to help, though he's unaware of the dangers that lie ahead. Lines are drawn as love and loyalty are tested, even among the truest friends and family, in an increasingly divided wizarding world.",
         "genres": [
-            "Drama"
+            "Adventure",
+            "Family",
+            "Fantasy"
         ],
-        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/498/posters/65898f0810283.jpg",
-        "background_url": "https://artworks.thetvdb.com/banners/v4/movie/498/posters/65898f0810283.jpg"
+        "background_url": "https://artworks.thetvdb.com/banners/v4/movie/5/posters/644d4aee2a432.jpg",
+        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/5/posters/644d4aee2a432.jpg"
     },
     {
-        "_id": "wrBetYGXfLnZxuTQW",
-        "id": 499,
-        "title": "Hairspray",
-        "release_year": 2007,
-        "runtime": 117,
-        "rating": 119696,
-        "overview": "In 1962, Tracy Turnblad, a heavy-set teen living in Baltimore, is given the opportunity of a lifetime to become a dancer on a popular tv show. However, once she is thrust into the limelight, she cannot help but speak out on the taboo subject of racial integration and she unwittingly ignites a nation.",
+        "_id": "K5FH8XyoyCsLtmfXf",
+        "id": 6,
+        "title": "A Star is Born",
+        "release_year": 2018,
+        "runtime": 135,
+        "rating": 1219796,
+        "overview": "Struggling artist Ally has just about given up on her dream to make it big as a singer. But when seasoned musician Jackson Maine notices her natural talent, he coaxes her into the spotlight and sets her up for a career she never imaged, and a tumultuous love she'll never forget.",
         "genres": [
-            "Comedy",
-            "Family"
+            "Drama",
+            "Musical",
+            "Romance"
         ],
-        "image_url": "https://artworks.thetvdb.com/banners/movies/499/posters/499.jpg",
-        "background_url": "https://artworks.thetvdb.com/banners/movies/499/posters/499.jpg"
-    },
+        "background_url": "https://artworks.thetvdb.com/banners/v4/movie/6/backgrounds/64ac700f76525.jpg",
+        "image_url": "https://artworks.thetvdb.com/banners/movies/6/posters/5f29728f15f57.jpg"
+    }
+
 ];
 
 const tvData = [
