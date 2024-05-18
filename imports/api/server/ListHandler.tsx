@@ -25,14 +25,19 @@ type GetListOptions = {
 const createList: HandlerFunc = {
     validate: null,
     run: ({userId, title, description, listType, content}: CreateListOptions) => {
+        const formattedContent = content.map(item => new ContentSummary(item).raw()); // Ensure content is in the correct format
         List.insert({
             userId, 
             userName: "Test User",
-            title, description, listType, content
+            title, 
+            description, 
+            listType, 
+            content: formattedContent
         });
         return;
     }
 }
+
 
 const readList: HandlerFunc = {
     validate: null,
@@ -43,6 +48,7 @@ const readList: HandlerFunc = {
 
     }
 }
+
 
 const updateList: HandlerFunc = {
     validate: null,
@@ -84,11 +90,25 @@ const deleteList: HandlerFunc = {
     }
 }
 
+const removeContent: HandlerFunc = {
+    validate: null,
+    run: ({ listId, contentId }) => {
+        ListCollection.update(
+            { _id: listId },
+            { $pull: { content: { content_id: contentId } } }
+        );
+        return;
+    }
+};
 
+// Instantiate the handler and add all handler functions
 const ListHandler = new Handler("list")
     .addCreateHandler(createList)
     .addReadHandler(readList)
     .addUpdateHandler(updateList)
-    .addDeleteHandler(deleteList);
+    .addDeleteHandler(deleteList)
+    .addUpdateHandler(removeContent, 'removeContent') // Using a custom method name
+
+console.log('ListHandler setup complete.');
 
 export default ListHandler;

@@ -16,54 +16,59 @@ export class Handler {
     // These get read by Meteor during execution, so we don't care that they are not "used" by anything from a linting perspective
     #createMethod
     #readMethod
-    #updateMethod
+    #updateMethods = {}; // Change to support multiple update methods
     #deleteMethod
 
     #objectName
 
     constructor(objectName: string) {
         this.#objectName = objectName;
+        console.log(`Handler created for ${objectName}`);
     }
 
     get type() { return this.#objectName; }
 
     addCreateHandler(funcDetails: HandlerFunc): Handler {
+        console.log(`Adding create handler for ${this.#objectName}`);
         this.#createMethod = new ValidatedMethod({
             name: `${this.#objectName}.create`,
             validate: funcDetails.validate,
             run: funcDetails.run
         });
-        
         return this;
     }
 
     addReadHandler(funcDetails: HandlerFunc): Handler {
+        console.log(`Adding read handler for ${this.#objectName}`);
         this.#readMethod = new ValidatedMethod({
             name: `${this.#objectName}.read`,
             validate: funcDetails.validate,
             run: funcDetails.run
         });
-
         return this;
     }
 
-    addUpdateHandler(funcDetails: HandlerFunc): Handler {
-        this.#updateMethod = new ValidatedMethod({
-            name: `${this.#objectName}.update`,
+    addUpdateHandler(funcDetails: HandlerFunc, methodName = 'update'): Handler {
+        const fullName = `${this.#objectName}.${methodName}`;
+        if (this.#updateMethods[fullName]) {
+            throw new Error(`A method named '${fullName}' is already defined`);
+        }
+        console.log(`Adding update handler for ${this.#objectName}`);
+        this.#updateMethods[fullName] = new ValidatedMethod({
+            name: fullName,
             validate: funcDetails.validate,
             run: funcDetails.run
         });
-
         return this;
     }
 
     addDeleteHandler(funcDetails: HandlerFunc): Handler {
+        console.log(`Adding delete handler for ${this.#objectName}`);
         this.#deleteMethod = new ValidatedMethod({
             name: `${this.#objectName}.delete`,
             validate: funcDetails.validate,
             run: funcDetails.run
         });
-
         return this;
     }
 
