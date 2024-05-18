@@ -73,13 +73,15 @@ export const TV_Episode = Class.create({
             index: 'text'
         },
         overview: {
-            type: String
+            type: String,
+            optional: true
         },
         runtime: {
             type: Number
         },
         image_url: {
-            type: String
+            type: String,
+            optional: true
         }
     }
 })
@@ -120,10 +122,10 @@ export const TV = Class.create({
             type: String
         },
         first_aired: {
-            type: Date
+            type: Number
         },
         last_aired: {
-            type: Date,
+            type: Number,
             optional: true
         },
         genres: {

@@ -29,7 +29,8 @@ const Modal = ({ show, onClose, content, type }) => {
       title: content.title,
       image_url: content.image_url,
       type: type, // "Movie" or "TV Show"
-      user_rating: 4 // THIS OBVIOUSLY NEEDS TO BE CHANGED
+      user_rating: 4, // THIS OBVIOUSLY NEEDS TO BE CHANGED
+      background_url: content.background_url
     };
 
     const list = lists.find(list => list._id === listId);
