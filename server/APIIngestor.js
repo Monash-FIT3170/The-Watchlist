@@ -52,6 +52,11 @@ export class APIIngestor {
             console.log(error.config);
         });
 
+        // Retry some queries when the API decides to randomly die on us
+        if (!req_data) {
+            return this.fetch(url, type, data);
+        }
+
         if (!("data" in req_data)) {
             return this.fetch(url, type, data);
         }
