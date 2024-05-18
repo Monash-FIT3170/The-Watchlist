@@ -4,8 +4,8 @@ import { useLists } from './ListContext';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const Modal = ({ show, onClose, movie }) => {
-  const { lists, handleAddContent } = useLists(); // Use lists and handleAddContent from context
+const Modal = ({ show, onClose, content, type }) => {
+  const { lists, handleAddContent } = useLists();
   const modalRef = useRef();
 
   useEffect(() => {
@@ -24,19 +24,19 @@ const Modal = ({ show, onClose, movie }) => {
   if (!show) return null;
 
   const handleAddContentClick = (listId) => {
-    const content = {
-      content_id: movie.id,
-      title: movie.title,
-      image_url: movie.image_url,
-      type: 'Movie',
+    const newContent = {
+      content_id: content.id,
+      title: content.title,
+      image_url: content.image_url,
+      type: type, // "Movie" or "TV Show"
       user_rating: 4 // THIS OBVIOUSLY NEEDS TO BE CHANGED
     };
 
     const list = lists.find(list => list._id === listId);
-    if (list && list.content.some(item => item.content_id === content.content_id)) {
+    if (list && list.content.some(item => item.content_id === newContent.content_id)) {
       toast.warn("This item is already in the list.");
     } else {
-      handleAddContent(listId, content); // Use context method
+      handleAddContent(listId, newContent);
       toast.success("Item successfully added to the list.");
     }
   };
@@ -52,7 +52,7 @@ const Modal = ({ show, onClose, movie }) => {
               <h2 className="flex justify-start items-center space-x-5 w-full px-4 py-2 mb-2 font-bold text-gray-300 text-lg">
                 <MdMovieFilter size={"24px"} /><span>Your Watchlists</span>
               </h2>
-              <ul className="h-full overflow-y-hidden hover:overflow-y-scroll hover:scrollbar-webkit scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+              <ul className="h-full overflow-y-scroll scrollbar-webkit scrollbar-thumb-gray-700 scrollbar-track-gray-900">
                 {lists.map((list) => (
                   <li key={list._id} className="flex items-center justify-between p-2 bg-gray-700 rounded-lg mb-2">
                     <div className="flex items-center">
