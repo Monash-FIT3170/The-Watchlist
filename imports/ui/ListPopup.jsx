@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLists } from './ListContext';
 
 const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
-  const { handleRemoveContent } = useLists();
+  const { handleRemoveContent, fetchLists, lists } = useLists();
   const popupRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const confirmDialogRef = useRef(null);
@@ -20,12 +20,8 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [contentToDelete, setContentToDelete] = useState(null);
   const [listToDelete, setListToDelete] = useState(null);
-  const [localContent, setLocalContent] = useState(list.content);
+  const [updatedList, setUpdatedList] = useState(list); // Track updated list
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setLocalContent(list.content);
-  }, [list.content]);
 
   const handleRedirect = (type, id) => {
     onClose();
@@ -61,6 +57,14 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
     }
   }, [list]);
 
+  useEffect(() => {
+    // Find the updated list in the lists array from context
+    const updatedList = lists.find(l => l._id === list._id);
+    if (updatedList) {
+      setUpdatedList(updatedList);
+    }
+  }, [lists, list._id]); // Depend on lists and list._id
+
   const handleExpandClick = (id, title) => {
     if (expandedItem === id) {
       setExpandedItem(null);
@@ -91,7 +95,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
 
   const handleRemoveContentClick = (contentId) => {
     if (contentId !== null) {
-      handleRemoveContent(list._id, contentId);
+      handleRemoveContent(list._id, contentId, fetchLists);
     }
   };
 
@@ -130,7 +134,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
         className="bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">{list.title}</h2>
+          <h2 className="text-2xl font-bold">{updatedList.title}</h2>
           <div className="flex space-x-2">
             <button
               onClick={handleRenameListClick}
@@ -158,7 +162,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
           ref={scrollContainerRef}
           className="space-y-8 overflow-y-auto max-h-[calc(100vh-10rem)]"
         >
-          {localContent.map((item) => (
+          {updatedList.content.map((item) => (
             <div key={item.content_id} className="block relative">
               <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
                 <div className="relative">
