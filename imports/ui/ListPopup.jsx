@@ -5,57 +5,31 @@ import { FiEdit, FiTrash2 } from "react-icons/fi";
 import RenameListModal from "./RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';
+import { useLists } from './ListContext';
 
-interface ContentItemData {
-  image_url: string;
-  title: string;
-  rating: number;
-  content_id: number;
-  type: string;
-  overview: string;
-}
-
-interface ContentListProps {
-  list: {
-    _id: string;
-    title: string;
-    content: ContentItemData[];
-  };
-  onClose: () => void;
-  onDeleteList: (listId: string) => void;
-  onRenameList: (listId: string, newName: string) => void;
-}
-
-const ListPopup: React.FC<ContentListProps> = ({
-  list,
-  onClose,
-  onDeleteList,
-  onRenameList,
-}) => {
-  const popupRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const confirmDialogRef = useRef<HTMLDivElement>(null);
-  const [expandedItem, setExpandedItem] = useState<number | null>(null);
+const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
+  const { handleRemoveContent, fetchLists, lists } = useLists();
+  const popupRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+  const confirmDialogRef = useRef(null);
+  const [expandedItem, setExpandedItem] = useState(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
-  const [contentDetails, setContentDetails] = useState<{ [key: number]: any }>({});
-  const [loadingDetails, setLoadingDetails] = useState<{ [key: number]: boolean }>({});
-  const [errorDetails, setErrorDetails] = useState<{ [key: number]: boolean }>({});
+  const [contentDetails, setContentDetails] = useState({});
+  const [loadingDetails, setLoadingDetails] = useState({});
+  const [errorDetails, setErrorDetails] = useState({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [contentToDelete, setContentToDelete] = useState<number | null>(null);
-  const [listToDelete, setListToDelete] = useState<string | null>(null);
-
-  const [localContent, setLocalContent] = useState(list.content);
-
+  const [contentToDelete, setContentToDelete] = useState(null);
+  const [listToDelete, setListToDelete] = useState(null);
+  const [updatedList, setUpdatedList] = useState(list); // Track updated list
   const navigate = useNavigate();
 
-  const handleRedirect = (type: string, id: number) => {
-    console.log("REDIRECT", `/${type}${id}`);
+  const handleRedirect = (type, id) => {
     onClose();
     navigate(`/${type}${id}`);
   };
 
-  const handleClickOutside = (event: MouseEvent) => {
-    const target = event.target as Element;
+  const handleClickOutside = (event) => {
+    const target = event.target;
     if (
       popupRef.current &&
       !popupRef.current.contains(target) &&
@@ -83,7 +57,15 @@ const ListPopup: React.FC<ContentListProps> = ({
     }
   }, [list]);
 
-  const handleExpandClick = (id: number, title: string) => {
+  useEffect(() => {
+    // Find the updated list in the lists array from context
+    const updatedList = lists.find(l => l._id === list._id);
+    if (updatedList) {
+      setUpdatedList(updatedList);
+    }
+  }, [lists, list._id]); // Depend on lists and list._id
+
+  const handleExpandClick = (id, title) => {
     if (expandedItem === id) {
       setExpandedItem(null);
     } else {
@@ -94,7 +76,7 @@ const ListPopup: React.FC<ContentListProps> = ({
     }
   };
 
-  const fetchContentDetails = (title: string, contentId: number) => {
+  const fetchContentDetails = (title, contentId) => {
     setLoadingDetails(prev => ({ ...prev, [contentId]: true }));
     setErrorDetails(prev => ({ ...prev, [contentId]: false }));
 
@@ -111,32 +93,19 @@ const ListPopup: React.FC<ContentListProps> = ({
     });
   };
 
-  const handleDeleteList = (listId: string) => {
-    onDeleteList(listId);
-    onClose();
-  };
-
-  const handleRemoveContent = (contentId: number) => {
+  const handleRemoveContentClick = (contentId) => {
     if (contentId !== null) {
-      Meteor.call("list.removeContent", { listId: list._id, contentId }, (error) => {
-        if (error) {
-          console.error("Error removing content:", error);
-        } else {
-          const updatedContent = localContent.filter(item => item.content_id !== contentId);
-          setLocalContent(updatedContent);
-          setShowConfirmDialog(false); // Close the confirmation dialog
-        }
-      });
+      handleRemoveContent(list._id, contentId, fetchLists);
     }
   };
 
-  const confirmRemoveContent = (contentId: number) => {
+  const confirmRemoveContent = (contentId) => {
     setContentToDelete(contentId);
     setListToDelete(null);
     setShowConfirmDialog(true);
   };
 
-  const confirmDeleteList = (listId: string) => {
+  const confirmDeleteList = (listId) => {
     setListToDelete(listId);
     setContentToDelete(null);
     setShowConfirmDialog(true);
@@ -144,7 +113,7 @@ const ListPopup: React.FC<ContentListProps> = ({
 
   const handleDeleteConfirmed = () => {
     if (contentToDelete !== null) {
-      handleRemoveContent(contentToDelete);
+      handleRemoveContentClick(contentToDelete);
     } else if (listToDelete !== null) {
       onDeleteList(listToDelete);
       onClose();
@@ -158,7 +127,6 @@ const ListPopup: React.FC<ContentListProps> = ({
     setListToDelete(null);
   };
 
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div
@@ -166,7 +134,7 @@ const ListPopup: React.FC<ContentListProps> = ({
         className="bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">{list.title}</h2>
+          <h2 className="text-2xl font-bold">{updatedList.title}</h2>
           <div className="flex space-x-2">
             <button
               onClick={handleRenameListClick}
@@ -194,7 +162,7 @@ const ListPopup: React.FC<ContentListProps> = ({
           ref={scrollContainerRef}
           className="space-y-8 overflow-y-auto max-h-[calc(100vh-10rem)]"
         >
-          {localContent.map((item) => (
+          {updatedList.content.map((item) => (
             <div key={item.content_id} className="block relative">
               <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
                 <div className="relative">
@@ -235,7 +203,6 @@ const ListPopup: React.FC<ContentListProps> = ({
                     </button>
                   </div>
                 </div>
-
               </div>
               {expandedItem === item.content_id && (
                 <div className="mt-4 p-4 bg-gray-900 rounded-lg">

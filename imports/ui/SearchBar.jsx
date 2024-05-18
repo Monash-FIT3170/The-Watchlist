@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai';
 import ContentItem from './ContentItem';
 import ListDisplay from './ListDisplay';
+import { useLists } from './ListContext'
 
-const SearchBar = ({ movies, tvs, lists }) => {
+const SearchBar = ({ movies, tvs }) => {
+    const { lists } = useLists();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTab, setSelectedTab] = useState('movies');
     const [showFilters, setShowFilters] = useState(false);
@@ -142,10 +144,10 @@ const SearchBar = ({ movies, tvs, lists }) => {
             movies: applyFilters(movies),
             tvShows: applyFilters(tvs),
             users: [], // Apply similar filtering logic if required
-            lists: applyFilters(lists)
+            lists: applyFilters(lists) // Use lists from context
         };
         setFilteredData(newFilteredData);
-    }, [filters]);
+    }, [filters, movies, tvs, lists]); // Add lists to dependencies
 
     const [filteredData, setFilteredData] = useState({
         movies: movies,

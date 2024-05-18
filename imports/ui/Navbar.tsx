@@ -6,23 +6,20 @@ import { AiOutlinePlus } from "react-icons/ai";
 import ListPopup from "./ListPopup";
 import NewListModal from "./NewListModal";
 import usePopup from './usePopup';
+import { useLists } from './ListContext'; // Import the context
 
-const popcornUrl="./ExampleResources/popcorn.png"
+const popcornUrl = "./ExampleResources/popcorn.png";
 
-export default function Navbar({
-  staticNavData,
-  listData,
-  onAddList,
-  onDeleteList,
-  onRenameList,
-}) {
+export default function Navbar({ staticNavData }) { // Remove listData, onAddList, onDeleteList, onRenameList props
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
   const [isAddListModalOpen, setIsAddListModalOpen] = useState(false);
+
+  // Use the context to get lists and list management functions
+  const { lists, handleCreateList, handleDeleteList, handleRenameList } = useLists();
 
   const handleAddList = () => {
     setIsAddListModalOpen(true);
   };
-
 
   return (
     <div className="flex flex-col h-screen">
@@ -55,17 +52,14 @@ export default function Navbar({
                 </button>
               </h2>
               <ul className="h-[calc(100vh_-_21rem)] overflow-y-hidden hover:overflow-y-scroll hover:scrollbar-webkit">
-                {listData.map((list) => (
+                {lists.map((list) => ( // Use lists from context
                   <li key={list._id} className="flex justify-center">
                     <button
                       onClick={() => handleItemClick(list)}
                       className="w-full flex items-center space-x-5 text-sm text-white font-semibold mb-2.5 p-2 rounded-lg hover:bg-dark"
                     >
                       <img
-                        src={
-                          list.content[0]?.image_url ||
-                          popcornUrl
-                        }
+                        src={list.content[0]?.image_url || popcornUrl}
                         alt={list.title}
                         className="w-10 h-10 mr-2.5 rounded-lg"
                       />
@@ -81,8 +75,8 @@ export default function Navbar({
           <ListPopup
             list={selectedList}
             onClose={handleClosePopup}
-            onDeleteList={onDeleteList}
-            onRenameList={onRenameList}
+            onDeleteList={handleDeleteList} // Use context function
+            onRenameList={handleRenameList} // Use context function
           />
         )}
         {isAddListModalOpen && (
@@ -90,7 +84,7 @@ export default function Navbar({
             <NewListModal
               isOpen={isAddListModalOpen}
               onClose={() => setIsAddListModalOpen(false)}
-              onCreate={onAddList}
+              onCreate={handleCreateList} // Use context function
             />
           </div>
         )}
