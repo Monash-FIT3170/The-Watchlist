@@ -19,7 +19,7 @@ const List = ({ list }) => {
                     <div className="relative rounded-lg shadow-lg cursor-pointer overflow-visible">
                         <div className="transition-transform duration-300 ease-in-out transform hover:scale-110">
                             <img
-                                src={getImageUrl(item.image_url)}
+                                src={getImageUrl(item.background_url)}
                                 alt={item.title}
                                 className="w-full h-35vh object-cover rounded-lg"
                             />

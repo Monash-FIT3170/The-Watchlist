@@ -11,6 +11,7 @@ interface ContentItemData {
   rating: number;
   content_id: number;
   type: string;
+  background_url: string
 }
 
 interface ContentListProps {
