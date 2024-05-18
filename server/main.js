@@ -11,7 +11,6 @@ import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content'
 
 const movieData = [
     {
-        "_id": "7srE5mWdr6nA5aEdy",
         "id": 1,
         "title": "Alita: Battle Angel",
         "release_year": 2019,
@@ -26,7 +25,6 @@ const movieData = [
         "image_url": "https://artworks.thetvdb.com/banners/v4/movie/1/posters/6621c12de19a3.jpg"
     },
     {
-        "_id": "GygpbZsNCKyxJvkWy",
         "id": 2,
         "title": "Bohemian Rhapsody",
         "release_year": 2018,
@@ -41,7 +39,6 @@ const movieData = [
         "image_url": "https://artworks.thetvdb.com/banners/movies/2/posters/2.jpg"
     },
     {
-        "_id": "c9DQxbmKiJYBwziXy",
         "id": 3,
         "title": "Ralph Breaks the Internet",
         "release_year": 2018,
@@ -56,7 +53,6 @@ const movieData = [
         "image_url": "https://artworks.thetvdb.com/banners/movies/3/posters/5f4061419e994.jpg"
     },
     {
-        "_id": "3m5qGxZYgKmCdRzwF",
         "id": 4,
         "title": "Serenity",
         "release_year": 2019,
@@ -71,7 +67,6 @@ const movieData = [
         "image_url": "https://artworks.thetvdb.com/banners/movies/4/posters/4.jpg"
     },
     {
-        "_id": "LPNHz2fsPnpPbJNjB",
         "id": 5,
         "title": "Fantastic Beasts: The Crimes of Grindelwald",
         "release_year": 2018,
@@ -87,7 +82,6 @@ const movieData = [
         "image_url": "https://artworks.thetvdb.com/banners/v4/movie/5/posters/644d4aee2a432.jpg"
     },
     {
-        "_id": "K5FH8XyoyCsLtmfXf",
         "id": 6,
         "title": "A Star is Born",
         "release_year": 2018,
@@ -107,7 +101,6 @@ const movieData = [
 const tvData = [
 
     {
-        "_id": "AZG5tfrPGcDsNnb62",
         "id": 70385,
         "title": "The Westerner",
         "overview": "Laconic cowboy Dave Blasingame wanders the Wild West with his faithful dog Brown and the occasional companionship of pal Burgundy Smith.",
@@ -164,7 +157,6 @@ const tvData = [
         "background_url": "https://artworks.thetvdb.com/banners/fanart/original/70327-3.jpg"
     },
     {
-        "_id": "bgW5bCyN6ubC3Zk7P",
         "id": 70393,
         "title": "Coronet Blue",
         "overview": "Michael Alden is an amnesiac, who must discover his real identity before the operatives of a mysterious group locate him and kill him. The key to his past might be \"Coronet Blue\", a meaningless phrase he for some reason remembers.",
@@ -263,7 +255,6 @@ const tvData = [
         "background_url": "https://artworks.thetvdb.com/banners/fanart/original/70393-1.jpg"
     },
     {
-        "_id": "NLkmPydAwRLZZaXBL",
         "id": 70399,
         "title": "Star Wars: Droids",
         "overview": "Long before their famous adventures with the Rebel Alliance, R2-D2 and C-3PO were assigned to many different masters by the Intergalactic Droid Agency. In this animated series, the droids encounter many unforgettable people: greedy villains set on conquering planets, terrible space pirates, and brave heroes. Flying to different planets with their new master Jann Tosh and cargo pilot Jessica Meade, R2-D2 and C-3PO become heroes that will do anything to help their friends triumph over villainy.",
@@ -380,7 +371,6 @@ const tvData = [
         "background_url": "https://artworks.thetvdb.com/banners/fanart/original/70399-2.jpg"
     },
     {
-        "_id": "cCqtsNQ7oHyz9v6W2",
         "id": 70443,
         "title": "Maverick",
         "overview": "Maverick is a comedy-western television series created by Roy Huggins that ran from September 22, 1957 to July 8, 1962 on ABC and featured James Garner, Jack Kelly, Roger Moore, and Robert Colbert as the poker-playing traveling Mavericks (Bret, Bart, Beau, & Brent). Moore and Colbert were later additions, though there were never more than two current Mavericks in the series at any given time, and sometimes only one. The series' primary sponsor for the first few seasons was Kaiser Aluminum, and their \"quilted\" aluminum foil was widely advertised in commercials shown on Maverick.",
@@ -1291,7 +1281,6 @@ const tvData = [
         "background_url": "https://artworks.thetvdb.com/banners/fanart/original/70443-2.jpg"
     },
     {
-        "_id": "5GbPPpyAcdABoZaak",
         "id": 71098,
         "title": "Viper",
         "overview": "In the near future, an organized crime group known as the \"Outfit\" has become a major force in America. Engineer Julian Wilkes develops a high-tech crime-fighting vehicle called the Viper, which is intended to be a \"flagship\" in a new crackdown on crime. The Viper needs a driver, so when Outfit driver Michael Payton is injured and captured, his memory is erased, and he is given a new identity as Joe Astor, MetroPol employee. The Outfit discredits the Viper project, but when it is canceled, Joe and Julian steal the Viper and strike out on their own private war against crime.",
