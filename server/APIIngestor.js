@@ -116,7 +116,7 @@ export class APIIngestor {
 
                 // Store the genre names only
                 if (extendedData["data"]["genres"] != null) {
-                    movieData["genres"] = extendedData["data"]["genres"].map((genreData) => genreData["name"]);
+                    movieData["genres"] = extendedData["data"]["genres"].map((extendedData) => extendedData["name"]);
                 }
 
                 // Store the full image
@@ -173,15 +173,28 @@ export class APIIngestor {
 
         for await (const series of cursor) {
 
+            // Retrieve and process genre, season and episode
+            const genreURL = `/series/${series.id}/extended?meta=episodes&short=true`
+            console.log(`Retrieving URL: ${genreURL}`);
+            let extendedData = await this.fetch(genreURL);
+
+            let genres = []
+
+            if (extendedData["data"]["genres"] != null) {
+                genres = extendedData["data"]["genres"].map((genre) => genre["name"]);
+            }
+      
+ 
             // Retrieve and process episode data
-            const episodeURL = `/series/${series.id}/episodes/official`;
-            console.log(`Retrieving URL: ${episodeURL}`);
-            let episodeData = await this.fetch(episodeURL);
+            // We may need to do this separately to ensure we only get official episodes, but the above query should return the right data.
+            // const episodeURL = `/series/${series.id}/episodes/official`;
+            // console.log(`Retrieving URL: ${episodeURL}`);
+            // let episodeData = await this.fetch(episodeURL);
 
             let seasonData = {}
-            for (const episode of episodeData.data.episodes) {
-                // Ignore extra episodes that were not aired
-                if (episode.aired == null) { continue; }
+            for (const episode of extendedData["data"]["episodes"]) {
+                // Ignore extra episodes that were not aired or are not official
+                if (episode.aired == null || episode.seasonNumber == 0) { continue; }
 
                 if (!(episode.seasonNumber in seasonData)) {
                     seasonData[episode.seasonNumber] = { season_number: episode.seasonNumber, episodes: []}
@@ -196,18 +209,6 @@ export class APIIngestor {
                 }
 
                 seasonData[episode.seasonNumber].episodes.push(episodeData);
-            }
-
-
-            // Retrieve and process genre data
-            const genreURL = `/series/${series.id}/extended?short=true`
-            console.log(`Retrieving URL: ${genreURL}`);
-            let genreData = await this.fetch(genreURL);
-
-            let genres = []
-
-            if (genreData["data"]["genres"] != null) {
-                genres = genreData["data"]["genres"].map((genre) => genre["name"]);
             }
 
             // Store the operation to perform with a bulk write at the end
@@ -227,7 +228,6 @@ export class APIIngestor {
             if (count % 100 == 0) {
                 console.log("Performing Mongo Bulk Write")
                 await TVCollection.rawCollection().bulkWrite(mongoOperations);
-                count = 0;
             }
 
             count += 1;
