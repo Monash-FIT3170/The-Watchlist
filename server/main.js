@@ -36,7 +36,8 @@ const movieData = [
             "Drama",
             "Romance"
         ],
-        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/231/posters/642d748b22859.jpg"
+        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/231/posters/642d748b22859.jpg",
+        "background_url": "https://artworks.thetvdb.com/banners/v4/movie/231/backgrounds/64191cfe1f7b3.jpg"
     },
     {
         "_id": "svwSqHhg93QzPgRsE",
@@ -50,7 +51,8 @@ const movieData = [
             "Action",
             "Science Fiction"
         ],
-        "image_url": "https://artworks.thetvdb.com/banners/movies/169/posters/5f274c00c85c1.jpg"
+        "image_url": "https://artworks.thetvdb.com/banners/movies/169/posters/5f274c00c85c1.jpg",
+        "background_url": "https://artworks.thetvdb.com/banners/movies/169/posters/5f274c00c85c1.jpg"
     },
     {
         "_id": "NwQ3BRRTTR3Tk8SZi",
@@ -64,6 +66,7 @@ const movieData = [
             "Science Fiction",
             "Thriller"
         ],
+        "background_url": "https://artworks.thetvdb.com/banners/v4/movie/113/backgrounds/63fad429b7a7b.jpg",
         "image_url": "https://artworks.thetvdb.com/banners/movies/113/posters/2195447.jpg"
     },
     {
@@ -78,6 +81,7 @@ const movieData = [
             "Horror",
             "Drama"
         ],
+        "background_url": "https://artworks.thetvdb.com/banners/movies/497/posters/497.jpg",
         "image_url": "https://artworks.thetvdb.com/banners/movies/497/posters/497.jpg"
     },
     {
@@ -91,7 +95,9 @@ const movieData = [
         "genres": [
             "Drama"
         ],
+        "background_url": "https://artworks.thetvdb.com/banners/movies/498/backgrounds/498.jpg",
         "image_url": "https://artworks.thetvdb.com/banners/v4/movie/498/posters/65898f0810283.jpg"
+        
     },
     {
         "_id": "wrBetYGXfLnZxuTQW",
@@ -105,6 +111,7 @@ const movieData = [
             "Comedy",
             "Family"
         ],
+        "background_url": "https://artworks.thetvdb.com/banners/movies/499/backgrounds/499.jpg",
         "image_url": "https://artworks.thetvdb.com/banners/movies/499/posters/499.jpg"
     },
 ];
@@ -115,6 +122,7 @@ const tvData = [
         "title": "Buffy the Vampire Slayer",
         "overview": "In every generation there is a Chosen One. She alone will stand against the vampires, the demons and the forces of darkness. She is the Slayer.\r\n\r\nBuffy Summers is The Chosen One, the one girl in all the world with the strength and skill to fight the vampires. With the help of her close friends, Willow, Xander, and her Watcher Giles she balances slaying, family, friendships, and relationships.",
         "image_url": "https://artworks.thetvdb.com/banners/posters/70327-1.jpg",
+        "background_url": "https://artworks.thetvdb.com/banners/fanart/original/70327-3.jpg",
         "first_aired": new Date('1997-03-10'),
         "last_aired": new Date('2003-05-20'),
         "genres": [
@@ -136,13 +144,15 @@ const tvData = [
                     }
                 ]
             }
-        ]
+        ],
+        
     },
     {
         "id": 1005,
         "title": "Breaking Bad",
         "overview": "A high school chemistry teacher turned methamphetamine producer in New Mexico partners with a former student to secure his family's financial future while avoiding detection from law enforcement.",
         "image_url": "https://artworks.thetvdb.com/banners/posters/81189-1.jpg",
+        "background_url": "https://artworks.thetvdb.com/banners/fanart/original/81189-21.jpg",
         "first_aired": new Date('2008-01-20'),
         "last_aired": new Date('2013-09-29'),
         "genres": [
@@ -171,6 +181,7 @@ const tvData = [
         "title": "Game of Thrones",
         "overview": "Nine noble families fight for control over the lands of Westeros, while an ancient enemy returns after being dormant for millennia.",
         "image_url": "https://artworks.thetvdb.com/banners/posters/121361-1.jpg",
+        "background_url": "https://artworks.thetvdb.com/banners/fanart/original/121361-15.jpg",
         "first_aired": new Date('2011-04-17'),
         "last_aired": new Date('2019-05-19'),
         "genres": [
@@ -199,6 +210,7 @@ const tvData = [
         "title": "Stranger Things",
         "overview": "When a young boy disappears, his mother, a police chief, and his friends must confront terrifying supernatural forces in order to get him back.",
         "image_url": "https://artworks.thetvdb.com/banners/posters/305288-1.jpg",
+        "background_url": "https://artworks.thetvdb.com/banners/v4/series/305288/backgrounds/62907d929e73d.jpg",
         "first_aired": new Date('2016-07-15'),
         "last_aired": new Date('2022-07-01'),
         "genres": [
@@ -227,6 +239,7 @@ const tvData = [
         "title": "The Office",
         "overview": "A mockumentary on a group of typical office workers, where the workday consists of ego clashes, inappropriate behavior, and tedium.",
         "image_url": "https://artworks.thetvdb.com/banners/posters/73244-1.jpg",
+        "background_url": "https://artworks.thetvdb.com/banners/fanart/original/78107-3.jpg",
         "first_aired": new Date('2005-03-24'),
         "last_aired": new Date('2013-05-16'),
         "genres": [
