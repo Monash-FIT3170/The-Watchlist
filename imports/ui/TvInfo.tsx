@@ -12,8 +12,11 @@ const TvInfo = ({ tv }) => {
                     {/* Left column */}
                     <div className="flex flex-col items-start w-2/5 gap-4">
                         <img src={tv.image_url} alt={tv.title} className="w-full h-auto rounded-lg mb-5 ml-6" />
-                        <button className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 mb-5 ml-6">+</button>
-                    </div>
+                        <div className="flex items-center">
+                        <p className="text-xl font-semibold text-center  mr-2">ADD TO LIST: </p>
+                        <button className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 ">+</button>
+                        </div>
+                   </div>
                     
                     {/* Right column */}
                     <div className="flex flex-col items-start w-1/2">
@@ -22,24 +25,28 @@ const TvInfo = ({ tv }) => {
 
                         <p className="text-2xl font-semibold text-center mt-5">SYNOPSIS</p>
                         <p className="text-lg text-center max-w-xl mt-5">{tv.overview}</p>
-                        <p className="text-2xl font-semibold text-center mt-5">AGE RATING</p>
-                        <p className="text-lg text-center max-w-xl mt-5">{tv.age_rating}</p>
-                        <p className="text-2xl font-semibold text-center mt-5">RATING</p>
-                        <p className="text-lg text-center max-w-xl mt-5">{tv.rating}</p>
+                        <p className="text-2xl font-semibold text-center mt-5">GENRES</p>
+                        <div className="text-lg text-center max-w-xl mt-5">
+                            {tv.genres.map((genre, index) => (
+                            <span key={index} className="mr-2">
+                                {genre}
+                                {index < tv.genres.length - 1 && ','}
+                            </span>
+                            ))}
+                        </div>
+                        {/* <p className="text-2xl font-semibold text-center mt-5">RATING</p>
+                        <p className="text-lg text-center max-w-xl mt-5">{tv.rating}</p> */}
                 
-                        <p className="text-2xl font-semibold text-center mt-5">SEASONS</p>
-        
-                    
-
-
-                    
-                        {/* Map through seasons and render */}
-                        {tv.seasons.map((season, index) => (
-                            <div key={index}>
-                                <p className="text-lg font-bold text-center mt-5 flex items-center">{` ${season}`}<button className="ml-2 px-3 py-1 border-none rounded-full cursor-pointer bg-white text-purple-500">+</button></p>
-                            </div>
-                        ))} 
+                <p className="text-2xl font-semibold text-center mt-5">SEASONS</p>
+                <div>
+                    {tv.seasons.map((season, index) => (
+                    <div key={index} className="mt-5 flex justify-center items-center">
+                        <p className="text-lg font-bold">{`Season ${season.season_number}`}</p>
+                        <button className="ml-2 px-3 py-1 border-none rounded-full cursor-pointer bg-white text-purple-500">+</button>
                     </div>
+                    ))}
+                </div>
+                </div>
                 </div>
             </div>
         </div>
