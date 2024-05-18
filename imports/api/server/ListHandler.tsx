@@ -138,8 +138,8 @@ const ListHandler = new Handler("list")
     .addReadHandler(readList)
     .addUpdateHandler(updateList)
     .addDeleteHandler(deleteList)
-    .addUpdateHandler(addContentToList, "addContent");
-    .addUpdateHandler(removeContent, 'removeContent') // Using a custom method name
+    .addUpdateHandler(addContentToList, "addContent")
+    .addUpdateHandler(removeContent, 'removeContent'); // Using a custom method name
 
 console.log('ListHandler setup complete.');
 
