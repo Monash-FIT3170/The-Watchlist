@@ -102,7 +102,6 @@ const movieData = [
         "background_url": "https://artworks.thetvdb.com/banners/v4/movie/6/backgrounds/64ac700f76525.jpg",
         "image_url": "https://artworks.thetvdb.com/banners/movies/6/posters/5f29728f15f57.jpg"
     }
-
 ];
 
 const tvData = [
@@ -138,6 +137,7 @@ const tvData = [
         "id": 1004,
         "title": "Buffy the Vampire Slayer",
         "overview": "In every generation there is a Chosen One. She alone will stand against the vampires, the demons and the forces of darkness. She is the Slayer.\r\n\r\nBuffy Summers is The Chosen One, the one girl in all the world with the strength and skill to fight the vampires. With the help of her close friends, Willow, Xander, and her Watcher Giles she balances slaying, family, friendships, and relationships.",
+        "background_url": "https://artworks.thetvdb.com/banners/fanart/original/70327-3.jpg",
         "image_url": "/banners/posters/70327-1.jpg",
         "first_aired": -81907200000,
         "last_aired": -73440000000,
