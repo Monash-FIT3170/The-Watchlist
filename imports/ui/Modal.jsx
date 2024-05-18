@@ -1,11 +1,29 @@
-import React from 'react';
-import { MdMovieFilter } from 'react-icons/md';
-import { MdAdd } from 'react-icons/md';
+import React, { useEffect, useRef } from 'react';
+import { MdMovieFilter, MdAdd } from 'react-icons/md';
+import { useLists } from './ListContext';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const Modal = ({ show, onClose, lists, movie, onAddContent }) => {
+const Modal = ({ show, onClose, movie }) => {
+  const { lists, handleAddContent } = useLists(); // Use lists and handleAddContent from context
+  const modalRef = useRef();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
+
   if (!show) return null;
 
-  const handleAddContent = (listId) => {
+  const handleAddContentClick = (listId) => {
     const content = {
       content_id: movie.id,
       title: movie.title,
@@ -14,16 +32,19 @@ const Modal = ({ show, onClose, lists, movie, onAddContent }) => {
       user_rating: 4 // THIS OBVIOUSLY NEEDS TO BE CHANGED
     };
 
-    // When we have a userId from the authentication system, UNCOMMENT BELOW
-    // const userId = Meteor.userId(); 
-    const userId = 1;
-
-    onAddContent(listId, content);
+    const list = lists.find(list => list._id === listId);
+    if (list && list.content.some(item => item.content_id === content.content_id)) {
+      toast.warn("This item is already in the list.");
+    } else {
+      handleAddContent(listId, content); // Use context method
+      toast.success("Item successfully added to the list.");
+    }
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-gray-900 rounded-lg shadow-lg p-8 max-w-2xl w-full h-3/4 relative">
+      <ToastContainer />
+      <div ref={modalRef} className="bg-gray-900 rounded-lg shadow-lg p-8 max-w-2xl w-full h-3/4 relative">
         <button onClick={onClose} className="absolute top-2 right-2 text-white text-xl">×</button>
         <div className="mb-4 h-full">
           <div className="bg-gray-800 rounded-lg shadow-lg p-4 h-full overflow-hidden">
@@ -44,7 +65,7 @@ const Modal = ({ show, onClose, lists, movie, onAddContent }) => {
                     </div>
                     <button
                       className="text-white bg-purple-500 hover:bg-purple-700 rounded-full p-2"
-                      onClick={() => handleAddContent(list._id)}
+                      onClick={() => handleAddContentClick(list._id)}
                     >
                       <MdAdd size={"20px"} />
                     </button>
