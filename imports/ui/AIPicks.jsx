@@ -84,7 +84,7 @@ export default function AIPicks() {
             </div>
             <div className="overflow-y-auto scrollbar-webkit">
                 {/* Display Movies */}
-                {display === DISPLAY_MOVIES && actionComedyList && sciFiList && (
+                {display === DISPLAY_MOVIES && customWatchlists && (
                     <>
                         {customWatchlists.map(list => (
                             <ContentList key={filterForMovies(list)._id} list={filterForMovies(list)} />
@@ -93,7 +93,7 @@ export default function AIPicks() {
                 )}
 
                 {/* Display TV Shows */}
-                {display === DISPLAY_SHOWS && actionComedyList && sciFiList && (
+                {display === DISPLAY_SHOWS && customWatchlists && (
                     <>
                         {customWatchlists.map(list => (
                             <ContentList key={filterForShows(list)._id} list={filterForShows(list)} />
