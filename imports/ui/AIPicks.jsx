@@ -1,9 +1,15 @@
 import React, {useState} from 'react';
 import dummyLists from './DummyLists.jsx';
 import ContentList from './ContentList.tsx';
+import { useLists } from './ListContext'; // Import the context
+
 
 export default function AIPicks() {
-    const currentUser = 'user1';
+    const currentUser = 1;
+
+    console.log("movies and tvs")
+    console.log(movies)
+    console.log(tvs)
 
     // Use react "state" to keep track of whether the component is displaying movies or TV shows
     const DISPLAY_MOVIES = "Display Movie"
@@ -11,17 +17,25 @@ export default function AIPicks() {
     const [display, setDisplay] = useState(DISPLAY_MOVIES)
 
     // Filter lists to get only the ones associated with the current user
-    const userLists = dummyLists.filter(list => list.userId === currentUser);
+    const { lists } = useLists(); // Use lists from context
+    console.log("lists:")
+    console.log(lists)
+
+    const userLists = lists.filter(list => list.userId === currentUser);
+    console.log("userLists")
+    console.log(userLists)
+
     const userInfo = userLists[0] || {};
 
-    const favouritesList = userLists.find(list => list.listId == "favorite-shows")
-    const toWatchList = userLists.find(list => list.listId == "must-watch")
+    const actionComedyList = userLists.find(list => list.title === "Action Comedies");
+    const sciFiList = userLists.find(list => list.title === "Sci-Fi Favorites");
+    const toWatchList = userLists.find(list => list.listType === "To Watch");
     const customWatchlists = userLists.filter(list => list.listId != "favorite-shows" && list.listId != "must-watch")
 
     // Method to get movies within content list
     function filterForMovies(watchList) {
         // Filter the content array for items of type 'movie'
-        const movies = watchList.content.filter(item => item.type === 'movie');
+        const movies = watchList.content.filter(item => item.type === 'Movie');
         // Return the filtered list
         return {
             ...watchList, // Include other properties of the watchList
@@ -32,7 +46,7 @@ export default function AIPicks() {
     // Method to get tv shows within content list
     function filterForShows(watchList) {
         // Filter the content array for items of type 'movie'
-        const shows = watchList.content.filter(item => item.type === 'tv');
+        const shows = watchList.content.filter(item => item.type === 'TV Show');
         // Return the filtered list
         return {
             ...watchList, // Include other properties of the watchList
@@ -70,16 +84,16 @@ export default function AIPicks() {
                 {/* Display Movies */}
                 {display === DISPLAY_MOVIES && (
                     <>
-                        <ContentList key={filterForMovies(favouritesList).listId} list={filterForMovies(favouritesList)} />,
-                        <ContentList key={filterForMovies(toWatchList).listId} list={filterForMovies(toWatchList)} />
+                        <ContentList key={filterForMovies(actionComedyList)._id} list={filterForMovies(actionComedyList)} />
+                        <ContentList key={filterForMovies(sciFiList)._id} list={filterForMovies(sciFiList)} />
                     </>
                 )}
 
                 {/* Display TV Shows */}
                 {display === DISPLAY_SHOWS && (
                     <>
-                        <ContentList key={filterForShows(favouritesList).listId} list={filterForShows(favouritesList)} />,
-                        <ContentList key={filterForShows(toWatchList).listId} list={filterForShows(toWatchList)} />
+                        <ContentList key={filterForShows(actionComedyList)._id} list={filterForShows(actionComedyList)} />
+                        <ContentList key={filterForShows(sciFiList)._id} list={filterForShows(sciFiList)} />
                     </>
                 )}
             </div>
