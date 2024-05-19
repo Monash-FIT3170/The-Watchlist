@@ -3,7 +3,7 @@
  * This defines the schema used
  */
 
-import { Class, Enum } from 'meteor/jagi:astronomy';
+import { Class } from 'meteor/jagi:astronomy';
 
 // Create or get the "content" collection
 // The <any, any> is needed to make TypeScript happy when creating the Class, not entirely sure why
@@ -36,13 +36,29 @@ export const Movie = Class.create({
         image_url: {
             type: String
         },
+        background_url: {
+            type: String
+        },
         runtime: {
             type: Number
         },
         rating: {
             type: Number // this will 100% need to be changed later
+        },
+        genres: {
+            type: [String]
         }
         
+    },
+    indexes: {
+        movie_id_unique: {
+            fields: {
+                id: 1
+            },
+            options: {
+                unique: true
+            }
+        }
     }
 });
 
@@ -57,13 +73,15 @@ export const TV_Episode = Class.create({
             index: 'text'
         },
         overview: {
-            type: String
+            type: String,
+            optional: true
         },
         runtime: {
             type: Number
         },
         image_url: {
-            type: String
+            type: String,
+            optional: true
         }
     }
 })
@@ -100,13 +118,29 @@ export const TV = Class.create({
         image_url: {
             type: String
         },
+        background_url: {
+            type: String
+        },
         first_aired: {
-            type: Date
+            type: Number
         },
         last_aired: {
-            type: Date,
+            type: Number,
             optional: true
         },
+        genres: {
+            type: [String]
+        },
         seasons: [TV_Season]
+    },
+    indexes: {
+        tv_series_id_unique: {
+            fields: {
+                id: 1
+            },
+            options: {
+                unique: true
+            }
+        }
     }
 });

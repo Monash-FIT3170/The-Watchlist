@@ -17,6 +17,37 @@ type GetListOptions = {
     userId: string
 }
 
+type AddContentToListOptions = {
+    listId: string,
+    userId: string,
+    content: {
+        content_id: number,
+        title: string,
+        image_url: string,
+        user_rating?: number,
+        type: 'Movie' | 'TV Show' | 'Episode',
+        episode_details?: {
+            season_number: number,
+            episode_number: number
+        }
+    }
+};
+
+const addContentToList: HandlerFunc = {
+    validate: null,
+    run: ({ listId, userId, content }: AddContentToListOptions) => {
+        // Ensure content is in the correct format
+        const contentSummary = new ContentSummary(content).raw();
+
+        ListCollection.update(
+            { _id: listId, userId },  // Ensuring that only the owner can update the list
+            { $push: { content: contentSummary } }
+        );
+        
+        return;
+    }
+};
+
 /**
  * Defines two functions:
  * validate - a validation function to check that the provided parameters are acceptable. Can be null for no validation.
@@ -25,14 +56,19 @@ type GetListOptions = {
 const createList: HandlerFunc = {
     validate: null,
     run: ({userId, title, description, listType, content}: CreateListOptions) => {
+        const formattedContent = content.map(item => new ContentSummary(item).raw()); // Ensure content is in the correct format
         List.insert({
             userId, 
             userName: "Test User",
-            title, description, listType, content
+            title, 
+            description, 
+            listType, 
+            content: formattedContent
         });
         return;
     }
 }
+
 
 const readList: HandlerFunc = {
     validate: null,
@@ -43,6 +79,7 @@ const readList: HandlerFunc = {
 
     }
 }
+
 
 const updateList: HandlerFunc = {
     validate: null,
@@ -84,11 +121,26 @@ const deleteList: HandlerFunc = {
     }
 }
 
+const removeContent: HandlerFunc = {
+    validate: null,
+    run: ({ listId, contentId }) => {
+        ListCollection.update(
+            { _id: listId },
+            { $pull: { content: { content_id: contentId } } }
+        );
+        return;
+    }
+};
 
+// Instantiate the handler and add all handler functions
 const ListHandler = new Handler("list")
     .addCreateHandler(createList)
     .addReadHandler(readList)
     .addUpdateHandler(updateList)
-    .addDeleteHandler(deleteList);
+    .addDeleteHandler(deleteList)
+    .addUpdateHandler(addContentToList, "addContent")
+    .addUpdateHandler(removeContent, 'removeContent'); // Using a custom method name
+
+console.log('ListHandler setup complete.');
 
 export default ListHandler;

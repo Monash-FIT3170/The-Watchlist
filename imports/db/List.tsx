@@ -36,7 +36,8 @@ export const ContentSummary = Class.create({
         episode_details: {
             type: EpisodeDetails,
             optional: true
-        }
+        },
+        background_url: String
     }
 });
 
@@ -79,9 +80,10 @@ const List = Class.create({
         listIndex: {
             fields: {
                 userId: 1,
-                listId: 1
+                title: 1 
             },
             options: {
+                name: "list_unique_userid_title",
                 unique: true
             }
         }
