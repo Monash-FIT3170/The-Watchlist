@@ -4,6 +4,7 @@ import { Rating as RatingDB } from '../db/Rating';
 import { useTracker } from 'meteor/react-meteor-data';
 import Modal from './Modal';
 import { getImageUrl } from './imageUtils';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
 
 const TvInfo = ({ tv, initialLists }) => {
     const [showModal, setShowModal] = useState(false);
@@ -115,6 +116,7 @@ const TvInfo = ({ tv, initialLists }) => {
                                     setValue(newValue);
                                     addRating(newValue);
                                 }}
+                                emptyIcon={<StarBorderIcon fontSize="inherit" color="secondary" />}
                             />
                             <button 
                                 className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 mb-5 ml-6"
