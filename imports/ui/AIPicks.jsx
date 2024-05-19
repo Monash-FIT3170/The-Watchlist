@@ -1,22 +1,23 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import dummyLists from './DummyLists.jsx';
 import ContentList from './ContentList.tsx';
+import Scrollbar from './ScrollBar';
 
 export default function AIPicks() {
     const currentUser = 'user1';
 
     // Use react "state" to keep track of whether the component is displaying movies or TV shows
-    const DISPLAY_MOVIES = "Display Movie"
-    const DISPLAY_SHOWS = "Display Show"
-    const [display, setDisplay] = useState(DISPLAY_MOVIES)
+    const DISPLAY_MOVIES = "Display Movie";
+    const DISPLAY_SHOWS = "Display Show";
+    const [display, setDisplay] = useState(DISPLAY_MOVIES);
 
     // Filter lists to get only the ones associated with the current user
     const userLists = dummyLists.filter(list => list.userId === currentUser);
     const userInfo = userLists[0] || {};
 
-    const favouritesList = userLists.find(list => list.listId == "favorite-shows")
-    const toWatchList = userLists.find(list => list.listId == "must-watch")
-    const customWatchlists = userLists.filter(list => list.listId != "favorite-shows" && list.listId != "must-watch")
+    const favouritesList = userLists.find(list => list.listId === "favorite-shows");
+    const toWatchList = userLists.find(list => list.listId === "must-watch");
+    const customWatchlists = userLists.filter(list => list.listId !== "favorite-shows" && list.listId !== "must-watch");
 
     // Method to get movies within content list
     function filterForMovies(watchList) {
@@ -31,7 +32,7 @@ export default function AIPicks() {
 
     // Method to get tv shows within content list
     function filterForShows(watchList) {
-        // Filter the content array for items of type 'movie'
+        // Filter the content array for items of type 'tv'
         const shows = watchList.content.filter(item => item.type === 'tv');
         // Return the filtered list
         return {
@@ -40,7 +41,7 @@ export default function AIPicks() {
         };
     }
 
-    return ( 
+    return (
         <div className="flex flex-col gap-6 overflow-y-hidden h-custom">
             <div className="bg-darker rounded-lg items-center flex flex-col justify-center">
                 <h1 className="text-5xl font-semibold mt-8">AI Picks</h1>
@@ -48,8 +49,7 @@ export default function AIPicks() {
                     <button
                         className="border border-solid rounded-full px-8 py-4 w-1/3 focus:bg-magenta"
                         onClick={() => {
-                            // console.log("Movies")
-                            setDisplay(DISPLAY_MOVIES)
+                            setDisplay(DISPLAY_MOVIES);
                         }}
                     >
                         Movies
@@ -58,15 +58,14 @@ export default function AIPicks() {
                     <button
                         className="border border-solid rounded-full px-8 py-4 w-1/3 focus:bg-magenta"
                         onClick={() => {
-                            // console.log("TV Shows")
-                            setDisplay(DISPLAY_SHOWS)
+                            setDisplay(DISPLAY_SHOWS);
                         }}
                     >
                         TV Shows
                     </button>
                 </div>
             </div>
-            <div className="overflow-y-auto scrollbar-webkit">
+            <Scrollbar className="overflow-y-auto scrollbar-webkit">
                 {/* Display Movies */}
                 {display === DISPLAY_MOVIES && (
                     <>
@@ -82,7 +81,7 @@ export default function AIPicks() {
                         <ContentList key={filterForShows(toWatchList).listId} list={filterForShows(toWatchList)} />
                     </>
                 )}
-            </div>
+            </Scrollbar>
         </div>
-     );
-};
+    );
+}

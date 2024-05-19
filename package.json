@@ -8,14 +8,15 @@
     "visualize": "meteor --production --extra-packages bundle-visualizer"
   },
   "dependencies": {
-    "@babel/runtime": "^7.24.4",
+    "@babel/runtime": "^7.24.5",
     "@types/meteor-astronomy": "^2.6.12",
     "@types/meteor-mdg-validated-method": "^1.2.10",
     "meteor-node-stubs": "^1.2.9",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-icons": "^5.1.0",
-    "react-router-dom": "^6.23.0",
+    "overlayscrollbars": "^2.8.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.2.1",
+    "react-router-dom": "^6.23.1",
     "react-scroll": "^1.9.0",
     "react-toastify": "^10.0.5"
   },

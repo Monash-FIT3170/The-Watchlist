@@ -40,21 +40,8 @@ module.exports = {
             background: "transparent",
           },
           "&::-webkit-scrollbar-thumb": {
-            background: "transparent",
+            background: "#3F3F3F",
             borderRadius: "20px",
-            border: "2px solid transparent",
-          },
-          "&:hover::-webkit-scrollbar-thumb": {
-            background: "#3F3F3F",
-          },
-          "&:active::-webkit-scrollbar-thumb": {
-            background: "#555",
-          },
-          "&::-webkit-scrollbar-thumb:hover": {
-            background: "#3F3F3F",
-          },
-          "&::-webkit-scrollbar-thumb:active": {
-            background: "#555",
           },
         },
         ".scrollbar-hidden": {

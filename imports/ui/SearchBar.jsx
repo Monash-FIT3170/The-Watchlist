@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai';
 import ContentItem from './ContentItem';
 import ListDisplay from './ListDisplay';
-import { useLists } from './ListContext'
+import { useLists } from './ListContext';
 import { getImageUrl } from './imageUtils';
+import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 
 const SearchBar = ({ movies, tvs }) => {
     const { lists } = useLists();
@@ -46,8 +47,6 @@ const SearchBar = ({ movies, tvs }) => {
         }
     };
 
-
-
     const handleClearFilters = () => {
         setFilters({
             year: { ...filters.year, selected: [] },
@@ -55,7 +54,6 @@ const SearchBar = ({ movies, tvs }) => {
             "sort by": { ...filters["sort by"], selected: '' }
         });
     };
-
 
     const handleFilterChange = (filterType, value) => {
         console.log("handleFilterChange called");
@@ -73,7 +71,6 @@ const SearchBar = ({ movies, tvs }) => {
             console.error("Filter type is undefined:", filterType);
         }
     };
-
 
     const FilterDropdown = ({ label, options, selected }) => {
         const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -135,10 +132,8 @@ const SearchBar = ({ movies, tvs }) => {
             });
         }
 
-
         return filtered;
     };
-
 
     useEffect(() => {
         const newFilteredData = {
@@ -181,7 +176,6 @@ const SearchBar = ({ movies, tvs }) => {
         }
     };
 
-
     return (
         <div className="flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
             <form className="flex flex-col items-start w-full pl-2">
@@ -214,13 +208,11 @@ const SearchBar = ({ movies, tvs }) => {
                                 } border-transparent border`}
                             onClick={() => setSelectedTab(tab)}
                         >
-
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </div>
                     ))}
                 </div>
                 <div className="search-bar">
-                    {/* Existing elements */}
                     {showFilters && (
                         <div className="flex space-x-4">
                             <FilterDropdown
@@ -243,10 +235,8 @@ const SearchBar = ({ movies, tvs }) => {
                             />
                         </div>
                     )}
-                    {/* Filter Tags and Clear All Button */}
                     {showFilters && (
                         <div className="filter-tags">
-                            {/* Filter through each filter category, check if there's a selected value, and render the tags accordingly */}
                             {Object.entries(filters).filter(([_, value]) => {
                                 return Array.isArray(value.selected) ? value.selected.length > 0 : value.selected
                             }).map(([key, value]) => (
@@ -257,9 +247,6 @@ const SearchBar = ({ movies, tvs }) => {
                                     </button>
                                 </div>
                             ))}
-
-
-                            {/* Show the "Clear All Filters" button only if any filter is actively selected */}
                             {Object.entries(filters).some(([_, value]) => Array.isArray(value.selected) ? value.selected.length > 0 : value.selected) && (
                                 <button className="inline-block bg-gray-500 rounded-full px-2.5 py-1.5 m-1 text-sm" onClick={handleClearFilters}>
                                     Clear All Filters
@@ -267,12 +254,9 @@ const SearchBar = ({ movies, tvs }) => {
                             )}
                         </div>
                     )}
-
                 </div>
             </form>
-
-            {/* Display Filtered Data */}
-            <div className="search-results-container flex-grow overflow-auto">
+            <Scrollbar className="search-results-container flex-grow overflow-auto">
                 {selectedTab === 'movies' && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {filteredData.movies.length > 0 ? filteredData.movies.map(movie => (
@@ -294,7 +278,7 @@ const SearchBar = ({ movies, tvs }) => {
                         <div>No lists available.</div>
                     )
                 )}
-            </div>
+            </Scrollbar>
         </div>
     );
 };

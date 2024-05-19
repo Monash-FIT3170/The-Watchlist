@@ -26,8 +26,8 @@ const Scrollbar = ({ children, className = '' }) => {
   return (
     <div
       ref={scrollRef}
-      className={`${className} relative overflow-y-auto scrollbar-webkit ${isScrolling ? '' : 'scrollbar-hidden'}`}
-      style={{ paddingRight: '8px', boxSizing: 'content-box' }}
+      className={`${className} relative overflow-y-overlay scrollbar-webkit ${isScrolling ? '' : 'scrollbar-hidden'}`}
+      style={{ overflowY: 'overlay', paddingRight: '8px', boxSizing: 'content-box' }}
     >
       {children}
     </div>

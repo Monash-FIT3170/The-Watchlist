@@ -3,6 +3,7 @@ import { MdMovieFilter, MdAdd } from 'react-icons/md';
 import { useLists } from './ListContext';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Scrollbar from './ScrollBar'; // Import the Scrollbar component
 
 const Modal = ({ show, onClose, content, type }) => {
   const { lists, handleAddContent } = useLists();
@@ -53,26 +54,28 @@ const Modal = ({ show, onClose, content, type }) => {
               <h2 className="flex justify-start items-center space-x-5 w-full px-4 py-2 mb-2 font-bold text-gray-300 text-lg">
                 <MdMovieFilter size={"24px"} /><span>Your Watchlists</span>
               </h2>
-              <ul className="h-full overflow-y-scroll scrollbar-webkit scrollbar-thumb-gray-700 scrollbar-track-gray-900">
-                {lists.map((list) => (
-                  <li key={list._id} className="flex items-center justify-between p-2 bg-gray-700 rounded-lg mb-2">
-                    <div className="flex items-center">
-                      <img
-                        src={list.content[0]?.image_url || './path_to_default_image.jpg'}
-                        alt={list.title}
-                        className="w-10 h-10 mr-2.5 rounded-lg"
-                      />
-                      <span className="text-white">{list.title}</span>
-                    </div>
-                    <button
-                      className="text-white bg-purple-500 hover:bg-purple-700 rounded-full p-2"
-                      onClick={() => handleAddContentClick(list._id)}
-                    >
-                      <MdAdd size={"20px"} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <Scrollbar className="h-full overflow-y-auto scrollbar-webkit scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+                <ul>
+                  {lists.map((list) => (
+                    <li key={list._id} className="flex items-center justify-between p-2 bg-gray-700 rounded-lg mb-2">
+                      <div className="flex items-center">
+                        <img
+                          src={list.content[0]?.image_url || './path_to_default_image.jpg'}
+                          alt={list.title}
+                          className="w-10 h-10 mr-2.5 rounded-lg"
+                        />
+                        <span className="text-white">{list.title}</span>
+                      </div>
+                      <button
+                        className="text-white bg-purple-500 hover:bg-purple-700 rounded-full p-2"
+                        onClick={() => handleAddContentClick(list._id)}
+                      >
+                        <MdAdd size={"20px"} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </Scrollbar>
             </nav>
           </div>
         </div>
