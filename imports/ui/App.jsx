@@ -16,6 +16,8 @@ import { ListsProvider } from './ListContext';
 import  UserDiscovery from './UserDiscovery.jsx';
 // import Profile from './Profile.jsx';
 import AIPicks from './AIPicks.jsx';
+import Scrollbar from './ScrollBar';
+
 
 const FetchTest = () => {
   useEffect(() => {
@@ -31,8 +33,6 @@ const FetchTest = () => {
   return <div>Check console for fetched data.</div>;
 };
 
-// Static navbar data, add new entries when required, ensuring that the complimentary Route is created in the App component below
-// ! Currently only search, home, profile and ai picks - don't add more
 const staticNavbarData = [
   {
     title: "Home",
@@ -61,14 +61,10 @@ const staticNavbarData = [
 ];
 
 export const App = () => {
-
-  // State to hold movies from the backend
-
   const [movies, setMovies] = useState([]);
   const [tvs, setTvs] = useState([]);
   const [lists, setLists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
 
   useEffect(() => {
     Meteor.call("content.read", {}, (error, response) => {
@@ -92,7 +88,7 @@ export const App = () => {
           <Navbar staticNavData={staticNavbarData} />
         </div>
         <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
-          <div className="h-custom overflow-y-scroll scrollbar-webkit">
+          <Scrollbar className="h-custom">
             <Routes>
               <Route path="/fetch-test" element={<FetchTest />} />
               <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} />} />
@@ -108,7 +104,7 @@ export const App = () => {
               <Route path="/user-discovery" element={<UserDiscovery />}/> 
             <Route path="/" element={<Navigate to="/home" />} />
             </Routes>
-          </div>
+          </Scrollbar>
         </div>
         <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </div>

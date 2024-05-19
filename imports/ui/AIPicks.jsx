@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ContentList from './ContentList.tsx';
+import Scrollbar from './ScrollBar';
 
 export default function AIPicks({ movies, tvs }) {
     // console.log("Movies")
@@ -71,7 +72,7 @@ export default function AIPicks({ movies, tvs }) {
                     </button>
                 </div>
             </div>
-            <div className="overflow-y-auto scrollbar-webkit">
+            <Scrollbar className="overflow-y-auto scrollbar-webkit">
                 {/* Display Movies */}
                 {display === DISPLAY_MOVIES && movieContentLists && (
                     <>
@@ -89,7 +90,7 @@ export default function AIPicks({ movies, tvs }) {
                         ))}
                     </>
                 )}
-            </div>
+            </Scrollbar>
         </div>
     );
 }

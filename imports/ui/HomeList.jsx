@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import RatingStar from './RatingStar';
 import { useLists } from './ListContext'; // Import the context
 import { getImageUrl } from "./imageUtils";
+import Scrollbar from "./ScrollBar";
 
 const List = ({ list }) => {
     const navigate = useNavigate();
@@ -27,7 +28,9 @@ const List = ({ list }) => {
                                 <div className="text-white">
                                     <h3 className="text-xl font-bold">{item.title}</h3>
                                     <p className="text-sm">{item.description}</p>
+                                    <div className="absolute bottom-4 right-4">
                                     <RatingStar totalStars={5} rating={4} />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -38,17 +41,17 @@ const List = ({ list }) => {
     );
 };
 
-const HomeList = ({ title, listType }) => { // Remove lists prop
-    const { lists } = useLists(); // Use lists from context
+const HomeList = ({ title, listType }) => {
+    const { lists } = useLists();
     const filteredMovies = lists.filter(list => list.listType === listType);
 
     return (
-        <div className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl overflow-auto scrollbar-thumb-gray-900 scrollbar-track-gray-100 scrollbar-thin">
+        <Scrollbar className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl">
             <h1 className="font-sans font-bold text-4xl my-4 mt-0 mb-4">{title}</h1>
-            <div className="w-full overflow-visible">
-                {filteredMovies.map((list) => <List key={list._id} list={list} />)} {/* Add key to List component */}
+            <div className="w-full">
+                {filteredMovies.map((list) => <List key={list._id} list={list} />)}
             </div>
-        </div>
+        </Scrollbar>
     );
 };
 

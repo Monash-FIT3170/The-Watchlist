@@ -7,12 +7,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Configure your color palette here
         'purplish-grey': "#B5A6AB",
         'magenta': "#7B1450",
         'dark-magenta': "#410227",
         'off-white': "#E2DCDE",
-        'smoky-black': "14110F",
+        'smoky-black': "#14110F",
         'less-dark': "#252525",
         'dark': "#1C1C1C",
         'darker': "#101010",
@@ -28,28 +27,33 @@ module.exports = {
         '35vh': '35vh',
       },
     },
-    
   },
   plugins: [
-    function ({addUtilities}) {
+    function ({ addUtilities }) {
       const newUtilities = {
         ".scrollbar-webkit": {
-          "&::-webkit-scrollbar" : {
-            width:"8px",
+          "&::-webkit-scrollbar": {
+            width: "8px",
+            height: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "#3F3F3F",
             borderRadius: "20px",
           },
-          "&::-webkit-scrollbar-track" : {
-            background:"transparent"
-          },
-          "&::-webkit-scrollbar-thumb" : {
-            background:"#3F3F3F",
-            borderRadius: "20px",
-          },
+        },
+        ".scrollbar-hidden": {
+          "scrollbar-width": "none", /* Firefox */
+          "-ms-overflow-style": "none",  /* Internet Explorer 10+ */
+        },
+        ".scrollbar-hidden::-webkit-scrollbar": {
+          display: "none", /* Safari and Chrome */
         }
-      }
+      };
 
-      addUtilities(newUtilities, ["responsive", "hover"])
-    }
+      addUtilities(newUtilities, ["responsive", "hover"]);
+    },
   ],
 }
-
