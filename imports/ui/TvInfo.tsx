@@ -103,8 +103,9 @@ const TvInfo = ({ tv, initialLists }) => {
     const lastAiredDate = tv.last_aired ? new Date(tv.last_aired).getFullYear() : 'Present';
 
     return (
-        <div className="flex flex-col items-center justify-end h-screen text-white bg-cover bg-center p-0 relative" style={{ backgroundImage: `url(${getImageUrl(tv.background_url)})` }}>
-            <div className="absolute inset-0 w-full h-full bg-cover bg-center opacity-30" style={{ backgroundImage: `url(${getImageUrl(tv.background_url)})` }}></div>
+
+        <div className="flex flex-col items-center justify-end h-screen text-white bg-cover bg-center p-0 relative" style={{ backgroundImage: `url(${tv.image_url})` }}>
+             <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${tv.image_url})`, filter: "blur(9px)" }}></div>
             <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center">
                 <div className="w-full h-3/4 rounded-xl shadow-md overflow-hidden md:max-w-4xl bg-black bg-opacity-90 text-white flex flex-row items-center justify-between px-5">
                     <div className="flex flex-col items-start w-2/5 gap-4">
@@ -126,8 +127,9 @@ const TvInfo = ({ tv, initialLists }) => {
                             </button>
                         </div>
                     </div>
-                    <div className="flex flex-col items-start w-1/2">
-                        <h1 className="text-6xl font-bold text-center">{tv.title} ({firstAiredDate} - {lastAiredDate})</h1>
+                    <div className="flex flex-col items-start w-1/2 h-full overflow-y-auto px-0 py-4">
+                        <h1 className="text-6xl font-bold text-center">{tv.title} ({tv.first_aired.getFullYear().toString()} - {tv.last_aired.getFullYear().toString()})</h1>
+
                         <p className="text-2xl font-semibold text-center mt-5">Synopsis</p>
                         <p className="text-lg text-center max-w-xl mt-5">{tv.overview}</p>
                         <p className="text-2xl font-semibold text-center mt-5">Genres</p>
