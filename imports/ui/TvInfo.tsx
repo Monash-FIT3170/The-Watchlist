@@ -1,10 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Rating } from '@mui/material';
 import Modal from './Modal';
 import { getImageUrl } from './imageUtils';
 
 const TvInfo = ({ tv, initialLists }) => {
     const [showModal, setShowModal] = useState(false);
     const [lists, setLists] = useState(initialLists);
+    const [value, setValue] = useState<number | null>(null);
+
+
+    useEffect(() => {
+        if (0 < tv.rating && tv.rating < 6) {
+            setValue(tv.rating);
+            console.log(tv.rating);
+        }
+    }, [tv.rating]);
+
+    const handleRating = (newValue) => {
+        console.log("Rating:", newValue);
+    }
 
     const handleAddContent = (listId, content) => {
         const userId = 1; // Temporary userId: 1
@@ -39,13 +53,22 @@ const TvInfo = ({ tv, initialLists }) => {
             <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center">
                 <div className="w-full h-3/4 rounded-xl shadow-md overflow-hidden md:max-w-4xl bg-black bg-opacity-90 text-white flex flex-row items-center justify-between px-5">
                     <div className="flex flex-col items-start w-2/5 gap-4">
-                        <img src={getImageUrl(tv.image_url)} alt={tv.title} className="w-full h-auto rounded-lg mb-5 ml-6" />
-                        <button
-                            className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 mb-5 ml-6"
-                            onClick={() => setShowModal(true)}
-                        >
-                            +
-                        </button>
+                    <div className="grid grid-cols-2 grid-rows-1 gap-1">
+                            <Rating
+                                name="simple-controlled"
+                                value={value}
+                                onChange={(event, newValue) => {
+                                    setValue(newValue);
+                                    handleRating(newValue);
+                                }}
+                            />
+                            <button 
+                                className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 mb-5 ml-6"
+                                onClick={() => setShowModal(true)}
+                            >
+                                +
+                            </button>
+                        </div>
                     </div>
                     <div className="flex flex-col items-start w-1/2">
                         <h1 className="text-6xl font-bold text-center">{tv.title} ({firstAiredDate} - {lastAiredDate})</h1>

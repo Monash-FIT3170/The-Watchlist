@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal'; 
 import { Rating } from '@mui/material';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
 
 const MovieInfo = ({ movie, initialLists }) => { 
     const [showModal, setShowModal] = useState(false);
@@ -12,7 +13,7 @@ const MovieInfo = ({ movie, initialLists }) => {
             setValue(movie.rating);
             console.log(movie.rating);
         }
-    })
+    }, [movie.rating]);
 
     const handleRating = (newValue) => {
         console.log(movie);
@@ -60,6 +61,7 @@ const MovieInfo = ({ movie, initialLists }) => {
                                     setValue(newValue);
                                     handleRating(newValue);
                                 }}
+                                emptyIcon={<StarBorderIcon fontSize="inherit" color="secondary" />}
                             />
                             <button 
                                 className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 mb-5 ml-6"
