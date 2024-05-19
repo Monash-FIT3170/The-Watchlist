@@ -7,11 +7,11 @@ import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';
 import { useLists } from './ListContext';
 import { getImageUrl } from "./imageUtils";
+import Scrollbar from './ScrollBar'; // Import the Scrollbar component
 
 const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const { handleRemoveContent, fetchLists, lists } = useLists();
   const popupRef = useRef(null);
-  const scrollContainerRef = useRef(null);
   const confirmDialogRef = useRef(null);
   const [expandedItem, setExpandedItem] = useState(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
@@ -53,12 +53,6 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
-  }, [list]);
 
   useEffect(() => {
     // Find the updated list in the lists array from context
@@ -188,10 +182,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
             </div>
           ))}
         </div>
-        <div
-          ref={scrollContainerRef}
-          className="space-y-8 overflow-y-auto max-h-[calc(100vh-10rem)]"
-        >
+        <Scrollbar className="space-y-8 max-h-[calc(100vh-10rem)]">
           {filteredContent.map((item) => (
             <div key={item.content_id} className="block relative">
               <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
@@ -258,7 +249,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
               )}
             </div>
           ))}
-        </div>
+        </Scrollbar>
       </div>
       <div className="z-50">
         {isRenameModalOpen && (
