@@ -22,7 +22,7 @@ const ProfileCard = ({ userName, ratings, followers, following, avatarUrl, userR
             <span className="p-2 text-lg flex-initial gap-2">{followers} Followers</span>
             <span className="p-2 text-lg flex-initial gap-2">{following} Following</span>
             <Link to="/user-discovery">
-              <button>
+              <button className="mt-2 p-1 bg-darker rounded-lg">
                 <FaPlus />
               </button>
             </Link>
