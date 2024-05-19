@@ -43,7 +43,7 @@ const MovieInfo = ({ movie, initialLists }) => {
                             +
                         </button>
                     </div>
-                    <div className="flex flex-col items-start w-1/2">
+                    <div className="flex flex-col items-start w-1/2 h-full overflow-y-auto px-0 py-4">
                         <h1 className="text-6xl font-bold text-center">{movie.title} ({movie.release_year})</h1>
                         <p className="text-2xl font-semibold text-center mt-5">SYNOPSIS</p>
                         <p className="text-lg text-center max-w-xl mt-5">{movie.overview}</p>
