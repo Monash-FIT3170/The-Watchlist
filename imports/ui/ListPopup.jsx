@@ -23,6 +23,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const [listToDelete, setListToDelete] = useState(null);
   const [updatedList, setUpdatedList] = useState(list); // Track updated list
   const [selectedTab, setSelectedTab] = useState('all'); // Track selected tab
+  const [imageStyles, setImageStyles] = useState({});
   const navigate = useNavigate();
 
   const handleRedirect = (type, id) => {
@@ -129,9 +130,18 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
     setListToDelete(null);
   };
 
-  const filteredContent = updatedList.content.filter(item => 
-    selectedTab === 'all' || 
-    (selectedTab === 'movies' && item.type === 'Movie') || 
+  const handleImageLoad = (event, id) => {
+    const { naturalWidth, naturalHeight } = event.target;
+    if (naturalHeight > naturalWidth) {
+      setImageStyles(prev => ({ ...prev, [id]: { height: '50vh', width: '100%' } }));
+    } else {
+      setImageStyles(prev => ({ ...prev, [id]: { width: '100%', height: 'auto' } }));
+    }
+  };
+
+  const filteredContent = updatedList.content.filter(item =>
+    selectedTab === 'all' ||
+    (selectedTab === 'movies' && item.type === 'Movie') ||
     (selectedTab === 'tv shows' && item.type === 'TV Show')
   );
 
@@ -171,7 +181,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
             <div
               key={tab}
               className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-                  } border-transparent border`}
+                } border-transparent border`}
               onClick={() => setSelectedTab(tab)}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -187,9 +197,11 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
               <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
                 <div className="relative">
                   <img
-                    src={getImageUrl(item.image_url)}
+                    src={getImageUrl(item.background_url)}
                     alt={item.title}
-                    className="w-full h-[35vh] object-cover cursor-pointer"
+                    className="cursor-pointer" // Change to maintain aspect ratio
+                    style={imageStyles[item.content_id] || {}}
+                    onLoad={(e) => handleImageLoad(e, item.content_id)}
                     onClick={() => {
                       console.log(`Image clicked: ${item.type}, ${item.content_id}`);
                       handleRedirect(item.type, item.content_id);
