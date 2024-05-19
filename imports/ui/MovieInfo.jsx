@@ -1,26 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal'; 
-import { useTracker } from 'meteor/react-meteor-data';
-import { Rating as RatingDB } from '../api/rating';
 import { Rating } from '@mui/material';
+
+import { useTracker } from 'meteor/react-meteor-data';
+
+import { Rating as RatingDB } from '../db/Rating';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 
 const MovieInfo = ({ movie, initialLists }) => { 
     const [showModal, setShowModal] = useState(false);
     const [lists, setLists] = useState(initialLists);
     const [value, setValue] = useState(null);
-    const { ratings, isLoading } = useTracker(() => {
-        const handler = Meteor.subscribe("rating");
-    
-        if (!handler.ready()) {
-          return { ratings: [], isLoading: true };
-        }
-    
-        const ratings = RatingDB.find({content_type: "Movie", content_id: movie.id}).fetch()
-    
-        return { ratings: ratings, isLoading: false }
-    
-      })
 
     useEffect(() => {
         if (0 < movie.rating && movie.rating < 6) {
@@ -34,6 +24,39 @@ const MovieInfo = ({ movie, initialLists }) => {
         movie.rating = newValue;
 
     }
+
+    const { rating, isLoadingRatings } = useTracker(() => {
+        const handler = Meteor.subscribe("rating");
+    
+        if (!handler.ready()) {
+          return { ratings: [], isLoading: true };
+        }
+    
+        const ratings = RatingDB.find({content_type: "Movie", content_id: movie.id}).fetch();
+
+        const ratingReduce = ratings.reduce((acc, rating) => {
+            acc["count"] += 1;
+            acc["totalRatings"] += rating.rating;
+        }, {count: 0, totalRatings: 0});
+
+        const finalRating = Math.floor(ratingReduce["totalRatings"] / ratingReduce["count"]);
+
+    
+        return { rating: finalRating, isLoadingRatings: false }
+    
+    });
+
+
+    const addRating = (rating) => {
+        Meteor.call("rating.create", {content_type: "Movie", content_id: movie.id, rating}, (error, result) => {
+            if (err) {
+                console.error(`Error creating rating: ${err}`);
+            } else {
+                console.log("Successfully added rating.")
+            }
+        })
+    }
+
 
     const handleAddContent = (listId, content) => {
         const userId = 1; // Temporary userId: 1
@@ -73,7 +96,7 @@ const MovieInfo = ({ movie, initialLists }) => {
                                 value={value}
                                 onChange={(event, newValue) => {
                                     setValue(newValue);
-                                    handleRating(newValue);
+                                    addRating(newValue);
                                 }}
                                 emptyIcon={<StarBorderIcon fontSize="inherit" color="secondary" />}
                             />
