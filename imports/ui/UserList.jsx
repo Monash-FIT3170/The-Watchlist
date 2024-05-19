@@ -1,18 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const UserList = ({ heading, users }) => {
+const UserList = ({ heading, users, searchTerm }) => {
+  const filteredUsers = users.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()));
   return (
     <div className="bg-darker p-4 rounded-lg">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-white text-2xl font-semibold">{heading}</h2>
         <a href="#" className="text-sm text-blue-400">View All</a>
       </div>
-      <div className="grid grid-cols-6 gap-4">
-        {users.map((user, index) => (
+      <div className="grid grid-cols-6 gap-8">
+        {filteredUsers.map((user, index) => (
           <div key={index} className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-700 transition-colors duration-300">
             <Link
-              to={`/profile/${user.name}`}
+              to={`/profile/${filteredUsers.name}`}
               className="flex flex-col items-center"
             >
               <img
@@ -39,6 +40,7 @@ UserList.defaultProps = {
     avatar: './ExampleResources/user-avatar.jpg',
     name: 'BabRulez',
   }),
+  searchTerm: '',
 };
 
 export default UserList;
