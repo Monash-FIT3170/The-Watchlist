@@ -9,6 +9,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.24.4",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/material": "^5.15.18",
     "@types/meteor-astronomy": "^2.6.12",
     "@types/meteor-mdg-validated-method": "^1.2.10",
     "meteor-node-stubs": "^1.2.9",
