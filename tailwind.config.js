@@ -31,28 +31,38 @@ module.exports = {
   plugins: [
     function ({ addUtilities }) {
       const newUtilities = {
-        ".scrollbar-webkit" : {
-          scrollbarWidth : "thin",
-          scrollbarColor : "rgb(31 29 29) white"
+        ".scrollbar-webkit": {
+          "&::-webkit-scrollbar": {
+            width: "8px",
+            height: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "transparent",
+            borderRadius: "20px",
+            border: "2px solid transparent",
+          },
+          "&:hover::-webkit-scrollbar-thumb": {
+            background: "#3F3F3F",
+          },
+          "&:active::-webkit-scrollbar-thumb": {
+            background: "#555",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            background: "#3F3F3F",
+          },
+          "&::-webkit-scrollbar-thumb:active": {
+            background: "#555",
+          },
         },
-        ".scrollbar-webkit" :{
-          "&::-webitkit-scrollbar":{
-            width : "10px",
-            height: "10px"
-          },
-          "&::-webkit-scrollbar-button":{
-            width: "10px",
-            height: "10px"
-          },
-          "&::-webkit-scrollbar-track":{
-            background:"white",
-            "border-radius" : "50px",
-          },
-          "&::-webkit-scrollbar-thumb" :{
-            backgroundColor: "rgb(31 41 55)",
-            borderRadius: "50px",
-            border: "1px solid white"
-          }
+        ".scrollbar-hidden": {
+          "scrollbar-width": "none", /* Firefox */
+          "-ms-overflow-style": "none",  /* Internet Explorer 10+ */
+        },
+        ".scrollbar-hidden::-webkit-scrollbar": {
+          display: "none", /* Safari and Chrome */
         }
       };
 
