@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import RatingStar from './RatingStar';
 import { useLists } from './ListContext'; // Import the context
 import { getImageUrl } from "./imageUtils";
-
 import { useTracker } from 'meteor/react-meteor-data';
-
 import { Rating as RatingDB } from '../db/Rating';
 import Scrollbar from "./ScrollBar";
 
@@ -19,17 +17,16 @@ const List = ({ list }) => {
 
     const { allRatings, isLoadingRatings } = useTracker(() => {
         const handler = Meteor.subscribe("rating");
-    
+
         if (!handler.ready()) {
-          return { allRatings: {}, isLoading: true };
+            return { allRatings: {}, isLoading: true };
         }
-    
+
         const ratings = RatingDB.find().fetch();
 
         if (!ratings.length) {
             return { allRatings: {}, isLoadingRatings: false }
         }
-        
 
         const ratingReduce = ratings.reduce((acc, currentRating) => {
             if (!(currentRating.content_id in acc)) {
@@ -38,7 +35,6 @@ const List = ({ list }) => {
                     totalRatings: 0
                 }
             }
-
 
             acc[currentRating.content_id]["count"] += 1;
             acc[currentRating.content_id]["totalRatings"] += currentRating.rating;
@@ -49,9 +45,7 @@ const List = ({ list }) => {
             ratingReduce[id]["finalRating"] = (ratingReduce[id]["totalRatings"] / ratingReduce[id]["count"]).toFixed(2);
         }
 
-
         return { allRatings: ratingReduce, isLoadingRatings: false }
-    
     });
 
     return (
@@ -69,8 +63,7 @@ const List = ({ list }) => {
                                 <div className="text-white">
                                     <h3 className="text-xl font-bold">{item.title}</h3>
                                     <p className="text-sm">{item.description}</p>
-                                    { isLoadingRatings ? null : <RatingStar totalStars={5} rating={ (item.content_id in allRatings) ? allRatings[item.content_id].finalRating : 0} />}
-                                    
+                                    {isLoadingRatings ? null : <RatingStar totalStars={5} rating={(item.content_id in allRatings) ? allRatings[item.content_id].finalRating : 0} />}
                                 </div>
                             </div>
                         </div>
@@ -86,12 +79,14 @@ const HomeList = ({ title, listType }) => {
     const filteredMovies = lists.filter(list => list.listType === listType);
 
     return (
-        <Scrollbar className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl">
+        <div>
             <h1 className="font-sans font-bold text-4xl my-4 mt-0 mb-4">{title}</h1>
-            <div className="w-full">
-                {filteredMovies.map((list) => <List key={list._id} list={list} />)}
-            </div>
-        </Scrollbar>
+            <Scrollbar className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left">
+                <div className="w-full">
+                    {filteredMovies.map((list) => <List key={list._id} list={list} />)}
+                </div>
+            </Scrollbar>
+        </div>
     );
 };
 
