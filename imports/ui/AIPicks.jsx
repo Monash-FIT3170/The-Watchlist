@@ -1,66 +1,71 @@
-import React, {useState} from 'react';
-import dummyLists from './DummyLists.jsx';
+import React, { useState, useEffect } from 'react';
 import ContentList from './ContentList.tsx';
 
-export default function AIPicks() {
-    const currentUser = 'user1';
+export default function AIPicks({ movies, tvs }) {
+    // console.log("Movies")
+    // console.log(movies)
+    // console.log(tvs)
 
     // Use react "state" to keep track of whether the component is displaying movies or TV shows
-    const DISPLAY_MOVIES = "Display Movie"
-    const DISPLAY_SHOWS = "Display Show"
-    const [display, setDisplay] = useState(DISPLAY_MOVIES)
+    const DISPLAY_MOVIES = "Display Movie";
+    const DISPLAY_SHOWS = "Display Show";
+    const [display, setDisplay] = useState(DISPLAY_MOVIES);
+    const [isLoading, setIsLoading] = useState(true); // Loading state
 
-    // Filter lists to get only the ones associated with the current user
-    const userLists = dummyLists.filter(list => list.userId === currentUser);
-    const userInfo = userLists[0] || {};
+    // Create content lists for each genre
+    genres = [
+        "Action", "Adventure", "Animation", "Anime", "Awards Show", "Children",
+        "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "Food",
+        "Game Show", "History", "Home and Garden", "Horror", "Indie", "Martial Arts",
+        "Mini-Series", "Musical", "Mystery", "News", "Podcast", "Reality",
+        "Romance", "Science Fiction", "Soap", "Sport", "Suspense", "Talk Show",
+        "Thriller", "Travel", "War", "Western"
+    ]
+    let movieContentLists = []
+    let showContentLists = []
+    genres.forEach(genre => {
+        const genreMovies = movies.filter(item => item.genres.includes(genre)).slice(0, 10)
+        const movieContentList = {
+            listId: genre + "Movies",
+            title: genre,
+            content: genreMovies
+        }
+        movieContentLists.push(movieContentList)
 
-    const favouritesList = userLists.find(list => list.listId == "favorite-shows")
-    const toWatchList = userLists.find(list => list.listId == "must-watch")
-    const customWatchlists = userLists.filter(list => list.listId != "favorite-shows" && list.listId != "must-watch")
+        const genreShows = tvs.filter(item => item.genres.includes(genre)).slice(0, 10)
+        const showContentList = {
+            listId: genre + "Shows",
+            title: genre,
+            content: genreShows
+        }
+        showContentLists.push(showContentList)
+    })
 
-    // Method to get movies within content list
-    function filterForMovies(watchList) {
-        // Filter the content array for items of type 'movie'
-        const movies = watchList.content.filter(item => item.type === 'movie');
-        // Return the filtered list
-        return {
-            ...watchList, // Include other properties of the watchList
-            content: movies // Replace the content array with the filtered movies
-        };
-    }
+    // useEffect(() => {
+    //     if (movies && movies > 0) {
+    //         setIsLoading(false); // Set loading to false when lists are loaded
+    //     }
+    // }, [movies]);
 
-    // Method to get tv shows within content list
-    function filterForShows(watchList) {
-        // Filter the content array for items of type 'movie'
-        const shows = watchList.content.filter(item => item.type === 'tv');
-        // Return the filtered list
-        return {
-            ...watchList, // Include other properties of the watchList
-            content: shows // Replace the content array with the filtered movies
-        };
-    }
+    // if (isLoading) {
+    //     return <div>Loading...</div>; // Show loading indicator while lists are loading
+    // }
 
-    return ( 
+    return (
         <div className="flex flex-col gap-6 overflow-y-hidden h-custom">
             <div className="bg-darker rounded-lg items-center flex flex-col justify-center">
                 <h1 className="text-5xl font-semibold mt-8">AI Picks</h1>
                 <div className="my-8 items-center w-1/2 flex flex-row">
                     <button
                         className="border border-solid rounded-full px-8 py-4 w-1/3 focus:bg-magenta"
-                        onClick={() => {
-                            // console.log("Movies")
-                            setDisplay(DISPLAY_MOVIES)
-                        }}
+                        onClick={() => setDisplay(DISPLAY_MOVIES)}
                     >
                         Movies
                     </button>
                     <div className="w-1/3"></div>
                     <button
                         className="border border-solid rounded-full px-8 py-4 w-1/3 focus:bg-magenta"
-                        onClick={() => {
-                            // console.log("TV Shows")
-                            setDisplay(DISPLAY_SHOWS)
-                        }}
+                        onClick={() => setDisplay(DISPLAY_SHOWS)}
                     >
                         TV Shows
                     </button>
@@ -68,21 +73,23 @@ export default function AIPicks() {
             </div>
             <div className="overflow-y-auto scrollbar-webkit">
                 {/* Display Movies */}
-                {display === DISPLAY_MOVIES && (
+                {display === DISPLAY_MOVIES && movieContentLists && (
                     <>
-                        <ContentList key={filterForMovies(favouritesList).listId} list={filterForMovies(favouritesList)} />,
-                        <ContentList key={filterForMovies(toWatchList).listId} list={filterForMovies(toWatchList)} />
+                        {movieContentLists.map(list => (
+                            <ContentList key={list._id} list={list} />
+                        ))}
                     </>
                 )}
 
                 {/* Display TV Shows */}
-                {display === DISPLAY_SHOWS && (
+                {display === DISPLAY_SHOWS && showContentLists && (
                     <>
-                        <ContentList key={filterForShows(favouritesList).listId} list={filterForShows(favouritesList)} />,
-                        <ContentList key={filterForShows(toWatchList).listId} list={filterForShows(toWatchList)} />
+                        {showContentLists.map(list => (
+                            <ContentList key={list._id} list={list} />
+                        ))}
                     </>
                 )}
             </div>
         </div>
-     );
-};
+    );
+}

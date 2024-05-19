@@ -27,7 +27,7 @@ const ContentItem: React.FC<ContentItemProps> = ({ id, type, src, alt, rating })
     };
 
     return (
-      <div className="flex flex-col items-start mr-4">
+      <div className="flex flex-col items-start mr-4 w-40">
         <button
           onClick={handleRedirect}
         >
