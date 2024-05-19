@@ -34,6 +34,46 @@ const TvInfo = ({ tv, initialLists }) => {
         console.log("Rating:", newValue);
     }
 
+    const addRating = (rating) => {
+        Meteor.call("rating.create", {content_type: "TV", content_id: tv.id, rating}, (error, result) => {
+            if (error) {
+                console.error(`Error creating rating: ${error}`);
+            } else {
+                console.log("Successfully added rating.")
+            }
+        })
+    }
+
+    const { rating, totalRatings, isLoadingRatings } = useTracker(() => {
+        const handler = Meteor.subscribe("rating");
+    
+        if (!handler.ready()) {
+          return { rating: [], isLoading: true };
+        }
+    
+        const ratings = RatingDB.find({content_type: "TV", content_id: tv.id}).fetch();
+
+        if (!ratings.length) {
+            return { rating: null, totalRatings: null, isLoadingRatings: false }
+        }
+
+        console.log(ratings);
+
+        const ratingReduce = ratings.reduce((acc, currentRating) => {
+            acc["count"] += 1;
+            acc["totalRatings"] += currentRating.rating;
+            return acc;
+        }, {count: 0, totalRatings: 0});
+
+
+        const finalRating = (ratingReduce["totalRatings"] / ratingReduce["count"]).toFixed(2);
+
+        console.log(finalRating);
+
+        return { rating: finalRating, totalRatings: ratingReduce["count"], isLoadingRatings: false }
+    
+    });
+
     const handleAddContent = (listId, content) => {
         const userId = 1; // Temporary userId: 1
 
@@ -73,7 +113,7 @@ const TvInfo = ({ tv, initialLists }) => {
                                 value={value}
                                 onChange={(event, newValue) => {
                                     setValue(newValue);
-                                    handleRating(newValue);
+                                    addRating(newValue);
                                 }}
                             />
                             <button 
@@ -97,6 +137,8 @@ const TvInfo = ({ tv, initialLists }) => {
                                 </span>
                             ))}
                         </div>
+                        <p className="text-2xl font-semibold text-center mt-5">RATING</p>
+                        <p className="text-lg font-bold text-center mt-5"> {rating ? `${rating}/5 (${totalRatings})` : "Not Yet Rated"}</p>
                         <p className="text-2xl font-semibold text-center mt-5">Seasons</p>
                         <div>
                             {tv.seasons.map((season, index) => (

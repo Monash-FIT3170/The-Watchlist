@@ -25,31 +25,39 @@ const MovieInfo = ({ movie, initialLists }) => {
 
     }
 
-    const { rating, isLoadingRatings } = useTracker(() => {
+    const { rating, totalRatings, isLoadingRatings } = useTracker(() => {
         const handler = Meteor.subscribe("rating");
     
         if (!handler.ready()) {
-          return { ratings: [], isLoading: true };
+          return { rating: [], isLoading: true };
         }
     
         const ratings = RatingDB.find({content_type: "Movie", content_id: movie.id}).fetch();
 
-        const ratingReduce = ratings.reduce((acc, rating) => {
+        if (!ratings.length) {
+            return { rating: null, totalRatings: null, isLoadingRatings: false }
+        }
+
+        console.log(ratings);
+
+        const ratingReduce = ratings.reduce((acc, currentRating) => {
             acc["count"] += 1;
-            acc["totalRatings"] += rating.rating;
+            acc["totalRatings"] += currentRating.rating;
+            return acc;
         }, {count: 0, totalRatings: 0});
 
-        const finalRating = Math.floor(ratingReduce["totalRatings"] / ratingReduce["count"]);
+        const finalRating = (ratingReduce["totalRatings"] / ratingReduce["count"]).toFixed(2);
 
-    
-        return { rating: finalRating, isLoadingRatings: false }
+        console.log(finalRating);
+
+        return { rating: finalRating, totalRatings: ratingReduce["count"], isLoadingRatings: false }
     
     });
 
 
     const addRating = (rating) => {
         Meteor.call("rating.create", {content_type: "Movie", content_id: movie.id, rating}, (error, result) => {
-            if (err) {
+            if (error) {
                 console.error(`Error creating rating: ${err}`);
             } else {
                 console.log("Successfully added rating.")
@@ -117,7 +125,7 @@ const MovieInfo = ({ movie, initialLists }) => {
                         <p className="text-2xl font-semibold text-center mt-5">RUNTIME</p>
                         <p className="text-lg font-bold text-center mt-5"> {movie.runtime}</p>
                         <p className="text-2xl font-semibold text-center mt-5">RATING</p>
-                        <p className="text-lg font-bold text-center mt-5"> {movie.rating}</p>
+                        <p className="text-lg font-bold text-center mt-5"> {rating ? `${rating}/5 (${totalRatings})` : "Not Yet Rated"}</p>
                     </div>
                 </div>
             </div>
