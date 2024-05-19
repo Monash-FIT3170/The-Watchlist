@@ -6,11 +6,12 @@ import RenameListModal from "./RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';
 import { useLists } from './ListContext';
+import { getImageUrl } from "./imageUtils";
+import Scrollbar from './ScrollBar'; // Import the Scrollbar component
 
 const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const { handleRemoveContent, fetchLists, lists } = useLists();
   const popupRef = useRef(null);
-  const scrollContainerRef = useRef(null);
   const confirmDialogRef = useRef(null);
   const [expandedItem, setExpandedItem] = useState(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
@@ -21,6 +22,8 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const [contentToDelete, setContentToDelete] = useState(null);
   const [listToDelete, setListToDelete] = useState(null);
   const [updatedList, setUpdatedList] = useState(list); // Track updated list
+  const [selectedTab, setSelectedTab] = useState('all'); // Track selected tab
+  const [imageStyles, setImageStyles] = useState({});
   const navigate = useNavigate();
 
   const handleRedirect = (type, id) => {
@@ -50,12 +53,6 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
-  }, [list]);
 
   useEffect(() => {
     // Find the updated list in the lists array from context
@@ -127,6 +124,21 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
     setListToDelete(null);
   };
 
+  const handleImageLoad = (event, id) => {
+    const { naturalWidth, naturalHeight } = event.target;
+    if (naturalHeight > naturalWidth) {
+      setImageStyles(prev => ({ ...prev, [id]: { height: '50vh', width: '100%' } }));
+    } else {
+      setImageStyles(prev => ({ ...prev, [id]: { width: '100%', height: 'auto' } }));
+    }
+  };
+
+  const filteredContent = updatedList.content.filter(item =>
+    selectedTab === 'all' ||
+    (selectedTab === 'movies' && item.type === 'Movie') ||
+    (selectedTab === 'tv shows' && item.type === 'TV Show')
+  );
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div
@@ -158,18 +170,29 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
             </button>
           </div>
         </div>
-        <div
-          ref={scrollContainerRef}
-          className="space-y-8 overflow-y-auto max-h-[calc(100vh-10rem)]"
-        >
-          {updatedList.content.map((item) => (
+        <div className="bubbles-container flex justify-start mt-2">
+          {['all', 'movies', 'tv shows'].map((tab) => (
+            <div
+              key={tab}
+              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
+                } border-transparent border`}
+              onClick={() => setSelectedTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </div>
+          ))}
+        </div>
+        <Scrollbar className="space-y-8 max-h-[calc(100vh-10rem)]">
+          {filteredContent.map((item) => (
             <div key={item.content_id} className="block relative">
               <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
                 <div className="relative">
                   <img
-                    src={item.image_url}
+                    src={getImageUrl(item.background_url)}
                     alt={item.title}
-                    className="w-full h-[35vh] object-cover cursor-pointer"
+                    className="cursor-pointer" // Change to maintain aspect ratio
+                    style={imageStyles[item.content_id] || {}}
+                    onLoad={(e) => handleImageLoad(e, item.content_id)}
                     onClick={() => {
                       console.log(`Image clicked: ${item.type}, ${item.content_id}`);
                       handleRedirect(item.type, item.content_id);
@@ -226,7 +249,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
               )}
             </div>
           ))}
-        </div>
+        </Scrollbar>
       </div>
       <div className="z-50">
         {isRenameModalOpen && (

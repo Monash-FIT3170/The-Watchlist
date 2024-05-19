@@ -36,7 +36,8 @@ export const ContentSummary = Class.create({
         episode_details: {
             type: EpisodeDetails,
             optional: true
-        }
+        },
+        background_url: String
     }
 });
 
