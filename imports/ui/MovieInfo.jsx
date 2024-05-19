@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal'; 
+import { useTracker } from 'meteor/react-meteor-data';
+import { Rating as RatingDB } from '../api/rating';
 import { Rating } from '@mui/material';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 
@@ -7,6 +9,18 @@ const MovieInfo = ({ movie, initialLists }) => {
     const [showModal, setShowModal] = useState(false);
     const [lists, setLists] = useState(initialLists);
     const [value, setValue] = useState(null);
+    const { ratings, isLoading } = useTracker(() => {
+        const handler = Meteor.subscribe("rating");
+    
+        if (!handler.ready()) {
+          return { ratings: [], isLoading: true };
+        }
+    
+        const ratings = RatingDB.find({content_type: "Movie", content_id: movie.id}).fetch()
+    
+        return { ratings: ratings, isLoading: false }
+    
+      })
 
     useEffect(() => {
         if (0 < movie.rating && movie.rating < 6) {

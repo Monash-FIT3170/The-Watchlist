@@ -4,6 +4,7 @@ import { Meteor } from 'meteor/meteor';
 import ContentHandler from '../imports/api/server/ContentHandler';
 import ListHandler from '../imports/api/server/ListHandler';
 import List, { ListCollection } from '../imports/db/List';
+import '../imports/api/server/RatingHandler';
 
 import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content';
 

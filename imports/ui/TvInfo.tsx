@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Rating } from '@mui/material';
+import { Rating as RatingDB } from '../db/Rating';
+import { useTracker } from 'meteor/react-meteor-data';
 import Modal from './Modal';
 import { getImageUrl } from './imageUtils';
 
@@ -7,6 +9,18 @@ const TvInfo = ({ tv, initialLists }) => {
     const [showModal, setShowModal] = useState(false);
     const [lists, setLists] = useState(initialLists);
     const [value, setValue] = useState<number | null>(null);
+    const { ratings, isLoading } = useTracker(() => {
+        const handler = Meteor.subscribe("rating");
+    
+        if (!handler.ready()) {
+          return { ratings: [], isLoading: true };
+        }
+    
+        const ratings = RatingDB.find({content_type: "Tv", content_id: tv.id}).fetch()
+    
+        return { ratings: ratings, isLoading: false }
+    
+      })
 
 
     useEffect(() => {
