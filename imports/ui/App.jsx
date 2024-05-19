@@ -67,6 +67,7 @@ export const App = () => {
   const [tvs, setTvs] = useState([]);
   const [lists, setLists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
@@ -82,7 +83,12 @@ export const App = () => {
         }
       }
     });
+    setLoading(false);
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <ListsProvider>
