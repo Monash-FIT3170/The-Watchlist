@@ -12,18 +12,19 @@ import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content'
 
 const movieData = [
     {
-        "id": 1,
-        "title": "Alita: Battle Angel",
-        "release_year": 2019,
-        "runtime": 122,
-        "rating": 392783,
-        "overview": "In the 23rd century, a catastrophic interplanetary war known as \"The Fall\" has left Earth devastated and while scouting the junkyard metropolis of Iron City, scientist Dr. Dyson Ido, discovers a disembodied female cyborg with a fully intact human brain. Soon known as Alita, she's trained to become a fearsome bounty hunter who tracks down criminals with her martial arts expertise in order to protect the innocent.",
+        "id": 48,
+        "title": "Black Panther",
+        "release_year": 2018,
+        "runtime": 134,
+        "rating": 3309932,
+        "overview": "After the death of his father, the king of Wakanda, T’Challa returns home to the isolated, technologically advanced African nation to succeed to the throne and take his rightful place as king. But when a powerful old enemy reappears, T’Challa’s mettle as king—and Black Panther—is tested when he is drawn into a formidable conflict that puts the fate of Wakanda and the entire world at risk. Faced with treachery and danger, the young king must rally his allies and release the full power of Black Panther to defeat his foes and secure the safety of his people and their way of life.",
         "genres": [
             "Action",
+            "Adventure",
             "Science Fiction"
         ],
-        "background_url": "https://artworks.thetvdb.com/banners/v4/movie/1/clearart/6124b4f3718f0.png",
-        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/1/posters/6621c12de19a3.jpg"
+        "background_url": "https://artworks.thetvdb.com/banners/movies/48/posters/2195366.jpg",
+        "image_url": "https://artworks.thetvdb.com/banners/movies/48/posters/2195366.jpg"
     },
     {
         "id": 2,
@@ -40,18 +41,18 @@ const movieData = [
         "image_url": "https://artworks.thetvdb.com/banners/movies/2/posters/2.jpg"
     },
     {
-        "id": 3,
-        "title": "Ralph Breaks the Internet",
+        "_id": "8YgHQBKfxAbE6cYSR",
+        "id": 36,
+        "title": "Creed II",
         "release_year": 2018,
-        "runtime": 112,
-        "rating": 899785,
-        "overview": "Video game bad guy Ralph teams up with Vanellope von Schweetz and together they must risk it all by entering the world wide web in search of a replacement part, in the hopes of salvaging Vanellope’s video game.",
+        "runtime": 130,
+        "rating": 164491,
+        "overview": "Three years after his loss to \"Pretty\" Ricky Conlan, Adonis Creed scores a string of victories, culminating in a victory over Danny \"Stuntman\" Wheeler to win the WBC World Heavyweight Championship. Now a worldwide star, Adonis proposes to his girlfriend, Bianca Taylor, who agrees to marry him. When Bianca suggests starting a new life together in Los Angeles, Adonis is reluctant to leave his life in Philadelphia behind.",
         "genres": [
-            "Adventure",
-            "Animation"
+            "Drama"
         ],
-        "background_url": "https://artworks.thetvdb.com/banners/movies/3/posters/5f4061419e994.jpg",
-        "image_url": "https://artworks.thetvdb.com/banners/movies/3/posters/5f4061419e994.jpg"
+        "background_url": "https://artworks.thetvdb.com/banners/movies/36/backgrounds/36.jpg",
+        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/36/posters/64be9c87ca4b2.jpg"
     },
     {
         "id": 4,
@@ -68,19 +69,21 @@ const movieData = [
         "image_url": "https://artworks.thetvdb.com/banners/movies/4/posters/4.jpg"
     },
     {
-        "id": 5,
-        "title": "Fantastic Beasts: The Crimes of Grindelwald",
-        "release_year": 2018,
-        "runtime": 134,
-        "rating": 744916,
-        "overview": "In an effort to thwart Grindelwald's plans of raising pure-blood wizards to rule over all non-magical beings, Albus Dumbledore enlists his former student Newt Scamander, who agrees to help, though he's unaware of the dangers that lie ahead. Lines are drawn as love and loyalty are tested, even among the truest friends and family, in an increasingly divided wizarding world.",
+        "_id": "8pEotvNk7TmKre2xx",
+        "id": 63,
+        "title": "Harry Potter and the Chamber of Secrets",
+        "release_year": 2002,
+        "runtime": 161,
+        "rating": 5175372,
+        "overview": "Harry Potter's unfortunate summer away from his friends continues when he returns to school and an ancient prophecy seems to be coming true as a mysterious presence stalks the corridors at Hogwarts, leaving its victims paralyzed.",
         "genres": [
             "Adventure",
             "Family",
-            "Fantasy"
+            "Fantasy",
+            "Mystery"
         ],
-        "background_url": "https://artworks.thetvdb.com/banners/v4/movie/5/posters/644d4aee2a432.jpg",
-        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/5/posters/644d4aee2a432.jpg"
+        "background_url": "https://artworks.thetvdb.com/banners/movies/63/posters/5ebb0c57951c9.jpg",
+        "image_url": "https://artworks.thetvdb.com/banners/movies/63/posters/5ebb0c57951c9.jpg"
     },
     {
         "id": 6,
@@ -96,37 +99,54 @@ const movieData = [
         ],
         "background_url": "https://artworks.thetvdb.com/banners/v4/movie/6/backgrounds/64ac700f76525.jpg",
         "image_url": "https://artworks.thetvdb.com/banners/movies/6/posters/5f29728f15f57.jpg"
-    }
+    },
+    {
+        "_id": "BTwugPYN9gfS6e2oe",
+        "id": 32,
+        "title": "Green Book",
+        "release_year": 2018,
+        "runtime": 130,
+        "rating": 440774,
+        "overview": "A working-class Italian-American bouncer becomes the driver of an African-American classical pianist on a tour of venues through the 1960s American South.",
+        "genres": [
+          "Drama"
+        ],
+        "background_url": "https://artworks.thetvdb.com/banners/movies/32/backgrounds/32.jpg",
+        "image_url": "https://artworks.thetvdb.com/banners/v4/movie/32/posters/66420ac521680.jpg"
+      }
 ];
 
 const tvData = [
 
     {
-        "id": 70385,
-        "title": "The Westerner",
-        "overview": "Laconic cowboy Dave Blasingame wanders the Wild West with his faithful dog Brown and the occasional companionship of pal Burgundy Smith.",
-        "image_url": "/banners/posters/70385-2.jpg",
-        "first_aired": -292032000000,
-        "last_aired": -284169600000,
+        "_id": "rt37JuEXi9drTvLs9",
+        "id": 70814,
+        "title": "American Idol",
+        "overview": "The smash reality series showcases wannabe pop stars competing for a record deal by crooning for a panel of judges. The judges review a performer's talent (or lack thereof), and at-home viewers then vote for their favorite potential star. The show helped launch the careers of such artists as Kelly Clarkson, Carrie Underwood, Jennifer Hudson and Adam Lambert.",
+        "image_url": "/banners/posters/70814-10.jpg",
+        "first_aired": 1023753600000,
+        "last_aired": 1716076800000,
         "genres": [
-            "Western"
+          "Reality",
+          "Game Show",
+          "Musical"
         ],
         "seasons": [
             {
                 "season_number": 1,
                 "episodes": [
                     {
-                        "id": 6006,
-                        "title": "Jeff",
-                        "overview": "Dave has been searching for quite a while for his old flame, a girl named \"Jeff\", who he finds working in a saloon as a prostitute and singer under the thumb of ex-prizefighter Denny Lipp. Yet, when he finally offers to \"rescue her\" from the cruel ex-boxer, he finds she is reluctant to leave him.",
-                        "runtime": 25,
-                        "image_url": null
-                    },
+                        "id": 1,
+                        "title": "Welcome to the Hellmouth (1)",
+                        "overview": "When teen vampire slayer Buffy tries to start a new life at Sunnydale High, she discovers that the school sits atop a demonic dimensional portal.",
+                        "runtime": 43,
+                        "image_url": "/banners/episodes/70327/2.jpg"
+                    }
                 ]
             }
         ],
-        "background_url": "https://artworks.thetvdb.com/banners/fanart/original/70385-1.jpg"
-    },
+        "background_url": "https://artworks.thetvdb.com/banners/fanart/original/70814-33.jpg"
+      },
     {
         "id": 1004,
         "title": "Buffy the Vampire Slayer",
@@ -1904,12 +1924,12 @@ Meteor.startup(async () => {
 
     const favouriteData = [
         {
-            content_id: movieData[0].id,
-            title: movieData[0].title,
-            image_url: movieData[0].image_url,
+            content_id: movieData[2].id,
+            title: movieData[2].title,
+            image_url: movieData[2].image_url,
             type: "Movie",
             user_rating: 4.8,
-            background_url: movieData[0].background_url
+            background_url: movieData[2].background_url
         },
         {
             content_id: movieData[1].id,
@@ -1943,6 +1963,25 @@ Meteor.startup(async () => {
 
     const toWatchData = [
         {
+            content_id: movieData[3].id,
+            title: movieData[3].title,
+            image_url: movieData[3].image_url,
+            type: "Movie",
+            user_rating: 4.5,
+            background_url: movieData[3].background_url
+        },
+        {
+            content_id: tvData[3].id,
+            title: tvData[3].title,
+            image_url: tvData[3].image_url,
+            type: "TV Show",
+            user_rating: 4.7,
+            background_url: tvData[3].background_url
+        }
+    ];
+
+    const customData0 = [
+        {
             content_id: movieData[1].id,
             title: movieData[1].title,
             image_url: movieData[1].image_url,
@@ -1951,23 +1990,23 @@ Meteor.startup(async () => {
             background_url: movieData[1].background_url
         },
         {
-            content_id: tvData[1].id,
-            title: tvData[1].title,
-            image_url: tvData[1].image_url,
+            content_id: tvData[3].id,
+            title: tvData[3].title,
+            image_url: tvData[3].image_url,
             type: "TV Show",
             user_rating: 4.7,
-            background_url: tvData[1].background_url
+            background_url: tvData[3].background_url
         }
     ];
 
     const customData1 = [
         {
-            content_id: movieData[2].id,
-            title: movieData[2].title,
-            image_url: movieData[2].image_url,
+            content_id: movieData[5].id,
+            title: movieData[5].title,
+            image_url: movieData[5].image_url,
             type: "Movie",
             user_rating: 4.9,
-            background_url: movieData[2].background_url
+            background_url: movieData[5].background_url
         },
         {
             content_id: tvData[2].id,
@@ -1981,12 +2020,12 @@ Meteor.startup(async () => {
 
     const customData2 = [
         {
-            content_id: movieData[3].id,
-            title: movieData[3].title,
-            image_url: movieData[3].image_url,
+            content_id: movieData[6].id,
+            title: movieData[6].title,
+            image_url: movieData[6].image_url,
             type: "Movie",
             user_rating: 4.7,
-            background_url: movieData[3].background_url
+            background_url: movieData[6].background_url
         },
         {
             content_id: tvData[3].id,
@@ -2051,7 +2090,7 @@ Meteor.startup(async () => {
         title: "Action Comedies",
         description: "Another example description, still might be a lot longer!",
         listType: "Custom",
-        content: toWatchData
+        content: customData0
     });
 
     List.upsert({
