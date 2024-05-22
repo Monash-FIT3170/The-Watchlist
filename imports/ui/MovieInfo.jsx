@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Modal from './Modal'; 
-import { Rating } from '@mui/material';
-
+import ClickableRatingStar from './ClickableRatingStar';
 import { useTracker } from 'meteor/react-meteor-data';
-
 import { Rating as RatingDB } from '../db/Rating';
-import StarBorderIcon from '@material-ui/icons/StarBorder';
+
 
 const MovieInfo = ({ movie, initialLists }) => { 
     const [showModal, setShowModal] = useState(false);
@@ -92,32 +90,45 @@ const MovieInfo = ({ movie, initialLists }) => {
     
     return (
         <div className="flex flex-col items-center justify-end h-screen text-white bg-cover bg-center p-0 relative" style={{ backgroundImage: `url(${movie.background_url})` }}>
-            <div className="absolute inset-0 w-full h-full bg-cover bg-center opacity-30" style={{ backgroundImage: `url(${movie.background_url})` }}></div>
+            <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${movie.background_url})`, filter: "blur(9px)"}}></div>
             {console.log(movie.background_url)}
             <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center">
                 <div className="w-full h-3/4 rounded-xl shadow-md overflow-hidden md:max-w-4xl bg-black bg-opacity-90 text-white flex flex-row items-center justify-between px-5">
                     <div className="flex flex-col items-start w-2/5 gap-4">
-                        <img src={movie.image_url} alt={movie.title} className="w-full h-auto rounded-lg mb-5 ml-6" />
-                        <div className="grid grid-cols-2 grid-rows-1 gap-1">
-                            <Rating
-                                name="simple-controlled"
-                                value={value}
-                                onChange={(event, newValue) => {
-                                    setValue(newValue);
-                                    addRating(newValue);
-                                }}
-                                emptyIcon={<StarBorderIcon fontSize="inherit" color="secondary" />}
-                            />
-                            <button 
-                                className="px-5 py-2 border-none rounded-lg cursor-pointer bg-white text-purple-500 mb-5 ml-6"
-                                onClick={() => setShowModal(true)}
-                            >
-                                +
-                            </button>
+                        <img src={movie.image_url} alt={movie.title} className="w-full h-[60vh] rounded-lg mb-5 ml-6" />
+                        <div className="grid grid-cols-2 grid-rows-1 gap -mt-6">
+                        <div className="">
+                <button
+                  className=" ml-5 p-0 w-12 h-12 bg-magenta rounded-full hover:bg-dark-magenta active:shadow-lg mouse shadow transition ease-in duration-200 focus:outline-none"
+                  onClick={() => setShowModal(true)}
+                >
+                  <svg
+                    viewBox="0 0 20 20"
+                    enable-background="new 0 0 20 20"
+                    className="w-6 h-6 inline-block"
+                  >
+                    <path
+                      fill="#FFFFFF"
+                      d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601
+                                    C4.049,11,4,10.553,4,10c0-0.553,0.049-1,0.601-1H9V4.601C9,4.048,9.447,4,10,4c0.553,0,1,0.048,1,0.601V9h4.399
+                                    C15.952,9,16,9.447,16,10z"
+                    />
+                  </svg>
+                </button>
+              </div>
 
-                        </div>
-                        
-                    </div>
+                        <div className="mt-2 -ml-9">
+                <ClickableRatingStar
+                  totalStars={5}
+                  rating={value !== null ? value : 0}
+                  onChange={(newValue) => {
+                    setValue(newValue);
+                    addRating(newValue);
+                  }}
+                />
+              </div>
+              </div>
+          </div>
                     <div className="flex flex-col items-start w-1/2 h-full overflow-y-auto px-0 py-4">
                         <h1 className="text-6xl font-bold text-center">{movie.title} ({movie.release_year})</h1>
                         <p className="text-2xl font-semibold text-center mt-5">SYNOPSIS</p>

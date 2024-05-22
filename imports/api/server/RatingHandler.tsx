@@ -6,7 +6,7 @@ import { Movie, TV } from '../../db/Content';
 export type AddRatingOptions = {
     content_type: "TV" | "Movie",
     content_id: Number,
-    rating: 1 | 2 | 3 | 4 | 5
+    rating: 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 3.5 | 4 | 4.5 | 5
 }
 
 const createRating: HandlerFunc = {
