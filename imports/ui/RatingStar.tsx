@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
-interface RatingStarProps {
+interface StarRatingProps {
   totalStars: number;
   rating: number;
 }
@@ -28,34 +28,9 @@ const StarSVG = ({ fill }) => {
   );
 };
 
-const RatingStar: React.FC<RatingStarProps> = ({
-  totalStars = 5,
-  rating: initialRating,
-}) => {
-  const [displayRating, setDisplayRating] = useState(roundToNearestHalf(initialRating));
+const StarRating: React.FC<StarRatingProps> = ({ totalStars = 5, rating }) => {
+  const displayRating = roundToNearestHalf(rating);
 
-  useEffect(() => {
-    setDisplayRating(roundToNearestHalf(initialRating));
-  }, [roundToNearestHalf(initialRating)]);
-
-  //handle a mouse leaving, let's not do anything for now
-  const handleMouseLeave = () => {
-    setDisplayRating((roundToNearestHalf(initialRating)));
-  };
-
-
-  
-  const handleClick = (index: number) => {
-    const fillType = getStarFill(index);
-    const rating = fillType === 1 ? index + 0.5 : index + 1;
-    alert(`User rating: ${rating}`);
-  };
-
-  const handleMouseMove = (index: number, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const isHalf = event.clientX - rect.left < rect.width / 2;
-    setDisplayRating(index + (isHalf ? 0.5 : 1));
-  };
   const getStarFill = (index: number) => {
     if (displayRating >= index + 1) return 2; 
     if (displayRating >= index + 0.5) return 1; 
@@ -63,23 +38,14 @@ const RatingStar: React.FC<RatingStarProps> = ({
   };
 
   return (
-    <div className="flex relative w-full justify-start"
-    onMouseLeave={handleMouseLeave} >
-      {[...Array(totalStars)].map((_, index) => {
-        return (
-          <div
-            key={index}
-            className="cursor-pointer"
-            style={{ margin: '0 4px' }}
-            onMouseMove={(e) => handleMouseMove(index, e)}
-            onClick={() => handleClick(index)}
-          >
-            <StarSVG fill={getStarFill(index)} />
-          </div>
-        );
-      })}
+    <div className="flex relative w-full justify-start">
+      {[...Array(totalStars)].map((_, index) => (
+        <div key={index} className="cursor-pointer" style={{ margin: '0 4px' }}>
+          <StarSVG fill={getStarFill(index)} />
+        </div>
+      ))}
     </div>
   );
 };
 
-export default RatingStar;
+export default StarRating;

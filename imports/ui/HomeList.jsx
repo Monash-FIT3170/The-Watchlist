@@ -5,7 +5,7 @@ import { useLists } from './ListContext'; // Import the context
 import { getImageUrl } from "./imageUtils";
 import { useTracker } from 'meteor/react-meteor-data';
 import { Rating as RatingDB } from '../db/Rating';
-import Scrollbar from "./ScrollBar";
+
 
 const List = ({ list }) => {
     const navigate = useNavigate();
@@ -48,6 +48,7 @@ const List = ({ list }) => {
         return { allRatings: ratingReduce, isLoadingRatings: false }
     });
 
+
     return (
         <div key={list._id} className="space-y-8">
             {list.content.map((item) => (
@@ -74,18 +75,16 @@ const List = ({ list }) => {
     );
 };
 
-const HomeList = ({ title, listType }) => {
-    const { lists } = useLists();
+const HomeList = ({ title, listType }) => { // Remove lists prop
+    const { lists } = useLists(); // Use lists from context
     const filteredMovies = lists.filter(list => list.listType === listType);
 
     return (
-        <div>
+        <div className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl overflow-auto scrollbar-thumb-gray-900 scrollbar-track-gray-100 scrollbar-thin">
             <h1 className="font-sans font-bold text-4xl my-4 mt-0 mb-4">{title}</h1>
-            <Scrollbar className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left">
-                <div className="w-full">
-                    {filteredMovies.map((list) => <List key={list._id} list={list} />)}
-                </div>
-            </Scrollbar>
+            <div className="w-full overflow-visible">
+                {filteredMovies.map((list) => <List key={list._id} list={list} />)} {/* Add key to List component */}
+            </div>
         </div>
     );
 };
