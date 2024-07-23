@@ -24,7 +24,25 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const [updatedList, setUpdatedList] = useState(list); // Track updated list
   const [selectedTab, setSelectedTab] = useState('all'); // Track selected tab
   const [imageStyles, setImageStyles] = useState({});
+  const [sortOrder, setSortOrder] = useState('ascending');
   const navigate = useNavigate();
+
+  const toggleSortOrder = () => {
+    setSortOrder(currentOrder => currentOrder === 'ascending' ? 'descending' : 'ascending');
+  };
+
+
+  // Assuming you have a function to sort your list content
+  // Adjust this function based on your actual data structure and sorting needs
+  const sortContent = (content) => {
+    return content.sort((a, b) => {
+      if (sortOrder === 'ascending') {
+        return a.title.localeCompare(b.title);
+      } else {
+        return b.title.localeCompare(a.title);
+      }
+    });
+  };
 
   const handleRedirect = (type, id) => {
     onClose();
@@ -62,6 +80,16 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
     }
   }, [lists, list._id]); // Depend on lists and list._id
 
+  // Use useEffect to sort content whenever sortOrder changes
+  useEffect(() => {
+    // Assuming you have a state or a way to update your list content
+    // Replace this with your actual method of updating the displayed list
+    setUpdatedList(prevList => ({
+      ...prevList,
+      content: sortContent([...prevList.content])
+    }));
+  }, [sortOrder]);
+  
   const handleExpandClick = (id, title) => {
     if (expandedItem === id) {
       setExpandedItem(null);
@@ -181,6 +209,13 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </div>
           ))}
+          <div
+            onClick={toggleSortOrder}
+            className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${sortOrder === 'ascending' ? 'bg-[#282525]' : 'bg-[#7B1450] text-white border-[#7B1450]'
+              } border-transparent border`}
+          >
+            Sort {sortOrder === 'ascending' ? 'Descending' : 'Ascending'}
+          </div>
         </div>
         <Scrollbar className="space-y-8 max-h-[calc(100vh-10rem)]">
           {filteredContent.map((item) => (
