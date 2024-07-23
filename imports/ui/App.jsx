@@ -4,6 +4,8 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { FaRegUserCircle } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { AiOutlineHome, AiOutlineSearch } from "react-icons/ai";
+import { useTracker } from 'meteor/react-meteor-data';
+
 import Navbar from "./Navbar.tsx";
 import SearchBar from "./SearchBar.jsx";
 import FullContentList from "./FullContentList.tsx";
@@ -62,12 +64,14 @@ const staticNavbarData = [
 ];
 
 export const App = () => {
+  
   const [movies, setMovies] = useState([]);
   const [tvs, setTvs] = useState([]);
   const [lists, setLists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
+  var [user, setUser] = useState(null);
+  user = useTracker(() => Meteor.user());
 
   useEffect(() => {
     Meteor.call("content.read", {}, (error, response) => {

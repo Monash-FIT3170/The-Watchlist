@@ -33,8 +33,7 @@ const LoginPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-darkest">
-      <h1 className="text-3xl mb-4 text-white">Welcome to My App</h1>
-      <button  >Click Me</button>
+      <h1 className="text-3xl mb-4 text-white">Welcome to The Watchlist</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-xs">
         <input
           type="email"
@@ -70,7 +69,7 @@ const LoginPage = () => {
           onClick={() => setIsRegistering(!isRegistering)} 
           className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
         >
-          {isRegistering ? 'Switch to Login' : 'Switch to Register'}
+          {isRegistering ? 'Login' : 'Create An Account'}
         </button>
       </form>
       {error && <p className="mt-4 text-red-500">{error}</p>}
