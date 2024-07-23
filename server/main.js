@@ -5,6 +5,11 @@ import ContentHandler from '../imports/api/server/ContentHandler';
 import ListHandler from '../imports/api/server/ListHandler';
 import List, { ListCollection } from '../imports/db/List';
 import '../imports/api/server/RatingHandler';
+import { Mongo } from 'meteor/mongo';
+import dotenv from 'dotenv';
+import { Accounts } from 'meteor/accounts-base';
+
+dotenv.config();
 
 import { MovieCollection, TVCollection, Movie, TV } from '../imports/db/Content';
 
@@ -1894,238 +1899,19 @@ const tvData = [
     }
 ];
 
-Meteor.startup(async () => {
 
-    // We drop the collection to make sure a broken index is removed.
-    // This will eventually need to be removed for obvious reasons!
-    console.log("[DEV] DROPPING LIST COLLECTION IN main.js");
-    console.log("[DEV] THIS SHOULD BE REMOVED IN FUTURE.")
-    await ListCollection.dropCollectionAsync()
-
-    try {
-        TVCollection._dropIndex('seasons.episodes.title');
-    } catch (error) {
-        console.log('Index seasons.episodes.title does not exist or already dropped');
-    }
-
-    // Log the indexes to verify
-    TVCollection.rawCollection().indexes().then(indexList => console.log('TV Collection Indexes:', indexList));
-
-
-    console.log('Inserting movie data...');
-    movieData.forEach(movie => {
-        Movie.upsert({ id: movie.id }, { $set: movie });
+Meteor.startup(() => {
+    // Define or use an existing collection
+    const testCollection = new Mongo.Collection('test');
+  
+    // Insert a test document (optional)
+    testCollection.insert({ test: 'Connection check' }, (error, result) => {
+      if (error) {
+        console.error('Database connection failed:', error);
+      } else {
+        console.log('Successfully inserted document:', result);
+      }
     });
-
-    console.log('Inserting TV show data...');
-    tvData.forEach(tvShow => {
-        TV.upsert({ id: tvShow.id }, { $set: tvShow });
-    });
-
-    const favouriteData = [
-        {
-            content_id: movieData[2].id,
-            title: movieData[2].title,
-            image_url: movieData[2].image_url,
-            type: "Movie",
-            user_rating: 4.8,
-            background_url: movieData[2].background_url
-        },
-        {
-            content_id: movieData[1].id,
-            title: movieData[1].title,
-            image_url: movieData[1].image_url,
-            type: "Movie",
-            user_rating: 4.5,
-            background_url: movieData[1].background_url
-        },
-        {
-            content_id: tvData[1].id,
-            title: tvData[1].title,
-            image_url: tvData[1].image_url,
-            type: "TV Show",
-            user_rating: 4.5,
-            background_url: tvData[1].background_url
-        },
-        {
-            content_id: tvData[0].id,
-            title: tvData[0].title,
-            image_url: tvData[0].image_url,
-            type: "TV Show",
-            user_rating: 4.7,
-            episode_details: {
-                season_number: tvData[0].seasons[0].season_number,
-                episode_number: tvData[0].seasons[0].episodes[0].id
-            },
-            background_url: tvData[0].background_url
-        }
-    ];
-
-    const toWatchData = [
-        {
-            content_id: movieData[3].id,
-            title: movieData[3].title,
-            image_url: movieData[3].image_url,
-            type: "Movie",
-            user_rating: 4.5,
-            background_url: movieData[3].background_url
-        },
-        {
-            content_id: tvData[3].id,
-            title: tvData[3].title,
-            image_url: tvData[3].image_url,
-            type: "TV Show",
-            user_rating: 4.7,
-            background_url: tvData[3].background_url
-        }
-    ];
-
-    const customData0 = [
-        {
-            content_id: movieData[1].id,
-            title: movieData[1].title,
-            image_url: movieData[1].image_url,
-            type: "Movie",
-            user_rating: 4.5,
-            background_url: movieData[1].background_url
-        },
-        {
-            content_id: tvData[3].id,
-            title: tvData[3].title,
-            image_url: tvData[3].image_url,
-            type: "TV Show",
-            user_rating: 4.7,
-            background_url: tvData[3].background_url
-        }
-    ];
-
-    const customData1 = [
-        {
-            content_id: movieData[5].id,
-            title: movieData[5].title,
-            image_url: movieData[5].image_url,
-            type: "Movie",
-            user_rating: 4.9,
-            background_url: movieData[5].background_url
-        },
-        {
-            content_id: tvData[2].id,
-            title: tvData[2].title,
-            image_url: tvData[2].image_url,
-            type: "TV Show",
-            user_rating: 4.6,
-            background_url: tvData[2].background_url
-        }
-    ];
-
-    const customData2 = [
-        {
-            content_id: movieData[6].id,
-            title: movieData[6].title,
-            image_url: movieData[6].image_url,
-            type: "Movie",
-            user_rating: 4.7,
-            background_url: movieData[6].background_url
-        },
-        {
-            content_id: tvData[3].id,
-            title: tvData[3].title,
-            image_url: tvData[3].image_url,
-            type: "TV Show",
-            user_rating: 4.8,
-            background_url: tvData[3].background_url
-        }
-    ];
-
-    const customData3 = [
-        {
-            content_id: movieData[4].id,
-            title: movieData[4].title,
-            image_url: movieData[4].image_url,
-            type: "Movie",
-            user_rating: 4.9,
-            background_url: movieData[4].background_url
-        },
-        {
-            content_id: tvData[4].id,
-            title: tvData[4].title,
-            image_url: tvData[4].image_url,
-            type: "TV Show",
-            user_rating: 4.9,
-            background_url: tvData[4].background_url
-        }
-    ];
-
-    console.log("Inserting list data...")
-    List.upsert({
-        userId: 1,
-        title: "Your Favourites"
-    }, {
-        userId: 1,
-        userName: "Test User",
-        title: "Your Favourites",
-        description: "Here is an example description, but it might be a lot longer!",
-        listType: "Favourite",
-        content: favouriteData
-    });
-
-    List.upsert({
-        userId: 1,
-        title: "Your Watchlist"
-    }, {
-        userId: 1,
-        userName: "Test User",
-        title: "Your Watchlist",
-        description: "Movies and shows I want to watch.",
-        listType: "To Watch",
-        content: toWatchData
-    });
-
-    List.upsert({
-        userId: 1,
-        title: "Action Comedies"
-    }, {
-        userId: 1,
-        userName: "Test User",
-        title: "Action Comedies",
-        description: "Another example description, still might be a lot longer!",
-        listType: "Custom",
-        content: customData0
-    });
-
-    List.upsert({
-        userId: 1,
-        title: "Sci-Fi Favorites"
-    }, {
-        userId: 1,
-        userName: "Test User",
-        title: "Sci-Fi Favorites",
-        description: "Best Sci-Fi movies and TV shows.",
-        listType: "Custom",
-        content: customData1
-    });
-
-    List.upsert({
-        userId: 1,
-        title: "Dramatic Picks"
-    }, {
-        userId: 1,
-        userName: "Test User",
-        title: "Dramatic Picks",
-        description: "Top dramatic movies and series.",
-        listType: "Custom",
-        content: customData2
-    });
-
-    List.upsert({
-        userId: 1,
-        title: "Highly Rated"
-    }, {
-        userId: 1,
-        userName: "Test User",
-        title: "Highly Rated",
-        description: "Top rated movies and TV shows.",
-        listType: "Custom",
-        content: customData3
-    });
-});
+  
+  });
+  

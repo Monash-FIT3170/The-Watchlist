@@ -17,6 +17,7 @@ import  UserDiscovery from './UserDiscovery.jsx';
 // import Profile from './Profile.jsx';
 import AIPicks from './AIPicks.jsx';
 import Scrollbar from './ScrollBar';
+import LoginPage from './LoginPage'; 
 
 
 const FetchTest = () => {
@@ -66,6 +67,7 @@ export const App = () => {
   const [lists, setLists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     Meteor.call("content.read", {}, (error, response) => {
@@ -96,6 +98,7 @@ export const App = () => {
         <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
           <Scrollbar className="h-custom">
             <Routes>
+            <Route path="/login" element={<LoginPage />} />
               <Route path="/fetch-test" element={<FetchTest />} />
               <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} />} />
               <Route path="/home" element={<Home />} />
@@ -108,11 +111,11 @@ export const App = () => {
                 <Route key={tv.id} path={`/TV Show${tv.id}`} element={<TvInfo tv={tv} />} />
               ))}
               <Route path="/user-discovery" element={<UserDiscovery />}/> 
-            <Route path="/" element={<Navigate to="/home" />} />
+            <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
             </Routes>
           </Scrollbar>
         </div>
-        <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        {user && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
       </div>
     </ListsProvider>
   );
