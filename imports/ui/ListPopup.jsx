@@ -103,10 +103,16 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   };
 
   const confirmDeleteList = (listId) => {
+    // Prevent deletion if the list is of a protected type
+    const list = lists.find(l => l._id === listId);
+    if (list && (list.title === 'Favourite' || list.title === 'To Watch')) {
+        alert('This list cannot be deleted.');
+        return;
+    }
+
     setListToDelete(listId);
-    setContentToDelete(null);
     setShowConfirmDialog(true);
-  };
+};
 
   const handleDeleteConfirmed = () => {
     if (contentToDelete !== null) {
@@ -184,18 +190,18 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
         </div>
         <Scrollbar className="space-y-8 max-h-[calc(100vh-10rem)]">
           {filteredContent.map((item) => (
-            <div key={item.content_id} className="block relative">
+            <div key={item.contentId} className="block relative">
               <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
                 <div className="relative">
                   <img
                     src={getImageUrl(item.background_url)}
                     alt={item.title}
                     className="cursor-pointer" // Change to maintain aspect ratio
-                    style={imageStyles[item.content_id] || {}}
-                    onLoad={(e) => handleImageLoad(e, item.content_id)}
+                    style={imageStyles[item.contentId] || {}}
+                    onLoad={(e) => handleImageLoad(e, item.contentId)}
                     onClick={() => {
-                      console.log(`Image clicked: ${item.type}, ${item.content_id}`);
-                      handleRedirect(item.type, item.content_id);
+                      console.log(`Image clicked: ${item.type}, ${item.contentId}`);
+                      handleRedirect(item.type, item.contentId);
                     }}
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60" style={{ pointerEvents: 'none' }}>
@@ -207,17 +213,17 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
                       className="absolute bottom-4 right-4 text-white text-2xl"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent the click from propagating to the image
-                        handleExpandClick(item.content_id, item.title);
+                        handleExpandClick(item.contentId, item.title);
                       }}
                       style={{ pointerEvents: 'auto' }}
                     >
-                      {expandedItem === item.content_id ? <FaChevronUp /> : <FaChevronDown />}
+                      {expandedItem === item.contentId ? <FaChevronUp /> : <FaChevronDown />}
                     </button>
                     <button
                       className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent the click from propagating to the image
-                        confirmRemoveContent(item.content_id);
+                        confirmRemoveContent(item.contentId);
                       }}
                       title="Remove from List"
                       style={{ pointerEvents: 'auto' }}
@@ -227,16 +233,16 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
                   </div>
                 </div>
               </div>
-              {expandedItem === item.content_id && (
+              {expandedItem === item.contentId && (
                 <div className="mt-4 p-4 bg-gray-900 rounded-lg">
-                  {loadingDetails[item.content_id] ? (
+                  {loadingDetails[item.contentId] ? (
                     <p>Loading...</p>
-                  ) : errorDetails[item.content_id] ? (
+                  ) : errorDetails[item.contentId] ? (
                     <p>Error loading details.</p>
-                  ) : contentDetails[item.content_id] ? (
+                  ) : contentDetails[item.contentId] ? (
                     <>
                       <p>
-                        <strong>Synopsis:</strong> {contentDetails[item.content_id].overview}
+                        <strong>Synopsis:</strong> {contentDetails[item.contentId].overview}
                       </p>
                       <p>
                         <strong>Director:</strong> Example Director
