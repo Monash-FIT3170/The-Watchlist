@@ -1,28 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Modal from "./Modal";
-import { Rating as RatingDB } from "../db/Rating";
+import ClickableRatingStar from "./ClickableRatingStar";
 import { useTracker } from "meteor/react-meteor-data";
+import { Rating as RatingDB } from "../db/Rating";
 import { getImageUrl } from "./imageUtils";
-import ClickableStarRating from "./ClickableRatingStar";
 
 const TvInfo = ({ tv, initialLists }) => {
   const [showModal, setShowModal] = useState(false);
   const [lists, setLists] = useState(initialLists);
   const [value, setValue] = useState<number | null>(null);
-  const { ratings, isLoading } = useTracker(() => {
-    const handler = Meteor.subscribe("rating");
-
-    if (!handler.ready()) {
-      return { ratings: [], isLoading: true };
-    }
-
-    const ratings = RatingDB.find({
-      content_type: "Tv",
-      content_id: tv.id,
-    }).fetch();
-
-    return { ratings: ratings, isLoading: false };
-  });
 
   useEffect(() => {
     if (0 < tv.rating && tv.rating < 6) {
@@ -35,89 +21,39 @@ const TvInfo = ({ tv, initialLists }) => {
     console.log("Rating:", newValue);
   };
 
-  const addRating = (rating) => {
-    Meteor.call(
-      "rating.create",
-      { content_type: "TV", content_id: tv.id, rating },
-      (error, result) => {
-        if (error) {
-          console.error(`Error creating rating: ${error}`);
-        } else {
-          console.log("Successfully added rating.");
-        }
-      }
-    );
-  };
-
-  const { rating, totalRatings, isLoadingRatings } = useTracker(() => {
+  const { rating, userRating, totalRatings } = useTracker(() => {
     const handler = Meteor.subscribe("rating");
+    console.log('Subscription ready:', handler.ready());
 
     if (!handler.ready()) {
-      return { rating: [], isLoading: true };
+      return { rating: 0, userRating: null, totalRatings: 0, isLoading: true };
     }
 
-    const ratings = RatingDB.find({
-      content_type: "TV",
-      content_id: tv.id,
-    }).fetch();
-
-    if (!ratings.length) {
-      return { rating: null, totalRatings: null, isLoadingRatings: false };
-    }
-
-    console.log(ratings);
-
-    const ratingReduce = ratings.reduce(
-      (acc, currentRating) => {
-        acc["count"] += 1;
-        acc["totalRatings"] += currentRating.rating;
-        return acc;
-      },
-      { count: 0, totalRatings: 0 }
-    );
-
-    const finalRating = (
-      ratingReduce["totalRatings"] / ratingReduce["count"]
-    ).toFixed(2);
-
-    console.log(finalRating);
+    const ratings = RatingDB.find({ contentId: tv.id }).fetch();
+    console.log('Fetched ratings:', ratings); // Log the fetched ratings
+    const total = ratings.reduce((acc, cur) => acc + cur.rating, 0);
+    const averageRating = ratings.length > 0 ? (total / ratings.length).toFixed(2) : 0;
+    const userRating = ratings.find(r => r.userId === Meteor.userId())?.rating;
 
     return {
-      rating: finalRating,
-      totalRatings: ratingReduce["count"],
-      isLoadingRatings: false,
+      rating: averageRating,
+      userRating,
+      totalRatings: ratings.length
     };
   });
 
-  const handleAddContent = (listId, content) => {
-    const userId = 1; // Temporary userId: 1
-
-    Meteor.call(
-      "list.addContent",
-      { listId, userId, content },
-      (error, result) => {
-        if (error) {
-          console.error("Error adding content to list:", error);
-        } else {
-          console.log("Content added to list successfully:", result);
-
-          // Update the state with the new content
-          setLists(
-            lists.map((list) => {
-              if (list._id === listId) {
-                return {
-                  ...list,
-                  content: [...list.content, content],
-                };
-              }
-              return list;
-            })
-          );
-          setShowModal(false);
-        }
+  // this was previously just add rating functionality since we did not deal with users. 
+  // here we are checking the existence of a rating so that we can update it if it exists
+  const addRating = (userId, contentId, contentType, rating) => {
+    console.log('addRating - Received:', { userId, contentId, contentType, rating });
+    Meteor.call('ratings.addOrUpdate', { userId, contentId, contentType, rating }, (error, result) => {
+      if (error) {
+        console.error('Error adding or updating rating:', error);
+      } else {
+        console.log('Rating updated or added successfully');
       }
-    );
-  };
+    });
+  }
 
   const firstAiredDate = new Date(tv.first_aired).getFullYear();
   const lastAiredDate = tv.last_aired
@@ -165,14 +101,16 @@ const TvInfo = ({ tv, initialLists }) => {
                 </button>
               </div>
               <div className="mt-2 -ml-9">
-                <ClickableStarRating
+                <ClickableRatingStar
                   totalStars={5}
-                  rating={value !== null ? value : 0}
+                  rating={userRating || 0}
                   onChange={(newValue) => {
-                    setValue(newValue);
-                    addRating(newValue);
+                    console.log('MovieInfo - newRating:', newValue); // Log new rating from ClickableRatingStar
+                    addRating(Meteor.userId(), tv.id, 'TV', newValue);
                   }}
                 />
+
+
               </div>
             </div>
           </div>
