@@ -56,7 +56,8 @@ def process_movies():
         i += 1
         print(f"[{i}/{num_lines}]")
         
-        if i == 100: break
+        if i < 100: continue
+        if i == 300: break
  
         initial_data = json.loads(movie_line)
         #print(initial_data)
@@ -79,18 +80,25 @@ def process_movies():
         movie_data["language"] = data.get("original_language")
         movie_data["origin_country"] = data.get("origin_country")        
         movie_data["genres"] = [genre["name"] for genre in data.get("genres")]
-
         movie_data["keywords"] = [keyword["name"] for keyword in data.get("keywords").get("keywords")]
+
+        movie_data["actors"] = [cast["name"] for cast in data.get("credits").get("cast")]
+        
+        directors = []
+        for crew in data.get("credits").get("crew"):
+            if crew.get("job") == "Director":
+                directors.append(crew.get("name"))
+
+        movie_data["directors"] = directors
         
         movie_data["background_url"] = ""
         movie_data["image_url"] = ""
-
 
         if data.get("images"):
             images = data.get("images")
             if images.get("backdrops") is not None and len(images.get("backdrops")):
                 movie_data["background_url"] = IMAGE_ROOT + images.get("backdrops")[0]["file_path"]
-            if images.get("posters") is not None and len(images.get("backdrops")):
+            if images.get("posters") is not None and len(images.get("posters")):
                 movie_data["image_url"] = IMAGE_ROOT + images.get("posters")[0]["file_path"]
         
         yield movie_data
