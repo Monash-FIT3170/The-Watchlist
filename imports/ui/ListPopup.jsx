@@ -209,13 +209,14 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </div>
           ))}
-          <div
-            onClick={toggleSortOrder}
-            className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${sortOrder === 'ascending' ? 'bg-[#282525]' : 'bg-[#7B1450] text-white border-[#7B1450]'
-              } border-transparent border`}
-          >
-            Sort {sortOrder === 'ascending' ? 'Descending' : 'Ascending'}
-          </div>
+        <div
+          onClick={toggleSortOrder}
+          className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
+            ${sortOrder === 'ascending' ? 'bg-[#7B1450] text-white' : 'bg-[#7B1450] text-white'} 
+            border-transparent border`}
+        >
+          Sort {sortOrder === 'ascending' ? 'Ascending' : 'Descending'}
+        </div>
         </div>
         <Scrollbar className="space-y-8 max-h-[calc(100vh-10rem)]">
           {filteredContent.map((item) => (
