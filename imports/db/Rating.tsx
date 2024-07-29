@@ -6,17 +6,16 @@ export const Rating = Class.create({
     name: "Rating",
     collection: RatingCollection,
     fields: {
-        // In future this will have a user ID (with an index) and the user name, but this isn't implemented currently
-        // user_id: Number,
+        userId: String,
         // user_full_name: String,
-        content_type: {
+        contentType: {
             type: String,
             validators: [{
                 type: 'choice',
                 param: ["Movie", "TV"]
             }]
         },
-        content_id: {
+        contentId: {
             type: Number,
             index: 1
         },
