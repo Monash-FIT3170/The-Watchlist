@@ -36,11 +36,33 @@ const UserList = ({ heading, users, searchTerm }) => {
 // Default props for testing
 UserList.defaultProps = {
   heading: 'Popular Users',
-  users: Array(8).fill({
-    avatar: './ExampleResources/user-avatar.jpg',
-    name: 'BabRulez',
-    percentage: '100'
-  }),
+  users: [
+    {
+      avatar: './ExampleResources/user-avatar.jpg',
+      name: 'BabRulez',
+      percentage: '100'
+    },
+    {
+      avatar: './ExampleResources/user-avatar.jpg',
+      name: 'BobRulez',
+      percentage: '98'
+    },
+    {
+      avatar: './ExampleResources/user-avatar.jpg',
+      name: 'Sineth',
+      percentage: '1000'
+    },
+    {
+      avatar: './ExampleResources/user-avatar.jpg',
+      name: 'Geo',
+      percentage: '80'
+    },
+    {
+      avatar: './ExampleResources/user-avatar.jpg',
+      name: 'Brian',
+      percentage: '50'
+    },
+  ],
   searchTerm: '',
 };
 

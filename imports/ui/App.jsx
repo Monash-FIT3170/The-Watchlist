@@ -109,7 +109,7 @@ export const App = () => {
                 <Route key={tv.id} path={`/TV Show${tv.id}`} element={<TvInfo tv={tv} />} />
               ))}
               <Route path="/user-discovery" element={<UserDiscovery />}/> 
-              <Route path="/user-following" element={<UserFollowers />}/> 
+              <Route path="/user-followers" element={<UserFollowers />}/> 
             <Route path="/" element={<Navigate to="/home" />} />
             </Routes>
           </Scrollbar>
