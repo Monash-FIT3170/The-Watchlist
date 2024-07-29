@@ -26,7 +26,7 @@ const Modal = ({ show, onClose, content, type }) => {
 
   const handleAddContentClick = (listId) => {
     const newContent = {
-      content_id: content.id,
+      contentId: content.id,
       title: content.title,
       image_url: content.image_url,
       type: type, // "Movie" or "TV Show"
@@ -35,7 +35,7 @@ const Modal = ({ show, onClose, content, type }) => {
     };
 
     const list = lists.find(list => list._id === listId);
-    if (list && list.content.some(item => item.content_id === newContent.content_id)) {
+    if (list && list.content.some(item => item.contentId === newContent.contentId)) {
       toast.warn("This item is already in the list.");
     } else {
       handleAddContent(listId, newContent);
