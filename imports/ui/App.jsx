@@ -17,6 +17,7 @@ import  UserDiscovery from './UserDiscovery.jsx';
 // import Profile from './Profile.jsx';
 import AIPicks from './AIPicks.jsx';
 import Scrollbar from './ScrollBar';
+import UserFollowers from "./UserFollowers.jsx";
 
 
 const FetchTest = () => {
@@ -108,6 +109,7 @@ export const App = () => {
                 <Route key={tv.id} path={`/TV Show${tv.id}`} element={<TvInfo tv={tv} />} />
               ))}
               <Route path="/user-discovery" element={<UserDiscovery />}/> 
+              <Route path="/user-following" element={<UserFollowers />}/> 
             <Route path="/" element={<Navigate to="/home" />} />
             </Routes>
           </Scrollbar>

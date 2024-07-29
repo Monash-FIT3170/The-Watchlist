@@ -21,7 +21,7 @@ const UserList = ({ heading, users, searchTerm }) => {
                 alt={user.name}
                 className="w-full h-auto rounded-full aspect-square"
               />
-              <p className="text-white mt-2 text-xl text-center">{user.name}</p>
+              <p className="text-white mt-2 text-xl text-center">{user.name}<br></br>({user.percentage}%)</p>
             </Link>
             <button className="mt-2 px-4 py-1 bg-fuchsia-600 text-white rounded-full">
               Follow
@@ -36,9 +36,10 @@ const UserList = ({ heading, users, searchTerm }) => {
 // Default props for testing
 UserList.defaultProps = {
   heading: 'Popular Users',
-  users: Array(6).fill({
+  users: Array(8).fill({
     avatar: './ExampleResources/user-avatar.jpg',
     name: 'BabRulez',
+    percentage: '100'
   }),
   searchTerm: '',
 };
