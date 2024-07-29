@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Meteor } from 'meteor/meteor';
+import { Accounts } from 'meteor/accounts-base';
 import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
@@ -10,13 +11,31 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const createDefaultLists = (userId) => {
+    // Define default lists
+    const defaultLists = [
+      { title: 'Favourite', listType: 'Favourite' },
+      { title: 'To Watch', listType: 'To Watch' }
+    ];
+
+    defaultLists.forEach(list => {
+      Meteor.call('list.create', { userId, title: list.title, listType: list.listType, content: [] }, (error) => {
+        if (error) {
+          console.error('Error creating default list:', error.reason);
+        }
+      });
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isRegistering) {
-      Accounts.createUser({ email, username, password }, (err) => {
+      Accounts.createUser({ email, username, password }, (err, userId) => {
         if (err) {
           setError(err.reason);
         } else {
+          // Create default lists after successful registration
+          createDefaultLists(userId);
           navigate('/home');
         }
       });
