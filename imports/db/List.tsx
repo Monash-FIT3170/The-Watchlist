@@ -19,7 +19,7 @@ export const EpisodeDetails = Class.create({
 export const ContentSummary = Class.create({
     name: "ContentSummary",
     fields: {
-        content_id: Number, // lookup id for the content
+        contentId: Number, // lookup id for the content
         title: String,
         image_url: String,
         user_rating: {
@@ -47,7 +47,7 @@ const List = Class.create({
     name: 'List',
     collection: ListCollection,
     fields: {
-        userId: Number,
+        userId: String,
         userName: String,
         title: String,
         description: {

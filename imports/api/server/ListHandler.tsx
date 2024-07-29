@@ -21,7 +21,7 @@ type AddContentToListOptions = {
     listId: string,
     userId: string,
     content: {
-        content_id: number,
+        contentId: number,
         title: string,
         image_url: string,
         user_rating?: number,
@@ -35,16 +35,18 @@ type AddContentToListOptions = {
 
 const addContentToList: HandlerFunc = {
     validate: null,
-    run: ({ listId, userId, content }: AddContentToListOptions) => {
-        // Ensure content is in the correct format
-        const contentSummary = new ContentSummary(content).raw();
+    run: function(this: any, { listId, userId, content }: AddContentToListOptions) {
+        if (!this.userId) {
+            throw new Meteor.Error('not-authorized', 'You must be logged in to add content to a list');
+        }
+        if (this.userId !== userId) {
+            throw new Meteor.Error('not-authorized', 'You cannot add content to a list that does not belong to you');
+        }
 
         ListCollection.update(
-            { _id: listId, userId },  // Ensuring that only the owner can update the list
-            { $push: { content: contentSummary } }
+            { _id: listId, userId },
+            { $push: { content: new ContentSummary(content).raw() } }
         );
-        
-        return;
     }
 };
 
@@ -55,80 +57,100 @@ const addContentToList: HandlerFunc = {
  */
 const createList: HandlerFunc = {
     validate: null,
-    run: ({userId, title, description, listType, content}: CreateListOptions) => {
-        const formattedContent = content.map(item => new ContentSummary(item).raw()); // Ensure content is in the correct format
+    run: function(this: any, { title, description, listType, content }: CreateListOptions) {
+        if (!this.userId) {
+            throw new Meteor.Error('not-authorized', 'You must be logged in to create a list');
+        }
+
         List.insert({
-            userId, 
-            userName: "Test User",
-            title, 
-            description, 
-            listType, 
-            content: formattedContent
+            userId: this.userId,
+            userName: "Determined Dynamically", // TODO: this obviously needs to be changed - determine the user's name dynamically
+            title,
+            description,
+            listType,
+            content: content.map(item => new ContentSummary(item).raw())
         });
         return;
     }
-}
+};
+
 
 
 const readList: HandlerFunc = {
     validate: null,
-    run: ({userId}: GetListOptions) => {
-        return ListCollection.find().fetch();
-        // Add userid when implemented:
-        // return ListCollection.find({userId}).fetch();
+    run: function(this: any, { userId }: GetListOptions) {
+        if (!this.userId) {
+            throw new Meteor.Error('not-authorized', 'You must be logged in to view lists');
+        }
+        if (this.userId !== userId) {
+            throw new Meteor.Error('not-authorized', 'You cannot view lists that do not belong to you');
+        }
 
+        return ListCollection.find({ userId }).fetch();
     }
 }
 
 
 const updateList: HandlerFunc = {
     validate: null,
-    run: function({listId, userId, updateFields}: {listId: string, userId: string, updateFields: Object}) {
-        // Use this.userId to access the current user's ID
-        // Use this once users have been implemented
-        // if (!this.userId) {
-        //     throw new Meteor.Error('not-authorized', 'You must be logged in to update a list');
-        // }
-        
-        // // Additional check to ensure that the user updating the list is the owner
-        // if (this.userId !== userId) {
-        //     throw new Meteor.Error('not-authorized', 'You cannot update lists that do not belong to you');
-        // }
+    run: function(this: any, { listId, userId, updateFields }: { listId: string, userId: string, updateFields: Object }) {
+        if (!this.userId) {
+            throw new Meteor.Error('not-authorized', 'You must be logged in to update a list');
+        }
+        if (this.userId !== userId) {
+            throw new Meteor.Error('not-authorized', 'You cannot update lists that do not belong to you');
+        }
 
         ListCollection.update(
-            { _id: listId, userId },  // Ensuring that only the owner can update the list
+            { _id: listId, userId },
             { $set: updateFields }
         );
-        
-        return;
     }
 }
 
 const deleteList: HandlerFunc = {
     validate: null,
     run: function({listId, userId}: {listId: string, userId: string}) {
-        // if (!this.userId) {
-        //     throw new Meteor.Error('not-authorized', 'You must be logged in to delete a list');
-        // }
+        if (!this.userId) {
+            throw new Meteor.Error('not-authorized', 'You must be logged in to delete a list');
+        }
 
-        // if (this.userId !== userId) {
-        //     throw new Meteor.Error('not-authorized', 'You cannot delete lists that do not belong to you');
-        // }
-        
+        if (this.userId !== userId) {
+            throw new Meteor.Error('not-authorized', 'You cannot delete lists that do not belong to you');
+        }
+
+        // Fetch the list to check its title before deletion
+        const list = ListCollection.findOne({ _id: listId, userId: userId });
+        if (!list) {
+            throw new Meteor.Error('not-found', 'List not found');
+        }
+
+        // Prevent deletion of Favourite and To Watch lists
+        if (list.title === 'Favourite' || list.title === 'To Watch') {
+            throw new Meteor.Error('not-allowed', 'Cannot delete Favourite or To Watch lists');
+        }
+
         ListCollection.remove({ _id: listId, userId: userId });  // Ensuring that only the owner can delete the list
         
         return;
     }
 }
 
+
 const removeContent: HandlerFunc = {
     validate: null,
-    run: ({ listId, contentId }) => {
+    run: function(this: any, { listId, userId, contentId }: { listId: string, userId: string, contentId: number }) {
+        if (!this.userId) {
+            throw new Meteor.Error('not-authorized', 'You must be logged in to remove content from a list');
+        }
+        if (this.userId !== userId) {
+            throw new Meteor.Error('not-authorized', 'You cannot remove content from lists that do not belong to you');
+        }
+
         ListCollection.update(
-            { _id: listId },
-            { $pull: { content: { content_id: contentId } } }
+            { _id: listId, userId },
+            { $pull: { content: { contentId: contentId } } }
         );
-        return;
     }
 };
 
