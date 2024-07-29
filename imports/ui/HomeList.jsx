@@ -29,15 +29,15 @@ const List = ({ list }) => {
         }
 
         const ratingReduce = ratings.reduce((acc, currentRating) => {
-            if (!(currentRating.content_id in acc)) {
-                acc[currentRating.content_id] = {
+            if (!(currentRating.contentId in acc)) {
+                acc[currentRating.contentId] = {
                     count: 0,
                     totalRatings: 0
                 }
             }
 
-            acc[currentRating.content_id]["count"] += 1;
-            acc[currentRating.content_id]["totalRatings"] += currentRating.rating;
+            acc[currentRating.contentId]["count"] += 1;
+            acc[currentRating.contentId]["totalRatings"] += currentRating.rating;
             return acc;
         }, {});
 
@@ -52,7 +52,7 @@ const List = ({ list }) => {
     return (
         <div key={list._id} className="space-y-8">
             {list.content.map((item) => (
-                <div key={item.content_id} className="relative" onClick={() => handleRedirect(item.type, item.content_id)}>
+                <div key={item.contentId} className="relative" onClick={() => handleRedirect(item.type, item.contentId)}>
                     <div className="relative rounded-lg shadow-lg cursor-pointer overflow-visible">
                         <div className="transition-transform duration-300 ease-in-out transform hover:scale-110">
                             <img
@@ -64,7 +64,7 @@ const List = ({ list }) => {
                                 <div className="text-white">
                                     <h3 className="text-xl font-bold">{item.title}</h3>
                                     <p className="text-sm">{item.description}</p>
-                                    {isLoadingRatings ? null : <RatingStar totalStars={5} rating={(item.content_id in allRatings) ? allRatings[item.content_id].finalRating : 0} />}
+                                    {isLoadingRatings ? null : <RatingStar totalStars={5} rating={(item.contentId in allRatings) ? allRatings[item.contentId].finalRating : 0} />}
                                 </div>
                             </div>
                         </div>
@@ -75,16 +75,29 @@ const List = ({ list }) => {
     );
 };
 
-const HomeList = ({ title, listType }) => { // Remove lists prop
-    const { lists } = useLists(); // Use lists from context
-    const filteredMovies = lists.filter(list => list.listType === listType);
+const HomeList = ({ title, listType }) => {
+    const { lists } = useLists();
+    const navigate = useNavigate();
+    const filteredLists = lists.filter(list => list.listType === listType);
 
     return (
         <div className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl overflow-auto scrollbar-thumb-gray-900 scrollbar-track-gray-100 scrollbar-thin">
             <h1 className="font-sans font-bold text-4xl my-4 mt-0 mb-4">{title}</h1>
-            <div className="w-full overflow-visible">
-                {filteredMovies.map((list) => <List key={list._id} list={list} />)} {/* Add key to List component */}
-            </div>
+            {filteredLists.length === 0 ? (
+                <div className="flex flex-col items-center justify-center flex-grow">
+                    <p className="text-lg text-white mb-4">You don't have any items in this list yet.</p>
+                    <button 
+                        className="px-6 py-2 bg-magenta text-white rounded hover:bg-pink-700 transition-colors"
+                        onClick={() => navigate('/search')}
+                    >
+                        Find great movies and shows
+                    </button>
+                </div>
+            ) : (
+                <div className="w-full overflow-visible">
+                    {filteredLists.map((list) => <List key={list._id} list={list} />)}
+                </div>
+            )}
         </div>
     );
 };
