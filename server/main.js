@@ -8,6 +8,9 @@ import '../imports/api/server/RatingHandler';
 import { Mongo } from 'meteor/mongo';
 import dotenv from 'dotenv';
 import { Accounts } from 'meteor/accounts-base';
+import { check, Match } from 'meteor/check';
+import { Rating } from '../imports/db/Rating';
+
 
 dotenv.config();
 
@@ -1899,6 +1902,33 @@ const tvData = [
     }
 ];
 
+Meteor.methods({
+    'ratings.addOrUpdate': function({ userId, contentId, contentType, rating }) {
+        // Security checks and operations
+        check(userId, String);
+        check(contentId, Number);
+        check(contentType, String);
+        check(rating, Number);
+
+        if (!this.userId) {
+            throw new Meteor.Error('not-authorized');
+        }
+
+        const existingRating = Rating.findOne({ userId, contentId, contentType });
+        if (existingRating) {
+            Rating.update({ _id: existingRating._id }, {
+                $set: { rating }
+            });
+        } else {
+            Rating.insert({
+                userId: this.userId,
+                contentId,
+                contentType,
+                rating
+            });
+        }
+    }
+});
 
 Meteor.startup(() => {
     // Define or use an existing collection
