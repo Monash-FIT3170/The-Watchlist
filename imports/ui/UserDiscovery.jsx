@@ -31,6 +31,16 @@ const UserDiscovery = () => {
     });
   };
 
+  const handleUnfollow = (userId) => {
+    Meteor.call('unfollowUser', userId, (error, result) => {
+      if (error) {
+        console.error('Error unfollowing user:', error);
+      } else {
+        console.log('Unfollowed user successfully');
+      }
+    });
+  };
+
   return (
     <div className="user-discovery text-center">
       <div className="flex items-center justify-start mb-8 space-x-7 w-full max-w-xl mt-4 ml-1">
@@ -48,9 +58,9 @@ const UserDiscovery = () => {
         </div>
       </div>
       <div>
-        <UserList heading="Popular Users" users={users} searchTerm={searchTerm} onFollow={handleFollow} onSelectUser={selectUser} />
+        <UserList heading="Popular Users" users={users} searchTerm={searchTerm} onFollow={handleFollow} onUnfollow={handleUnfollow} onSelectUser={selectUser} />
         <div className="mt-8">
-          <UserList heading="Similar Users" users={users} searchTerm={searchTerm} onFollow={handleFollow} onSelectUser={selectUser} />
+          <UserList heading="Similar Users" users={users} searchTerm={searchTerm} onFollow={handleFollow} onUnfollow={handleUnfollow} onSelectUser={selectUser} />
         </div>
       </div>
     </div>

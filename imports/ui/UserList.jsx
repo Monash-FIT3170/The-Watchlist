@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
+import { Meteor } from 'meteor/meteor';
 
-const UserList = ({ heading, searchTerm, onFollow }) => {
+const UserList = ({ heading, searchTerm, onFollow, onUnfollow }) => {
   const defaultAvatarUrl = './default-avatar.png';
   const navigate = useNavigate();
+  const currentUserId = Meteor.userId();
 
   const users = useTracker(() => {
     const subscription = Meteor.subscribe('allUsers');
@@ -15,6 +17,11 @@ const UserList = ({ heading, searchTerm, onFollow }) => {
       username: { $regex: searchTerm, $options: 'i' },
     }).fetch();
   }, [searchTerm]);
+
+  const isFollowing = (userId) => {
+    const currentUser = Meteor.user();
+    return currentUser && currentUser.following.includes(userId);
+  };
 
   return (
     <div className="bg-darker p-4 rounded-lg">
@@ -32,15 +39,21 @@ const UserList = ({ heading, searchTerm, onFollow }) => {
               <img src={user.avatarUrl || defaultAvatarUrl} alt={user.username} className="w-full h-auto rounded-full aspect-square" />
               <p className="text-white mt-2 text-xl text-center">{user.username}</p>
             </div>
-            <button
-              className="mt-2 px-4 py-1 bg-fuchsia-600 text-white rounded-full"
-              onClick={(e) => {
-                e.stopPropagation();
-                onFollow(user._id);
-              }}
-            >
-              Follow
-            </button>
+            {currentUserId !== user._id && (
+              <button
+                className={`mt-2 px-4 py-1 ${isFollowing(user._id) ? 'bg-blue-600' : 'bg-fuchsia-600'} text-white rounded-full`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isFollowing(user._id)) {
+                    onUnfollow(user._id);
+                  } else {
+                    onFollow(user._id);
+                  }
+                }}
+              >
+                {isFollowing(user._id) ? 'Unfollow' : 'Follow'}
+              </button>
+            )}
           </div>
         ))}
       </div>
