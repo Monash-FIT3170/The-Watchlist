@@ -1,16 +1,38 @@
 import React, { useState } from 'react';
 import UserList from './UserList';
 import { AiOutlineSearch } from 'react-icons/ai';
-
+import { useTracker } from 'meteor/react-meteor-data';
+import { Meteor } from 'meteor/meteor';
 
 const UserDiscovery = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-  
-    const handleSearchChange = (event) => {
-      setSearchTerm(event.target.value);
-    };
+  const [searchTerm, setSearchTerm] = useState('');
+  const users = useTracker(() => {
+    Meteor.subscribe('allUsers');
+    return Meteor.users.find().fetch();
+  });
+
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const selectUser = (user) => {
+    setSelectedUser(user);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleFollow = (userId) => {
+    Meteor.call('followUser', userId, (error, result) => {
+      if (error) {
+        console.error('Error following user:', error);
+      } else {
+        console.log('Followed user successfully');
+      }
+    });
+  };
+
   return (
-    <div className="user-discovery text-center ">
+    <div className="user-discovery text-center">
       <div className="flex items-center justify-start mb-8 space-x-7 w-full max-w-xl mt-4 ml-1">
         <div className="relative flex-grow">
           <input
@@ -23,12 +45,12 @@ const UserDiscovery = () => {
           <span className="absolute inset-y-0 left-0 flex items-center pl-3">
             <AiOutlineSearch className="text-gray-400" size={20} />
           </span>
-          </div>
+        </div>
       </div>
-      <div >
-        <UserList heading="Popular Users" searchTerm={searchTerm} />
+      <div>
+        <UserList heading="Popular Users" users={users} searchTerm={searchTerm} onFollow={handleFollow} onSelectUser={selectUser} />
         <div className="mt-8">
-          <UserList heading="Similar Users" searchTerm={searchTerm} />
+          <UserList heading="Similar Users" users={users} searchTerm={searchTerm} onFollow={handleFollow} onSelectUser={selectUser} />
         </div>
       </div>
     </div>

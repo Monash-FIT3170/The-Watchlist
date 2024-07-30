@@ -12,13 +12,12 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const createDefaultLists = (userId) => {
-    // Define default lists
     const defaultLists = [
       { title: 'Favourite', listType: 'Favourite' },
-      { title: 'To Watch', listType: 'To Watch' }
+      { title: 'To Watch', listType: 'To Watch' },
     ];
 
-    defaultLists.forEach(list => {
+    defaultLists.forEach((list) => {
       Meteor.call('list.create', { userId, title: list.title, listType: list.listType, content: [] }, (error) => {
         if (error) {
           console.error('Error creating default list:', error.reason);
@@ -30,12 +29,11 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isRegistering) {
-      Accounts.createUser({ email, username, password }, (err, userId) => {
+      Accounts.createUser({ email, username, password }, (err) => {
         if (err) {
           setError(err.reason);
         } else {
-          // Create default lists after successful registration
-          createDefaultLists(userId);
+          createDefaultLists(Meteor.userId());
           navigate('/home');
         }
       });
@@ -83,9 +81,9 @@ const LoginPage = () => {
         <button type="submit" className="w-full p-2 mb-2 bg-magenta text-white rounded hover:bg-pink-700">
           {isRegistering ? 'Register' : 'Log In'}
         </button>
-        <button 
-          type="button" 
-          onClick={() => setIsRegistering(!isRegistering)} 
+        <button
+          type="button"
+          onClick={() => setIsRegistering(!isRegistering)}
           className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
         >
           {isRegistering ? 'Login' : 'Create An Account'}
