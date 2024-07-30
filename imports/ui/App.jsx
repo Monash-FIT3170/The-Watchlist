@@ -1,3 +1,4 @@
+// imports/ui/App.jsx
 import React, { useState, useEffect } from "react";
 import { Meteor } from "meteor/meteor";
 import { Route, Routes, Navigate } from "react-router-dom";
@@ -20,6 +21,7 @@ import  UserDiscovery from './UserDiscovery.jsx';
 import AIPicks from './AIPicks.jsx';
 import Scrollbar from './ScrollBar';
 import LoginPage from './LoginPage'; 
+import UserProfilePage from './UserProfilePage';
 
 
 const FetchTest = () => {
@@ -115,6 +117,7 @@ export const App = () => {
                 <Route key={tv.id} path={`/TV Show${tv.id}`} element={<TvInfo tv={tv} />} />
               ))}
               <Route path="/user-discovery" element={<UserDiscovery />}/> 
+              <Route path="/user/:userId" element={<UserProfilePage />} />
             <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
             </Routes>
           </Scrollbar>

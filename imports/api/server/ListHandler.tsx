@@ -82,9 +82,6 @@ const readList: HandlerFunc = {
         if (!this.userId) {
             throw new Meteor.Error('not-authorized', 'You must be logged in to view lists');
         }
-        if (this.userId !== userId) {
-            throw new Meteor.Error('not-authorized', 'You cannot view lists that do not belong to you');
-        }
 
         return ListCollection.find({ userId }).fetch();
     }
