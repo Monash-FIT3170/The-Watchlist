@@ -29,6 +29,22 @@ Meteor.methods({
     const user = Meteor.users.findOne(this.userId);
     return user.following.includes(targetUserId);
   },
+  'users.followers'({ userId }) {
+    check(userId, String);
+    const user = Meteor.users.findOne(userId);
+    if (!user) {
+      throw new Meteor.Error('not-found', 'User not found');
+    }
+    return Meteor.users.find({ _id: { $in: user.followers } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
+  },
+  'users.following'({ userId }) {
+    check(userId, String);
+    const user = Meteor.users.findOne(userId);
+    if (!user) {
+      throw new Meteor.Error('not-found', 'User not found');
+    }
+    return Meteor.users.find({ _id: { $in: user.following } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
+  },
   'ratings.addOrUpdate'({ userId, contentId, contentType, rating }) {
     check(userId, String);
     check(contentId, Number);
@@ -56,7 +72,7 @@ Meteor.methods({
 });
 
 Accounts.onCreateUser((options, user) => {
-  const defaultAvatarUrl = "./ExampleResources/user-avatar.jpg";
+  const defaultAvatarUrl = "https://randomuser.me/api/portraits/lego/1.jpg";
   user.following = [];
   user.followers = [];
   user.avatarUrl = defaultAvatarUrl;

@@ -1,3 +1,4 @@
+// imports/ui/UserProfile.jsx
 import React, { Fragment, useEffect, useState } from 'react';
 import ContentList from './ContentList';
 import ProfileCard from './ProfileCard';
@@ -48,8 +49,8 @@ export default function UserProfile() {
       avatarUrl: currentUser.avatarUrl || './default-avatar.png',
       userName: currentUser.username || 'Default User',
       ratings: currentUser.ratings || '0',
-      followers: currentUser.followers.length || '0',
-      following: currentUser.following.length || '0',
+      followers: currentUser.followers?.length || '0',
+      following: currentUser.following?.length || '0',
       userRealName: currentUser.realName || 'No Name Provided',
       userDescription: currentUser.description || 'No description provided.',
       _id: currentUser._id,

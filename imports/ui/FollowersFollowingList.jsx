@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
-import Scrollbar from './ScrollBar'; // Import the Scrollbar component
+import Scrollbar from './ScrollBar';
 
 const FollowersFollowingList = ({ userId, type, show, onClose }) => {
   const [usersList, setUsersList] = useState([]);
@@ -13,6 +13,7 @@ const FollowersFollowingList = ({ userId, type, show, onClose }) => {
     if (show) {
       const fetchUsers = async () => {
         try {
+          console.log(`Fetching ${type} for userId:`, userId);
           const users = await new Promise((resolve, reject) => {
             Meteor.call(`users.${type}`, { userId }, (error, result) => {
               if (error) {
@@ -22,6 +23,7 @@ const FollowersFollowingList = ({ userId, type, show, onClose }) => {
               }
             });
           });
+          console.log(`${type} fetched:`, users);
           setUsersList(users);
         } catch (error) {
           console.error(`Error fetching ${type}:`, error);
@@ -33,6 +35,7 @@ const FollowersFollowingList = ({ userId, type, show, onClose }) => {
 
   const handleClickOutside = (event) => {
     if (popupRef.current && !popupRef.current.contains(event.target)) {
+      console.log('Clicked outside the popup');
       onClose();
     }
   };
@@ -47,6 +50,7 @@ const FollowersFollowingList = ({ userId, type, show, onClose }) => {
   }, [show]);
 
   const handleUserClick = (userId) => {
+    console.log('User clicked:', userId);
     onClose();
     navigate(`/user/${userId}`);
   };
