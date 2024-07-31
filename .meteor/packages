@@ -28,3 +28,6 @@ ejson
 jagi:astronomy-timestamp-behavior
 accounts-password
 tracker
+accounts-github
+service-configuration
+accounts-google

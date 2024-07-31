@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { useNavigate } from 'react-router-dom';
+import LoginWithGithub from './LoginWithGithub.jsx';
+import LoginWithGoogle from './LoginWithGoogle.jsx';
+
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -88,6 +91,15 @@ const LoginPage = () => {
         >
           {isRegistering ? 'Login' : 'Create An Account'}
         </button>
+        <div className="py-1">
+          <div className="py-1">
+            <LoginWithGithub />
+          </div>
+          <div className="py-1">
+            <LoginWithGoogle />
+          </div>
+        </div>
+
       </form>
       {error && <p className="mt-4 text-red-500">{error}</p>}
     </div>
