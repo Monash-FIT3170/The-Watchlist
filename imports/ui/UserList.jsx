@@ -36,7 +36,7 @@ const UserList = ({ heading, searchTerm, onFollow, onUnfollow }) => {
               onClick={() => navigate(`/user/${user._id}`)}
               className="flex flex-col items-center cursor-pointer"
             >
-              <img src={user.avatarUrl || defaultAvatarUrl} alt={user.username} className="w-full h-auto rounded-full aspect-square" />
+              <img src={user.avatarUrl || defaultAvatarUrl} alt={user.username} className="w-32 h-32 rounded-full aspect-square object-cover" />
               <p className="text-white mt-2 text-xl text-center">{user.username}</p>
             </div>
             {currentUserId !== user._id && (
