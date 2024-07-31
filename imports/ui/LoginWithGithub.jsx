@@ -5,7 +5,7 @@ export const LoginWithGithub = () => {
   const handleGithubLogin = () => {
     Meteor.loginWithGithub({
       requestPermissions: ['user'],
-      loginStyle: 'popup',
+      loginStyle: 'redirect',
     });
   };
 

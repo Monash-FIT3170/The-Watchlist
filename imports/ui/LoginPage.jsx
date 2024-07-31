@@ -43,7 +43,7 @@ const LoginPage = () => {
     } else {
       Meteor.loginWithPassword(email, password, (err) => {
         if (err) {
-          setError(err.reason);
+          setError("Username or Password Incorrect");
         } else {
           navigate('/home');
         }
