@@ -9,22 +9,18 @@ const ProfileCard = ({ user, onFollow, showFollowButton }) => {
   const [showFollowing, setShowFollowing] = useState(false);
 
   useEffect(() => {
-    const avatarPath = user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg";; // Use absolute path from public directory
+    const avatarPath = user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"; // Use absolute path
     const img = new Image();
     img.onload = () => console.log(`Image exists at ${avatarPath}:`, true);
     img.onerror = () => console.log(`Image exists at ${avatarPath}:`, false);
     img.src = avatarPath;
   }, [user.avatarUrl]);
 
-  console.log("USER INSIDE PROFILE CARD");
-  console.log(user);
-  console.log(user.avatarUrl);
-
   return (
-    <div className="flex items-center h-72 p-4 bg-gradient-to-br from-zinc-900 via-zinc-700 to-zinc-600 rounded-lg shadow-md">
+    <div className="flex items-center h-72 p-4 bg-gradient-to-br from-zinc-900 via-zinc-700 to-zinc-600 rounded-lg shadow-md mb-4">
       <div className="flex items-center gap-4">
         <img
-          src={user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"} // Use absolute path from public directory
+          src={user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"} // Use absolute path
           alt="avatar"
           className="aspect-square w-56 h-56 object-cover rounded-full shadow-2xl"
         />

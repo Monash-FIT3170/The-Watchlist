@@ -16,11 +16,10 @@ import MovieInfo from "./MovieInfo.jsx";
 import TvInfo from "./TvInfo.tsx";
 import NewListModal from "./NewListModal.tsx";
 import { ListsProvider } from './ListContext';
-import  UserDiscovery from './UserDiscovery.jsx';
-// import Profile from './Profile.jsx';
+import UserDiscovery from './UserDiscovery.jsx';
 import AIPicks from './AIPicks.jsx';
 import Scrollbar from './ScrollBar';
-import LoginPage from './LoginPage'; 
+import LoginPage from './LoginPage';
 import UserProfilePage from './UserProfilePage';
 
 
@@ -66,14 +65,12 @@ const staticNavbarData = [
 ];
 
 export const App = () => {
-  
   const [movies, setMovies] = useState([]);
   const [tvs, setTvs] = useState([]);
   const [lists, setLists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  var [user, setUser] = useState(null);
-  user = useTracker(() => Meteor.user());
+  var user = useTracker(() => Meteor.user());
 
   useEffect(() => {
     Meteor.call("content.read", {}, (error, response) => {
@@ -104,21 +101,21 @@ export const App = () => {
         <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
           <Scrollbar className="h-custom">
             <Routes>
-            <Route path="/login" element={<LoginPage />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/fetch-test" element={<FetchTest />} />
               <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} />} />
               <Route path="/home" element={<Home />} />
               <Route path="/profile" element={<UserProfile />} />
-              <Route path="/ai-picks" element={ <AIPicks movies={movies} tvs={tvs}/>}  />
+              <Route path="/ai-picks" element={<AIPicks movies={movies} tvs={tvs} />} />
               {movies.map((movie) => (
                 <Route key={movie.id} path={`/Movie${movie.id}`} element={<MovieInfo movie={movie} />} />
               ))}
               {tvs.map((tv) => (
                 <Route key={tv.id} path={`/TV Show${tv.id}`} element={<TvInfo tv={tv} />} />
               ))}
-              <Route path="/user-discovery" element={<UserDiscovery />}/> 
+              <Route path="/user-discovery" element={<UserDiscovery />} />
               <Route path="/user/:userId" element={<UserProfilePage />} />
-            <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+              <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
             </Routes>
           </Scrollbar>
         </div>

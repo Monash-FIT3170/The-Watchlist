@@ -46,7 +46,7 @@ export default function UserProfile() {
 
   const userProfile = currentUser
     ? {
-      avatarUrl: currentUser.avatarUrl || './default-avatar.png',
+      avatarUrl: currentUser.avatarUrl || 'https://randomuser.me/api/portraits/lego/1.jpg',
       userName: currentUser.username || 'Default User',
       ratings: currentUser.ratings || '0',
       followers: currentUser.followers?.length || '0',
@@ -60,7 +60,7 @@ export default function UserProfile() {
   return (
     <Fragment>
       {currentUser ? (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 bg-darker rounded-lg shadow-lg p-6">
           <ProfileCard
             user={userProfile}
             onFollow={null}
