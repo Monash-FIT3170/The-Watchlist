@@ -5,12 +5,21 @@ import ListDisplay from './ListDisplay';
 import { useLists } from './ListContext';
 import { getImageUrl } from './imageUtils';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
+import UserList from './UserList'; 
+import { useTracker } from 'meteor/react-meteor-data';
 
 const SearchBar = ({ movies, tvs }) => {
     const { lists } = useLists();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTab, setSelectedTab] = useState('movies');
     const [showFilters, setShowFilters] = useState(false);
+
+    const users = useTracker(() => {
+        Meteor.subscribe('allUsers');  
+        return Meteor.users.find({
+            username: { $regex: searchTerm, $options: 'i' }
+        }).fetch();
+    }, [searchTerm]);
 
     const dropdownData = {
         year: {
@@ -139,16 +148,16 @@ const SearchBar = ({ movies, tvs }) => {
         const newFilteredData = {
             movies: applyFilters(movies),
             tvShows: applyFilters(tvs),
-            users: [], // Apply similar filtering logic if required
+            users,
             lists: applyFilters(lists) // Use lists from context
         };
         setFilteredData(newFilteredData);
-    }, [filters, movies, tvs, lists]); // Add lists to dependencies
+    }, [filters, movies, tvs, lists, users]); // Add lists to dependencies
 
     const [filteredData, setFilteredData] = useState({
         movies: movies,
         tvShows: tvs,
-        users: [], // there will be a similar dummy data array for users
+        users: users,
         lists: lists  // there will be a similar dummy data array for lists
     });
 
@@ -160,7 +169,7 @@ const SearchBar = ({ movies, tvs }) => {
             setFilteredData({
                 movies: movies,
                 tvShows: tvs,
-                users: [], // Reset or update according to available user data
+                users: users,
                 lists: lists
             });
         } else {
@@ -170,7 +179,7 @@ const SearchBar = ({ movies, tvs }) => {
             setFilteredData({
                 movies: movies.filter(filterContent),
                 tvShows: tvs.filter(filterContent),
-                users: [], // Filter user data
+                users,
                 lists: lists.filter(filterLists)
             });
         }
@@ -276,6 +285,13 @@ const SearchBar = ({ movies, tvs }) => {
                         <ListDisplay listData={filteredData.lists} />
                     ) : (
                         <div>No lists available.</div>
+                    )
+                )}
+                {selectedTab === 'users' && (
+                    filteredData.users.length > 0 ? (
+                        <UserList heading="Users" users={filteredData.users} searchTerm={searchTerm} />
+                    ) : (
+                        <div>No users found.</div>
                     )
                 )}
             </Scrollbar>
