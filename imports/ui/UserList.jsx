@@ -3,25 +3,21 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 
-const UserList = ({ heading, searchTerm, onFollow, onUnfollow }) => {
+const UserList = ({ heading, users, searchTerm, onFollow, onUnfollow }) => {
   const defaultAvatarUrl = './default-avatar.png';
   const navigate = useNavigate();
   const currentUserId = Meteor.userId();
 
-  const users = useTracker(() => {
-    const subscription = Meteor.subscribe('allUsers');
-    if (!subscription.ready()) {
-      return [];
-    }
-    return Meteor.users.find({
-      username: { $regex: searchTerm, $options: 'i' },
-    }).fetch();
-  }, [searchTerm]);
-
+  // Function to check if the current user is following the given userId
   const isFollowing = (userId) => {
     const currentUser = Meteor.user();
-    return currentUser && currentUser.following.includes(userId);
+    return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
   };
+  
+
+  const filteredUsers = users.filter(user =>
+    user.username.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="bg-darker p-4 rounded-lg">
@@ -30,7 +26,7 @@ const UserList = ({ heading, searchTerm, onFollow, onUnfollow }) => {
         <Link to="/all-users" className="text-sm text-blue-400">View All</Link>
       </div>
       <div className="grid grid-cols-6 gap-8">
-        {users.map((user, index) => (
+        {filteredUsers.map((user, index) => (
           <div key={index} className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-700 transition-colors duration-300">
             <div 
               onClick={() => navigate(`/user/${user._id}`)}

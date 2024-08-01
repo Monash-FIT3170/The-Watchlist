@@ -21,6 +21,7 @@ import AIPicks from './AIPicks.jsx';
 import Scrollbar from './ScrollBar';
 import LoginPage from './LoginPage';
 import UserProfilePage from './UserProfilePage';
+import FollowersFollowingPage from "./FollowersFollowingPage.jsx";
 
 
 const FetchTest = () => {
@@ -115,6 +116,7 @@ export const App = () => {
               ))}
               <Route path="/user-discovery" element={<UserDiscovery />} />
               <Route path="/user/:userId" element={<UserProfilePage />} />
+              <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage />} /> 
               <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
             </Routes>
           </Scrollbar>
