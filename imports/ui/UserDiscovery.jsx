@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import UserList from './UserList';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { useTracker } from 'meteor/react-meteor-data';
@@ -12,6 +12,10 @@ const UserDiscovery = ({ currentUser }) => {
     return Meteor.users.find().fetch();
   });
 
+  useEffect(() => {
+    console.log("UserDiscovery component mounted or updated");
+  });
+  
   const [selectedUser, setSelectedUser] = useState(null);
 
   const selectUser = (user) => {

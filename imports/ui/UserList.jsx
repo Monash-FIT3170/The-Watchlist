@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 
-const UserList = ({ heading, users, searchTerm, onFollow, onUnfollow }) => {
+const UserList = React.memo(({ heading, users, searchTerm, onFollow, onUnfollow }) => {
   const [containerWidth, setContainerWidth] = useState(0);
   const defaultAvatarUrl = './default-avatar.png';
   const navigate = useNavigate();
   const currentUserId = Meteor.userId();
 
-    // Function to check if the current user is following the given userId
-    const isFollowing = (userId) => {
-      const currentUser = Meteor.user();
-      return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
-    };
+  useEffect(() => {
+    console.log("UserList component mounted or updated");
+  });
   
+  // Function to check if the current user is following the given userId
+  const isFollowing = (userId) => {
+    const currentUser = Meteor.user();
+    return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
+  };
 
   // Adjusting how many users to show based on the container width
   useEffect(() => {
@@ -37,19 +40,28 @@ const UserList = ({ heading, users, searchTerm, onFollow, onUnfollow }) => {
   );
 
   // Calculate the maximum number of users that can be shown without adjusting card size
-  const maxUsersToShow = Math.floor(containerWidth / 220); // assuming 250px is an optimal width per card
+  const maxUsersToShow = Math.floor(containerWidth / 220); // assuming 220px is an optimal width per card
   const displayedUsers = filteredUsers.slice(0, maxUsersToShow);
+
+  const handleViewAll = () => {
+    navigate("/all-users", { state: { users: filteredUsers.length > 0 ? filteredUsers : users } });
+  };
 
   return (
     <div className="user-list-container bg-darker p-4 rounded-lg">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-white text-2xl font-semibold">{heading}</h2>
-        <Link to="/all-users" className="text-sm text-blue-400">View All</Link>
+        {console.log('Filtered Users:', filteredUsers)}
+        {console.log("Navigating to /all-users with users:", filteredUsers)}
+
+        <button onClick={handleViewAll} className="text-sm text-blue-400">
+          View All
+        </button>
       </div>
       <div className="flex overflow-hidden">
         {displayedUsers.map((user, index) => (
           <div key={index} className="min-w-[200px] max-w-[200px] flex flex-col items-center p-2 m-2 rounded-lg hover:bg-gray-700 transition-colors duration-300">
-            <div 
+            <div
               onClick={() => navigate(`/user/${user._id}`)}
               className="flex flex-col items-center cursor-pointer"
             >
@@ -76,6 +88,6 @@ const UserList = ({ heading, users, searchTerm, onFollow, onUnfollow }) => {
       </div>
     </div>
   );
-};
+});
 
 export default UserList;

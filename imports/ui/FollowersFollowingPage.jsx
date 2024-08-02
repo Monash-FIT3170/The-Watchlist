@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
 import AllUsersPage from './AllUsersPage';
 
-const FollowersFollowingPage = ( ) => {
+const FollowersFollowingPage = ( { currentUser } ) => {
   const { userId, type } = useParams(); // Get userId and type (followers/following) from URL parameters
   const [usersList, setUsersList] = useState([]);
 
@@ -29,6 +29,7 @@ const FollowersFollowingPage = ( ) => {
 
   return (
     <AllUsersPage 
+      currentUser={currentUser}
       users={usersList}
       onFollow={(userId) => {
         Meteor.call('followUser', userId, (error) => {
