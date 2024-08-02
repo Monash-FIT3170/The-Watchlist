@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaPlus } from 'react-icons/fa';
 import { Meteor } from 'meteor/meteor';
+import ProfileDropdown from './ProfileDropdown';
 
-const ProfileCard = ({ user, showFollowButton }) => {
+const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const navigate = useNavigate();
 
@@ -36,7 +37,10 @@ const ProfileCard = ({ user, showFollowButton }) => {
   };
 
   return (
-    <div className="flex items-center h-72 p-4 bg-gradient-to-br from-zinc-900 via-zinc-700 to-zinc-600 rounded-lg shadow-md">
+    <div className="flex items-center h-72 p-4 bg-gradient-to-br from-zinc-900 via-zinc-700 to-zinc-600 rounded-t-lg shadow-md">
+            <div className="absolute top-4 right-4">
+        <ProfileDropdown user={currentUser} />
+      </div>
       <div className="flex items-center gap-4">
         <img
           src={user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"}
@@ -44,8 +48,11 @@ const ProfileCard = ({ user, showFollowButton }) => {
           className="aspect-square w-56 h-56 object-cover rounded-full shadow-2xl"
         />
         <div>
+        <div className="p-2">
+            <div className="text-sm user-description">Profile</div>
+          </div>
           <div className="userName flex items-center gap-4">
-            <h2 className="p-2 text-2xl font-bold">{user.userName || 'Username'}</h2>
+            <h2 className="p-2 text-8xl font-bold">{user.userName || 'Username'}</h2>
             {showFollowButton && (
               <button
                 className={`py-1 px-10 text-xl rounded-lg ${isFollowing ? 'bg-blue-600' : 'bg-fuchsia-600'}`}
@@ -73,10 +80,6 @@ const ProfileCard = ({ user, showFollowButton }) => {
                 <FaPlus />
               </button>
             </Link>
-          </div>
-          <div className="p-2">
-            <div className="font-bold user-name">{user.userRealName || user.userName}</div>
-            <div className="text-sm user-description">{user.userDescription}</div>
           </div>
         </div>
       </div>

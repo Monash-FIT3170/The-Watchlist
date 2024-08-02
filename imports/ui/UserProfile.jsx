@@ -60,19 +60,20 @@ export default function UserProfile() {
   return (
     <Fragment>
       {currentUser ? (
-        <div className="flex flex-col min-h-screen bg-darker p-6">
-          <div className="flex flex-col gap-6 bg-darker rounded-lg shadow-lg p-6 flex-grow">
+        <div className="flex flex-col min-h-screen bg-darker">
+          <div className="flex flex-col gap-0 flex-grow">
             <ProfileCard
+              currentUser={currentUser}
               user={userProfile}
               onFollow={null}
               showFollowButton={false}
+              className="w-full"  // Make ProfileCard take full width
             />
-            <button onClick={handleLogout} className="self-start px-4 py-2 mt-4 text-white bg-blue-500 rounded hover:bg-blue-700">
-              Log Out
-            </button>
-            {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} />}
-            {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} />}
-            <CustomWatchLists listData={customWatchlists} />
+            <div className="p-6">
+              {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} />}
+              {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} />}
+              <CustomWatchLists listData={customWatchlists} />
+            </div>
           </div>
         </div>
       ) : (
