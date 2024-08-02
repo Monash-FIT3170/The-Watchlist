@@ -3,6 +3,7 @@
 import json
 import os
 import requests
+import threading
 from datetime import datetime
 from dotenv import load_dotenv
 from json_stream.writer import streamable_list 
@@ -38,27 +39,20 @@ def make_request(partial_url):
 
 
 @streamable_list
-def process_movies():
+def process_movies(data, num_lines):
     '''
     Processes a particular movie from the initial data, yielding the result.
     This approach is used to make the data streamable so that RAM does not get filled.
     '''
-
-    with open("movie_ids_07_28_2024.json", "rb") as f:
-        num_lines = sum(1 for _ in f)
-
-    movie_file = open("movie_ids_07_28_2024.json", encoding='utf8')
-
     
     i = 0
     # Read each line and parse it as JSON (each line of the file is valid JSON, the entire file is not)
-    for movie_line in movie_file:
-        i += 1
-        print(f"[{i}/{num_lines}]")
+    for movie_line in data:
+
+        if i % 100 == 0:
+            print(f"[{i}/{num_lines}]")
         
-        if i < 100: continue
-        if i == 300: break
- 
+        i += 1
         initial_data = json.loads(movie_line)
         #print(initial_data)
 
@@ -73,7 +67,7 @@ def process_movies():
 
         data = make_request(request_url)
 
-        movie_data["release_year"] = datetime.strptime(data.get('release_date'), "%Y-%m-%d").year
+        movie_data["release_year"] = datetime.strptime(data.get('release_date'), "%Y-%m-%d").year if data.get("release_date") else None
         movie_data["runtime"] = data.get("runtime")
         movie_data["popularity"] = data.get("popularity")
         movie_data["overview"] = data.get("overview")
@@ -102,14 +96,12 @@ def process_movies():
                 movie_data["image_url"] = IMAGE_ROOT + images.get("posters")[0]["file_path"]
         
         yield movie_data
-    
-    movie_file.close()
 
 
-def process_all_movies():
-    
-    movie_output = open("all_movies.json", "w", encoding="utf8")
-    all_data = process_movies()
+
+def process_movie_set(outfile, data, num_line_count):
+    movie_output = open(f"{os.getcwd()}/data/{outfile}", "w", encoding="utf8")
+    all_data = process_movies(data, num_line_count)
     
     json.dump(all_data, movie_output, indent=4)
     
@@ -128,4 +120,30 @@ if __name__ == "__main__":
         print("THEMOVIEDB_ACCESS_TOKEN environment variable is not set. Exiting.")
         os.exit(-1)
 
-    process_all_movies()
+    with open("movie_ids_07_28_2024.json", "rb") as f:
+        num_lines = sum(1 for _ in f)
+
+    with open("movie_ids_07_28_2024.json", encoding='utf8') as f:
+        movie_file = [line for line in f]
+
+    threads = []
+
+    movie_count = 100000
+
+    per_thread_count = movie_count / 40
+
+    for i in range(0, 40):
+        start_id = int(i * per_thread_count)
+        end_id = int(((i+1) * per_thread_count) - 1)
+
+        print(start_id)
+        print(end_id)
+        t = threading.Thread(target=process_movie_set, args=(f"movie-out-{i}.json", movie_file[start_id:end_id], per_thread_count))
+        threads.append(t)
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+    #process_all_movies()
