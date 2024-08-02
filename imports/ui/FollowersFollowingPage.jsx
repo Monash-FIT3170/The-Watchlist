@@ -1,37 +1,61 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Meteor } from 'meteor/meteor';
 import AllUsersPage from './AllUsersPage';
 
-const FollowersFollowingPage = ({currentUser}) => {
+const FollowersFollowingPage = ({ currentUser }) => {
   const { userId, type } = useParams(); 
   const [usersList, setUsersList] = useState([]);
   const [sortOption, setSortOption] = useState('alphabetical'); 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const users = await new Promise((resolve, reject) => {
-          Meteor.call(`users.${type}`, { userId }, (error, result) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(result);
-            }
-          });
-        });
-        setUsersList(users);
-      } catch (error) {
-        console.error(`Error fetching ${type}:`, error);
-      }
-    };
-    fetchUsers();
+    fetchUsers(); // Fetch users when the component mounts or when userId/type changes
   }, [userId, type]);
+
+  const fetchUsers = async () => {
+    try {
+      const users = await new Promise((resolve, reject) => {
+        Meteor.call(`users.${type}`, { userId }, (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+      setUsersList(users);
+    } catch (error) {
+      console.error(`Error fetching ${type}:`, error);
+    }
+  };
+
+  const handleFollow = (userId) => {
+    Meteor.call('followUser', userId, (error) => {
+      if (error) {
+        console.error('Error following user:', error);
+      } else {
+        fetchUsers(); // Re-fetch the updated users list after following
+      }
+    });
+  };
+
+  const handleUnfollow = (userId) => {
+    Meteor.call('unfollowUser', userId, (error) => {
+      if (error) {
+        console.error('Error unfollowing user:', error);
+      } else {
+        fetchUsers(); // Re-fetch the updated users list after unfollowing
+      }
+    });
+  };
 
   const sortUsers = (users, option) => {
     if (option === 'alphabetical') {
-      return [...users].sort((a, b) => a.name.localeCompare(b.name));
+      return [...users].sort((a, b) => {
+        const nameA = a.name || ''; // Fallback to an empty string if name is undefined
+        const nameB = b.name || ''; // Fallback to an empty string if name is undefined
+        return nameA.localeCompare(nameB);
+      });
     } else if (option === 'percentage') {
       return [...users].sort((a, b) => b.percentageMatch - a.percentageMatch);
     }
@@ -81,28 +105,17 @@ const FollowersFollowingPage = ({currentUser}) => {
       </div>
 
       <div className="mt-8">
-        <AllUsersPage 
-          currentUser={currentUser}
-          users={sortedUsersList}
-          onFollow={(userId) => {
-            Meteor.call('followUser', userId, (error) => {
-              if (error) {
-                console.error('Error following user:', error);
-              } else {
-                console.log('Followed user successfully');
-              }
-            });
-          }}
-          onUnfollow={(userId) => {
-            Meteor.call('unfollowUser', userId, (error) => {
-              if (error) {
-                console.error('Error unfollowing user:', error);
-              } else {
-                console.log('Unfollowed user successfully');
-              }
-            });
-          }}
-        />
+        {/* Conditionally render AllUsersPage based on the users list */}
+        {sortedUsersList.length > 0 ? (
+          <AllUsersPage 
+            currentUser={currentUser}
+            users={sortedUsersList}
+            onFollow={handleFollow}
+            onUnfollow={handleUnfollow}
+          />
+        ) : (
+          <div>No users to display</div>
+        )}
       </div>
     </div>
   );
