@@ -15,18 +15,26 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const createDefaultLists = (userId) => {
-    const defaultLists = [
-      { title: 'Favourite', listType: 'Favourite' },
-      { title: 'To Watch', listType: 'To Watch' },
-    ];
+    if (!userId.defaultListsCreated) {
+      const defaultLists = [
+        { title: 'Favourite', listType: 'Favourite' },
+        { title: 'To Watch', listType: 'To Watch' },
+      ];
 
-    defaultLists.forEach((list) => {
-      Meteor.call('list.create', { userId, title: list.title, listType: list.listType, content: [] }, (error) => {
-        if (error) {
-          console.error('Error creating default list:', error.reason);
+      defaultLists.forEach((list) => {
+        Meteor.call('list.create', { userId, title: list.title, listType: list.listType, content: [] }, (error) => {
+          if (error) {
+            console.error('Error creating default list:', error.reason);
+          }
+        });
+      });
+      // Update user document to indicate that default lists have been created
+      Meteor.users.update(userId, {
+        $set: {
+          defaultListsCreated: true
         }
       });
-    });
+    }
   };
 
   const handleSubmit = (e) => {
