@@ -22,6 +22,28 @@ import Scrollbar from './ScrollBar';
 import LoginPage from './LoginPage';
 import UserProfilePage from './UserProfilePage';
 import FollowersFollowingPage from "./FollowersFollowingPage.jsx";
+import AllUsersPage from "./AllUsersPage.jsx";
+
+const handleFollow = (userId) => {
+  Meteor.call('followUser', userId, (error, result) => {
+    if (error) {
+      console.error('Error following user:', error);
+    } else {
+      console.log('Followed user successfully');
+    }
+  });
+};
+
+const handleUnfollow = (userId) => {
+  Meteor.call('unfollowUser', userId, (error, result) => {
+    if (error) {
+      console.error('Error unfollowing user:', error);
+    } else {
+      console.log('Unfollowed user successfully');
+    }
+  });
+};
+
 
 
 const FetchTest = () => {
@@ -73,6 +95,15 @@ export const App = () => {
   const [loading, setLoading] = useState(true);
   var user = useTracker(() => Meteor.user());
 
+  const { currentUser, isLoading } = useTracker(() => {
+    const handler = Meteor.subscribe('userData', Meteor.userId());
+    const user = Meteor.user();
+    return {
+      currentUser: user,
+      isLoading: !handler.ready(),
+    };
+  }, []);
+
   useEffect(() => {
     Meteor.call("content.read", {}, (error, response) => {
       if (error) {
@@ -118,6 +149,7 @@ export const App = () => {
               <Route path="/user/:userId" element={<UserProfilePage />} />
               <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage />} /> 
               <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+              <Route path="/all-users" element={<AllUsersPage onFollow={handleFollow} onUnfollow={handleUnfollow} />} /> 
             </Routes>
           </Scrollbar>
         </div>

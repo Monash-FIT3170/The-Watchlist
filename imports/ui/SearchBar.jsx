@@ -7,6 +7,7 @@ import { getImageUrl } from './imageUtils';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList'; 
 import { useTracker } from 'meteor/react-meteor-data';
+import ProfileDropdown from './ProfileDropdown';
 
 const SearchBar = ({ movies, tvs }) => {
     const { lists } = useLists();
@@ -20,6 +21,8 @@ const SearchBar = ({ movies, tvs }) => {
             username: { $regex: searchTerm, $options: 'i' }
         }).fetch();
     }, [searchTerm]);
+
+    const currentUser = useTracker(() => Meteor.user());
 
     const dropdownData = {
         year: {
@@ -186,7 +189,10 @@ const SearchBar = ({ movies, tvs }) => {
     };
 
     return (
-        <div className="flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
+        <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
+            <div className="absolute top-4 right-4">
+                <ProfileDropdown user={currentUser} />
+            </div>
             <form className="flex flex-col items-start w-full pl-2">
                 <div className="flex justify-between items-center w-full max-w-xl">
                     <div className="relative flex-grow">
