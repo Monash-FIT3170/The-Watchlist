@@ -3,8 +3,9 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';  // Import the useNavigate hook
 import Scrollbar from './ScrollBar';
+import ProfileDropdown from './ProfileDropdown';
 
-const AllUsersPage = ({ onFollow, onUnfollow }) => {
+const AllUsersPage = ({ onFollow, onUnfollow, currentUser }) => {
   const navigate = useNavigate();  // Initialize the navigate function
   const users = useTracker(() => {
     Meteor.subscribe('allUsers');
@@ -20,6 +21,9 @@ const AllUsersPage = ({ onFollow, onUnfollow }) => {
 
   return (
     <div className="bg-darker min-h-screen p-4">
+              <div className="absolute top-4 right-4">
+        <ProfileDropdown user={currentUser} />
+      </div>
       <Scrollbar className="h-full">
         <div className="grid grid-cols-4 gap-8">
           {users.map((user, index) => (

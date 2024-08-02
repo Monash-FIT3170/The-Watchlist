@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import ContentList from './ContentList.tsx';
 import Scrollbar from './ScrollBar';
+import ProfileDropdown from './ProfileDropdown.jsx';
 
-export default function AIPicks({ movies, tvs }) {
+export default function AIPicks({ movies, tvs, currentUser }) {
     // console.log("Movies")
     // console.log(movies)
     // console.log(tvs)
@@ -54,6 +55,9 @@ export default function AIPicks({ movies, tvs }) {
 
     return (
         <div className="flex flex-col gap-6 overflow-y-hidden h-custom">
+                  <div className="absolute top-4 right-4">
+        <ProfileDropdown user={currentUser} />
+      </div>
             <div className="bg-darker rounded-lg items-center flex flex-col justify-center">
                 <h1 className="text-5xl font-semibold mt-8">AI Picks</h1>
                 <div className="my-8 items-center w-1/2 flex flex-row">

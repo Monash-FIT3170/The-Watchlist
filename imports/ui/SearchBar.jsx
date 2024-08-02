@@ -9,7 +9,7 @@ import UserList from './UserList';
 import { useTracker } from 'meteor/react-meteor-data';
 import ProfileDropdown from './ProfileDropdown';
 
-const SearchBar = ({ movies, tvs }) => {
+const SearchBar = ({ movies, tvs, currentUser }) => {
     const { lists } = useLists();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTab, setSelectedTab] = useState('movies');
@@ -21,8 +21,6 @@ const SearchBar = ({ movies, tvs }) => {
             username: { $regex: searchTerm, $options: 'i' }
         }).fetch();
     }, [searchTerm]);
-
-    const currentUser = useTracker(() => Meteor.user());
 
     const dropdownData = {
         year: {
@@ -190,9 +188,9 @@ const SearchBar = ({ movies, tvs }) => {
 
     return (
         <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
-            <div className="absolute top-4 right-4">
-                <ProfileDropdown user={currentUser} />
-            </div>
+      <div className="absolute top-4 right-4">
+        <ProfileDropdown user={currentUser} />
+      </div>
             <form className="flex flex-col items-start w-full pl-2">
                 <div className="flex justify-between items-center w-full max-w-xl">
                     <div className="relative flex-grow">

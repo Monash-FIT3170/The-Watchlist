@@ -135,21 +135,21 @@ export const App = () => {
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route path="/fetch-test" element={<FetchTest />} />
-              <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/profile" element={<UserProfile />} />
-              <Route path="/ai-picks" element={<AIPicks movies={movies} tvs={tvs} />} />
+              <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} currentUser={currentUser}/>} />
+              <Route path="/home" element={<Home currentUser={currentUser}/>} />
+              <Route path="/profile" element={<UserProfile currentUser={currentUser}/>} />
+              <Route path="/ai-picks" element={<AIPicks movies={movies} tvs={tvs} currentUser={currentUser}/>} />
               {movies.map((movie) => (
                 <Route key={movie.id} path={`/Movie${movie.id}`} element={<MovieInfo movie={movie} />} />
               ))}
               {tvs.map((tv) => (
                 <Route key={tv.id} path={`/TV Show${tv.id}`} element={<TvInfo tv={tv} />} />
               ))}
-              <Route path="/user-discovery" element={<UserDiscovery />} />
-              <Route path="/user/:userId" element={<UserProfilePage />} />
-              <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage />} /> 
+              <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser}/>} />
+              <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser}/>} />
+              <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser}/>} /> 
               <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
-              <Route path="/all-users" element={<AllUsersPage onFollow={handleFollow} onUnfollow={handleUnfollow} />} /> 
+              <Route path="/all-users" element={<AllUsersPage onFollow={handleFollow} onUnfollow={handleUnfollow} currentUser={currentUser}/>} /> 
             </Routes>
           </Scrollbar>
         </div>

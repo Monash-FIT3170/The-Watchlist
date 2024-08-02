@@ -2,11 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Favourites from './Favourites';
 import ToWatch from './ToWatch';
 import ProfileDropdown from './ProfileDropdown';
-import { useTracker } from 'meteor/react-meteor-data';
 
-const Home = ({ lists }) => {
-
-  const currentUser = useTracker(() => Meteor.user());
+const Home = ({ lists, currentUser }) => {
 
   return (
     <div className="flex justify-between space-x-5 overflow-hidden">

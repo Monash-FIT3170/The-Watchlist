@@ -3,8 +3,9 @@ import UserList from './UserList';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
+import ProfileDropdown from './ProfileDropdown';
 
-const UserDiscovery = () => {
+const UserDiscovery = ({ currentUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const users = useTracker(() => {
     Meteor.subscribe('allUsers');
@@ -43,6 +44,9 @@ const UserDiscovery = () => {
 
   return (
     <div className="user-discovery text-center">
+            <div className="absolute top-4 right-4">
+        <ProfileDropdown user={currentUser} />
+      </div>
       <div className="flex items-center justify-start mb-8 space-x-7 w-full max-w-xl mt-4 ml-1">
         <div className="relative flex-grow">
           <input
