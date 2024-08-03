@@ -47,11 +47,11 @@ const UserDiscovery = ({ currentUser }) => {
   };
 
   return (
-    <div className="user-discovery text-center">
+    <div className="bg-darker min-h-screen p-4">
             <div className="absolute top-4 right-4">
         <ProfileDropdown user={currentUser} />
       </div>
-      <div className="flex items-center justify-start mb-8 space-x-7 w-full max-w-xl mt-4 ml-1">
+      <div className="flex items-center justify-start mb-8 space-x-7 w-full max-w-xl mt-1 ml-0">
         <div className="relative flex-grow">
           <input
             type="text"

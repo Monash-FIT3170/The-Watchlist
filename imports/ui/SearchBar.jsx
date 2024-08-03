@@ -5,7 +5,7 @@ import ListDisplay from './ListDisplay';
 import { useLists } from './ListContext';
 import { getImageUrl } from './imageUtils';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
-import UserList from './UserList'; 
+import UserList from './UserList';
 import { useTracker } from 'meteor/react-meteor-data';
 import ProfileDropdown from './ProfileDropdown';
 
@@ -16,7 +16,7 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
     const [showFilters, setShowFilters] = useState(false);
 
     const users = useTracker(() => {
-        Meteor.subscribe('allUsers');  
+        Meteor.subscribe('allUsers');
         return Meteor.users.find({
             username: { $regex: searchTerm, $options: 'i' }
         }).fetch();
@@ -188,10 +188,10 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
 
     return (
         <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
-      <div className="absolute top-4 right-4">
-        <ProfileDropdown user={currentUser} />
-      </div>
-            <form className="flex flex-col items-start w-full pl-2">
+            <div className="absolute top-4 right-4">
+                <ProfileDropdown user={currentUser} />
+            </div>
+            <form className="flex flex-col items-start w-full pl-1">
                 <div className="flex justify-between items-center w-full max-w-xl">
                     <div className="relative flex-grow">
                         <input
@@ -293,7 +293,7 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
                 )}
                 {selectedTab === 'users' && (
                     filteredData.users.length > 0 ? (
-                        <UserList heading="Users" users={filteredData.users} searchTerm={searchTerm} />
+                        <UserList users={filteredData.users} searchTerm={searchTerm} currentUser={currentUser} />
                     ) : (
                         <div>No users found.</div>
                     )
