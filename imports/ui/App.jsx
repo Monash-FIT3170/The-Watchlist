@@ -126,6 +126,15 @@ export const App = () => {
     return <div>Loading...</div>;
   }
 
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<Navigate replace to="/login" />} />
+      </Routes>
+    );
+  }
+
   return (
     <ListsProvider>
       <div className="app flex h-screen overflow-hidden bg-darkest text-white">
@@ -135,7 +144,6 @@ export const App = () => {
         <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
           <Scrollbar className="h-custom">
             <Routes>
-              <Route path="/login" element={<LoginPage />} />
               <Route path="/fetch-test" element={<FetchTest />} />
               <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} currentUser={currentUser}/>} />
               <Route path="/home" element={<Home currentUser={currentUser}/>} />

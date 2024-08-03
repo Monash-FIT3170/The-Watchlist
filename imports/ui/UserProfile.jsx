@@ -4,7 +4,6 @@ import ContentList from './ContentList';
 import ProfileCard from './ProfileCard';
 import CustomWatchLists from './CustomWatchLists';
 import { useLists } from './ListContext';
-import LoginPage from './LoginPage';
 import { useTracker } from 'meteor/react-meteor-data';
 
 export default function UserProfile() {
@@ -57,28 +56,19 @@ export default function UserProfile() {
     }
     : {};
 
-  return (
-    <Fragment>
-      {currentUser ? (
-        <div className="flex flex-col min-h-screen bg-darker">
-          <div className="flex flex-col gap-0 flex-grow">
-            <ProfileCard
-              currentUser={currentUser}
-              user={userProfile}
-              onFollow={null}
-              showFollowButton={false}
-              className="w-full"  // Make ProfileCard take full width
-            />
-            <div className="p-6">
-              {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} />}
-              {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} />}
-              <CustomWatchLists listData={customWatchlists} />
-            </div>
-          </div>
+    return (
+      <div className="flex flex-col min-h-screen bg-darker">
+        <ProfileCard
+          currentUser={currentUser} 
+          user={userProfile}
+          onFollow={null}
+          showFollowButton={false}
+        />
+        <div className="p-6">
+          {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} />}
+          {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} />}
+          <CustomWatchLists listData={customWatchlists} />
         </div>
-      ) : (
-        <LoginPage />
-      )}
-    </Fragment>
-  );
-}
+      </div>
+    );
+  };
