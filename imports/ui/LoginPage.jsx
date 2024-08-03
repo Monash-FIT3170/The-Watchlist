@@ -15,7 +15,8 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const createDefaultLists = (userId) => {
-    if (!userId.defaultListsCreated) {
+    const user = Meteor.users.findOne({ _id: userId });
+    if (!user.defaultListsCreated) {
       const defaultLists = [
         { title: 'Favourite', listType: 'Favourite' },
         { title: 'To Watch', listType: 'To Watch' },
