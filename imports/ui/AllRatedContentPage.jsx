@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
 import { useTracker } from 'meteor/react-meteor-data';
@@ -8,33 +8,33 @@ import ContentItem from './ContentItem';
 import { RatingCollection } from '../db/Rating';
 import { MovieCollection, TVCollection } from '../db/Content';
 import { getImageUrl } from './imageUtils';
+import { AiOutlineSearch } from 'react-icons/ai';
 
 const AllRatedContentPage = ({ currentUser }) => {
   const { userId } = useParams();
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const { ratings, ratedContent, isLoading } = useTracker(() => {
+  const { ratedContent, isLoading } = useTracker(() => {
     const subscription = Meteor.subscribe('ratedContent', userId);
     const ratings = RatingCollection.find({ userId }).fetch();
     const contentDetails = ratings.map(rating => {
-        const collection = rating.contentType === 'Movie' ? MovieCollection : TVCollection;
-        const content = collection.findOne({ id: rating.contentId });
-        if (content) {
-            console.log(`Content for ${rating.contentType}`, content);
-        }
-        return {
-            ...content,
-            rating: rating.rating,
-            contentType: rating.contentType
-        };
+      const collection = rating.contentType === 'Movie' ? MovieCollection : TVCollection;
+      return {
+        ...collection.findOne({ id: rating.contentId }),
+        rating: rating.rating,
+        contentType: rating.contentType
+      };
     });
-    
 
     return {
-      ratings,
-      ratedContent: contentDetails,
+      ratedContent: contentDetails.filter(content => content.title.toLowerCase().includes(searchTerm.toLowerCase())),
       isLoading: !subscription.ready()
     };
-  }, [userId]);
+  }, [userId, searchTerm]);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -44,6 +44,20 @@ const AllRatedContentPage = ({ currentUser }) => {
     <div className="bg-darker min-h-screen p-4">
       <div className="absolute top-4 right-4">
         <ProfileDropdown user={currentUser} />
+      </div>
+      <div className="flex items-center justify-start mb-4 space-x-7 w-full max-w-xl mt-1 ml-0">
+        <div className="relative flex-grow">
+          <input
+            type="text"
+            className="rounded-full bg-dark border border-gray-300 pl-10 pr-3 py-3 w-full focus:border-custom-border"
+            placeholder="Search rated content..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+            <AiOutlineSearch className="text-gray-400" size={20} />
+          </span>
+        </div>
       </div>
       <Scrollbar className="w-full">
         <div className="flex flex-wrap justify-start items-start gap-8 p-4">
