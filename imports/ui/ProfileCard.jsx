@@ -13,7 +13,8 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const currentUser = Meteor.user();
+    if (!user || !user._id) return; // Ensure user and user._id are defined
+    const currentUser = Meteor.user(); 
     if (currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(user._id)) {
       setIsFollowing(true);
     }
