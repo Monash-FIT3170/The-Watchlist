@@ -1,4 +1,7 @@
 import { Meteor } from 'meteor/meteor';
+import { RatingCollection } from '../imports/db/Rating';
+import { MovieCollection } from '../imports/db/Content';
+import { TVCollection } from '../imports/db/Content';
 
 Meteor.publish('userData', function (userId) {
   if (!this.userId) {
@@ -39,4 +42,30 @@ Meteor.publish('userLists', function (userId) {
 
 Meteor.publish('userRatings', function (userId) {
   return Ratings.find({ userId });
+});
+
+Meteor.publish('ratedContent', function (userId) {
+  console.log("Publishing rated content for user:", userId);
+  if (!this.userId) {
+    console.log("No user logged in, stopping publication.");
+    return this.ready();
+  }
+
+  const ratings = RatingCollection.find({ userId }).fetch();
+  if (!ratings.length) {
+    console.log("No ratings found for this user.");
+  } else {
+    console.log("Ratings found:", ratings.length);
+  }
+
+  const movieIds = ratings.filter(r => r.contentType === 'Movie').map(r => r.contentId);
+  const tvIds = ratings.filter(r => r.contentType === 'TV').map(r => r.contentId);
+
+  console.log("Publishing movies and TV data for IDs:", movieIds, tvIds);
+
+  return [
+    RatingCollection.find({ userId }),
+    MovieCollection.find({ id: { $in: movieIds } }),
+    TVCollection.find({ id: { $in: tvIds } })
+  ];
 });

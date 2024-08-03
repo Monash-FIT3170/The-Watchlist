@@ -23,6 +23,8 @@ import LoginPage from './LoginPage';
 import UserProfilePage from './UserProfilePage';
 import FollowersFollowingPage from "./FollowersFollowingPage.jsx";
 import AllUsersPage from "./AllUsersPage.jsx";
+import UserRatingsPage from "./UserRatingsPage.jsx";
+import AllRatedContentPage from "./AllRatedContentPage.jsx";
 
 const handleFollow = (userId) => {
   Meteor.call('followUser', userId, (error, result) => {
@@ -150,6 +152,7 @@ export const App = () => {
               <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser}/>} /> 
               <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
               <Route path="/all-users" element={<AllUsersPage onFollow={handleFollow} onUnfollow={handleUnfollow} currentUser={currentUser}/>} /> 
+              <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser}/>} />
             </Routes>
           </Scrollbar>
         </div>

@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaPlus, FaPencilAlt } from 'react-icons/fa';
 import { Meteor } from 'meteor/meteor';
 import ProfileDropdown from './ProfileDropdown';
+import { RatingCollection } from '../db/Rating';
 
 const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [newAvatar, setNewAvatar] = useState(null);
+  const [ratingsCount, setRatingsCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,6 +17,14 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
     if (currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(user._id)) {
       setIsFollowing(true);
     }
+
+    Meteor.call('users.ratingsCount', { userId: user._id }, (error, result) => {
+      if (error) {
+        console.error('Error fetching ratings count:', error);
+      } else {
+        setRatingsCount(result);
+      }
+    });
   }, [user._id]);
 
   const handleAvatarClick = () => {
@@ -86,6 +96,10 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
             <button className="p-2 text-lg flex-initial" onClick={() => navigate(`/followers-following/${user._id}/following`)}>
               {user.following} Following
             </button>
+            <button className="p-2 text-lg flex-initial" onClick={() => navigate(`/user/${user._id}/ratings`)}>
+              {ratingsCount} Ratings
+            </button>
+
             <Link to="/user-discovery">
               <button className="mt-2 p-1 bg-darker rounded-lg">
                 <FaPlus />

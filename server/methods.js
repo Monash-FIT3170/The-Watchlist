@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import { Accounts } from 'meteor/accounts-base';
 import { Rating } from '../imports/db/Rating';
+import { RatingCollection } from '../imports/db/Rating';
 import Lists from '../imports/db/List';
 
 Meteor.methods({
@@ -95,4 +96,11 @@ Accounts.onCreateUser((options, user) => {
     user.profile = options.profile;
   }
   return user;
+});
+
+Meteor.methods({
+  'users.ratingsCount'({ userId }) {
+    check(userId, String);
+    return RatingCollection.find({ userId }).count();
+  },
 });
