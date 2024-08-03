@@ -95,19 +95,19 @@ const UserProfilePage = () => {
             <div className="p-6">
               {Meteor.userId() !== userId && (
                 <div className="p-2 mb-4 flex justify-left">
-<button
-  onClick={(e) => {
-    e.stopPropagation();
-    if (isFollowing(userId)) {
-      handleUnfollow(userId);
-    } else {
-      handleFollow(userId);
-    }
-  }}
-  className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450] rounded-full transition-all duration-300 ease-in-out transform hover:scale-110 hover:shadow-lg`}
->
-  {isFollowing(userId) ? 'Unfollow' : 'Follow'}
-</button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isFollowing(userId)) {
+                        handleUnfollow(userId);
+                      } else {
+                        handleFollow(userId);
+                      }
+                    }}
+                    className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450] rounded-full transition-all duration-300 ease-in-out transform hover:scale-110 hover:shadow-lg`}
+                  >
+                    {isFollowing(userId) ? 'Unfollow' : 'Follow'}
+                  </button>
 
                 </div>
               )}
