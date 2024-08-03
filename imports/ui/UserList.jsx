@@ -48,8 +48,8 @@ const UserList = React.memo(({ heading, users, searchTerm, onFollow, onUnfollow 
   };
 
   return (
-    <div className="user-list-container bg-darker p-4 rounded-lg">
-      <div className="flex justify-between items-center mb-4">
+    <div className="user-list-container bg-transparent py-0">
+      <div className="flex justify-between items-center">
         <h2 className="text-white text-2xl font-semibold">{heading}</h2>
         {console.log('Filtered Users:', filteredUsers)}
         {console.log("Navigating to /all-users with users:", filteredUsers)}

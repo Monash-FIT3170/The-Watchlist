@@ -1,4 +1,3 @@
-// imports/ui/ContentList
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ContentItem from './ContentItem';
@@ -54,14 +53,14 @@ const ContentList: React.FC<ContentListProps> = ({ list }) => {
   }, []);
 
   return (
-    <div className="flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2">
-      <div className="flex justify-between items-center mb-2 text-base">
-      <button
-        onClick={() => handleItemClick(list)} // Same click handler as "Show all"
-        className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 hover:underline cursor-pointer bg-transparent border-none" // Styling to make it look like the original h1 plus hover effect
-      >
-        {list.title}
-      </button>
+    <div className="flex flex-col mb-2 bg-transparent overflow-hidden shadow-none py-0 px-0">
+      <div className="flex justify-between items-center mb-0 text-base">
+        <button
+          onClick={() => handleItemClick(list)} // Same click handler as "Show all"
+          className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 hover:underline cursor-pointer bg-transparent border-none" // Styling to make it look like the original h1 plus hover effect
+        >
+          {list.title}
+        </button>
         <button onClick={() => handleItemClick(list)} className="text-gray-400 text-base bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
           Show all
         </button>
