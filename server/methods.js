@@ -1,4 +1,3 @@
-// server/methods.js
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import { Accounts } from 'meteor/accounts-base';
@@ -68,6 +67,22 @@ Meteor.methods({
         rating
       });
     }
+  },
+  updateAvatar(userId, avatarUrl) {
+    check(userId, String);
+    check(avatarUrl, String);
+
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized');
+    }
+
+    if (this.userId !== userId) {
+      throw new Meteor.Error('not-authorized', 'You can only update your own avatar');
+    }
+
+    Meteor.users.update(userId, {
+      $set: { avatarUrl: avatarUrl }
+    });
   },
 });
 
