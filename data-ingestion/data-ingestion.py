@@ -66,6 +66,8 @@ def process_movies(data, num_lines):
         request_url = f"/movie/{initial_data.get('id')}?append_to_response=keywords,credits,images&language=en-US&include_image_language=en,null"
 
         data = make_request(request_url)
+        
+        if data is None: continue
 
         movie_data["release_year"] = datetime.strptime(data.get('release_date'), "%Y-%m-%d").year if data.get("release_date") else None
         movie_data["runtime"] = data.get("runtime")
@@ -127,10 +129,8 @@ if __name__ == "__main__":
         movie_file = [line for line in f]
 
     threads = []
-
-    movie_count = 100000
-
-    per_thread_count = movie_count / 40
+    
+    per_thread_count = int(num_lines / 40)
 
     for i in range(0, 40):
         start_id = int(i * per_thread_count)
