@@ -107,30 +107,127 @@ def process_movies(data, num_lines):
         
 @streamable_list
 def process_tv(data, num_lines):
-    i = 0
+    current_count = 0
     # Read each line and parse it as JSON (each line of the file is valid JSON, the entire file is not)
     for tv_line in data:
 
-        if i % 100 == 0:
-            print(f"[{i}/{num_lines}]")
+        if current_count % 100 == 0:
+            print(f"[{current_count}/{num_lines}]")
         
-        i += 1
+        current_count += 1
         initial_data = json.loads(tv_line)
         #print(initial_data)
 
         tv_data = {
             "id": initial_data.get("id"),
-            "title": initial_data.get("original_title"),
+            "title": initial_data.get("original_name"),
             "popularity": initial_data.get("popularity")
         }
 
         # Retrieve the movie details and artwork via one request using the append_to_response query parameter
-        request_url = f"/tv/{initial_data.get('id')}"
+        request_url = f"/tv/{initial_data.get('id')}?append_to_response=keywords,credits,images&language=en-US&include_image_language=en,null"
 
         data = make_request(request_url)
-        print(data)
         
         if data is None: continue
+        
+        tv_data["overview"] = data.get("overview")
+        
+        tv_data["first_aired"] = None
+        tv_data["last_aired"] = None
+        
+        if data.get("first_air_date"):
+            tv_data["first_aired"] = { "$date": datetime.strptime(data.get('first_air_date'), "%Y-%m-%d").isoformat() }
+        
+        if data.get("last_air_date"):
+            tv_data["last_aired"] = { "$date": datetime.strptime(data.get('last_air_date'), "%Y-%m-%d").isoformat() }
+                
+        tv_data["genres"] = [genre["name"] for genre in data.get("genres")] if data.get("genres") else None
+        tv_data["language"] = data.get("original_language")
+        tv_data["origin_country"] = data.get("origin_country") 
+        tv_data["keywords"] = [keyword["name"] for keyword in data.get("keywords").get("results")] if data.get("keywords") else None
+        tv_data["actors"] = [cast["name"] for cast in data.get("credits").get("cast")]
+
+        directors = []
+        if data.get("credits") is not None:
+
+            for crew in data.get("credits").get("crew"):
+                if crew.get("job") == "Director":
+                    directors.append(crew.get("name"))
+
+            tv_data["directors"] = directors
+        else:
+            tv_data["directors"] = None
+        
+        tv_data["background_url"] = ""
+        tv_data["image_url"] = ""
+
+        if data.get("images"):
+            images = data.get("images")
+            if images.get("backdrops") is not None and len(images.get("backdrops")):
+                tv_data["background_url"] = IMAGE_ROOT + images.get("backdrops")[0]["file_path"]
+            if images.get("posters") is not None and len(images.get("posters")):
+                tv_data["image_url"] = IMAGE_ROOT + images.get("posters")[0]["file_path"]
+        
+        tv_data["seasons"] = []
+        
+        number_of_seasons = data.get("number_of_seasons")
+        
+        season_request_urls = []
+        
+        if number_of_seasons is not None and number_of_seasons > 0:
+            append_to_value = ""
+            for i in range(number_of_seasons):
+                append_to_value += f"{',' if append_to_value else ''}season/{i+1}"
+                
+                # Can only do a maximum of 20 additional append_to_response values
+                if (i + 1) % 19 == 0:
+                    request_url = f"/tv/{initial_data.get('id')}?append_to_response={append_to_value}"
+                    season_request_urls.append(request_url)
+                    append_to_value = ""
+                    
+            # Check if we have any extra data
+            if append_to_value != "":
+                request_url = f"/tv/{initial_data.get('id')}?append_to_response={append_to_value}"
+                season_request_urls.append(request_url)
+                
+        # Then perform all the respective queries
+        for url in season_request_urls:
+            all_season_data = make_request(url)
+            
+            if all_season_data is None: continue
+            
+            for i in range(number_of_seasons):
+                output_season = {
+                    "season_number": i+1
+                }
+                
+                # Not all seasons are in the dataset
+                if f"season/{i+1}" not in all_season_data: continue
+                                
+                season_data = all_season_data[f"season/{i+1}"]
+                
+                episodes = []
+                
+                if season_data.get("episodes") is None: continue
+                
+                for episode in season_data.get("episodes"):
+                    episode_data = {
+                        "title": episode.get("name"),
+                        "episode_number": episode.get("episode_number"),
+                        "runtime": episode.get("runtime")
+                    }
+                    episodes.append(episode_data)
+                
+                output_season["episodes"] = episodes
+                tv_data["seasons"].append(output_season)
+                
+        yield tv_data
+                
+                    
+                     
+                
+            
 
 
 
@@ -201,6 +298,13 @@ def begin_movie():
     
     begin_threads(movie_file, num_lines, target_func=process_movie_set, filename="movie-out")
     
+def begin_tv():
+    filename = "tv_series_ids_07_28_2024.json"
+    
+    (tv_file, num_lines) = read_file(filename)
+    
+    begin_threads(tv_file, num_lines, target_func=process_tv_set, filename="tv-out")
+    
 
 if __name__ == "__main__":
     load_dotenv()
@@ -211,10 +315,11 @@ if __name__ == "__main__":
         
     parser = argparse.ArgumentParser("data-ingestion")
     parser.add_argument("type", choices=["tv", "movie"])
-    args = parser.parse_args()        
-
-
-   
-
+    args = parser.parse_args()
     
+    if args.type == "tv":
+        begin_tv()
+    else:
+        begin_movie()
+
     #process_all_movies()

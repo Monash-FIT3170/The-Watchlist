@@ -3,4 +3,5 @@ node_modules/
 .vscode
 development_secrets.json
 venv/
-all_movies.json
+750k-movies.json
+data/
