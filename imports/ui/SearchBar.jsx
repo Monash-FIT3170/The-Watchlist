@@ -1,184 +1,55 @@
-import React, { useState, useEffect } from 'react';
-import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai';
+import React, { useState, useEffect, useCallback } from 'react';
+import { AiOutlineSearch } from 'react-icons/ai';
 import ContentItem from './ContentItem';
 import ListDisplay from './ListDisplay';
 import { useTracker } from 'meteor/react-meteor-data';
 import { ListCollection } from '../db/List';
-import { getImageUrl } from './imageUtils';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList';
 import ProfileDropdown from './ProfileDropdown';
+import { getImageUrl } from './imageUtils';
 
 const SearchBar = ({ movies, tvs, currentUser }) => {
+    console.log('Component render');
+
     // Fetch lists directly from the database using useTracker
-    const { lists, loading } = useTracker(() => {
+    const fetchLists = useCallback(() => {
         const userId = Meteor.userId();
-        const listsHandle = Meteor.subscribe('userLists', userId);
-        const lists = ListCollection.find({ userId }).fetch();
-        return { lists, loading: !listsHandle.ready() };
-    });
+        Meteor.subscribe('userLists', userId);
+        return ListCollection.find({ userId }).fetch();
+    }, []);
+
+    const [selectedTab, setSelectedTab] = useState('movies');
+
+    const lists = useTracker(fetchLists, []);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedTab, setSelectedTab] = useState('movies');
-    const [showFilters, setShowFilters] = useState(false);
 
-    const users = useTracker(() => {
+    const fetchUsers = useCallback(() => {
         Meteor.subscribe('allUsers');
         return Meteor.users.find({
             username: { $regex: searchTerm, $options: 'i' }
         }).fetch();
     }, [searchTerm]);
 
-    const dropdownData = {
-        year: {
-            options: [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000, 1999, 1998, 1997, 1996, 1995, 1994, 1993, 1992, 1991, 1990],
-            selected: []
-        },
-        genres: {
-            options: [
-                "Action", "Adventure", "Animation", "Anime", "Awards Show", "Children",
-                "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "Food",
-                "Game Show", "History", "Home and Garden", "Horror", "Indie", "Martial Arts",
-                "Mini-Series", "Musical", "Mystery", "News", "Podcast", "Reality",
-                "Romance", "Science Fiction", "Soap", "Sport", "Suspense", "Talk Show",
-                "Thriller", "Travel", "War", "Western"
-            ],
-            selected: []
-        },
-        "sort by": {
-            options: ["rating", "runtime"],
-            selected: "" // this is string as opposed to arrays above due to lack of multi-select
-        }
-    };
-
-    const [filters, setFilters] = useState(dropdownData);
-
-    const handleRemoveFilter = (filterKey) => {
-        if (Array.isArray(filters[filterKey].selected)) {
-            setFilters(prev => ({ ...prev, [filterKey]: { ...prev[filterKey], selected: [] } }));
-        } else {
-            setFilters(prev => ({ ...prev, [filterKey]: { ...prev[filterKey], selected: '' } }));
-        }
-    };
-
-    const handleClearFilters = () => {
-        setFilters({
-            year: { ...filters.year, selected: [] },
-            genres: { ...filters.genres, selected: [] },
-            "sort by": { ...filters["sort by"], selected: '' }
-        });
-    };
-
-    const handleFilterChange = (filterType, value) => {
-        if (filters[filterType] && Array.isArray(filters[filterType].selected)) {
-            const updatedSelected = filters[filterType].selected.includes(value)
-                ? filters[filterType].selected.filter(item => item !== value)
-                : [...filters[filterType].selected, value];
-            setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: updatedSelected } }));
-        } else if (filters[filterType]) {
-            setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: value } }));
-        }
-    };
-
-    const FilterDropdown = ({ label, options, selected }) => {
-        const [dropdownOpen, setDropdownOpen] = useState(false);
-        return (
-            <div className="relative bg-dark text-white text-xs rounded-lg">
-                <button
-                    type="button"
-                    className="bg-dark px-4 py-2 rounded-md flex items-center justify-between w-full"
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                >
-                    {label}
-                    <AiOutlineDown className="ml-2 h-3 w-3" aria-hidden="true" />
-                </button>
-                {dropdownOpen && (
-                    <div className="absolute left-0 mt-1 w-full rounded-md shadow-lg bg-gray-900 z-50 overflow-auto max-h-60">
-                        <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                            {options.map(option => (
-                                <a
-                                    key={option}
-                                    className={`block px-4 py-2 text-sm hover:bg-gray-700 ${selected.includes(option) ? 'font-bold bg-gray-700' : 'bg-transparent'}`}
-                                    onClick={() => handleFilterChange(label, option)}
-                                    role="menuitem"
-                                >
-                                    {option}
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-                )}
-            </div>
-        );
-    };
-
-    const applyFilters = (data) => {
-        let filtered = [...data];
-
-        if (filters.year.selected.length > 0) {
-            filtered = filtered.filter(item => filters.year.selected.includes(item.release_year));
-        }
-
-        if (filters.genres.selected.length > 0 && (selectedTab === 'movies' || selectedTab === 'tv shows')) {
-            filtered = filtered.filter(item => {
-                return Array.isArray(item.genres) && item.genres.some(genre => filters.genres.selected.includes(genre));
-            });
-        }
-
-        if (filters["sort by"].selected) {
-            filtered = filtered.sort((a, b) => {
-                if (filters["sort by"].selected === 'rating') {
-                    return b.rating - a.rating;
-                } else if (filters["sort by"].selected === 'runtime') {
-                    return b.runtime - a.runtime;
-                }
-                return 0;
-            });
-        }
-
-        return filtered;
-    };
-
-    useEffect(() => {
-        const newFilteredData = {
-            movies: applyFilters(movies),
-            tvShows: applyFilters(tvs),
-            users,
-            lists: applyFilters(lists)
-        };
-        setFilteredData(newFilteredData);
-    }, [filters, movies, tvs, lists, users]);
-
-    const [filteredData, setFilteredData] = useState({
-        movies: movies,
-        tvShows: tvs,
-        users: users,
-        lists: lists
-    });
+    const users = useTracker(fetchUsers, [searchTerm]);
 
     const handleSearchChange = (e) => {
-        const value = e.target.value.toLowerCase();
-        setSearchTerm(value);
-
-        if (!value) {
-            setFilteredData({
-                movies: movies,
-                tvShows: tvs,
-                users: users,
-                lists: lists
-            });
-        } else {
-            const filterContent = (item) => item.title.toLowerCase().includes(value);
-            const filterLists = (list) => list.title.toLowerCase().includes(value) || list.description.toLowerCase().includes(value);
-
-            setFilteredData({
-                movies: movies.filter(filterContent),
-                tvShows: tvs.filter(filterContent),
-                users,
-                lists: lists.filter(filterLists)
-            });
-        }
+        setSearchTerm(e.target.value.toLowerCase());
     };
+
+    const filteredMovies = movies.filter(movie =>
+        movie.title && movie.title.toLowerCase().includes(searchTerm)
+    );
+
+    const filteredTVShows = tvs.filter(tv =>
+        tv.title && tv.title.toLowerCase().includes(searchTerm)
+    );
+
+    const filteredLists = lists.filter(list =>
+        (list.title && list.title.toLowerCase().includes(searchTerm)) ||
+        (list.description && list.description.toLowerCase().includes(searchTerm))
+    );
 
     return (
         <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
@@ -199,13 +70,6 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
                             <AiOutlineSearch className="text-gray-400" size={20} />
                         </span>
                     </div>
-                    <button
-                        type="button"
-                        className="ml-4"
-                        onClick={() => setShowFilters(!showFilters)}
-                    >
-                        <AiOutlineFilter size={20} />
-                    </button>
                 </div>
                 <div className="bubbles-container flex justify-end mt-2">
                     {['movies', 'tv shows', 'lists', 'users'].map((tab) => (
@@ -219,75 +83,32 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
                         </div>
                     ))}
                 </div>
-                <div className="search-bar">
-                    {showFilters && (
-                        <div className="flex space-x-4">
-                            <FilterDropdown
-                                label="year"
-                                options={filters.year.options}
-                                selected={filters.year.selected}
-                                onFilterChange={handleFilterChange}
-                            />
-                            <FilterDropdown
-                                label="sort by"
-                                options={filters["sort by"].options}
-                                selected={filters["sort by"].selected}
-                                onFilterChange={handleFilterChange}
-                            />
-                            <FilterDropdown
-                                label="genres"
-                                options={filters.genres.options}
-                                selected={filters.genres.selected}
-                                onFilterChange={handleFilterChange}
-                            />
-                        </div>
-                    )}
-                    {showFilters && (
-                        <div className="filter-tags">
-                            {Object.entries(filters).filter(([_, value]) => {
-                                return Array.isArray(value.selected) ? value.selected.length > 0 : value.selected
-                            }).map(([key, value]) => (
-                                <div key={key} className="inline-block bg-gray-500 rounded-full px-2.5 py-1.5 m-1 mt-3 text-sm">
-                                    {`${key}: ${Array.isArray(value.selected) ? value.selected.join(', ') : value.selected}`}
-                                    <button type="button" onClick={() => handleRemoveFilter(key)} className="bg-transparent border-none cursor-pointer text-gray-800 ml-2.5">
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
-                            {Object.entries(filters).some(([_, value]) => Array.isArray(value.selected) ? value.selected.length > 0 : value.selected) && (
-                                <button className="inline-block bg-gray-500 rounded-full px-2.5 py-1.5 m-1 text-sm" onClick={handleClearFilters}>
-                                    Clear All Filters
-                                </button>
-                            )}
-                        </div>
-                    )}
-                </div>
             </form>
             <Scrollbar className="search-results-container flex-grow overflow-auto">
                 {selectedTab === 'movies' && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {filteredData.movies.length > 0 ? filteredData.movies.map(movie => (
+                        {filteredMovies.length > 0 ? filteredMovies.map(movie => (
                             <ContentItem key={movie.id} id={movie.id} type="Movie" src={movie.image_url} alt={movie.title} rating={movie.rating} />
                         )) : <div>No movies available.</div>}
                     </div>
                 )}
                 {selectedTab === 'tv shows' && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {filteredData.tvShows.length > 0 ? filteredData.tvShows.map(tv => (
+                        {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
                             <ContentItem key={tv.id} id={tv.id} type="TV Show" src={getImageUrl(tv.image_url)} alt={tv.title} rating={tv.rating || undefined} />
                         )) : <div>No TV shows available.</div>}
                     </div>
                 )}
                 {selectedTab === 'lists' && (
-                    filteredData.lists.length > 0 ? (
-                        <ListDisplay listData={filteredData.lists} />
+                    filteredLists.length > 0 ? (
+                        <ListDisplay listData={filteredLists} />
                     ) : (
                         <div>No lists available.</div>
                     )
                 )}
                 {selectedTab === 'users' && (
-                    filteredData.users.length > 0 ? (
-                        <UserList users={filteredData.users} searchTerm={searchTerm} currentUser={currentUser} />
+                    users.length > 0 ? (
+                        <UserList users={users} searchTerm={searchTerm} currentUser={currentUser} />
                     ) : (
                         <div>No users found.</div>
                     )
