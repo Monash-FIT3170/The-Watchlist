@@ -1,13 +1,21 @@
 import React, { useEffect, useRef } from 'react';
 import { MdMovieFilter, MdAdd } from 'react-icons/md';
-import { useLists } from './ListContext';
+import { useTracker } from 'meteor/react-meteor-data';
+import { ListCollection } from '../db/List';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Scrollbar from './ScrollBar'; // Import the Scrollbar component
 
 const Modal = ({ show, onClose, content, type }) => {
-  const { lists, handleAddContent } = useLists();
   const modalRef = useRef();
+
+  // Fetch the lists for the current user
+  const { lists, loading } = useTracker(() => {
+    const userId = Meteor.userId();
+    const listsHandle = Meteor.subscribe('userLists', userId);
+    const lists = ListCollection.find({ userId }).fetch();
+    return { lists, loading: !listsHandle.ready() };
+  });
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -22,7 +30,7 @@ const Modal = ({ show, onClose, content, type }) => {
     };
   }, [onClose]);
 
-  if (!show) return null;
+  if (!show || loading) return null;
 
   const handleAddContentClick = (listId) => {
     const newContent = {
@@ -30,7 +38,7 @@ const Modal = ({ show, onClose, content, type }) => {
       title: content.title,
       image_url: content.image_url,
       type: type, // "Movie" or "TV Show"
-      user_rating: 4, // THIS OBVIOUSLY NEEDS TO BE CHANGED
+      user_rating: 4, // This needs to be dynamically set
       background_url: content.background_url
     };
 
@@ -38,8 +46,13 @@ const Modal = ({ show, onClose, content, type }) => {
     if (list && list.content.some(item => item.contentId === newContent.contentId)) {
       toast.warn("This item is already in the list.");
     } else {
-      handleAddContent(listId, newContent);
-      toast.success("Item successfully added to the list.");
+      Meteor.call('list.addContent', { listId, userId: Meteor.userId(), content: newContent }, (error) => {
+        if (error) {
+          toast.error("Failed to add item to the list.");
+        } else {
+          toast.success("Item successfully added to the list.");
+        }
+      });
     }
   };
 

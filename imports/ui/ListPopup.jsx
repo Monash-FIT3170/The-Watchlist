@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useTracker } from 'meteor/react-meteor-data';
 import RatingStar from "./RatingStar";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import RenameListModal from "./RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';
-import { useLists } from './ListContext';
+import { ListCollection } from "../db/List";
 import { getImageUrl } from "./imageUtils";
 import Scrollbar from './ScrollBar'; // Import the Scrollbar component
 
-const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
-  const { handleRemoveContent, fetchLists, lists } = useLists();
+const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const popupRef = useRef(null);
   const confirmDialogRef = useRef(null);
   const [expandedItem, setExpandedItem] = useState(null);
@@ -21,10 +21,57 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [contentToDelete, setContentToDelete] = useState(null);
   const [listToDelete, setListToDelete] = useState(null);
-  const [updatedList, setUpdatedList] = useState(list); // Track updated list
   const [selectedTab, setSelectedTab] = useState('all'); // Track selected tab
   const [imageStyles, setImageStyles] = useState({});
   const navigate = useNavigate();
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  // Subscribe to the list and the user's subscriptions
+  const { list, loading } = useTracker(() => {
+    const listHandle = Meteor.subscribe('userLists', listId);
+    const subscribedListHandle = Meteor.subscribe('subscribedLists', Meteor.userId());
+
+    const list = ListCollection.findOne({ _id: listId }) || {};
+    const loading = !listHandle.ready() || !subscribedListHandle.ready();
+
+    return { list, loading };
+  }, [listId]);
+
+  useEffect(() => {
+    // Check if the current user is subscribed to the list
+    if (list.subscribers && Array.isArray(list.subscribers)) {
+      const isSubscribed = list.subscribers.includes(Meteor.userId());
+      setIsSubscribed(isSubscribed);
+    } else {
+      console.warn("Subscribers list is undefined or not an array");
+    }
+  }, [list.subscribers]);
+
+  const handleSubscribe = (listId) => {
+    if (list.userId === Meteor.userId()) {
+      console.log('Cannot subscribe to your own list');
+      return;
+    }
+    Meteor.call('list.subscribe', listId, (error) => {
+      if (!error) {
+        setIsSubscribed(true);
+        console.log('Subscription successful');
+      } else {
+        console.error('Subscription error:', error);
+      }
+    });
+  };
+
+  const handleUnsubscribe = (listId) => {
+    Meteor.call('list.unsubscribe', listId, (error) => {
+      if (!error) {
+        setIsSubscribed(false);
+        console.log('Unsubscription successful');
+      } else {
+        console.error('Unsubscription error:', error);
+      }
+    });
+  };
 
   const handleRedirect = (type, id) => {
     onClose();
@@ -53,14 +100,6 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    // Find the updated list in the lists array from context
-    const updatedList = lists.find(l => l._id === list._id);
-    if (updatedList) {
-      setUpdatedList(updatedList);
-    }
-  }, [lists, list._id]); // Depend on lists and list._id
 
   const handleExpandClick = (id, title) => {
     if (expandedItem === id) {
@@ -92,7 +131,13 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
 
   const handleRemoveContentClick = (contentId) => {
     if (contentId !== null) {
-      handleRemoveContent(list._id, contentId, fetchLists);
+      Meteor.call('list.removeContent', { listId: list._id, contentId }, (error) => {
+        if (error) {
+          console.error("Error removing content:", error);
+        } else {
+          console.log("Content removed successfully");
+        }
+      });
     }
   };
 
@@ -103,23 +148,26 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   };
 
   const confirmDeleteList = (listId) => {
-    // Prevent deletion if the list is of a protected type
-    const list = lists.find(l => l._id === listId);
-    if (list && (list.title === 'Favourite' || list.title === 'To Watch')) {
-        alert('This list cannot be deleted.');
-        return;
+    if (list.title === 'Favourite' || list.title === 'To Watch') {
+      alert('This list cannot be deleted.');
+      return;
     }
-
     setListToDelete(listId);
     setShowConfirmDialog(true);
-};
+  };
 
   const handleDeleteConfirmed = () => {
     if (contentToDelete !== null) {
       handleRemoveContentClick(contentToDelete);
     } else if (listToDelete !== null) {
-      onDeleteList(listToDelete);
-      onClose();
+      Meteor.call('list.delete', { listId: listToDelete }, (error) => {
+        if (error) {
+          console.error("Error deleting list:", error);
+        } else {
+          onClose();
+          console.log("List deleted successfully");
+        }
+      });
     }
     resetConfirmationState();
   };
@@ -139,11 +187,15 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
     }
   };
 
-  const filteredContent = updatedList.content.filter(item =>
+  const filteredContent = list.content?.filter(item =>
     selectedTab === 'all' ||
     (selectedTab === 'movies' && item.type === 'Movie') ||
     (selectedTab === 'tv shows' && item.type === 'TV Show')
-  );
+  ) || [];
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -152,7 +204,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
         className="bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">{updatedList.title}</h2>
+          <h2 className="text-2xl font-bold">{list.title}</h2>
           <div className="flex space-x-2">
             <button
               onClick={handleRenameListClick}
@@ -168,6 +220,16 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
             >
               <FiTrash2 className="text-lg" />
             </button>
+            {/* Conditionally render subscribe/unsubscribe button */}
+            {list.userId !== Meteor.userId() && (
+              <button
+                onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
+                className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
+              >
+                {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+              </button>
+            )}
+
             <button
               className="text-2xl font-bold text-gray-500 hover:text-gray-800"
               onClick={onClose}
@@ -196,23 +258,20 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
                   <img
                     src={getImageUrl(item.background_url)}
                     alt={item.title}
-                    className="cursor-pointer" // Change to maintain aspect ratio
+                    className="cursor-pointer"
                     style={imageStyles[item.contentId] || {}}
                     onLoad={(e) => handleImageLoad(e, item.contentId)}
-                    onClick={() => {
-                      console.log(`Image clicked: ${item.type}, ${item.contentId}`);
-                      handleRedirect(item.type, item.contentId);
-                    }}
+                    onClick={() => handleRedirect(item.type, item.contentId)}
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60" style={{ pointerEvents: 'none' }}>
                     <div className="absolute bottom-4 left-4 text-white" style={{ pointerEvents: 'auto' }}>
                       <h3 className="text-xl font-bold ml-1">{item.title}</h3>
-                      <RatingStar totalStars={5} rating={3.5} />
+                      <RatingStar totalStars={5} rating={item.user_rating || 0} />
                     </div>
                     <button
                       className="absolute bottom-4 right-4 text-white text-2xl"
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent the click from propagating to the image
+                        e.stopPropagation();
                         handleExpandClick(item.contentId, item.title);
                       }}
                       style={{ pointerEvents: 'auto' }}
@@ -222,7 +281,7 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
                     <button
                       className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent the click from propagating to the image
+                        e.stopPropagation();
                         confirmRemoveContent(item.contentId);
                       }}
                       title="Remove from List"
