@@ -75,17 +75,22 @@ def process_movies(data, num_lines):
         movie_data["overview"] = data.get("overview")
         movie_data["language"] = data.get("original_language")
         movie_data["origin_country"] = data.get("origin_country")        
-        movie_data["genres"] = [genre["name"] for genre in data.get("genres")]
-        movie_data["keywords"] = [keyword["name"] for keyword in data.get("keywords").get("keywords")]
+        movie_data["genres"] = [genre["name"] for genre in data.get("genres")] if data.get("genres") else None
+        movie_data["keywords"] = [keyword["name"] for keyword in data.get("keywords").get("keywords")] if data.get("keywords") else None
+
 
         movie_data["actors"] = [cast["name"] for cast in data.get("credits").get("cast")]
         
         directors = []
-        for crew in data.get("credits").get("crew"):
-            if crew.get("job") == "Director":
-                directors.append(crew.get("name"))
+        if data.get("credits") is not None:
 
-        movie_data["directors"] = directors
+            for crew in data.get("credits").get("crew"):
+                if crew.get("job") == "Director":
+                    directors.append(crew.get("name"))
+
+            movie_data["directors"] = directors
+        else:
+            movie_data["directors"] = None
         
         movie_data["background_url"] = ""
         movie_data["image_url"] = ""
@@ -118,14 +123,18 @@ def process_all_tv_shows():
 if __name__ == "__main__":
     load_dotenv()
 
+    # Change the filename to process here
+    # filename = "movie_ids_07_28_2024.json" # initial dataset
+    filename = "missing-data.json" # smaller dataset of movies that got corrupted
+
     if not os.environ['THEMOVIEDB_ACCESS_TOKEN']:
         print("THEMOVIEDB_ACCESS_TOKEN environment variable is not set. Exiting.")
         os.exit(-1)
 
-    with open("movie_ids_07_28_2024.json", "rb") as f:
+    with open(filename, "rb") as f:
         num_lines = sum(1 for _ in f)
 
-    with open("movie_ids_07_28_2024.json", encoding='utf8') as f:
+    with open(filename, encoding='utf8') as f:
         movie_file = [line for line in f]
 
     threads = []
