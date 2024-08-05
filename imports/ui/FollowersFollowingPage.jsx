@@ -59,8 +59,8 @@ const FollowersFollowingPage = ({ currentUser }) => {
     const filteredUsers = users.filter(user => user.username.toLowerCase().includes(searchTerm.toLowerCase()));
     if (option === 'alphabetical') {
       return [...filteredUsers].sort((a, b) => {
-        const nameA = a.name || ''; // Fallback to an empty string if name is undefined
-        const nameB = b.name || ''; // Fallback to an empty string if name is undefined
+        const nameA = a.username || ''; // Fallback to an empty string if name is undefined
+        const nameB = b.username || ''; // Fallback to an empty string if name is undefined
         return nameA.localeCompare(nameB);
       });
     } else if (option === 'percentage') {
