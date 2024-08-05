@@ -109,6 +109,10 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   };
 
   const handleRenameListClick = () => {
+    if (list.title === 'Favourite' || list.title === 'To Watch') {
+      alert('Cannot rename Favourite or To Watch lists');
+      return;
+    }
     setIsRenameModalOpen(true);
   };
 
@@ -365,7 +369,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
             isOpen={isRenameModalOpen}
             onClose={() => setIsRenameModalOpen(false)}
             onRename={(newName) => {
-              onRenameList(list._id, newName);
+              onRenameList(newName);
               list.title = newName; // Update the list title locally
             }}
             currentName={list.title}

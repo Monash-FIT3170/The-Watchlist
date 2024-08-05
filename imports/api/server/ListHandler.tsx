@@ -33,6 +33,17 @@ type AddContentToListOptions = {
     }
 };
 
+interface List {
+    _id: string;
+    userId: string;
+    userName: string;
+    title: string;
+    description?: string;
+    listType: "Favourite" | "To Watch" | "Custom";
+    content: typeof ContentSummary[];
+    subscribers?: string[];
+  }
+
 const addContentToList: HandlerFunc = {
     validate: null,
     run: function(this: any, { listId, userId, content }: AddContentToListOptions) {
@@ -69,7 +80,12 @@ const createList: HandlerFunc = {
             throw new Meteor.Error('not-found', 'User not found');
         }
 
-        // Choose the user name source here. For simplicity, we're using the 'realName' field.
+        // Check if a list with the same title already exists for this user
+        const existingList = ListCollection.findOne({ userId: this.userId, title });
+        if (existingList) {
+            throw new Meteor.Error('duplicate-list', 'A list with this title already exists.');
+        }
+
         const userName = user.username || "Anonymous"; // Fallback to 'Anonymous' if no name is found
 
         List.insert({
@@ -101,20 +117,39 @@ const readList: HandlerFunc = {
 
 const updateList: HandlerFunc = {
     validate: null,
-    run: function(this: any, { listId, userId, updateFields }: { listId: string, userId: string, updateFields: Object }) {
+    run: function(this: any, { listId, updateFields }: { listId: string, updateFields: Partial<List> }) {
+        
         if (!this.userId) {
+            console.error('Error: User not logged in.');
             throw new Meteor.Error('not-authorized', 'You must be logged in to update a list');
         }
-        if (this.userId !== userId) {
-            throw new Meteor.Error('not-authorized', 'You cannot update lists that do not belong to you');
+
+        // Find the list by ID and cast it to the List type
+        const list = ListCollection.findOne({ _id: listId }) as List;
+        if (!list) {
+            console.error('Error: List not found.');
+            throw new Meteor.Error('not-found', 'List not found');
         }
 
-        ListCollection.update(
-            { _id: listId, userId },
+        if (list.userId !== this.userId) {
+            console.error('Error: User does not own this list.');
+            throw new Meteor.Error('not-authorized', 'You cannot update a list that does not belong to you');
+        }
+
+        // Prevent renaming of 'Favourite' and 'To Watch' lists
+        if ((list.title === 'Favourite' || list.title === 'To Watch') && updateFields.title) {
+            console.error('Error: Attempt to rename a protected list (Favourite or To Watch).');
+            throw new Meteor.Error('not-allowed', 'Cannot rename Favourite or To Watch lists.');
+        }
+
+        const result = ListCollection.update(
+            { _id: listId, userId: this.userId },
             { $set: updateFields }
         );
     }
-}
+};
+
+
 
 const deleteList: HandlerFunc = {
     validate: null,
