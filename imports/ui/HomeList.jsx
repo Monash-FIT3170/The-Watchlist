@@ -1,11 +1,10 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 import RatingStar from './RatingStar';
-import { useLists } from './ListContext'; // Import the context
-import { getImageUrl } from "./imageUtils";
 import { useTracker } from 'meteor/react-meteor-data';
+import { ListCollection } from '../db/List';
 import { Rating as RatingDB } from '../db/Rating';
-
+import { getImageUrl } from "./imageUtils";
 
 const List = ({ list }) => {
     const navigate = useNavigate();
@@ -19,7 +18,7 @@ const List = ({ list }) => {
         const handler = Meteor.subscribe("rating");
 
         if (!handler.ready()) {
-            return { allRatings: {}, isLoading: true };
+            return { allRatings: {}, isLoadingRatings: true };
         }
 
         const ratings = RatingDB.find().fetch();
@@ -33,7 +32,7 @@ const List = ({ list }) => {
                 acc[currentRating.contentId] = {
                     count: 0,
                     totalRatings: 0
-                }
+                };
             }
 
             acc[currentRating.contentId]["count"] += 1;
@@ -45,9 +44,8 @@ const List = ({ list }) => {
             ratingReduce[id]["finalRating"] = (ratingReduce[id]["totalRatings"] / ratingReduce[id]["count"]).toFixed(2);
         }
 
-        return { allRatings: ratingReduce, isLoadingRatings: false }
+        return { allRatings: ratingReduce, isLoadingRatings: false };
     });
-
 
     return (
         <div key={list._id} className="space-y-8">
@@ -76,12 +74,19 @@ const List = ({ list }) => {
 };
 
 const HomeList = ({ title, listType }) => {
-    const { lists, loading } = useLists();
     const navigate = useNavigate();
-    const filteredLists = lists.filter(list => list.listType === listType);
+
+    // Subscribe to and fetch the lists from the database
+    const { lists, loading } = useTracker(() => {
+        const userId = Meteor.userId(); // Get the current user's ID
+        const listsHandle = Meteor.subscribe('userLists', userId);
+        const lists = ListCollection.find({ userId, listType }).fetch(); // Filter by userId and listType
+        const loading = !listsHandle.ready();
+        return { lists, loading };
+    }, [listType]);
 
     // Check if all lists have empty content
-    const isEmpty = filteredLists.every(list => list.content.length === 0);
+    const isEmpty = lists.every(list => list.content.length === 0);
 
     return (
         <div className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl overflow-auto scrollbar-thumb-gray-900 scrollbar-track-gray-100 scrollbar-thin">
@@ -100,12 +105,11 @@ const HomeList = ({ title, listType }) => {
                 </div>
             ) : (
                 <div className="w-full overflow-visible">
-                    {filteredLists.map((list) => <List key={list._id} list={list} />)}
+                    {lists.map((list) => <List key={list._id} list={list} />)}
                 </div>
             )}
         </div>
     );
 };
-
 
 export default HomeList;

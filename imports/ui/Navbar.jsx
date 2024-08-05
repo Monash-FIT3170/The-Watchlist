@@ -3,24 +3,39 @@ import { IconContext } from "react-icons";
 import { Link } from "react-router-dom";
 import { MdMovieFilter } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
+import { useTracker } from 'meteor/react-meteor-data';
 import ListPopup from "./ListPopup";
 import NewListModal from "./NewListModal";
 import usePopup from './usePopup';
-import { useLists } from './ListContext'; // Import the context
+import { ListCollection } from "../db/List";
 import Scrollbar from './ScrollBar'; // Import the Scrollbar component
 
 const popcornUrl = "./ExampleResources/popcorn.png";
 
-export default function Navbar({ staticNavData }) { // Remove listData, onAddList, onDeleteList, onRenameList props
+export default function Navbar({ staticNavData }) {
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
   const [isAddListModalOpen, setIsAddListModalOpen] = useState(false);
 
-  // Use the context to get lists and list management functions
-  const { lists, handleCreateList, handleDeleteList, handleRenameList } = useLists();
+  // Subscribe to the user's lists and subscribed lists
+  const { lists, subscribedLists, loading } = useTracker(() => {
+    const userId = Meteor.userId();
+    const listsHandle = Meteor.subscribe('userLists', userId);
+    const subscribedListsHandle = Meteor.subscribe('subscribedLists', userId);
+
+    const lists = ListCollection.find({ userId }).fetch();
+    const subscribedLists = ListCollection.find({ subscribers: { $in: [userId] } }).fetch();
+    const loading = !listsHandle.ready() || !subscribedListsHandle.ready();
+
+    return { lists, subscribedLists, loading };
+  }, []);
 
   const handleAddList = () => {
     setIsAddListModalOpen(true);
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -54,18 +69,17 @@ export default function Navbar({ staticNavData }) { // Remove listData, onAddLis
               </h2>
               <Scrollbar className="h-[calc(100vh_-_21rem)] overflow-y-hidden">
                 <ul className="h-full">
-                  {lists.map((list) => ( // Use lists from context
-                    <li key={list._id} className="flex justify-center">
+                  {lists.concat(subscribedLists).map((list) => (
+                    <li key={list._id} className="flex justify-start items-center text-sm text-white font-semibold mb-2.5 p-2 rounded-lg hover:bg-dark">
                       <button
                         onClick={() => handleItemClick(list)}
-                        className="w-full flex items-center space-x-5 text-sm text-white font-semibold mb-2.5 p-2 rounded-lg hover:bg-dark"
+                        className="flex items-center space-x-5 w-full text-left"
                       >
-                        <img
-                          src={list.content[0]?.image_url || popcornUrl}
-                          alt={list.title}
-                          className="w-10 h-10 mr-2.5 rounded-lg"
-                        />
-                        {list.title}
+                        <img src={list.content[0]?.image_url || popcornUrl} alt={list.title} className="w-10 h-10 mr-2.5 rounded-lg" />
+                        <div className="flex flex-col justify-center">
+                          <span className="font-bold">{list.title}</span>
+                          <span className="text-xs text-gray-400">{list.userName}</span>
+                        </div>
                       </button>
                     </li>
                   ))}
@@ -76,10 +90,10 @@ export default function Navbar({ staticNavData }) { // Remove listData, onAddLis
         </div>
         {isPopupOpen && selectedList && (
           <ListPopup
-            list={selectedList}
+            listId={selectedList._id}
             onClose={handleClosePopup}
-            onDeleteList={handleDeleteList} // Use context function
-            onRenameList={handleRenameList} // Use context function
+            onDeleteList={() => Meteor.call('list.delete', { listId: selectedList._id })}
+            onRenameList={(newName) => Meteor.call('list.update', { listId: selectedList._id, updateFields: { title: newName } })}
           />
         )}
         {isAddListModalOpen && (
@@ -87,7 +101,7 @@ export default function Navbar({ staticNavData }) { // Remove listData, onAddLis
             <NewListModal
               isOpen={isAddListModalOpen}
               onClose={() => setIsAddListModalOpen(false)}
-              onCreate={handleCreateList} // Use context function
+              onCreate={(title) => Meteor.call('list.create', { title, listType: "Custom", content: [] })}
             />
           </div>
         )}

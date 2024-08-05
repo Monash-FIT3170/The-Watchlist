@@ -6,26 +6,42 @@ const ListContext = createContext();
 export const ListsProvider = ({ children }) => {
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [subscribedLists, setSubscribedLists] = useState([]); 
 
   // Fetch lists for the current logged-in user
   const fetchLists = () => {
     const userId = Meteor.userId();
+    console.log("Fetching lists for userId:", userId);
     if (!userId) {
       setLists([]);
+      setSubscribedLists([]);
       setLoading(false);
       return;
     }
+  
     setLoading(true);
+  
     Meteor.call("list.read", { userId }, (error, response) => {
       if (error) {
         console.error("Error fetching lists:", error);
       } else {
+        console.log("Fetched personal lists:", response);
         setLists(response);
       }
-      setLoading(false);
+  
+      Meteor.call("list.getSubscribed", { userId }, (subError, subResponse) => {
+        if (subError) {
+          console.error("Error fetching subscribed lists:", subError);
+        } else {
+          console.log("Fetched subscribed lists:", subResponse);
+          setSubscribedLists(subResponse);
+        }
+        setLoading(false);
+      });
     });
   };
-
+  
+  
   // Create a new list
   const handleCreateList = (title, listType = "Custom") => {
     const userId = Meteor.userId();
@@ -103,6 +119,23 @@ export const ListsProvider = ({ children }) => {
     });
   };
 
+  const updateSubscriptions = (listId, isSubscribed) => {
+    // Optimistically update the subscribedLists
+    setSubscribedLists(currentSubscribed => {
+      if (isSubscribed) {
+        // Find the list that was subscribed to and add it to subscribedLists
+        const listToAdd = lists.find(list => list._id === listId);
+        if (listToAdd) {
+          return [...currentSubscribed, listToAdd];
+        }
+      } else {
+        // Filter out the list that was unsubscribed from
+        return currentSubscribed.filter(list => list._id !== listId);
+      }
+      return currentSubscribed;
+    });
+  };
+
   // Use effect to refetch lists whenever the user ID changes
   useEffect(() => {
     fetchLists();
@@ -111,13 +144,15 @@ export const ListsProvider = ({ children }) => {
   return (
     <ListContext.Provider value={{
       lists,
+      subscribedLists,
       loading,
       handleAddContent,
       fetchLists,
       handleCreateList,
       handleDeleteList,
       handleRenameList,
-      handleRemoveContent
+      handleRemoveContent,
+      updateSubscriptions
     }}>
       {children}
     </ListContext.Provider>

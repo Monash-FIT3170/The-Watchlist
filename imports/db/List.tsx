@@ -66,6 +66,12 @@ const List = Class.create({
             default: function() {
                 return [];
             }
+        },
+        subscribers: {
+            type: [String], // array of userIds
+            default: function() {
+                return [];
+            }
         }
     },
     behaviors: {

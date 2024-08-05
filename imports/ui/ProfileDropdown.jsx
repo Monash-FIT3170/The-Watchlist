@@ -18,8 +18,6 @@ const ProfileDropdown = ({ user }) => {
     });
   };
 
-  console.log("User in ProfileDropdown:", user);
-
 
   // If the user is not logged in, don't render the dropdown
   if (!user) {

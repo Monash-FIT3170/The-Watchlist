@@ -1,10 +1,10 @@
-// imports/ui/UserProfile.jsx
 import React, { Fragment, useEffect, useState } from 'react';
+import { Meteor } from 'meteor/meteor';
 import ContentList from './ContentList';
 import ProfileCard from './ProfileCard';
-import CustomWatchLists from './CustomWatchLists';
-import { useLists } from './ListContext';
 import { useTracker } from 'meteor/react-meteor-data';
+import { ListCollection } from '../db/List';
+import ListDisplay from './ListDisplay';
 
 export default function UserProfile() {
   const currentUser = useTracker(() => {
@@ -15,10 +15,23 @@ export default function UserProfile() {
     return null;
   }, []);
 
-  const { lists, followUser, unfollowUser } = useLists();
+  const { lists, subscribedLists, followUser, unfollowUser } = useTracker(() => {
+    const listsHandler = Meteor.subscribe('userLists', Meteor.userId());
+    const subscribedHandler = Meteor.subscribe('subscribedLists', Meteor.userId());
+    const lists = ListCollection.find({ userId: Meteor.userId() }).fetch();
+    const subscribedLists = ListCollection.find({
+      subscribers: { $in: [Meteor.userId()] }
+    }).fetch();
+    return {
+      lists,
+      subscribedLists,
+      loading: !listsHandler.ready() && !subscribedHandler.ready(),
+    };
+  }, []);
+
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const userLists = currentUser ? lists.filter((list) => list.userId === currentUser._id) : [];
+  const userLists = lists || [];
   const favouritesList = userLists.find((list) => list.listType === 'Favourite');
   const toWatchList = userLists.find((list) => list.listType === 'To Watch');
   const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
@@ -56,19 +69,20 @@ export default function UserProfile() {
     }
     : {};
 
-    return (
-      <div className="flex flex-col min-h-screen bg-darker">
-        <ProfileCard
-          currentUser={currentUser} 
-          user={userProfile}
-          onFollow={null}
-          showFollowButton={false}
-        />
-        <div className="p-6">
-          {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} />}
-          {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} />}
-          <CustomWatchLists listData={customWatchlists} />
-        </div>
+  return (
+    <div className="flex flex-col min-h-screen bg-darker">
+      <ProfileCard
+        currentUser={currentUser}
+        user={userProfile}
+        onFollow={null}
+        showFollowButton={false}
+      />
+      <div className="p-6">
+        {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} />}
+        {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} />}
+        <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />
+        <ListDisplay heading="Subscribed Watchlists" listData={subscribedLists} />
       </div>
-    );
-  };
+    </div>
+  );
+}
