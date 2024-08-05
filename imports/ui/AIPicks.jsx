@@ -36,12 +36,17 @@ export default function AIPicks({ movies, tvs, currentUser }) {
             listId: genre + "Movies",
             title: genre,
             content: genreMovies.map(movie => ({
-                ...movie,
+                contentId: movie.id,
+                title: movie.title,
+                image_url: movie.image_url,
                 rating: globalRatings[movie.id]?.average || 0,
-                isUserSpecificRating: false
+                type: "Movie",
+                background_url: movie.background_url || movie.image_url
             }))
         };
     });
+
+    console.log(movieContentLists)
 
     let showContentLists = genres.map(genre => {
         const genreShows = tvs.filter(item => item.genres.includes(genre)).slice(0, 10);
@@ -49,9 +54,12 @@ export default function AIPicks({ movies, tvs, currentUser }) {
             listId: genre + "Shows",
             title: genre,
             content: genreShows.map(tv => ({
-                ...tv,
+                contentId: tv.id,
+                title: tv.title,
+                image_url: tv.image_url,
                 rating: globalRatings[tv.id]?.average || 0,
-                isUserSpecificRating: false
+                type: "TV Show",
+                background_url: tv.background_url || tv.image_url
             }))
         };
     });
@@ -62,12 +70,12 @@ export default function AIPicks({ movies, tvs, currentUser }) {
             <Scrollbar className="w-full overflow-y-auto">
                 {display === "Display Movie" && movieContentLists.map(list => (
                     <div key={list.listId} className="px-8 py-2">
-                        <ContentList list={list} />
+                        <ContentList list={list} isUserOwned={false} />
                     </div>
                 ))}
                 {display === "Display Show" && showContentLists.map(list => (
                     <div key={list.listId} className="px-8 py-5">
-                        <ContentList list={list} />
+                        <ContentList list={list} isUserOwned={false} />
                     </div>
                 ))}
             </Scrollbar>

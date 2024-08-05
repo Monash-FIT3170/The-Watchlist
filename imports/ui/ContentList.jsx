@@ -5,15 +5,11 @@ import usePopup from './usePopup';
 import ListPopup from './ListPopup';
 import { getImageUrl } from './imageUtils';
 
-const ContentList = ({ list }) => {
+const ContentList = ({ list, isUserOwned }) => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const [visibleContentCount, setVisibleContentCount] = useState(0);
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
-
-  const handleRedirect = () => {
-    navigate(`/${list.listId}`);
-  };
 
   // Calculate the number of content panels that fit in the container
   const updateVisibleContent = () => {
@@ -44,9 +40,11 @@ const ContentList = ({ list }) => {
         >
           {list.title}
         </button>
-        <button onClick={() => handleItemClick(list)} className="text-gray-400 text-base bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
-          Show all
-        </button>
+        {isUserOwned && (
+          <button onClick={() => handleItemClick(list)} className="text-gray-400 text-base bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
+            Show all
+          </button>
+        )}
       </div>
       <div ref={containerRef} className="flex justify-flex-start items-start overflow-hidden">
         {React.Children.toArray(list.content.map((item, index) => (
