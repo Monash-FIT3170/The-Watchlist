@@ -13,10 +13,15 @@ import { AiOutlineSearch } from 'react-icons/ai';
 const AllRatedContentPage = ({ currentUser }) => {
   const { userId } = useParams();
   const [searchTerm, setSearchTerm] = useState('');
+  const searchParams = new URLSearchParams(window.location.search);
+  const userSpecific = searchParams.get('userSpecific') === 'true';
 
   const { ratedContent, isLoading } = useTracker(() => {
     const subscription = Meteor.subscribe('ratedContent', userId);
-    const ratings = RatingCollection.find({ userId }).fetch();
+    const isCurrentUser = userId === currentUser._id;
+    const ratings = userSpecific 
+    ? RatingCollection.find({ userId: currentUser._id }).fetch() 
+    : RatingCollection.find({ userId }).fetch();
     const contentDetails = ratings.map(rating => {
       const collection = rating.contentType === 'Movie' ? MovieCollection : TVCollection;
       return {
@@ -30,7 +35,7 @@ const AllRatedContentPage = ({ currentUser }) => {
       ratedContent: contentDetails.filter(content => content.title.toLowerCase().includes(searchTerm.toLowerCase())),
       isLoading: !subscription.ready()
     };
-  }, [userId, searchTerm]);
+  }, [userId, searchTerm, currentUser, userSpecific]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -69,6 +74,7 @@ const AllRatedContentPage = ({ currentUser }) => {
               src={getImageUrl(content.image_url)}
               alt={content.title}
               rating={content.rating}
+              isUserSpecificRating={userSpecific}
             />
           )) : <p>No rated content available.</p>}
         </div>

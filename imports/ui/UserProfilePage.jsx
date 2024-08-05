@@ -8,6 +8,13 @@ import { ListCollection } from '../db/List';
 import ListDisplay from './ListDisplay';
 
 const UserProfilePage = () => {
+  const currentUser = useTracker(() => {
+    const handler = Meteor.subscribe('userData', Meteor.userId());
+    if (handler.ready()) {
+      return Meteor.user();
+    }
+    return null;
+  }, []);
   const { userId } = useParams();
   const [userLists, setUserLists] = useState([]);
 
@@ -100,6 +107,7 @@ const UserProfilePage = () => {
         <div className="flex flex-col min-h-screen bg-darker">
           <div className="flex flex-col gap-0 flex-grow">
             <ProfileCard
+              currentUser={currentUser}
               user={userProfile}
               onFollow={() => {
                 // Define follow logic here

@@ -13,7 +13,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user || !user._id) return; // Ensure user and user._id are defined
+    if (!user || !user._id) return;
     const currentUser = Meteor.user();
     if (currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(user._id)) {
       setIsFollowing(true);
@@ -73,7 +73,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
         <ProfileDropdown user={currentUser} />
       </div>
       <div className="flex items-center gap-4">
-      <div className="relative cursor-pointer">
+        <div className="relative cursor-pointer">
           <img
             src={newAvatar || user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"}
             alt="avatar"
@@ -97,10 +97,17 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
             <button className="p-1 text-lg flex-initial hover:underline" onClick={() => navigate(`/followers-following/${user._id}/following`)}>
               • {user.following} Following
             </button>
-            <button className="p-1 text-lg flex-initial hover:underline" onClick={() => navigate(`/user/${user._id}/ratings`)}>
+            <button
+              className="p-1 text-lg flex-initial hover:underline"
+              onClick={() => {
+                if (user._id === currentUser._id) {
+                  navigate(`/user/${user._id}/ratings?userSpecific=true`);
+                } else {
+                  navigate(`/user/${user._id}/ratings`);
+                }
+              }}>
               • {ratingsCount} Ratings
             </button>
-
             <Link to="/user-discovery">
               <button className="mt-2 p-1 bg-darker rounded-lg">
                 <FaPlus />
