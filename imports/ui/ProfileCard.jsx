@@ -73,7 +73,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
         <ProfileDropdown user={currentUser} />
       </div>
       <div className="flex items-center gap-4">
-        <div className="relative cursor-pointer">
+      <div className="relative cursor-pointer">
           <img
             src={newAvatar || user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"}
             alt="avatar"
@@ -81,10 +81,11 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
             onClick={handleAvatarClick}
             style={{ zIndex: 10 }} // Ensures the image is always clickable
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 opacity-0 hover:bg-opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out pointer-events-none">
-            <FaPencilAlt className="text-white text-3xl pointer-events-auto" />
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 opacity-0 hover:bg-opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
+            style={{ pointerEvents: 'none' }} // Disables pointer events when not hovering
+          >
+            <FaPencilAlt className="text-white text-3xl" style={{ pointerEvents: 'auto' }} />
           </div>
-
         </div>
 
         <div>
