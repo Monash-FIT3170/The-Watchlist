@@ -25,6 +25,7 @@ import FollowersFollowingPage from "./FollowersFollowingPage.jsx";
 import AllUsersPage from "./AllUsersPage.jsx";
 import UserRatingsPage from "./UserRatingsPage.jsx";
 import AllRatedContentPage from "./AllRatedContentPage.jsx";
+import Loading from "./Loading.jsx";
 
 const handleFollow = (userId) => {
   Meteor.call('followUser', userId, (error, result) => {
@@ -94,15 +95,15 @@ export const App = () => {
   const [tvs, setTvs] = useState([]);
   const [lists, setLists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  var user = useTracker(() => Meteor.user());
+  const [contentLoading,setContentLoading] = useState(true);
+  const user = useTracker(() => Meteor.user());
 
-  const { currentUser, isLoading } = useTracker(() => {
+  const { currentUser, userLoading } = useTracker(() => {
     const handler = Meteor.subscribe('userData', Meteor.userId());
     const user = Meteor.user();
     return {
       currentUser: user,
-      isLoading: !handler.ready(),
+      userLoading: !handler.ready(),
     };
   }, []);
 
@@ -119,53 +120,58 @@ export const App = () => {
         }
       }
     });
-    setLoading(false);
+    setContentLoading(false);
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
+  if (userLoading || contentLoading ) {
+    console.log("Loading")
+    return (<Loading />);
   }
 
-  if (!user) {
+  if (!userLoading || !contentLoading) {
+    if (!user) {
+      return (
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="*" element={<Navigate replace to="/login" />} />
+        </Routes>
+      );
+    }
+  }
+
+  if (!userLoading || !contentLoading) {
     return (
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="*" element={<Navigate replace to="/login" />} />
-      </Routes>
+      <ListsProvider>
+        <div className="app flex h-screen overflow-hidden bg-darkest text-white">
+          <div>
+            <Navbar staticNavData={staticNavbarData} />
+          </div>
+          <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
+            <Scrollbar className="h-custom">
+              <Routes>
+                <Route path="/fetch-test" element={<FetchTest />} />
+                <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} currentUser={currentUser} />} />
+                <Route path="/home" element={<Home currentUser={currentUser} />} />
+                <Route path="/profile" element={<UserProfile currentUser={currentUser} />} />
+                <Route path="/ai-picks" element={<AIPicks movies={movies} tvs={tvs} currentUser={currentUser} />} />
+                {movies.map((movie) => (
+                  <Route key={movie.id} path={`/Movie${movie.id}`} element={<MovieInfo movie={movie} />} />
+                ))}
+                {tvs.map((tv) => (
+                  <Route key={tv.id} path={`/TV Show${tv.id}`} element={<TvInfo tv={tv} />} />
+                ))}
+                <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
+                <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
+                <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />
+                <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+                <Route path="/all-users" element={<AllUsersPage onFollow={handleFollow} onUnfollow={handleUnfollow} currentUser={currentUser} />} />
+                <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
+              </Routes>
+            </Scrollbar>
+          </div>
+          {user && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
+        </div>
+      </ListsProvider>
     );
   }
-
-  return (
-    <ListsProvider>
-      <div className="app flex h-screen overflow-hidden bg-darkest text-white">
-        <div>
-          <Navbar staticNavData={staticNavbarData} />
-        </div>
-        <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
-          <Scrollbar className="h-custom">
-            <Routes>
-              <Route path="/fetch-test" element={<FetchTest />} />
-              <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} currentUser={currentUser}/>} />
-              <Route path="/home" element={<Home currentUser={currentUser}/>} />
-              <Route path="/profile" element={<UserProfile currentUser={currentUser}/>} />
-              <Route path="/ai-picks" element={<AIPicks movies={movies} tvs={tvs} currentUser={currentUser}/>} />
-              {movies.map((movie) => (
-                <Route key={movie.id} path={`/Movie${movie.id}`} element={<MovieInfo movie={movie} />} />
-              ))}
-              {tvs.map((tv) => (
-                <Route key={tv.id} path={`/TV Show${tv.id}`} element={<TvInfo tv={tv} />} />
-              ))}
-              <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser}/>} />
-              <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser}/>} />
-              <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser}/>} /> 
-              <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
-              <Route path="/all-users" element={<AllUsersPage onFollow={handleFollow} onUnfollow={handleUnfollow} currentUser={currentUser}/>} /> 
-              <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser}/>} />
-            </Routes>
-          </Scrollbar>
-        </div>
-        {user && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
-      </div>
-    </ListsProvider>
-  );
 };
