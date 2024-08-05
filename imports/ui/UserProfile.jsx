@@ -1,9 +1,10 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Meteor } from 'meteor/meteor';
 import ContentList from './ContentList';
 import ProfileCard from './ProfileCard';
 import { useTracker } from 'meteor/react-meteor-data';
 import { ListCollection } from '../db/List';
+import { RatingCollection } from '../db/Rating';
 import ListDisplay from './ListDisplay';
 
 export default function UserProfile() {
@@ -15,17 +16,22 @@ export default function UserProfile() {
     return null;
   }, []);
 
-  const { lists, subscribedLists, followUser, unfollowUser } = useTracker(() => {
+  const { lists, subscribedLists, followUser, unfollowUser, ratings, loading } = useTracker(() => {
     const listsHandler = Meteor.subscribe('userLists', Meteor.userId());
     const subscribedHandler = Meteor.subscribe('subscribedLists', Meteor.userId());
+    const ratingsHandler = Meteor.subscribe('userRatings', Meteor.userId());
+
     const lists = ListCollection.find({ userId: Meteor.userId() }).fetch();
     const subscribedLists = ListCollection.find({
       subscribers: { $in: [Meteor.userId()] }
     }).fetch();
+    const ratings = RatingCollection.find({ userId: Meteor.userId() }).fetch();
+
     return {
       lists,
       subscribedLists,
-      loading: !listsHandler.ready() && !subscribedHandler.ready(),
+      ratings,
+      loading: !listsHandler.ready() || !subscribedHandler.ready() || !ratingsHandler.ready(),
     };
   }, []);
 
@@ -36,6 +42,11 @@ export default function UserProfile() {
   const toWatchList = userLists.find((list) => list.listType === 'To Watch');
   const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
 
+  const getUserRatingForContent = (contentId) => {
+    const rating = ratings.find(r => r.contentId === contentId);
+    return rating ? rating.rating : 0;
+  };
+
   useEffect(() => {
     if (currentUser) {
       Meteor.call('isFollowing', currentUser._id, (error, result) => {
@@ -45,16 +56,6 @@ export default function UserProfile() {
       });
     }
   }, [currentUser]);
-
-  const handleLogout = () => {
-    Meteor.logout((error) => {
-      if (error) {
-        console.error('Logout failed', error);
-      } else {
-        console.log('User logged out successfully');
-      }
-    });
-  };
 
   const userProfile = currentUser
     ? {
@@ -78,8 +79,32 @@ export default function UserProfile() {
         showFollowButton={false}
       />
       <div className="p-6">
-        {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} />}
-        {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} />}
+        {favouritesList && (
+          <ContentList
+            key={favouritesList._id}
+            list={{
+              ...favouritesList,
+              content: favouritesList.content.map(item => ({
+                ...item,
+                rating: getUserRatingForContent(item.contentId),
+                isUserSpecificRating: true
+              }))
+            }}
+          />
+        )}
+        {toWatchList && (
+          <ContentList
+            key={toWatchList._id}
+            list={{
+              ...toWatchList,
+              content: toWatchList.content.map(item => ({
+                ...item,
+                rating: getUserRatingForContent(item.contentId),
+                isUserSpecificRating: true
+              }))
+            }}
+          />
+        )}
         <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />
         <ListDisplay heading="Subscribed Watchlists" listData={subscribedLists} />
       </div>

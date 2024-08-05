@@ -8,7 +8,9 @@ import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';
 import { ListCollection } from "../db/List";
 import { getImageUrl } from "./imageUtils";
-import Scrollbar from './ScrollBar'; // Import the Scrollbar component
+import Scrollbar from './ScrollBar';
+import { FaUser, FaGlobe } from "react-icons/fa";
+import { RatingCollection } from "../db/Rating";
 
 const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const popupRef = useRef(null);
@@ -23,22 +25,36 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const [listToDelete, setListToDelete] = useState(null);
   const [selectedTab, setSelectedTab] = useState('all'); // Track selected tab
   const [imageStyles, setImageStyles] = useState({});
-  const navigate = useNavigate();
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [globalRatings, setGlobalRatings] = useState({});
+  const navigate = useNavigate();
 
-  // Subscribe to the list and the user's subscriptions
-  const { list, loading } = useTracker(() => {
+  const { list, loading, ratings } = useTracker(() => {
     const listHandle = Meteor.subscribe('userLists', listId);
     const subscribedListHandle = Meteor.subscribe('subscribedLists', Meteor.userId());
+    const ratingsHandle = Meteor.subscribe('userRatings', Meteor.userId());
 
     const list = ListCollection.findOne({ _id: listId }) || {};
-    const loading = !listHandle.ready() || !subscribedListHandle.ready();
+    const ratings = RatingCollection.find({ userId: list.userId }).fetch();
+    const loading = !listHandle.ready() || !subscribedListHandle.ready() || !ratingsHandle.ready();
 
-    return { list, loading };
+    return { list, loading, ratings };
   }, [listId]);
 
+  const isListOwner = list.userId === Meteor.userId();
+
   useEffect(() => {
-    // Check if the current user is subscribed to the list
+    // Fetch global ratings using the Meteor method
+    Meteor.call('ratings.getGlobalAverages', (error, result) => {
+      if (!error) {
+        setGlobalRatings(result);
+      } else {
+        console.error("Error fetching global ratings:", error);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     if (list.subscribers && Array.isArray(list.subscribers)) {
       const isSubscribed = list.subscribers.includes(Meteor.userId());
       setIsSubscribed(isSubscribed);
@@ -187,6 +203,21 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     }
   };
 
+  const getRatingForContent = (contentId) => {
+    if (isListOwner) {
+      const userRating = ratings.find(r => r.contentId === contentId);
+      return {
+        rating: userRating ? userRating.rating : 0,
+        isUserSpecificRating: !!userRating
+      };
+    } else {
+      return {
+        rating: globalRatings[contentId]?.average || 0,
+        isUserSpecificRating: false
+      };
+    }
+  };
+
   const filteredContent = list.content?.filter(item =>
     selectedTab === 'all' ||
     (selectedTab === 'movies' && item.type === 'Movie') ||
@@ -251,69 +282,79 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
           ))}
         </div>
         <Scrollbar className="space-y-8 max-h-[calc(100vh-10rem)]">
-          {filteredContent.map((item) => (
-            <div key={item.contentId} className="block relative">
-              <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
-                <div className="relative">
-                  <img
-                    src={getImageUrl(item.background_url)}
-                    alt={item.title}
-                    className="cursor-pointer"
-                    style={imageStyles[item.contentId] || {}}
-                    onLoad={(e) => handleImageLoad(e, item.contentId)}
-                    onClick={() => handleRedirect(item.type, item.contentId)}
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60" style={{ pointerEvents: 'none' }}>
-                    <div className="absolute bottom-4 left-4 text-white" style={{ pointerEvents: 'auto' }}>
-                      <h3 className="text-xl font-bold ml-1">{item.title}</h3>
-                      <RatingStar totalStars={5} rating={item.user_rating || 0} />
+          {filteredContent.map((item) => {
+            const { rating = 0, isUserSpecificRating = false } = getRatingForContent(item.contentId);
+            return (
+              <div key={item.contentId} className="block relative">
+                <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
+                  <div className="relative">
+                    <img
+                      src={getImageUrl(item.background_url)}
+                      alt={item.title}
+                      className="cursor-pointer"
+                      style={imageStyles[item.contentId] || {}}
+                      onLoad={(e) => handleImageLoad(e, item.contentId)}
+                      onClick={() => handleRedirect(item.type, item.contentId)}
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60" style={{ pointerEvents: 'none' }}>
+                      <div className="absolute bottom-4 left-4 text-white" style={{ pointerEvents: 'auto' }}>
+                        <h3 className="text-xl font-bold ml-0">{item.title}</h3>
+                        <div className="flex items-center">
+                          {isUserSpecificRating ? (
+                            <FaUser className="mr-1 text-blue-500" />
+                          ) : (
+                            <FaGlobe className="mr-1 text-green-500" />
+                          )}
+                          <RatingStar totalStars={5} rating={rating} />
+                        </div>
+                      </div>
+                      <button
+                        className="absolute bottom-4 right-4 text-white text-2xl"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleExpandClick(item.contentId, item.title);
+                        }}
+                        style={{ pointerEvents: 'auto' }}
+                      >
+                        {expandedItem === item.contentId ? <FaChevronUp /> : <FaChevronDown />}
+                      </button>
+                      <button
+                        className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          confirmRemoveContent(item.contentId);
+                        }}
+                        title="Remove from List"
+                        style={{ pointerEvents: 'auto' }}
+                      >
+                        <FiTrash2 />
+                      </button>
                     </div>
-                    <button
-                      className="absolute bottom-4 right-4 text-white text-2xl"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleExpandClick(item.contentId, item.title);
-                      }}
-                      style={{ pointerEvents: 'auto' }}
-                    >
-                      {expandedItem === item.contentId ? <FaChevronUp /> : <FaChevronDown />}
-                    </button>
-                    <button
-                      className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        confirmRemoveContent(item.contentId);
-                      }}
-                      title="Remove from List"
-                      style={{ pointerEvents: 'auto' }}
-                    >
-                      <FiTrash2 />
-                    </button>
                   </div>
                 </div>
+                {expandedItem === item.contentId && (
+                  <div className="mt-4 p-4 bg-gray-900 rounded-lg">
+                    {loadingDetails[item.contentId] ? (
+                      <p>Loading...</p>
+                    ) : errorDetails[item.contentId] ? (
+                      <p>Error loading details.</p>
+                    ) : contentDetails[item.contentId] ? (
+                      <>
+                        <p>
+                          <strong>Synopsis:</strong> {contentDetails[item.contentId].overview}
+                        </p>
+                        <p>
+                          <strong>Director:</strong> Example Director
+                        </p>
+                      </>
+                    ) : (
+                      <p>No details available.</p>
+                    )}
+                  </div>
+                )}
               </div>
-              {expandedItem === item.contentId && (
-                <div className="mt-4 p-4 bg-gray-900 rounded-lg">
-                  {loadingDetails[item.contentId] ? (
-                    <p>Loading...</p>
-                  ) : errorDetails[item.contentId] ? (
-                    <p>Error loading details.</p>
-                  ) : contentDetails[item.contentId] ? (
-                    <>
-                      <p>
-                        <strong>Synopsis:</strong> {contentDetails[item.contentId].overview}
-                      </p>
-                      <p>
-                        <strong>Director:</strong> Example Director
-                      </p>
-                    </>
-                  ) : (
-                    <p>No details available.</p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </Scrollbar>
       </div>
       <div className="z-50">

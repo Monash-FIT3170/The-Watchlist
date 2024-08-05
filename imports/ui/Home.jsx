@@ -1,9 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import Favourites from './Favourites';
-import ToWatch from './ToWatch';
+import React from 'react';
+import { useTracker } from 'meteor/react-meteor-data';
 import ProfileDropdown from './ProfileDropdown';
+import HomeList from './HomeList';
+import { RatingCollection } from '../db/Rating';
+import { FaUser } from "react-icons/fa";
+import { ListCollection } from '../db/List';
 
-const Home = ({ lists, currentUser }) => {
+const Home = ({ currentUser }) => {
+  const { lists, ratings, loading } = useTracker(() => {
+    const userId = Meteor.userId();
+    const listsHandle = Meteor.subscribe('userLists', userId);
+    const ratingsHandle = Meteor.subscribe('userRatings', userId);
+
+    const lists = ListCollection.find({ userId }).fetch();
+    const ratings = RatingCollection.find({ userId }).fetch();
+    const loading = !listsHandle.ready() || !ratingsHandle.ready();
+
+    return { lists, ratings, loading };
+  }, []);
+
+  const getUserRatingForContent = (contentId) => {
+    const rating = ratings.find(r => r.contentId === contentId);
+    return rating ? rating.rating : 0;
+  };
+
+  const favouritesList = lists.filter(list => list.listType === 'Favourite');
+  const toWatchList = lists.filter(list => list.listType === 'To Watch');
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex justify-between overflow-hidden">
@@ -11,13 +37,33 @@ const Home = ({ lists, currentUser }) => {
         <ProfileDropdown user={currentUser} />
       </div>
       <div className="w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center overflow-hidden">
-        <Favourites lists={lists} />
+        <HomeList
+          title="Favourites"
+          lists={favouritesList.map(list => ({
+            ...list,
+            content: list.content.map(item => ({
+              ...item,
+              rating: getUserRatingForContent(item.contentId),
+              isUserSpecificRating: true
+            }))
+          }))}
+        />
       </div>
       <div className="mx-5 w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center overflow-hidden">
-        <ToWatch lists={lists} />
+        <HomeList
+          title="To Watch"
+          lists={toWatchList.map(list => ({
+            ...list,
+            content: list.content.map(item => ({
+              ...item,
+              rating: getUserRatingForContent(item.contentId),
+              isUserSpecificRating: true
+            }))
+          }))}
+        />
       </div>
     </div>
   );
-}  
+};
 
 export default Home;

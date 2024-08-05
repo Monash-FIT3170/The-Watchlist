@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ContentList from './ContentList.jsx';
 import Scrollbar from './ScrollBar';
 import ProfileDropdown from './ProfileDropdown.jsx';
@@ -8,6 +8,7 @@ export default function AIPicks({ movies, tvs, currentUser }) {
     const DISPLAY_MOVIES = "Display Movie";
     const DISPLAY_SHOWS = "Display Show";
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
+    const [globalRatings, setGlobalRatings] = useState({});
 
     const genres = [
         "Action", "Adventure", "Animation", "Anime", "Awards Show", "Children",
@@ -18,12 +19,27 @@ export default function AIPicks({ movies, tvs, currentUser }) {
         "Thriller", "Travel", "War", "Western"
     ];
 
+    useEffect(() => {
+        // Call the Meteor method to fetch global ratings
+        Meteor.call('ratings.getGlobalAverages', (error, result) => {
+            if (!error) {
+                setGlobalRatings(result);
+            } else {
+                console.error("Error fetching global ratings:", error);
+            }
+        });
+    }, []);
+
     let movieContentLists = genres.map(genre => {
         const genreMovies = movies.filter(item => item.genres.includes(genre)).slice(0, 10);
         return {
             listId: genre + "Movies",
             title: genre,
-            content: genreMovies
+            content: genreMovies.map(movie => ({
+                ...movie,
+                rating: globalRatings[movie.id]?.average || 0,
+                isUserSpecificRating: false
+            }))
         };
     });
 
@@ -32,7 +48,11 @@ export default function AIPicks({ movies, tvs, currentUser }) {
         return {
             listId: genre + "Shows",
             title: genre,
-            content: genreShows
+            content: genreShows.map(tv => ({
+                ...tv,
+                rating: globalRatings[tv.id]?.average || 0,
+                isUserSpecificRating: false
+            }))
         };
     });
 
@@ -51,7 +71,6 @@ export default function AIPicks({ movies, tvs, currentUser }) {
                     </div>
                 ))}
             </Scrollbar>
-
         </div>
     );
 }

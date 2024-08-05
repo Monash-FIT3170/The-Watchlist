@@ -50,7 +50,15 @@ const ContentList = ({ list }) => {
       </div>
       <div ref={containerRef} className="flex justify-flex-start items-start overflow-hidden">
         {React.Children.toArray(list.content.map((item, index) => (
-          <ContentItem key={index} id={item.contentId} type={item.type} src={getImageUrl(item.image_url)} alt={item.title} rating={4} />
+          <ContentItem 
+            key={index} 
+            id={item.contentId} 
+            type={item.type} 
+            src={getImageUrl(item.image_url)} 
+            alt={item.title} 
+            rating={item.rating} 
+            isUserSpecificRating={item.isUserSpecificRating}
+          />
         ))).slice(0, visibleContentCount)}
       </div>
       {isPopupOpen && selectedList && (

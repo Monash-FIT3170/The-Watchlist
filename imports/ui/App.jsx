@@ -21,7 +21,6 @@ import LoginPage from './LoginPage';
 import UserProfilePage from './UserProfilePage';
 import FollowersFollowingPage from "./FollowersFollowingPage.jsx";
 import AllUsersPage from "./AllUsersPage.jsx";
-import UserRatingsPage from "./UserRatingsPage.jsx";
 import AllRatedContentPage from "./AllRatedContentPage.jsx";
 import Loading from "./Loading.jsx";
 import { ListCollection } from '../db/List';

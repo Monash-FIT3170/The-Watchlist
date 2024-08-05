@@ -24,6 +24,18 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
     const lists = useTracker(fetchLists, []);
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [globalRatings, setGlobalRatings] = useState({});
+
+    useEffect(() => {
+        // Fetch global ratings using the Meteor method
+        Meteor.call('ratings.getGlobalAverages', (error, result) => {
+            if (!error) {
+                setGlobalRatings(result);
+            } else {
+                console.error("Error fetching global ratings:", error);
+            }
+        });
+    }, []);
 
     const fetchUsers = useCallback(() => {
         Meteor.subscribe('allUsers');
@@ -38,11 +50,17 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
         setSearchTerm(e.target.value.toLowerCase());
     };
 
-    const filteredMovies = movies.filter(movie =>
+    const filteredMovies = movies.map(movie => ({
+        ...movie,
+        rating: globalRatings[movie.id]?.average || 0
+    })).filter(movie =>
         movie.title && movie.title.toLowerCase().includes(searchTerm)
     );
 
-    const filteredTVShows = tvs.filter(tv =>
+    const filteredTVShows = tvs.map(tv => ({
+        ...tv,
+        rating: globalRatings[tv.id]?.average || 0
+    })).filter(tv =>
         tv.title && tv.title.toLowerCase().includes(searchTerm)
     );
 

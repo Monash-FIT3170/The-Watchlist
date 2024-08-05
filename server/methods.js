@@ -245,3 +245,59 @@ Meteor.methods({
   }
 });
 
+Meteor.methods({
+  'ratings.getAverage'({ contentId, contentType }) {
+    check(contentId, Number);
+    check(contentType, String);
+
+    // Fetch all ratings for the given content
+    const ratings = RatingCollection.find({ contentId, contentType }).fetch();
+
+    if (ratings.length === 0) {
+      return 0; // Return 0 if no ratings exist
+    }
+
+    // Calculate the average rating
+    const totalRatings = ratings.reduce((sum, rating) => sum + rating.rating, 0);
+    const averageRating = totalRatings / ratings.length;
+
+    return averageRating;
+  },
+});
+
+Meteor.methods({
+  'ratings.getUserRating'({ userId, contentId, contentType }) {
+    check(userId, String);
+    check(contentId, Number);
+    check(contentType, String);
+
+    // Fetch the user's rating for the given content
+    const rating = RatingCollection.findOne({ userId, contentId, contentType });
+
+    return rating ? rating.rating : null; // Return null if no rating exists
+  },
+});
+
+// In methods.js
+Meteor.methods({
+  'ratings.getGlobalAverages'() {
+    const ratings = RatingCollection.find().fetch();
+    const ratingMap = ratings.reduce((acc, rating) => {
+        if (!acc[rating.contentId]) {
+            acc[rating.contentId] = {
+                count: 0,
+                total: 0
+            };
+        }
+        acc[rating.contentId].count += 1;
+        acc[rating.contentId].total += rating.rating;
+        return acc;
+    }, {});
+
+    for (const id in ratingMap) {
+        ratingMap[id].average = (ratingMap[id].total / ratingMap[id].count).toFixed(2);
+    }
+
+    return ratingMap;
+  }
+});
