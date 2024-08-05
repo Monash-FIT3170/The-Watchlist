@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ContentList from './ContentList.tsx';
+import ContentList from './ContentList.jsx';
 import Scrollbar from './ScrollBar';
 import ProfileDropdown from './ProfileDropdown.jsx';
 import AIPicksHeader from './AIPicksHeader.jsx';

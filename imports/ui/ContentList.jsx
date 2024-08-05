@@ -5,26 +5,9 @@ import usePopup from './usePopup';
 import ListPopup from './ListPopup';
 import { getImageUrl } from './imageUtils';
 
-interface ContentItemData {
-  image_url: string;  // Use image_url instead of src
-  title: string;      // Use title as the alt text description
-  rating: number;
-  contentId: number;
-  type: string;
-  background_url: string
-}
-
-interface ContentListProps {
-  list: {
-    listId: string;
-    title: string;
-    content: ContentItemData[];
-  };
-}
-
-const ContentList: React.FC<ContentListProps> = ({ list }) => {
+const ContentList = ({ list }) => {
   const navigate = useNavigate();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef(null);
   const [visibleContentCount, setVisibleContentCount] = useState(0);
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
 
@@ -72,7 +55,7 @@ const ContentList: React.FC<ContentListProps> = ({ list }) => {
       </div>
       {isPopupOpen && selectedList && (
         <ListPopup
-          list={selectedList}
+          listId={selectedList._id}
           onClose={handleClosePopup}
           onDeleteList={() => console.log("Delete list")}
           onRenameList={() => console.log("Rename list")}
