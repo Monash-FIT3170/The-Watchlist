@@ -5,6 +5,7 @@ import os
 import requests
 import threading
 from datetime import datetime
+import argparse
 from dotenv import load_dotenv
 from json_stream.writer import streamable_list 
 
@@ -103,6 +104,34 @@ def process_movies(data, num_lines):
                 movie_data["image_url"] = IMAGE_ROOT + images.get("posters")[0]["file_path"]
         
         yield movie_data
+        
+@streamable_list
+def process_tv(data, num_lines):
+    i = 0
+    # Read each line and parse it as JSON (each line of the file is valid JSON, the entire file is not)
+    for tv_line in data:
+
+        if i % 100 == 0:
+            print(f"[{i}/{num_lines}]")
+        
+        i += 1
+        initial_data = json.loads(tv_line)
+        #print(initial_data)
+
+        tv_data = {
+            "id": initial_data.get("id"),
+            "title": initial_data.get("original_title"),
+            "popularity": initial_data.get("popularity")
+        }
+
+        # Retrieve the movie details and artwork via one request using the append_to_response query parameter
+        request_url = f"/tv/{initial_data.get('id')}"
+
+        data = make_request(request_url)
+        print(data)
+        
+        if data is None: continue
+
 
 
 
@@ -116,38 +145,44 @@ def process_movie_set(outfile, data, num_line_count):
         
 
 
-def process_all_tv_shows():
-    pass
-
-
-if __name__ == "__main__":
-    load_dotenv()
-
-    # Change the filename to process here
-    # filename = "movie_ids_07_28_2024.json" # initial dataset
-    filename = "missing-data.json" # smaller dataset of movies that got corrupted
-
-    if not os.environ['THEMOVIEDB_ACCESS_TOKEN']:
-        print("THEMOVIEDB_ACCESS_TOKEN environment variable is not set. Exiting.")
-        os.exit(-1)
-
+def process_tv_set(outfile, data, num_line_count):
+    tv_output = open(f"{os.getcwd()}/data/{outfile}", "w", encoding="utf8")
+    all_data = process_tv(data, num_line_count)
+    json.dump(all_data, tv_output, indent=4)
+    
+    tv_output.close()
+    
+    
+def read_file(filename):
+    """
+    Reads the specified file, returning a tuple containing an array of each line as well as the number of lines in the file.
+    """
     with open(filename, "rb") as f:
         num_lines = sum(1 for _ in f)
 
     with open(filename, encoding='utf8') as f:
-        movie_file = [line for line in f]
+        file_lines = [line for line in f]
+        
+    return (file_lines, num_lines)
 
-    threads = []
+def begin_threads(dataset, num_lines, target_func, filename):
+    """
+    Spawns 40 threads using the specified target and filename. The name will have the file index appended.
+    Example target: process_movie_set (function reference)
+    Example filename: movie-out
+    """
     
+    threads = []
     per_thread_count = int(num_lines / 40)
-
     for i in range(0, 40):
         start_id = int(i * per_thread_count)
         end_id = int(((i+1) * per_thread_count) - 1)
+        
+        args = (f"{filename}-{i}.json", dataset[start_id:end_id], per_thread_count)
 
         print(start_id)
         print(end_id)
-        t = threading.Thread(target=process_movie_set, args=(f"movie-out-{i}.json", movie_file[start_id:end_id], per_thread_count))
+        t = threading.Thread(target=target_func, args=args)
         threads.append(t)
 
     for thread in threads:
@@ -155,4 +190,31 @@ if __name__ == "__main__":
 
     for thread in threads:
         thread.join()
+    
+    
+def begin_movie():
+    # Change the filename to process here
+    # filename = "movie_ids_07_28_2024.json" # initial dataset
+    filename = "missing-data.json" # smaller dataset of movies that got corrupted
+    
+    (movie_file, num_lines) = read_file(filename)
+    
+    begin_threads(movie_file, num_lines, target_func=process_movie_set, filename="movie-out")
+    
+
+if __name__ == "__main__":
+    load_dotenv()
+
+    if not os.environ['THEMOVIEDB_ACCESS_TOKEN']:
+        print("THEMOVIEDB_ACCESS_TOKEN environment variable is not set. Exiting.")
+        os.exit(-1)
+        
+    parser = argparse.ArgumentParser("data-ingestion")
+    parser.add_argument("type", choices=["tv", "movie"])
+    args = parser.parse_args()        
+
+
+   
+
+    
     #process_all_movies()
