@@ -10,8 +10,15 @@ import { Mongo } from 'meteor/mongo';
 import dotenv from 'dotenv';
 import './methods.js'; 
 import './publications.js'; 
+import { ServiceConfiguration } from 'meteor/service-configuration';
 
 dotenv.config();
+
+const githubClientId = Meteor.settings.private.github.clientId;
+const githubClientSecret = Meteor.settings.private.github.clientSecret;
+
+const googleClientId = Meteor.settings.private.google.clientId;
+const googleClientSecret = Meteor.settings.private.google.clientSecret;
 
 Meteor.startup(() => {
     // Define or use an existing collection
