@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AllUsersPage from './AllUsersPage';
+import { AiOutlineSearch } from 'react-icons/ai';
 
 const FollowersFollowingPage = ({ currentUser }) => {
-  const { userId, type } = useParams(); 
+  const { userId, type } = useParams();
   const [usersList, setUsersList] = useState([]);
-  const [sortOption, setSortOption] = useState('alphabetical'); 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); 
+  const [sortOption, setSortOption] = useState('alphabetical');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchUsers(); // Fetch users when the component mounts or when userId/type changes
@@ -49,9 +51,14 @@ const FollowersFollowingPage = ({ currentUser }) => {
     });
   };
 
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
   const sortUsers = (users, option) => {
+    const filteredUsers = users.filter(user => user.username.toLowerCase().includes(searchTerm.toLowerCase()));
     if (option === 'alphabetical') {
-      return [...users].sort((a, b) => {
+      return [...filteredUsers].sort((a, b) => {
         const nameA = a.name || ''; // Fallback to an empty string if name is undefined
         const nameB = b.name || ''; // Fallback to an empty string if name is undefined
         return nameA.localeCompare(nameB);
@@ -73,8 +80,8 @@ const FollowersFollowingPage = ({ currentUser }) => {
           </h1>
         </div>
         <div className="relative border border-solid rounded-full px-4 py-2 focus:bg-magenta">
-          <button 
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)} 
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="text-sm text-white"
           >
             Sort by
@@ -103,11 +110,26 @@ const FollowersFollowingPage = ({ currentUser }) => {
           )}
         </div>
       </div>
-
+      {/* Search Bar */}
+      <div className="flex items-center justify-start mb-8 space-x-7 w-full max-w-xl mt-4 ml-1">
+        <div className="relative flex-grow">
+          <input
+            type="text"
+            className="rounded-full bg-dark border border-gray-300 pl-10 pr-3 py-3 w-full focus:border-custom-border"
+            placeholder="Search for users..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+            <AiOutlineSearch className="text-gray-400" size={20} />
+          </span>
+        </div>
+      </div>
+      {/* Users */}
       <div className="mt-8">
         {/* Conditionally render AllUsersPage based on the users list */}
         {sortedUsersList.length > 0 ? (
-          <AllUsersPage 
+          <AllUsersPage
             currentUser={currentUser}
             users={sortedUsersList}
             onFollow={handleFollow}
