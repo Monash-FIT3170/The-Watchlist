@@ -11,6 +11,7 @@ import { getImageUrl } from "./imageUtils";
 import Scrollbar from './ScrollBar';
 import { FaUser, FaGlobe } from "react-icons/fa";
 import { RatingCollection } from "../db/Rating";
+import ContentItem from "./ContentItem";
 
 const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const popupRef = useRef(null);
@@ -27,6 +28,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const [imageStyles, setImageStyles] = useState({});
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [globalRatings, setGlobalRatings] = useState({});
+  const [isGridView, setIsGridView] = useState(false);
   const navigate = useNavigate();
 
   const { list, loading, ratings } = useTracker(() => {
@@ -251,6 +253,13 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
             >
               <FiTrash2 className="text-lg" />
             </button>
+            <button
+              onClick={() => setIsGridView(!isGridView)}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold p-2 rounded-full"
+              title={isGridView ? "Switch to List View" : "Switch to Grid View"}
+            >
+              {isGridView ? "List View" : "Grid View"}
+            </button>
             {/* Conditionally render subscribe/unsubscribe button */}
             {list.userId !== Meteor.userId() && (
               <button
@@ -281,81 +290,74 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
             </div>
           ))}
         </div>
-        <Scrollbar className="space-y-8 max-h-[calc(100vh-10rem)]">
+        <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
           {filteredContent.map((item) => {
             const { rating = 0, isUserSpecificRating = false } = getRatingForContent(item.contentId);
             return (
-              <div key={item.contentId} className="block relative">
-                <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
-                  <div className="relative">
-                    <img
-                      src={getImageUrl(item.background_url)}
-                      alt={item.title}
-                      className="cursor-pointer"
-                      style={imageStyles[item.contentId] || {}}
-                      onLoad={(e) => handleImageLoad(e, item.contentId)}
-                      onClick={() => handleRedirect(item.type, item.contentId)}
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60" style={{ pointerEvents: 'none' }}>
-                      <div className="absolute bottom-4 left-4 text-white" style={{ pointerEvents: 'auto' }}>
-                        <h3 className="text-xl font-bold ml-0">{item.title}</h3>
-                        <div className="flex items-center">
-                          {isUserSpecificRating ? (
-                            <FaUser className="mr-1 text-blue-500" />
-                          ) : (
-                            <FaGlobe className="mr-1 text-green-500" />
-                          )}
-                          <RatingStar totalStars={5} rating={rating} />
+              <div key={item.contentId} className={isGridView ? '' : 'block relative'}>
+                {isGridView ? (
+                  <ContentItem
+                    id={item.contentId}
+                    type={item.type}
+                    src={getImageUrl(item.image_url)}
+                    alt={item.title}
+                    rating={rating}
+                    isUserSpecificRating={isUserSpecificRating}
+                  />
+                ) : (
+                  <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
+                    <div className="relative">
+                      <img
+                        src={getImageUrl(item.background_url)}
+                        alt={item.title}
+                        className="cursor-pointer w-full h-48 object-cover rounded-t-lg"
+                        style={imageStyles[item.contentId] || {}}
+                        onLoad={(e) => handleImageLoad(e, item.contentId)}
+                        onClick={() => handleRedirect(item.type, item.contentId)}
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60" style={{ pointerEvents: 'none' }}>
+                        <div className="absolute bottom-4 left-4 text-white" style={{ pointerEvents: 'auto' }}>
+                          <h3 className="text-xl font-bold">{item.title}</h3>
+                          <div className="flex items-center">
+                            {isUserSpecificRating ? (
+                              <FaUser className="mr-1 text-blue-500" />
+                            ) : (
+                              <FaGlobe className="mr-1 text-green-500" />
+                            )}
+                            <RatingStar totalStars={5} rating={rating} />
+                          </div>
                         </div>
+                        <button
+                          className="absolute bottom-4 right-4 text-white text-2xl"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleExpandClick(item.contentId, item.title);
+                          }}
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          {expandedItem === item.contentId ? <FaChevronUp /> : <FaChevronDown />}
+                        </button>
+                        <button
+                          className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            confirmRemoveContent(item.contentId);
+                          }}
+                          title="Remove from List"
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          <FiTrash2 />
+                        </button>
                       </div>
-                      <button
-                        className="absolute bottom-4 right-4 text-white text-2xl"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleExpandClick(item.contentId, item.title);
-                        }}
-                        style={{ pointerEvents: 'auto' }}
-                      >
-                        {expandedItem === item.contentId ? <FaChevronUp /> : <FaChevronDown />}
-                      </button>
-                      <button
-                        className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          confirmRemoveContent(item.contentId);
-                        }}
-                        title="Remove from List"
-                        style={{ pointerEvents: 'auto' }}
-                      >
-                        <FiTrash2 />
-                      </button>
                     </div>
-                  </div>
-                </div>
-                {expandedItem === item.contentId && (
-                  <div className="mt-4 p-4 bg-gray-900 rounded-lg">
-                    {loadingDetails[item.contentId] ? (
-                      <p>Loading...</p>
-                    ) : errorDetails[item.contentId] ? (
-                      <p>Error loading details.</p>
-                    ) : contentDetails[item.contentId] ? (
-                      <>
-                        <p>
-                          <strong>Synopsis:</strong> {contentDetails[item.contentId].overview}
-                        </p>
-                        <p>
-                          <strong>Director:</strong> Example Director
-                        </p>
-                      </>
-                    ) : (
-                      <p>No details available.</p>
-                    )}
                   </div>
                 )}
               </div>
             );
           })}
         </Scrollbar>
+
+
       </div>
       <div className="z-50">
         {isRenameModalOpen && (
