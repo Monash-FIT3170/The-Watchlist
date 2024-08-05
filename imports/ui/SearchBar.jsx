@@ -177,9 +177,9 @@ const SearchBar = ({ movies, tvs }) => {
     };
 
     return (
-        <div className="flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
+        <div className="flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full ">
             <form className="flex flex-col items-start w-full pl-2">
-                <div className="flex justify-between items-center w-full max-w-xl">
+                <div className="flex justify-between w-full max-w-l px-20">
                     <div className="relative flex-grow">
                         <input
                             type="text"
