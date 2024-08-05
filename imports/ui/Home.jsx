@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Favourites from './Favourites';
-import ToWatch from './ToWatch';
 import ProfileDropdown from './ProfileDropdown';
+import HomeList from './HomeList';
 
 const Home = ({ lists, currentUser }) => {
 
@@ -11,10 +10,10 @@ const Home = ({ lists, currentUser }) => {
         <ProfileDropdown user={currentUser} />
       </div>
       <div className="w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center overflow-hidden">
-        <Favourites lists={lists} />
+        <HomeList lists={lists} title="Favourites" listType="Favourite" />
       </div>
       <div className="mx-5 w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center overflow-hidden">
-        <ToWatch lists={lists} />
+        <HomeList lists={lists} title="To Watch" listType="To Watch" />
       </div>
     </div>
   );
