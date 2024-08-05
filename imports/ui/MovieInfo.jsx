@@ -103,13 +103,31 @@ const MovieInfo = ({ movie, initialLists }) => {
                         </div>
                     </div>
                     <div className="flex flex-col items-start w-1/2 h-full overflow-y-auto px-0 py-4">
-                        <h1 className="text-6xl font-bold text-center">{movie.title} ({movie.release_year})</h1>
-                        <p className="text-2xl font-semibold text-center mt-5">SYNOPSIS</p>
-                        <p className="text-lg text-left max-w-xl mt-5">{movie.overview}</p>
-                        <p className="text-2xl font-semibold text-center mt-5">RUNTIME</p>
-                        <p className="text-lg font-bold text-center mt-5"> {movie.runtime}</p>
-                        <p className="text-2xl font-semibold text-center mt-5">RATING</p>
-                        <p className="text-lg font-bold text-center mt-5"> {rating ? `${rating}/5 (${totalRatings})` : "Not Yet Rated"}</p>
+                        <h1 className="text-6xl font-bold text-center w-full">{movie.title} ({movie.release_year})</h1>
+                        <div className="flex justify-center items-center w-full mt-5">
+                            <div className="flex items-center mx-2">
+                                <p className="text-2xl font-semibold">Watchlist Rating</p>
+                                <p className="text-lg font-bold flex items-center ml-2">
+                                    <FaStar className="text-yellow-500 mr-1" />
+                                    {rating ? `${rating}/5` : "Not Yet Rated"} <span className="text-sm text-gray-400 ml-2">({totalRatings} users)</span>
+                                </p>
+                            </div>
+                            <div className="flex items-center mx-2">
+                                <p className="text-2xl font-semibold">Your Rating</p>
+                                <p className="text-lg font-bold flex items-center ml-2">
+                                    <FaStar className="text-yellow-500 mr-1" />
+                                    {userRating ? `${userRating}/5` : "Not Yet Rated"}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="w-full mt-5">
+                            <p className="text-2xl font-semibold text-center">SYNOPSIS</p>
+                            <p className="text-lg text-left max-w-xl mt-5">{movie.overview}</p>
+                        </div>
+                        <div className="w-full mt-5">
+                            <p className="text-2xl font-semibold text-center">RUNTIME</p>
+                            <p className="text-lg font-bold text-center mt-5">{movie.runtime} minutes</p>
+                        </div>
                     </div>
                 </div>
             </div>
