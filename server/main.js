@@ -25,6 +25,27 @@ Meteor.startup(() => {
             console.log('Successfully inserted document:', result);
         }
     });
+    ServiceConfiguration.configurations.upsert(
+        { service: 'github' },
+        {
+            $set: {
+                loginStyle: 'popup',
+                clientId: githubClientId, // Replace with your GitHub Client ID
+                secret: githubClientSecret // Replace with your GitHub Client Secret
+            }
+        }
+    );
+    // Configuration for Google
+    ServiceConfiguration.configurations.upsert(
+        { service: 'google' },
+        {
+            $set: {
+                loginStyle: 'popup',
+                clientId: googleClientId, // Replace with your Google Client ID
+                secret: googleClientSecret // Replace with your Google Client Secret
+            }
+        }
+    );
 
 });
 
