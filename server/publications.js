@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { RatingCollection } from '../imports/db/Rating';
 import { MovieCollection } from '../imports/db/Content';
 import { TVCollection } from '../imports/db/Content';
+import { ListCollection } from '../imports/db/List';
 
 Meteor.publish('userData', function (userId) {
   if (!this.userId) {
@@ -36,12 +37,17 @@ Meteor.publish('allUsers', function () {
   });
 });
 
+// Server-side publication for user-created lists
 Meteor.publish('userLists', function (userId) {
-  return Lists.find({ userId });
+  if (!this.userId || this.userId !== userId) {
+    return this.ready();
+  }
+  return ListCollection.find({ userId });
 });
 
+
 Meteor.publish('userRatings', function (userId) {
-  return Ratings.find({ userId });
+  return RatingCollection.find({ userId });
 });
 
 Meteor.publish('ratedContent', function (userId) {
@@ -68,4 +74,27 @@ Meteor.publish('ratedContent', function (userId) {
     MovieCollection.find({ id: { $in: movieIds } }),
     TVCollection.find({ id: { $in: tvIds } })
   ];
+});
+
+// Server: publications.js
+Meteor.publish('subscribedLists', function (viewedUserId) {
+  if (!this.userId) {
+    return this.ready();
+  }
+
+  return ListCollection.find({
+    subscribers: { $in: [viewedUserId] } // Ensure that we're looking at lists the viewed user has subscribed to
+  }, {
+    fields: {
+      userId: 1,
+      userName: 1,
+      title: 1,
+      description: 1,
+      listType: 1,
+      content: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      subscribers: 1  // Ensure to publish the subscribers field
+    }
+  });
 });

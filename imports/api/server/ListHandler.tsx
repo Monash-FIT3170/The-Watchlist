@@ -62,9 +62,19 @@ const createList: HandlerFunc = {
             throw new Meteor.Error('not-authorized', 'You must be logged in to create a list');
         }
 
+        // Retrieve user information from the database
+        const user = Meteor.users.findOne({_id: this.userId});
+
+        if (!user) {
+            throw new Meteor.Error('not-found', 'User not found');
+        }
+
+        // Choose the user name source here. For simplicity, we're using the 'realName' field.
+        const userName = user.username || "Anonymous"; // Fallback to 'Anonymous' if no name is found
+
         List.insert({
             userId: this.userId,
-            userName: "Determined Dynamically", // TODO: this obviously needs to be changed - determine the user's name dynamically
+            userName: userName, // Use the dynamically determined name
             title,
             description,
             listType,
@@ -73,6 +83,7 @@ const createList: HandlerFunc = {
         return;
     }
 };
+
 
 
 

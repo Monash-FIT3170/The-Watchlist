@@ -5,6 +5,7 @@ import { Rating } from '../imports/db/Rating';
 import { RatingCollection } from '../imports/db/Rating';
 import Lists from '../imports/db/List';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
+import { ListCollection } from '../imports/db/List';
 
 Meteor.methods({
   followUser(targetUserId) {
@@ -155,3 +156,92 @@ Meteor.methods({
     return RatingCollection.find({ userId }).count();
   },
 });
+
+Meteor.methods({
+  'list.subscribe'(listId) {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to subscribe to lists.');
+    }
+
+    const list = ListCollection.findOne({ _id: listId });
+
+    if (!list) {
+      throw new Meteor.Error('not-found', 'List not found.');
+    }
+
+    if (list.userId === this.userId) {
+      throw new Meteor.Error('invalid-action', 'You cannot subscribe to your own list.');
+    }
+
+    const result = ListCollection.update(
+      { _id: listId },
+      { $addToSet: { subscribers: this.userId } }
+    );
+
+    if (result) {
+      return 'Subscribed successfully';
+    } else {
+      throw new Meteor.Error('failed', 'Failed to subscribe to list.');
+    }
+  }
+});
+
+
+// Server-side method to fetch subscribed lists
+Meteor.methods({
+  'list.getSubscribed': function({ userId }) {
+    // Check if the userId is provided
+    if (!userId) {
+      throw new Meteor.Error('invalid-argument', 'You must provide a user ID.');
+    }
+
+    // Check if the user calling the method is logged in
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to access subscribed lists.');
+    }
+
+    // Check if the user is requesting their own subscribed lists
+    if (this.userId !== userId) {
+      throw new Meteor.Error('not-authorized', 'You are not authorized to view other users\' subscribed lists.');
+    }
+
+    // Fetch and return lists where the specified userId is in the subscribers array
+    return Lists.find({
+      subscribers: { $in: [userId] }
+    }, {
+      fields: { title: 1, userName: 1, content: 1 }  // Limit the fields returned for privacy/security
+    }).fetch();
+  }
+});
+
+Meteor.methods({
+  'list.unsubscribe'(listId) {
+    check(listId, String);
+
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to unsubscribe from lists.');
+    }
+
+    const list = ListCollection.findOne({ _id: listId });
+
+    if (!list) {
+      throw new Meteor.Error('not-found', 'List not found.');
+    }
+
+    if (list.userId === this.userId) {
+      throw new Meteor.Error('invalid-action', 'You cannot unsubscribe from your own list.');
+    }
+
+    const result = ListCollection.update(
+      { _id: listId },
+      { $pull: { subscribers: this.userId } }
+    );
+
+    if (result) {
+      return 'Unsubscribed successfully';
+    } else {
+      throw new Meteor.Error('failed', 'Failed to unsubscribe from list.');
+    }
+  }
+});
+

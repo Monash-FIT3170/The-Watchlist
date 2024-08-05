@@ -4,7 +4,8 @@ import { useParams } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
 import ProfileCard from './ProfileCard';
 import ContentList from './ContentList';
-import CustomWatchLists from './CustomWatchLists';
+import { ListCollection } from '../db/List';
+import ListDisplay from './ListDisplay';
 
 const UserProfilePage = () => {
   const { userId } = useParams();
@@ -35,6 +36,23 @@ const UserProfilePage = () => {
     });
   };
 
+  const { lists, subscribedLists, loading } = useTracker(() => {
+    const listsHandler = Meteor.subscribe('userLists', userId); // Subscribe to the lists of the viewed user
+    const subscribedHandler = Meteor.subscribe('subscribedLists', userId); // Subscribe to the lists subscribed by the viewed user
+    const lists = ListCollection.find({ userId: userId }).fetch(); // Fetch lists of the viewed user
+    const subscribedLists = ListCollection.find({
+      subscribers: { $in: [userId] } // Fetch lists where the viewed user is a subscriber
+    }).fetch();
+    return {
+      lists,
+      subscribedLists,
+      loading: !listsHandler.ready() && !subscribedHandler.ready(),
+    };
+  }, [userId]);
+
+
+  
+
   // Use useTracker to subscribe to userData and fetch user details
   const userProfile = useTracker(() => {
     const handler = Meteor.subscribe('userData', userId);
@@ -56,8 +74,6 @@ const UserProfilePage = () => {
     return null;
   }, [userId]);
 
-  console.log("USER PROFILE PAGE.")
-
   useEffect(() => {
     if (userProfile) {
       console.log('Fetching user lists for userId:', userId);
@@ -76,8 +92,6 @@ const UserProfilePage = () => {
   const toWatchList = userLists.find((list) => list.listType === 'To Watch');
   const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
 
-
-  console.log("USER PROFILE")
   console.log(userProfile)
 
   return (
@@ -113,7 +127,8 @@ const UserProfilePage = () => {
               )}
               {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} />}
               {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} />}
-              <CustomWatchLists listData={customWatchlists} />
+              <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />
+              <ListDisplay heading="Subscribed Watchlists" listData={subscribedLists} />
             </div>
           </div>
         </div>

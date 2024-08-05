@@ -2,15 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { AiOutlineSearch, AiOutlineFilter, AiOutlineDown } from 'react-icons/ai';
 import ContentItem from './ContentItem';
 import ListDisplay from './ListDisplay';
-import { useLists } from './ListContext';
+import { useTracker } from 'meteor/react-meteor-data';
+import { ListCollection } from '../db/List';
 import { getImageUrl } from './imageUtils';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList';
-import { useTracker } from 'meteor/react-meteor-data';
 import ProfileDropdown from './ProfileDropdown';
 
 const SearchBar = ({ movies, tvs, currentUser }) => {
-    const { lists } = useLists();
+    // Fetch lists directly from the database using useTracker
+    const { lists, loading } = useTracker(() => {
+        const userId = Meteor.userId();
+        const listsHandle = Meteor.subscribe('userLists', userId);
+        const lists = ListCollection.find({ userId }).fetch();
+        return { lists, loading: !listsHandle.ready() };
+    });
+
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTab, setSelectedTab] = useState('movies');
     const [showFilters, setShowFilters] = useState(false);
@@ -47,12 +54,9 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
     const [filters, setFilters] = useState(dropdownData);
 
     const handleRemoveFilter = (filterKey) => {
-        // Directly reset the selected values based on the expected data type
         if (Array.isArray(filters[filterKey].selected)) {
-            // If it's an array (e.g., genres), reset to an empty array
             setFilters(prev => ({ ...prev, [filterKey]: { ...prev[filterKey], selected: [] } }));
         } else {
-            // If it's a single-select (e.g., sortBy), reset to the default or empty string
             setFilters(prev => ({ ...prev, [filterKey]: { ...prev[filterKey], selected: '' } }));
         }
     };
@@ -66,19 +70,13 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
     };
 
     const handleFilterChange = (filterType, value) => {
-        console.log("handleFilterChange called");
-        console.log("Current Filters State:", filters);
-        console.log("Filter Type:", filterType);
-        console.log("Filters Object for Type:", filters[filterType]);  // Add this to check if it's defined
-        if (filters[filterType] && Array.isArray(filters[filterType].selected)) {  // Also check if filters[filterType] is defined
+        if (filters[filterType] && Array.isArray(filters[filterType].selected)) {
             const updatedSelected = filters[filterType].selected.includes(value)
                 ? filters[filterType].selected.filter(item => item !== value)
                 : [...filters[filterType].selected, value];
             setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: updatedSelected } }));
-        } else if (filters[filterType]) {  // Handle single-select options safely
+        } else if (filters[filterType]) {
             setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: value } }));
-        } else {
-            console.error("Filter type is undefined:", filterType);
         }
     };
 
@@ -115,22 +113,18 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
     };
 
     const applyFilters = (data) => {
-        let filtered = [...data]; // Clone the data array to avoid direct modifications
+        let filtered = [...data];
 
-        // Filter by year if any year is selected
         if (filters.year.selected.length > 0) {
             filtered = filtered.filter(item => filters.year.selected.includes(item.release_year));
         }
 
-        // Filter by genre if any genre is selected and the tab is either 'movies' or 'tv shows'
         if (filters.genres.selected.length > 0 && (selectedTab === 'movies' || selectedTab === 'tv shows')) {
             filtered = filtered.filter(item => {
-                console.log("Checking genres for item:", item);
                 return Array.isArray(item.genres) && item.genres.some(genre => filters.genres.selected.includes(genre));
             });
         }
 
-        // Sorting logic
         if (filters["sort by"].selected) {
             filtered = filtered.sort((a, b) => {
                 if (filters["sort by"].selected === 'rating') {
@@ -150,16 +144,16 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
             movies: applyFilters(movies),
             tvShows: applyFilters(tvs),
             users,
-            lists: applyFilters(lists) // Use lists from context
+            lists: applyFilters(lists)
         };
         setFilteredData(newFilteredData);
-    }, [filters, movies, tvs, lists, users]); // Add lists to dependencies
+    }, [filters, movies, tvs, lists, users]);
 
     const [filteredData, setFilteredData] = useState({
         movies: movies,
         tvShows: tvs,
         users: users,
-        lists: lists  // there will be a similar dummy data array for lists
+        lists: lists
     });
 
     const handleSearchChange = (e) => {
