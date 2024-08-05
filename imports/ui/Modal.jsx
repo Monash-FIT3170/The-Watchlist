@@ -17,6 +17,8 @@ const Modal = ({ show, onClose, content, type }) => {
     return { lists, loading: !listsHandle.ready() };
   });
 
+  const popcornUrl = "./ExampleResources/popcorn.png";
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -73,7 +75,7 @@ const Modal = ({ show, onClose, content, type }) => {
                     <li key={list._id} className="flex items-center justify-between p-2 bg-gray-700 rounded-lg mb-2">
                       <div className="flex items-center">
                         <img
-                          src={list.content[0]?.image_url || './path_to_default_image.jpg'}
+                          src={list.content[0]?.image_url || popcornUrl}
                           alt={list.title}
                           className="w-10 h-10 mr-2.5 rounded-lg"
                         />

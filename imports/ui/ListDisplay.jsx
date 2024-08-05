@@ -18,6 +18,8 @@ export default function ListDisplay({ listData, heading }) { // Added heading as
         rows.push(listData.slice(i, i + itemsPerRow));
     }
 
+    const popcornUrl = "./ExampleResources/popcorn.png";
+
     return (
         <div className="w-full bg-darker px-2 py-5 rounded-lg">
             {/* Conditionally render heading if provided */}
@@ -33,7 +35,7 @@ export default function ListDisplay({ listData, heading }) { // Added heading as
                             className="flex-1 bg-dark min-w-[24%] max-w-[24%] flex items-center rounded-lg hover:bg-less-dark transition-colors duration-150 cursor-pointer"
                         >
                             <img
-                                src={list.content[0]?.image_url || './path_to_default_image.jpg'}
+                                src={list.content[0]?.image_url || popcornUrl}
                                 alt={list.title}
                                 className="w-16 h-16 rounded-lg mr-2"
                             />

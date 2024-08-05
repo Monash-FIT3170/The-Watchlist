@@ -10,6 +10,7 @@ export default HomePage = ({ listData }) => {
   const [searchString, setSearchString] = useState("");
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const popcornUrl = "./ExampleResources/popcorn.png";
 
 
   // If we wanted to use live updating, which I don't think we do for content. But the below works!
@@ -105,7 +106,7 @@ export default HomePage = ({ listData }) => {
           onMouseLeave={e => e.currentTarget.style.backgroundColor = '#282525'}  // Revert on mouse leave
           >
             <img 
-              src={list.content[0]?.image_url || './path_to_default_image.jpg'}  // Use first image in list or a default one
+              src={list.content[0]?.image_url || popcornUrl}  // Use first image in list or a default one
               alt={list.title}
               style={{ width: '60px', height: '60px', marginRight: '10px', borderRadius: '5px' }}  // Adjust size as necessary
             />

@@ -118,17 +118,14 @@ const updateList: HandlerFunc = {
 
 const deleteList: HandlerFunc = {
     validate: null,
-    run: function({listId, userId}: {listId: string, userId: string}) {
+    run: function(this: any, { listId }: { listId: string }) {
+        // Ensure the user is logged in
         if (!this.userId) {
             throw new Meteor.Error('not-authorized', 'You must be logged in to delete a list');
         }
 
-        if (this.userId !== userId) {
-            throw new Meteor.Error('not-authorized', 'You cannot delete lists that do not belong to you');
-        }
-
-        // Fetch the list to check its title before deletion
-        const list = ListCollection.findOne({ _id: listId, userId: userId });
+        // Fetch the list to check ownership and its title before deletion
+        const list = ListCollection.findOne({ _id: listId, userId: this.userId });
         if (!list) {
             throw new Meteor.Error('not-found', 'List not found');
         }
@@ -138,29 +135,35 @@ const deleteList: HandlerFunc = {
             throw new Meteor.Error('not-allowed', 'Cannot delete Favourite or To Watch lists');
         }
 
-        ListCollection.remove({ _id: listId, userId: userId });  // Ensuring that only the owner can delete the list
-        
-        return;
+        // Delete the list if ownership is confirmed
+        ListCollection.remove({ _id: listId, userId: this.userId });
     }
-}
+};
+
 
 
 const removeContent: HandlerFunc = {
     validate: null,
-    run: function(this: any, { listId, userId, contentId }: { listId: string, userId: string, contentId: number }) {
+    run: function(this: any, { listId, contentId }: { listId: string, contentId: number }) {
+        // Ensure the user is logged in
         if (!this.userId) {
             throw new Meteor.Error('not-authorized', 'You must be logged in to remove content from a list');
         }
-        if (this.userId !== userId) {
+
+        // Find the list by ID and ensure it belongs to the logged-in user
+        const list = ListCollection.findOne({ _id: listId, userId: this.userId });
+        if (!list) {
             throw new Meteor.Error('not-authorized', 'You cannot remove content from lists that do not belong to you');
         }
 
+        // Remove the content from the list
         ListCollection.update(
-            { _id: listId, userId },
+            { _id: listId, userId: this.userId },
             { $pull: { content: { contentId: contentId } } }
         );
     }
 };
+
 
 // Instantiate the handler and add all handler functions
 const ListHandler = new Handler("list")
