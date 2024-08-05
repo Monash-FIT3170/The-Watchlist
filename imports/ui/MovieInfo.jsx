@@ -3,6 +3,7 @@ import Modal from './Modal';
 import ClickableRatingStar from './ClickableRatingStar';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Rating as RatingDB } from '../db/Rating';
+import { FaStar } from 'react-icons/fa';
 
 
 const MovieInfo = ({ movie, initialLists }) => {
@@ -104,17 +105,20 @@ const MovieInfo = ({ movie, initialLists }) => {
                     </div>
                     <div className="flex flex-col items-start w-1/2 h-full overflow-y-auto px-0 py-4">
                         <h1 className="text-6xl font-bold text-center w-full">{movie.title} ({movie.release_year})</h1>
-                        <div className="flex justify-center items-center w-full mt-5">
-                            <div className="flex items-center mx-2">
+                        <div className="flex justify-between items-start w-full mt-5 px-4">
+                            <div className="flex flex-col items-center w-1/2">
                                 <p className="text-2xl font-semibold">Watchlist Rating</p>
-                                <p className="text-lg font-bold flex items-center ml-2">
+                                <p className="text-lg font-bold flex items-center justify-center mt-2">
                                     <FaStar className="text-yellow-500 mr-1" />
-                                    {rating ? `${rating}/5` : "Not Yet Rated"} <span className="text-sm text-gray-400 ml-2">({totalRatings} users)</span>
+                                    {rating ? `${rating}/5` : "Not Yet Rated"}
                                 </p>
+                                {rating && (
+                                    <p className="text-sm text-gray-400 mt-1">Rated by {totalRatings} users</p>
+                                )}
                             </div>
-                            <div className="flex items-center mx-2">
+                            <div className="flex flex-col items-center w-1/2">
                                 <p className="text-2xl font-semibold">Your Rating</p>
-                                <p className="text-lg font-bold flex items-center ml-2">
+                                <p className="text-lg font-bold flex items-center justify-center mt-2">
                                     <FaStar className="text-yellow-500 mr-1" />
                                     {userRating ? `${userRating}/5` : "Not Yet Rated"}
                                 </p>
