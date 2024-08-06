@@ -11,7 +11,6 @@ import Navbar from "./Navbar.jsx";
 import SearchBar from "./SearchBar.jsx";
 import Home from "./Home.jsx";
 import UserProfile from "./UserProfile.jsx";
-import MovieInfo from "./MovieInfo.jsx";
 import TvInfo from "./TvInfo.tsx";
 import NewListModal from "./NewListModal.tsx";
 import UserDiscovery from './UserDiscovery.jsx';
@@ -118,15 +117,26 @@ export const App = () => {
         console.error("Error fetching content:", error);
       } else {
         if (response.movie) {
-          setMovies(response.movie);
+          // Add type "Movie" to each movie item
+          const moviesWithType = response.movie.map(movie => ({
+            ...movie,
+            type: "Movie"
+          }));
+          setMovies(moviesWithType);
         }
         if (response.tv) {
-          setTvs(response.tv);
+          // Add type "TV Show" to each TV show item
+          const tvsWithType = response.tv.map(tv => ({
+            ...tv,
+            type: "TV Show"
+          }));
+          setTvs(tvsWithType);
         }
       }
     });
     setContentLoading(false);
   }, []);
+  
 
   if (userLoading || contentLoading || userListsLoading) {
     return <Loading />;
@@ -157,9 +167,9 @@ export const App = () => {
               <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
               <Route path="/profile" element={<UserProfile currentUser={currentUser} />} />
               <Route path="/ai-picks" element={<AIPicks movies={movies} tvs={tvs} currentUser={currentUser} />} />
-              {movies.map((movie) => (
+              {/* {movies.map((movie) => (
                 <Route key={movie.id} path={`/Movie${movie.id}`} element={<MovieInfo movie={movie} />} />
-              ))}
+              ))} */}
               {tvs.map((tv) => (
                 <Route key={tv.id} path={`/TV Show${tv.id}`} element={<TvInfo tv={tv} />} />
               ))}
