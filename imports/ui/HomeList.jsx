@@ -92,7 +92,7 @@ const HomeList = ({ title, listType }) => {
         <div className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl overflow-auto scrollbar-thumb-gray-900 scrollbar-track-gray-100 scrollbar-thin">
             <h1 className="font-sans font-bold text-4xl my-4 mt-0 mb-4">{title}</h1>
             {loading ? (
-                <div>Loading...</div> // Display loading message
+                <div>Fetching your Content Lists...</div> // Display loading message
             ) : isEmpty ? (
                 <div className="flex flex-col items-center justify-center flex-grow">
                     <p className="text-lg text-white mb-4">You don't have any items in this list yet.</p>
