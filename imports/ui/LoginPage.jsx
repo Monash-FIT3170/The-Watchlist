@@ -52,50 +52,67 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-darkest">
-      <h1 className="text-3xl mb-4 text-white">Welcome to The Watchlist</h1>
-      <form onSubmit={handleSubmit} className="w-full max-w-xs">
+    <div className="flex flex-col items-center min-h-screen bg-darkest py-40">
+      <h1 className="text-3xl mb-4 text-white font-bold">The Watchlist</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center w-full max-w-xs bg-darker p-5 rounded-lg">
+        
+        <h1 className="text-white font-bold text-3xl mb-7 mt-2">
+          {isRegistering ? 'Sign Up' : 'Login'}
+        </h1>
+
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 mb-4 bg-dark text-white rounded"
+          className="w-full p-2 pl-4 mb-5 bg-dark text-white rounded-full"
           required
         />
+
         {isRegistering && (
           <input
             type="text"
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 mb-4 bg-dark text-white rounded"
+            className="w-full p-2 pl-4 mb-5 bg-dark text-white rounded-full"
             required
           />
         )}
+
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 mb-4 bg-dark text-white rounded"
+          className="w-full p-2 pl-4 mb-5 bg-dark text-white rounded-full"
           required
         />
-        <button type="submit" className="w-full p-2 mb-2 bg-magenta text-white rounded hover:bg-pink-700">
-          {isRegistering ? 'Register' : 'Log In'}
+
+        <button type="submit" className="w-2/3 p-1.5 mb-3 bg-magenta font-bold text-white rounded-full hover:bg-pink-700">
+          {isRegistering ? 'Sign Up' : 'Log In'}
         </button>
-        <button
-          type="button"
-          onClick={() => setIsRegistering(!isRegistering)}
-          className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-        >
-          {isRegistering ? 'Login' : 'Create An Account'}
-        </button>
-        <div className="py-1">
-          <div className="py-1">
-            <LoginWithGithub />
+
+        <p className="text-white text-xs font-thin mb-5">
+          {isRegistering ? "Have an account?":"Don't have an account?"}
+          <a
+            className="font-bold"
+            href="#" onClick={() => setIsRegistering(!isRegistering)}>
+            {isRegistering ? " Login!" : " Sign Up!"}
+          </a>
+        </p>
+        
+        <div className='flex flex-row w-full items-center'>
+          <hr className='w-full h-0.5 bg-white'/>
+          <p className=' text-white px-1 text-sm'>or</p>
+          <hr className='w-full h-0.5 bg-white'/>
+        </div>
+
+        <div className="flex flex-col w-full py-1 items-center mt-5">
+          <div className="w-3/4 mb-5">
+            <LoginWithGithub/>
           </div>
-          <div className="py-1">
+          <div className="w-3/4">
             <LoginWithGoogle />
           </div>
         </div>
