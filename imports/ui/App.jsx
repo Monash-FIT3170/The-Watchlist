@@ -11,7 +11,6 @@ import Navbar from "./Navbar.jsx";
 import SearchBar from "./SearchBar.jsx";
 import Home from "./Home.jsx";
 import UserProfile from "./UserProfile.jsx";
-import TvInfo from "./TvInfo.tsx";
 import NewListModal from "./NewListModal.tsx";
 import UserDiscovery from './UserDiscovery.jsx';
 import AIPicks from './AIPicks.jsx';
@@ -167,12 +166,6 @@ export const App = () => {
               <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
               <Route path="/profile" element={<UserProfile currentUser={currentUser} />} />
               <Route path="/ai-picks" element={<AIPicks movies={movies} tvs={tvs} currentUser={currentUser} />} />
-              {/* {movies.map((movie) => (
-                <Route key={movie.id} path={`/Movie${movie.id}`} element={<MovieInfo movie={movie} />} />
-              ))} */}
-              {tvs.map((tv) => (
-                <Route key={tv.id} path={`/TV Show${tv.id}`} element={<TvInfo tv={tv} />} />
-              ))}
               <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
               <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
               <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />

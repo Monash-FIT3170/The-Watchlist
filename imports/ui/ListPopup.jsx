@@ -7,11 +7,11 @@ import RenameListModal from "./RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';
 import { ListCollection } from "../db/List";
-import { getImageUrl } from "./imageUtils";
 import Scrollbar from './ScrollBar';
 import { FaUser, FaGlobe } from "react-icons/fa";
 import { RatingCollection } from "../db/Rating";
 import ContentItem from "./ContentItem";
+import ContentInfoModal from "./ContentInfoModal";  // Import the modal component
 
 const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const popupRef = useRef(null);
@@ -29,7 +29,8 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [globalRatings, setGlobalRatings] = useState({});
   const [isGridView, setIsGridView] = useState(false);
-  const navigate = useNavigate();
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedContent, setSelectedContent] = useState(null);
 
   const { list, loading, ratings } = useTracker(() => {
     const listHandle = Meteor.subscribe('userLists', listId);
@@ -65,6 +66,11 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     }
   }, [list.subscribers]);
 
+  const handleContentClick = (item) => {
+    setSelectedContent(item);
+    setModalOpen(true);
+  };
+
   const handleSubscribe = (listId) => {
     if (list.userId === Meteor.userId()) {
       console.log('Cannot subscribe to your own list');
@@ -80,6 +86,12 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     });
   };
 
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedContent(null);
+  };
+
   const handleUnsubscribe = (listId) => {
     Meteor.call('list.unsubscribe', listId, (error) => {
       if (!error) {
@@ -89,12 +101,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
         console.error('Unsubscription error:', error);
       }
     });
-  };
-
-  const handleRedirect = (type, id) => {
-    onClose();
-    navigate(`/${type}${id}`);
-  };
+  }
 
   const handleClickOutside = (event) => {
     const target = event.target;
@@ -301,26 +308,22 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
               <div key={item.contentId} className={isGridView ? '' : 'block relative'}>
                 {isGridView ? (
                   <ContentItem
-                    id={item.contentId}
-                    type={item.type}
-                    src={getImageUrl(item.image_url)}
-                    alt={item.title}
-                    rating={rating}
+                    content={item}
                     isUserSpecificRating={isUserSpecificRating}
+                    onClick={() => handleContentClick(item)}  // Open modal on click
                   />
                 ) : (
-                  <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
+                  <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101" onClick={() => handleContentClick(item)}>
                     <div className="relative">
                       <img
-                        src={getImageUrl(item.background_url)}
+                        src={item.background_url}
                         alt={item.title}
                         className="cursor-pointer w-full h-48 object-cover rounded-t-lg"
                         style={imageStyles[item.contentId] || {}}
                         onLoad={(e) => handleImageLoad(e, item.contentId)}
-                        onClick={() => handleRedirect(item.type, item.contentId)}
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60" style={{ pointerEvents: 'none' }}>
-                        <div className="absolute bottom-4 left-4 text-white" style={{ pointerEvents: 'auto' }}>
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60">
+                        <div className="absolute bottom-4 left-4 text-white">
                           <h3 className="text-xl font-bold">{item.title}</h3>
                           <div className="flex items-center">
                             {isUserSpecificRating ? (
@@ -337,7 +340,6 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
                             e.stopPropagation();
                             handleExpandClick(item.contentId, item.title);
                           }}
-                          style={{ pointerEvents: 'auto' }}
                         >
                           {expandedItem === item.contentId ? <FaChevronUp /> : <FaChevronDown />}
                         </button>
@@ -348,7 +350,6 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
                             confirmRemoveContent(item.contentId);
                           }}
                           title="Remove from List"
-                          style={{ pointerEvents: 'auto' }}
                         >
                           <FiTrash2 />
                         </button>
@@ -360,22 +361,28 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
             );
           })}
         </Scrollbar>
-
-
       </div>
-      <div className="z-50">
-        {isRenameModalOpen && (
-          <RenameListModal
-            isOpen={isRenameModalOpen}
-            onClose={() => setIsRenameModalOpen(false)}
-            onRename={(newName) => {
-              onRenameList(newName);
-              list.title = newName; // Update the list title locally
-            }}
-            currentName={list.title}
-          />
-        )}
-      </div>
+
+      {isRenameModalOpen && (
+        <RenameListModal
+          isOpen={isRenameModalOpen}
+          onClose={() => setIsRenameModalOpen(false)}
+          onRename={(newName) => {
+            onRenameList(newName);
+            list.title = newName; // Update the list title locally
+          }}
+          currentName={list.title}
+        />
+      )}
+      
+      {isModalOpen && selectedContent && (
+        <ContentInfoModal 
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          content={selectedContent}
+        />
+      )}
+
       {showConfirmDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
           <div ref={confirmDialogRef} className="bg-darker p-6 rounded-lg">

@@ -65,7 +65,7 @@ const ClickableStarRating: React.FC<ClickableStarRatingProps> = ({
         <div
           key={index}
           className="cursor-pointer"
-          style={{ margin: '0 4px' }}
+          style={{ margin: index === 0 ? '0 4px 0 0' : '0 4px' }}  // Conditional margin for the first star
           onMouseMove={(e) => handleMouseMove(index, e)}
           onClick={() => handleClick(index)}
         >
@@ -74,6 +74,7 @@ const ClickableStarRating: React.FC<ClickableStarRatingProps> = ({
       ))}
     </div>
   );
+  
 };
 
 export default ClickableStarRating;

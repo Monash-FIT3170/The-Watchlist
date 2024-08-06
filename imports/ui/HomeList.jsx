@@ -1,24 +1,20 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import RatingStar from './RatingStar';
 import { FaUser } from 'react-icons/fa';
-import { getImageUrl } from './imageUtils';
+import ContentInfoModal from './ContentInfoModal';  // Import your modal component
 
-const List = ({ list }) => {
-  const navigate = useNavigate();
+const List = ({ list, onContentClick }) => {
 
-  const handleRedirect = (type, id) => {
-    navigate(`/${type}${id}`);
-  };
+  console.log(list)
 
   return (
     <div key={list._id} className="space-y-8">
       {list.content.map(item => (
-        <div key={item.contentId} className="relative" onClick={() => handleRedirect(item.type, item.contentId)}>
+        <div key={item.contentId} className="relative" onClick={() => onContentClick(item)}>
           <div className="relative rounded-lg shadow-lg cursor-pointer overflow-visible">
             <div className="transition-transform duration-300 ease-in-out transform hover:scale-110">
               <img
-                src={getImageUrl(item.background_url)}
+                src={item.background_url}
                 alt={item.title}
                 className="w-full h-35vh object-cover rounded-lg"
               />
@@ -41,6 +37,19 @@ const List = ({ list }) => {
 };
 
 const HomeList = ({ title, lists }) => {
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedContent, setSelectedContent] = useState(null);
+
+  const handleContentClick = (content) => {
+    setSelectedContent(content);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedContent(null);
+  };
+
   const isEmpty = lists.every(list => list.content.length === 0);
 
   return (
@@ -58,8 +67,18 @@ const HomeList = ({ title, lists }) => {
         </div>
       ) : (
         <div className="w-full overflow-visible">
-          {lists.map((list) => <List key={list._id} list={list} />)}
+          {lists.map((list) => (
+            <List key={list._id} list={list} onContentClick={handleContentClick} />
+          ))}
         </div>
+      )}
+
+      {isModalOpen && selectedContent && (
+        <ContentInfoModal 
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          content={selectedContent}
+        />
       )}
     </div>
   );
