@@ -4,6 +4,7 @@ import ClickableRatingStar from './ClickableRatingStar';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Rating as RatingDB } from '../db/Rating';
 import { FaStar } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 
 const MovieInfo = ({ movie, initialLists }) => {
@@ -23,6 +24,12 @@ const MovieInfo = ({ movie, initialLists }) => {
         movie.rating = newValue;
 
     }
+
+    const navigate = useNavigate();
+
+    const handleBack = () => {
+        navigate(-1);
+    };
 
     const { rating, userRating, totalRatings } = useTracker(() => {
         const handler = Meteor.subscribe("rating");
@@ -61,9 +68,8 @@ const MovieInfo = ({ movie, initialLists }) => {
     }
 
     return (
-        <div className="flex flex-col items-center justify-end h-screen text-white bg-cover bg-center p-0 relative" style={{ backgroundImage: `url(${movie.background_url})` }}>
-            <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url(${movie.background_url})`, filter: "blur(9px)" }}></div>
-            {console.log(movie.background_url)}
+        <div className="flex flex-col items-center justify-end h-screen text-white bg-cover bg-center p-0 relative " style={{ backgroundImage: `url(${movie.background_url})` }}>
+            <div className="absolute inset-0 w-full h-full bg-cover bg-center " style={{ backgroundImage: `url(${movie.background_url})`, filter: "blur(9px)" }}></div>
             <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center">
                 <div className="w-full h-3/4 rounded-xl shadow-md overflow-hidden md:max-w-4xl bg-black bg-opacity-90 text-white flex flex-row items-center justify-between px-5">
                     <div className="flex flex-col items-start w-2/5 gap-4">
@@ -103,36 +109,42 @@ const MovieInfo = ({ movie, initialLists }) => {
                             </div>
                         </div>
                     </div>
-                    <div className="flex flex-col items-start w-1/2 h-full overflow-y-auto px-0 py-4">
+                    <div className="flex flex-col items-start w-1/2 h-full overflow-y-auto px-0 py-6">
                         <h1 className="text-6xl font-bold text-center w-full">{movie.title} ({movie.release_year})</h1>
                         <div className="flex justify-between items-start w-full mt-5 px-4">
                             <div className="flex flex-col items-center w-1/2">
                                 <p className="text-2xl font-semibold">Watchlist Rating</p>
-                                <p className="text-lg font-bold flex items-center justify-center mt-2">
+                                <p className="text-lg font-thin flex items-center justify-center mt-2">
                                     <FaStar className="text-yellow-500 mr-1" />
                                     {rating ? `${rating}/5` : "Not Yet Rated"}
                                 </p>
-                                {rating && (
-                                    <p className="text-sm text-gray-400 mt-1">Rated by {totalRatings} users</p>
-                                )}
+                                <p className="text-sm text-gray-400 mt-1">Rated by {totalRatings} users</p>
                             </div>
                             <div className="flex flex-col items-center w-1/2">
                                 <p className="text-2xl font-semibold">Your Rating</p>
-                                <p className="text-lg font-bold flex items-center justify-center mt-2">
-                                    <FaStar className="text-yellow-500 mr-1" />
+                                <p className="text-lg font-thin flex items-center justify-center mt-2">
+                                    <FaStar className="font-normal text-yellow-500 mr-1" />
                                     {userRating ? `${userRating}/5` : "Not Yet Rated"}
                                 </p>
                             </div>
                         </div>
                         <div className="w-full mt-5">
-                            <p className="text-2xl font-semibold text-center">SYNOPSIS</p>
-                            <p className="text-lg text-left max-w-xl mt-5">{movie.overview}</p>
-                        </div>
-                        <div className="w-full mt-5">
-                            <p className="text-2xl font-semibold text-center">RUNTIME</p>
+                            <p className="text-2xl font-semibold text-center">Runtime</p>
                             <p className="text-lg font-bold text-center mt-5">{movie.runtime} minutes</p>
                         </div>
+                        <div className="w-full mt-5">
+                            <p className="text-2xl font-semibold text-center">Synopsis</p>
+                            <p className="text-lg text-left max-w-xl mt-5">{movie.overview}</p>
+                        </div>
                     </div>
+                </div>
+                <div className='p-4'>
+                    <button
+                        onClick={handleBack}
+                        className="bg-purple-500 text-white font-bold py-2 px-4 rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-opacity-50"
+                    >
+                        Back
+                    </button>
                 </div>
             </div>
             <Modal show={showModal} onClose={() => setShowModal(false)} content={movie} type="Movie" />
