@@ -39,12 +39,18 @@ const ContentList = ({ list, isUserOwned }) => {
         >
           {list.title}
         </button>
+
         {isUserOwned && (
           <button onClick={() => handleItemClick(list)} className="text-gray-400 text-base bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
             Show all
           </button>
         )}
       </div>
+      {list.content.length === 0 && (
+          <div className="text-center text-gray-500 mt-2">
+            {list.title} List is empty. Add your movies/TV shows.
+          </div>
+        )}
       <div ref={containerRef} className="flex justify-flex-start items-start overflow-hidden">
         {React.Children.toArray(list.content.map((item, index) => (
           <ContentItem 
