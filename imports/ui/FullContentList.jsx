@@ -9,12 +9,7 @@ const FullContentList = ({ list, onDeleteList, onRenameList }) => {
 
   const content = contentarr.map((item, index) => (
     <ContentItem
-      key={index}
-      id={item.id}
-      type={item.type}
-      src={item.image_url}
-      alt={item.title}
-      rating={item.rating}
+      content={item}
     />
   ));
 
