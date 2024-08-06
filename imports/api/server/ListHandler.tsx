@@ -23,15 +23,23 @@ type AddContentToListOptions = {
     content: {
         contentId: number,
         title: string,
+        overview?: string,
         image_url: string,
+        background_url: string,
         user_rating?: number,
         type: 'Movie' | 'TV Show' | 'Episode',
+        runtime?: number,
+        release_year?: number,
+        language?: string,
+        origin_country?: string[],
+        genres?: string[],
         episode_details?: {
             season_number: number,
             episode_number: number
         }
     }
 };
+
 
 interface List {
     _id: string;
@@ -44,7 +52,7 @@ interface List {
     subscribers?: string[];
   }
 
-const addContentToList: HandlerFunc = {
+  const addContentToList: HandlerFunc = {
     validate: null,
     run: function(this: any, { listId, userId, content }: AddContentToListOptions) {
         if (!this.userId) {
@@ -54,12 +62,28 @@ const addContentToList: HandlerFunc = {
             throw new Meteor.Error('not-authorized', 'You cannot add content to a list that does not belong to you');
         }
 
+        const contentSummary = {
+            contentId: content.contentId,
+            title: content.title,
+            overview: content.overview,
+            image_url: content.image_url,
+            background_url: content.background_url,
+            user_rating: content.user_rating,
+            type: content.type,
+            runtime: content.runtime,
+            release_year: content.release_year,
+            language: content.language,
+            origin_country: content.origin_country,
+            genres: content.genres
+        };
+
         ListCollection.update(
             { _id: listId, userId },
-            { $push: { content: new ContentSummary(content).raw() } }
+            { $push: { content: new ContentSummary(contentSummary).raw() } }
         );
     }
 };
+
 
 /**
  * Defines two functions:
