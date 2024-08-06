@@ -16,7 +16,7 @@ export const LoginWithGoogle = () => {
   return (
       <button
         type="button"
-        className='bg-red-700 hover:bg-red-900 text-white font-bold py-2 px-4 rounded inline-flex items-center w-full'
+        className='bg-red-700 hover:bg-red-900 text-white font-bold py-2 px-4 rounded-lg inline-flex items-center w-full'
         onClick={handleGoogleLogin}
       >
         <svg className="mr-3" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 256 262">

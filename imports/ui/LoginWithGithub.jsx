@@ -12,7 +12,7 @@ export const LoginWithGithub = () => {
   return (
     <button
       type="button"
-      className='bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded inline-flex items-center w-full'
+      className='bg-blue-700 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded-lg inline-flex items-center w-full'
       onClick={handleGithubLogin}
     >
       <svg fill="#FFFFFF" viewBox="0 0 30 30" width="20px" height="20px" className="mr-3">
