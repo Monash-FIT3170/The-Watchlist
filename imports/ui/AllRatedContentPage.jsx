@@ -7,7 +7,6 @@ import ProfileDropdown from './ProfileDropdown';
 import ContentItem from './ContentItem';
 import { RatingCollection } from '../db/Rating';
 import { MovieCollection, TVCollection } from '../db/Content';
-import { getImageUrl } from './imageUtils';
 import { AiOutlineSearch } from 'react-icons/ai';
 
 const AllRatedContentPage = ({ currentUser }) => {
@@ -32,7 +31,7 @@ const AllRatedContentPage = ({ currentUser }) => {
     });
 
     return {
-      ratedContent: contentDetails.filter(content => content.title.toLowerCase().includes(searchTerm.toLowerCase())),
+      ratedContent: contentDetails.filter(content => content.title && content.title.toLowerCase().includes(searchTerm.toLowerCase())),
       isLoading: !subscription.ready()
     };
   }, [userId, searchTerm, currentUser, userSpecific]);
@@ -68,12 +67,7 @@ const AllRatedContentPage = ({ currentUser }) => {
         <div className="flex flex-wrap justify-start items-start gap-8 p-4">
           {ratedContent.length > 0 ? ratedContent.map((content, index) => (
             <ContentItem
-              key={index}
-              id={content.id}
-              type={content.contentType}
-              src={getImageUrl(content.image_url)}
-              alt={content.title}
-              rating={content.rating}
+              content={content}
               isUserSpecificRating={userSpecific}
             />
           )) : <p>No rated content available.</p>}

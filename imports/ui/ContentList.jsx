@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import ContentItem from './ContentItem';
 import usePopup from './usePopup';
 import ListPopup from './ListPopup';
-import { getImageUrl } from './imageUtils';
 
 const ContentList = ({ list, isUserOwned }) => {
   const navigate = useNavigate();
@@ -49,12 +48,7 @@ const ContentList = ({ list, isUserOwned }) => {
       <div ref={containerRef} className="flex justify-flex-start items-start overflow-hidden">
         {React.Children.toArray(list.content.map((item, index) => (
           <ContentItem 
-            key={index} 
-            id={item.contentId} 
-            type={item.type} 
-            src={getImageUrl(item.image_url)} 
-            alt={item.title} 
-            rating={item.rating} 
+            content={item}
             isUserSpecificRating={item.isUserSpecificRating}
           />
         ))).slice(0, visibleContentCount)}

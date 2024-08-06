@@ -7,11 +7,12 @@ import { ListCollection } from '../db/List';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList';
 import ProfileDropdown from './ProfileDropdown';
-import { getImageUrl } from './imageUtils';
 
 const SearchBar = ({ movies, tvs, currentUser }) => {
     console.log('Component render');
 
+    console.log("TVs in search bar:")
+    console.log(tvs)
     // Fetch lists directly from the database using useTracker
     const fetchLists = useCallback(() => {
         const userId = Meteor.userId();
@@ -106,14 +107,14 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
                 {selectedTab === 'movies' && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {filteredMovies.length > 0 ? filteredMovies.map(movie => (
-                            <ContentItem key={movie.id} id={movie.id} type="Movie" src={movie.image_url} alt={movie.title} rating={movie.rating} />
+                            <ContentItem content={movie} />
                         )) : <div>No movies available.</div>}
                     </div>
                 )}
                 {selectedTab === 'tv shows' && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
-                            <ContentItem key={tv.id} id={tv.id} type="TV Show" src={getImageUrl(tv.image_url)} alt={tv.title} rating={tv.rating || undefined} />
+                            <ContentItem content={tv} />
                         )) : <div>No TV shows available.</div>}
                     </div>
                 )}

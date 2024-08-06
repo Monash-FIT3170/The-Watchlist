@@ -35,20 +35,12 @@ const Modal = ({ show, onClose, content, type }) => {
   if (!show || loading) return null;
 
   const handleAddContentClick = (listId) => {
-    const newContent = {
-      contentId: content.id,
-      title: content.title,
-      image_url: content.image_url,
-      type: type, // "Movie" or "TV Show"
-      user_rating: 4, // This needs to be dynamically set
-      background_url: content.background_url
-    };
-
     const list = lists.find(list => list._id === listId);
-    if (list && list.content.some(item => item.contentId === newContent.contentId)) {
+    
+    if (list && list.content.some(item => item.contentId === content.id)) {
       toast.warn("This item is already in the list.");
     } else {
-      Meteor.call('list.addContent', { listId, userId: Meteor.userId(), content: newContent }, (error) => {
+      Meteor.call('list.addContent', { listId, userId: Meteor.userId(), content }, (error) => {
         if (error) {
           toast.error("Failed to add item to the list.");
         } else {
@@ -60,7 +52,7 @@ const Modal = ({ show, onClose, content, type }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <ToastContainer />
+      <ToastContainer style={{ zIndex: 1001 }} />
       <div ref={modalRef} className="bg-gray-900 rounded-lg shadow-lg p-8 max-w-2xl w-full h-3/4 relative">
         <button onClick={onClose} className="absolute top-2 right-2 text-white text-xl">×</button>
         <div className="mb-4 h-full">

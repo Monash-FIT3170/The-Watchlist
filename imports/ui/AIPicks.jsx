@@ -36,30 +36,25 @@ export default function AIPicks({ movies, tvs, currentUser }) {
             listId: genre + "Movies",
             title: genre,
             content: genreMovies.map(movie => ({
-                contentId: movie.id,
-                title: movie.title,
-                image_url: movie.image_url,
+                ...movie,  // Spread the entire movie object
                 rating: globalRatings[movie.id]?.average || 0,
-                type: "Movie",
-                background_url: movie.background_url || movie.image_url
+                type: "Movie"
             }))
         };
     });
 
-    console.log(movieContentLists)
+    console.log("TVs in ai picks:")
+    console.log(tvs)
 
     let showContentLists = genres.map(genre => {
-        const genreShows = tvs.filter(item => item.genres.includes(genre)).slice(0, 10);
+        const genreShows = tvs.filter(item => item.genres?.includes(genre)).slice(0, 10);
         return {
             listId: genre + "Shows",
             title: genre,
             content: genreShows.map(tv => ({
-                contentId: tv.id,
-                title: tv.title,
-                image_url: tv.image_url,
+                ...tv,  // Spread the entire TV show object
                 rating: globalRatings[tv.id]?.average || 0,
-                type: "TV Show",
-                background_url: tv.background_url || tv.image_url
+                type: "TV Show"
             }))
         };
     });
