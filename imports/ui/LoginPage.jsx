@@ -52,9 +52,15 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-darkest py-40">
+    <div className="flex flex-col items-center min-h-screen py-40"
+      style={{
+        backgroundImage: `url(/test.jpg)`,
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: '0px -250px'}}
+    >
       <h1 className="text-3xl mb-4 text-white font-bold">The Watchlist</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center w-full max-w-xs bg-darker p-5 rounded-lg">
+      <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center w-full max-w-xs bg-darker/90 px-5 py-7 rounded-2xl">
         
         <h1 className="text-white font-bold text-3xl mb-7 mt-2">
           {isRegistering ? 'Sign Up' : 'Login'}
@@ -85,7 +91,7 @@ const LoginPage = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 pl-4 mb-5 bg-dark text-white rounded-full"
+          className="w-full p-2 pl-4 mb-7 bg-dark text-white rounded-full"
           required
         />
 
@@ -93,7 +99,7 @@ const LoginPage = () => {
           {isRegistering ? 'Sign Up' : 'Log In'}
         </button>
 
-        <p className="text-white text-xs font-thin mb-5">
+        <p className="text-white text-xs font-thin">
           {isRegistering ? "Have an account?":"Don't have an account?"}
           <a
             className="font-bold"
@@ -102,13 +108,13 @@ const LoginPage = () => {
           </a>
         </p>
         
-        <div className='flex flex-row w-full items-center'>
-          <hr className='w-full h-0.5 bg-white'/>
+        <div className='flex flex-row w-full items-center mt-8 mb-5'>
+          <hr className='w-full h-px bg-white'/>
           <p className=' text-white px-1 text-sm'>or</p>
-          <hr className='w-full h-0.5 bg-white'/>
+          <hr className='w-full h-px bg-white'/>
         </div>
 
-        <div className="flex flex-col w-full py-1 items-center mt-5">
+        <div className="flex flex-col w-full py-1 items-center">
           <div className="w-3/4 mb-5">
             <LoginWithGithub/>
           </div>
