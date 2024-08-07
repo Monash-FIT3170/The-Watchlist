@@ -14,8 +14,8 @@ import ContentItem from "./ContentItem";
 import ContentInfoModal from "./ContentInfoModal";  // Import the modal component
 
 const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
-  const popupRef = useRef(null);
-  const confirmDialogRef = useRef(null);
+  const popupRef = useRef(null); // Ref for ListPopup
+  const contentInfoModalRef = useRef(null); // Ref for ContentInfoModal
   const [expandedItem, setExpandedItem] = useState(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [contentDetails, setContentDetails] = useState({});
@@ -47,12 +47,11 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const isListOwner = list.userId === Meteor.userId();
 
   useEffect(() => {
-    // Fetch global ratings using the Meteor method
     Meteor.call('ratings.getGlobalAverages', (error, result) => {
-      if (!error) {
-        setGlobalRatings(result);
-      } else {
+      if (error) {
         console.error("Error fetching global ratings:", error);
+      } else {
+        setGlobalRatings(result);
       }
     });
   }, []);
@@ -61,14 +60,19 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     if (list.subscribers && Array.isArray(list.subscribers)) {
       const isSubscribed = list.subscribers.includes(Meteor.userId());
       setIsSubscribed(isSubscribed);
-    } else {
-      console.warn("Subscribers list is undefined or not an array");
     }
   }, [list.subscribers]);
 
-  const handleContentClick = (item) => {
-    setSelectedContent(item);
-    setModalOpen(true);
+  // Separate close handlers for each modal
+  const closeContentInfoModal = () => {
+    setModalOpen(false);
+    setSelectedContent(null);
+  };
+
+  const handleContentClick = (item, event) => {
+    event.stopPropagation(); // Prevents the event from bubbling up
+    setSelectedContent(item); // Set the content to be shown in ContentInfoModal
+    setModalOpen(true); // Open ContentInfoModal
   };
 
   const handleSubscribe = (listId) => {
@@ -77,15 +81,13 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
       return;
     }
     Meteor.call('list.subscribe', listId, (error) => {
-      if (!error) {
-        setIsSubscribed(true);
-        console.log('Subscription successful');
-      } else {
+      if (error) {
         console.error('Subscription error:', error);
+      } else {
+        setIsSubscribed(true);
       }
     });
   };
-
 
   const closeModal = () => {
     setModalOpen(false);
@@ -94,24 +96,29 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
 
   const handleUnsubscribe = (listId) => {
     Meteor.call('list.unsubscribe', listId, (error) => {
-      if (!error) {
-        setIsSubscribed(false);
-        console.log('Unsubscription successful');
-      } else {
+      if (error) {
         console.error('Unsubscription error:', error);
+      } else {
+        setIsSubscribed(false);
       }
     });
   }
 
   const handleClickOutside = (event) => {
-    const target = event.target;
+    // Debug logs
+    console.log("Click detected. Target:", event.target);
+    console.log("popupRef current:", popupRef.current);
+    console.log("contentInfoModalRef current:", contentInfoModalRef.current);
+
+    // Check if the click is outside both ListPopup and ContentInfoModal
     if (
-      popupRef.current &&
-      !popupRef.current.contains(target) &&
-      !target.closest(".rename-modal") &&
-      (!confirmDialogRef.current || !confirmDialogRef.current.contains(target))
+      popupRef.current && !popupRef.current.contains(event.target) &&
+      (!contentInfoModalRef.current || !contentInfoModalRef.current.contains(event.target))
     ) {
+      console.log("Click outside both modals detected, closing ListPopup.");
       onClose();
+    } else {
+      console.log("Click inside a modal, should not close.");
     }
   };
 
@@ -194,7 +201,6 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
           console.error("Error deleting list:", error);
         } else {
           onClose();
-          console.log("List deleted successfully");
         }
       });
     }
@@ -244,8 +250,8 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div
-        ref={popupRef}
-        className="bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
+        ref={popupRef}  // Ref for the ListPopup
+        className="list-popup bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">{list.title}</h2>
@@ -313,7 +319,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
                     onClick={() => handleContentClick(item)}  // Open modal on click
                   />
                 ) : (
-                  <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101" onClick={() => handleContentClick(item)}>
+                  <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101" onClick={(e) => handleContentClick(item, e)}>
                     <div className="relative">
                       <img
                         src={item.background_url}
@@ -374,11 +380,12 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
           currentName={list.title}
         />
       )}
-      
+
       {isModalOpen && selectedContent && (
-        <ContentInfoModal 
+        <ContentInfoModal
+          ref={contentInfoModalRef}  // Ref for the ContentInfoModal
           isOpen={isModalOpen}
-          onClose={closeModal}
+          onClose={closeContentInfoModal}
           content={selectedContent}
         />
       )}

@@ -19,8 +19,8 @@ const StarSVG = ({ fill }) => {
       <path
         d="M20.388,10.918L32,12.118l-8.735,7.749L25.914,31.4l-9.893-6.088L6.127,31.4l2.695-11.533L0,12.118 l11.547-1.2L16.026,0.6L20.388,10.918z"
         fill={`url(#${gradientId})`}
-        stroke="#7B1450" 
-        strokeWidth="1" 
+        stroke="#7B1450"
+        strokeWidth="1"
       />
     </svg>
   );
@@ -41,22 +41,25 @@ const ClickableStarRating: React.FC<ClickableStarRatingProps> = ({
     setDisplayRating(initialRating);
   };
 
-  const handleClick = (index: number) => {
+  const handleClick = (index: number, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    event.stopPropagation();  // Prevent event from bubbling up to parent components
     const fillType = getStarFill(index);
     const newRating = fillType === 1 ? index + 0.5 : index + 1;
     onChange(newRating);
   };
 
   const handleMouseMove = (index: number, event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    event.stopPropagation();  // Optionally prevent mouse move events from propagating
     const rect = event.currentTarget.getBoundingClientRect();
     const isHalf = event.clientX - rect.left < rect.width / 2;
     setDisplayRating(index + (isHalf ? 0.5 : 1));
   };
 
+
   const getStarFill = (index: number) => {
-    if (displayRating >= index + 1) return 2; 
-    if (displayRating >= index + 0.5) return 1; 
-    return 0; 
+    if (displayRating >= index + 1) return 2;
+    if (displayRating >= index + 0.5) return 1;
+    return 0;
   };
 
   return (
@@ -65,16 +68,17 @@ const ClickableStarRating: React.FC<ClickableStarRatingProps> = ({
         <div
           key={index}
           className="cursor-pointer"
-          style={{ margin: index === 0 ? '0 4px 0 0' : '0 4px' }}  // Conditional margin for the first star
+          style={{ margin: index === 0 ? '0 4px 0 0' : '0 4px' }}
           onMouseMove={(e) => handleMouseMove(index, e)}
-          onClick={() => handleClick(index)}
+          onClick={(e) => handleClick(index, e)}  // Pass the event to the handler
         >
           <StarSVG fill={getStarFill(index)} />
         </div>
       ))}
     </div>
+
   );
-  
+
 };
 
 export default ClickableStarRating;

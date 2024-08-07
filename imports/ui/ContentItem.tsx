@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import ContentInfoModal from './ContentInfoModal'; // Ensure this import is correct
-import TvInfo from './TvInfo';
 import RatingStar from "./RatingStar";
 import { FaGlobe, FaUser } from "react-icons/fa";
 import { getImageUrl } from './imageUtils';

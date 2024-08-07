@@ -48,6 +48,8 @@ Meteor.methods({
     return Meteor.users.find({ _id: { $in: user.following } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
   },
   'ratings.addOrUpdate'({ userId, contentId, contentType, rating }) {
+    console.log('addOrUpdate method called with:', { userId, contentId, contentType, rating });
+
     check(userId, String);
     check(contentId, Number);
     check(contentType, String);
@@ -71,6 +73,7 @@ Meteor.methods({
       });
     }
   },
+
   updateAvatar(userId, avatarUrl) {
     check(userId, String);
     check(avatarUrl, String);
@@ -189,7 +192,7 @@ Meteor.methods({
 
 // Server-side method to fetch subscribed lists
 Meteor.methods({
-  'list.getSubscribed': function({ userId }) {
+  'list.getSubscribed': function ({ userId }) {
     // Check if the userId is provided
     if (!userId) {
       throw new Meteor.Error('invalid-argument', 'You must provide a user ID.');
@@ -283,19 +286,19 @@ Meteor.methods({
   'ratings.getGlobalAverages'() {
     const ratings = RatingCollection.find().fetch();
     const ratingMap = ratings.reduce((acc, rating) => {
-        if (!acc[rating.contentId]) {
-            acc[rating.contentId] = {
-                count: 0,
-                total: 0
-            };
-        }
-        acc[rating.contentId].count += 1;
-        acc[rating.contentId].total += rating.rating;
-        return acc;
+      if (!acc[rating.contentId]) {
+        acc[rating.contentId] = {
+          count: 0,
+          total: 0
+        };
+      }
+      acc[rating.contentId].count += 1;
+      acc[rating.contentId].total += rating.rating;
+      return acc;
     }, {});
 
     for (const id in ratingMap) {
-        ratingMap[id].average = (ratingMap[id].total / ratingMap[id].count).toFixed(2);
+      ratingMap[id].average = (ratingMap[id].total / ratingMap[id].count).toFixed(2);
     }
 
     return ratingMap;

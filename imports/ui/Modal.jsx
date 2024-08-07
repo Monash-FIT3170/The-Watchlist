@@ -9,6 +9,7 @@ import Scrollbar from './ScrollBar'; // Import the Scrollbar component
 const Modal = ({ show, onClose, content, type }) => {
   const modalRef = useRef();
 
+
   // Fetch the lists for the current user
   const { lists, loading } = useTracker(() => {
     const userId = Meteor.userId();
@@ -36,6 +37,10 @@ const Modal = ({ show, onClose, content, type }) => {
 
   const handleAddContentClick = (listId) => {
     const list = lists.find(list => list._id === listId);
+
+    console.log("Modal content:")
+    console.log(content)
+    console.log(`Modal content id: ${content.id}`)
     
     if (list && list.content.some(item => item.contentId === content.id)) {
       toast.warn("This item is already in the list.");
@@ -45,6 +50,7 @@ const Modal = ({ show, onClose, content, type }) => {
           toast.error("Failed to add item to the list.");
         } else {
           toast.success("Item successfully added to the list.");
+          console.log("Item successfully added")
         }
       });
     }
