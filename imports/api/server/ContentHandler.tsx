@@ -7,7 +7,9 @@ import { Handler, HandlerFunc } from './Handler';
 import { Movie, TV } from "../../db/Content";
 
 type GetContentOptions = {
-    searchString: string | null
+    searchString: string | null,
+    limit: number,
+    page: number
 }
 
 type GetContentResults = {
@@ -32,29 +34,33 @@ type GetContentResults = {
 //     }
 // }
 
-function GetContent(searchObject: object, userId: string): GetContentResults {
-    const movieData = Movie.find({...searchObject, userId}).fetch().map(doc => doc.raw());
-    const tvData = TV.find({...searchObject, userId}).fetch().map(doc => doc.raw());
+function GetContent(searchObject: object, searchOptions: object): GetContentResults {
+    const movieData = Movie.find(searchObject, searchOptions).fetch().map(doc => doc.raw());
+    const tvData = TV.find(searchObject, searchOptions).fetch().map(doc => doc.raw());
 
     return { movie: movieData, tv: tvData }
 }
 
 const readContent: HandlerFunc = {
     validate: null,
-    run: ({ searchString, userId }: { searchString: string | null, userId: string }) => {
+    run: ({ searchString, limit, page }: GetContentOptions) => {
         console.log('Search string received:', searchString);
+
+        let searchOptions = {
+            limit: limit ?? 50,
+            skip: limit && page ? limit * page : 0
+        }
 
         let searchCriteria = {};
         if (searchString == null) {
             console.log('Fetching all content...');
-            searchCriteria = { userId }; 
         } else {
             console.log('Performing search with:', searchString);
-            searchCriteria = { "$text": { "$search": searchString }, userId };
+            searchCriteria = { "$text": { "$search": searchString } };
         }
 
         // Fetch content using the updated search criteria and convert to raw objects
-        const results = GetContent(searchCriteria, userId);
+        const results = GetContent(searchCriteria, searchOptions);
         // console.log('Fetched content:', results);
         return results;
     }
