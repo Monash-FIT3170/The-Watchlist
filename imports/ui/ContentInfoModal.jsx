@@ -5,6 +5,14 @@ import { Rating as RatingDB } from '../db/Rating';
 import Modal from './Modal';
 
 const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
+
+  const contentId = content.contentId || content.id; 
+
+  console.log("Content info modal content ID:", contentId);
+
+  console.log("Content info modal content:")
+  console.log(content)
+
   const [showModal, setShowModal] = useState(false);
   const [value, setValue] = useState(null);
   const [selectedSeason, setSelectedSeason] = useState(null);
@@ -30,20 +38,18 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
   };
 
   const { rating, userRating, totalRatings } = useTracker(() => {
-    const handler = Meteor.subscribe("ratings");
-    if (!handler.ready()) {
-      return { rating: 0, userRating: null, totalRatings: 0 };
-    }
-    const ratings = RatingDB.find({ contentId: content.id }).fetch();
+    const ratings = RatingDB.find({ contentId: contentId }).fetch();
     const total = ratings.reduce((acc, cur) => acc + cur.rating, 0);
     const averageRating = ratings.length > 0 ? (total / ratings.length).toFixed(2) : 0;
     const userRating = ratings.find(r => r.userId === Meteor.userId())?.rating;
+    console.log(`User rating: ${userRating}`);
     return {
       rating: averageRating,
       userRating,
       totalRatings: ratings.length
     };
   });
+  
 
   const addRating = (userId, contentId, contentType, rating) => {
     Meteor.call('ratings.addOrUpdate', { userId, contentId, contentType, rating }, (error, result) => {
@@ -54,7 +60,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
   };
 
   const loadEpisodes = (seasonNumber) => {
-    Meteor.call('tv.getEpisodes', content.id, seasonNumber, (error, result) => {
+    Meteor.call('tv.getEpisodes', contentId, seasonNumber, (error, result) => {
       if (error) {
         console.error('Failed to load episodes:', error);
       } else {
@@ -155,7 +161,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
               totalStars={5}
               rating={userRating || 0}
               onChange={(newValue) => {
-                addRating(Meteor.userId(), content.id, content.type, newValue);
+                addRating(Meteor.userId(), contentId, content.type, newValue);
               }}
             />
             <p className="mt-2">Average Rating: {rating ? `${rating}/5 (${totalRatings} reviews)` : "Not Yet Rated"}</p>

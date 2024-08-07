@@ -36,13 +36,14 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     const listHandle = Meteor.subscribe('userLists', listId);
     const subscribedListHandle = Meteor.subscribe('subscribedLists', Meteor.userId());
     const ratingsHandle = Meteor.subscribe('userRatings', Meteor.userId());
-
+  
     const list = ListCollection.findOne({ _id: listId }) || {};
-    const ratings = RatingCollection.find({ userId: list.userId }).fetch();
+    const ratings = RatingCollection.find({ userId: Meteor.userId() }).fetch(); // Fetch logged-in user's ratings
     const loading = !listHandle.ready() || !subscribedListHandle.ready() || !ratingsHandle.ready();
-
+  
     return { list, loading, ratings };
   }, [listId]);
+  
 
   const isListOwner = list.userId === Meteor.userId();
 
@@ -71,9 +72,12 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
 
   const handleContentClick = (item, event) => {
     event.stopPropagation(); // Prevents the event from bubbling up
-    setSelectedContent(item); // Set the content to be shown in ContentInfoModal
+    const userRating = ratings.find(r => r.contentId === item.contentId);
+    const contentWithRating = { ...item, rating: userRating?.rating || 0 };
+    setSelectedContent(contentWithRating); // Set the content with rating to be shown in ContentInfoModal
     setModalOpen(true); // Open ContentInfoModal
   };
+  
 
   const handleSubscribe = (listId) => {
     if (list.userId === Meteor.userId()) {
@@ -236,6 +240,10 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
       };
     }
   };
+
+  console.log("list")
+  console.log(list)
+
 
   const filteredContent = list.content?.filter(item =>
     selectedTab === 'all' ||

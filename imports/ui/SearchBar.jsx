@@ -9,10 +9,7 @@ import UserList from './UserList';
 import ProfileDropdown from './ProfileDropdown';
 
 const SearchBar = ({ movies, tvs, currentUser }) => {
-    console.log('Component render');
 
-    console.log("TVs in search bar:")
-    console.log(tvs)
     // Fetch lists directly from the database using useTracker
     const fetchLists = useCallback(() => {
         const userId = Meteor.userId();

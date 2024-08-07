@@ -43,9 +43,6 @@ export default function AIPicks({ movies, tvs, currentUser }) {
         };
     });
 
-    console.log("TVs in ai picks:")
-    console.log(tvs)
-
     let showContentLists = genres.map(genre => {
         const genreShows = tvs.filter(item => item.genres?.includes(genre)).slice(0, 10);
         return {
