@@ -120,7 +120,8 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
       (!contentInfoModalRef.current || !contentInfoModalRef.current.contains(event.target))
     ) {
       console.log("Click outside both modals detected, closing ListPopup.");
-      onClose();
+      // onClose();
+      event.stopPropagation();
     } else {
       console.log("Click inside a modal, should not close.");
     }

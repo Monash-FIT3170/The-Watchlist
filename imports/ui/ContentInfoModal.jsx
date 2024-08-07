@@ -1,4 +1,4 @@
-import React, { useEffect, useState, forwardRef } from 'react';
+import React, { useEffect, useState, forwardRef, useRef } from 'react';
 import ClickableRatingStar from './ClickableRatingStar';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Rating as RatingDB } from '../db/Rating';
@@ -6,17 +6,15 @@ import Modal from './Modal';
 
 const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
 
-  const contentId = content.contentId || content.id; 
-
-  console.log("Content info modal content ID:", contentId);
-
-  console.log("Content info modal content:")
-  console.log(content)
+  const contentId = content.contentId || content.id;
 
   const [showModal, setShowModal] = useState(false);
   const [value, setValue] = useState(null);
   const [selectedSeason, setSelectedSeason] = useState(null);
   const [episodes, setEpisodes] = useState([]);
+  
+  // Define modalRef using useRef
+  const modalRef = useRef(null);
 
   useEffect(() => {
     if (0 < content.rating && content.rating < 6) {
@@ -42,7 +40,6 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
     const total = ratings.reduce((acc, cur) => acc + cur.rating, 0);
     const averageRating = ratings.length > 0 ? (total / ratings.length).toFixed(2) : 0;
     const userRating = ratings.find(r => r.userId === Meteor.userId())?.rating;
-    console.log(`User rating: ${userRating}`);
     return {
       rating: averageRating,
       userRating,
@@ -50,9 +47,8 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
     };
   });
   
-
   const addRating = (userId, contentId, contentType, rating) => {
-    Meteor.call('ratings.addOrUpdate', { userId, contentId, contentType, rating }, (error, result) => {
+    Meteor.call('ratings.addOrUpdate', { userId, contentId, contentType, rating }, (error) => {
       if (error) {
         console.error('Failed to update/add rating:', error);
       }
@@ -168,7 +164,8 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
           </div>
         </div>
       </div>
-      <Modal show={showModal} onClose={() => setShowModal(false)} content={content} type={content.type} />
+      {/* Pass modalRef to the Modal component */}
+      <Modal ref={modalRef} show={showModal} onClose={() => setShowModal(false)} content={content} type={content.type} />
     </div>
   ) : null;
 });
