@@ -33,58 +33,69 @@ export const Movie = Class.create({
         release_year: {
             type: Number
         },
-        image_url: {
+        runtime: {
+            type: Number
+        },
+        popularity: {
+            type: Number
+        },
+        language: {
             type: String
+        },
+        origin_country: {
+            type: [String]
+        },
+        genres: {
+            type: [String]
+        },
+        keywords: {
+            type: [String],
+            optional: true
+        },
+        actors: {
+            type: [String],
+            optional: true
+        },
+        directors: {
+            type: [String],
+            optional: true
         },
         background_url: {
             type: String
         },
-        runtime: {
-            type: Number
-        },
-        rating: {
-            type: Number // this will 100% need to be changed later
-        },
-        genres: {
-            type: [String]
+        image_url: {
+            type: String
         }
-        
     },
     indexes: {
-        movie_id_unique: {
+        title_text_index: {
             fields: {
-                id: 1
+                title: "text"
             },
             options: {
-                unique: true
+                default_language: "none",  // Specify the default language
+                language_override: "none"  // Specify the field that overrides the default language
             }
         }
     }
 });
 
+
 export const TV_Episode = Class.create({
     name: "TV_Episode",
     fields: {
-        id: {
-            type: Number
-        },
         title: {
-            type: String,
-            index: 'text'
+            type: String
         },
-        overview: {
-            type: String,
-            optional: true
+        episode_number: {
+            type: Number
         },
         runtime: {
-            type: Number
-        },
-        image_url: {
-            type: String,
+            type: Number,
             optional: true
         }
     }
-})
+});
 
 export const TV_Season = Class.create({
     name: "TV_Season",
@@ -92,15 +103,13 @@ export const TV_Season = Class.create({
         season_number: {
             type: Number
         },
-        episodes: [TV_Episode]
+        episodes: {
+            type: [TV_Episode],
+            optional: true // Optional to defer loading until needed
+        }
     }
-})
+});
 
-// https://api4.thetvdb.com/v4/series
-// https://api4.thetvdb.com/v4/series/70327 for description
-// https://api4.thetvdb.com/v4/series/70327/episodes/official for episodes but filter on aired != null
-// number = episode number in season
-// seasonNumber = as named
 export const TV = Class.create({
     name: "TV",
     collection: TVCollection,
@@ -112,34 +121,67 @@ export const TV = Class.create({
             type: String,
             index: 'text'
         },
-        overview: {
-            type: String
-        },
-        image_url: {
-            type: String
-        },
-        background_url: {
-            type: String
-        },
-        first_aired: {
-            type: Number
-        },
-        last_aired: {
+        popularity: {
             type: Number,
             optional: true
         },
-        genres: {
-            type: [String]
+        overview: {
+            type: String,
+            optional: true
         },
-        seasons: [TV_Season]
+        first_aired: {
+            type: Date,
+            optional: true
+        },
+        last_aired: {
+            type: Date,
+            optional: true
+        },
+        genres: {
+            type: [String],
+            optional: true
+        },
+        language: {
+            type: String,
+            optional: true
+        },
+        origin_country: {
+            type: [String],
+            optional: true
+        },
+        keywords: {
+            type: [String],
+            optional: true
+        },
+        actors: {
+            type: [String],
+            optional: true
+        },
+        directors: {
+            type: [String],
+            optional: true
+        },
+        background_url: {
+            type: String,
+            optional: true
+        },
+        image_url: {
+            type: String,
+            optional: true
+        },
+        seasons: {
+            type: [TV_Season],
+            optional: true // Optional to defer loading until needed
+        }
     },
     indexes: {
-        tv_series_id_unique: {
+        title_text_index: {
             fields: {
-                id: 1
+                title: "text"
             },
             options: {
-                unique: true
+                default_language: "none",  // Specify the default language
+                language_override: "none"  // Specify the field that overrides the default language
             }
         }
     }

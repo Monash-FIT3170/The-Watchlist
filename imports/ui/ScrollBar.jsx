@@ -36,7 +36,7 @@ const Scrollbar = ({ children, className = '', backgroundColor = '#FFFFFF' }) =>
       }}
     >
       {children}
-      <style jsx>{`
+      <style>{`
         .scrollbar-webkit::-webkit-scrollbar {
           width: 8px;
           height: 8px;

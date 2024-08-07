@@ -19,9 +19,14 @@ export const EpisodeDetails = Class.create({
 export const ContentSummary = Class.create({
     name: "ContentSummary",
     fields: {
-        content_id: Number, // lookup id for the content
+        contentId: Number, // lookup id for the content
         title: String,
+        overview: {
+            type: String,
+            optional: true
+        },
         image_url: String,
+        background_url: String,
         user_rating: {
             type: Number,
             optional: true
@@ -33,13 +38,33 @@ export const ContentSummary = Class.create({
                 param: ['Movie', 'TV Show', 'Episode']
             }]
         },
-        episode_details: {
-            type: EpisodeDetails,
+        runtime: {
+            type: Number,
             optional: true
         },
-        background_url: String
+        release_year: {
+            type: Number,
+            optional: true
+        },
+        language: {
+            type: String,
+            optional: true
+        },
+        origin_country: {
+            type: [String],
+            optional: true
+        },
+        genres: {
+            type: [String],
+            optional: true
+        },
+        keywords: {
+            type: [String],
+            optional: true
+        }
     }
 });
+
 
 
 // Define the schema for the List
@@ -47,7 +72,7 @@ const List = Class.create({
     name: 'List',
     collection: ListCollection,
     fields: {
-        userId: Number,
+        userId: String,
         userName: String,
         title: String,
         description: {
@@ -63,6 +88,12 @@ const List = Class.create({
         },
         content: {
             type: [ContentSummary],
+            default: function() {
+                return [];
+            }
+        },
+        subscribers: {
+            type: [String], // array of userIds
             default: function() {
                 return [];
             }

@@ -3,6 +3,9 @@ import { MdMovieFilter } from 'react-icons/md';
 import Scrollbar from './ScrollBar'; // Import the Scrollbar component
 
 export default function ViewLists({ listData }) {
+
+  const popcornUrl = "./ExampleResources/popcorn.png";
+  
   return (
     <div className="bg-darker rounded-lg shadow-lg p-2 flex-grow overflow-hidden">
       <nav>
@@ -14,7 +17,7 @@ export default function ViewLists({ listData }) {
             {listData.map((list) => (
               <li key={list.listId} className="flex justify-center">
                 <img
-                  src={list.content[0]?.image_url || './path_to_default_image.jpg'}
+                  src={list.content[0]?.image_url || popcornUrl}
                   alt={list.title}
                   className="w-10 h-10 mr-2.5 rounded-lg"
                 />

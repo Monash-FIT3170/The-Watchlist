@@ -32,36 +32,29 @@ type GetContentResults = {
 //     }
 // }
 
-function GetContent(searchObject: object): GetContentResults {
-    const movieData = Movie.find(searchObject).fetch().map(doc => doc.raw()); // Convert each document to a raw object
-    const tvData = TV.find(searchObject).fetch().map(doc => doc.raw()); // Convert each document to a raw object
+function GetContent(searchObject: object, userId: string): GetContentResults {
+    const movieData = Movie.find({...searchObject, userId}).fetch().map(doc => doc.raw());
+    const tvData = TV.find({...searchObject, userId}).fetch().map(doc => doc.raw());
 
-    return {
-        movie: movieData,
-        tv: tvData,
-    }
+    return { movie: movieData, tv: tvData }
 }
 
-
-
-// In your /imports/api/server/ContentHandler.tsx file, within the readContent function
 const readContent: HandlerFunc = {
     validate: null,
-    run: ({searchString}: GetContentOptions) => {
+    run: ({ searchString, userId }: { searchString: string | null, userId: string }) => {
         console.log('Search string received:', searchString);
 
         let searchCriteria = {};
-
         if (searchString == null) {
             console.log('Fetching all content...');
-            searchCriteria = {};
+            searchCriteria = { userId }; 
         } else {
             console.log('Performing search with:', searchString);
-            searchCriteria = { "$text": { "$search": searchString } };
+            searchCriteria = { "$text": { "$search": searchString }, userId };
         }
 
         // Fetch content using the updated search criteria and convert to raw objects
-        const results = GetContent(searchCriteria);
+        const results = GetContent(searchCriteria, userId);
         // console.log('Fetched content:', results);
         return results;
     }
