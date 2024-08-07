@@ -5,7 +5,7 @@ import { Meteor } from 'meteor/meteor';
 
 export type AddRatingOptions = {
     userId: string,  // Add userId to track which user is making the request
-    contentType: "TV" | "Movie",
+    contentType: "TV Show" | "Movie",
     contentId: number,
     rating: 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 3.5 | 4 | 4.5 | 5
 }
@@ -21,7 +21,7 @@ const createRating: HandlerFunc = {
         }
 
         // Check that the content with the specified ID exists
-        const contentCollection = contentType === "TV" ? TV : Movie;
+        const contentCollection = contentType === "TV Show" ? TV : Movie;
         if (!contentCollection.findOne({id: contentId})) {
             throw new Meteor.Error('not-found', `Content of type ${contentType} with ID ${contentId} does not exist!`);
         }

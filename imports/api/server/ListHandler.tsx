@@ -21,7 +21,7 @@ type AddContentToListOptions = {
     listId: string,
     userId: string,
     content: {
-        contentId: number,
+        id: number,
         title: string,
         overview?: string,
         image_url: string,
@@ -63,7 +63,7 @@ interface List {
         }
 
         const contentSummary = {
-            contentId: content.contentId,
+            contentId: content.id,
             title: content.title,
             overview: content.overview,
             image_url: content.image_url,

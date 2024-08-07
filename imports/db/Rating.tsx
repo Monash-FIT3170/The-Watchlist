@@ -12,7 +12,7 @@ export const Rating = Class.create({
             type: String,
             validators: [{
                 type: 'choice',
-                param: ["Movie", "TV"]
+                param: ["Movie", "TV Show"]
             }]
         },
         contentId: {
