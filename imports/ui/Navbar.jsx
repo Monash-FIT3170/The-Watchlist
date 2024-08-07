@@ -8,7 +8,7 @@ import ListPopup from "./ListPopup";
 import NewListModal from "./NewListModal";
 import usePopup from './usePopup';
 import { ListCollection } from "../db/List";
-import Scrollbar from './ScrollBar'; // Import the Scrollbar component
+import Scrollbar from './ScrollBar'; 
 
 const popcornUrl = "./ExampleResources/popcorn.png";
 
@@ -32,10 +32,6 @@ export default function Navbar({ staticNavData }) {
   const handleAddList = () => {
     setIsAddListModalOpen(true);
   };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="flex flex-col h-screen">
