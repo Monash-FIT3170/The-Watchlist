@@ -177,7 +177,7 @@ const SearchBar = ({ movies, tvs }) => {
     };
 
     return (
-        <div className="flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full ">
+        <div className="flex flex-col mb-2 bg-darker  overflow-hidden shadow-lg py-5 px-2 h-full ">
             <form className="flex flex-col items-start w-full pl-2">
                 <div className="flex justify-between w-full max-w-l px-20">
                     <div className="relative flex-grow">
@@ -201,17 +201,16 @@ const SearchBar = ({ movies, tvs }) => {
                     </button>
                 </div>
                 <div className="bubbles-container flex justify-end mt-2">
-                    {['movies', 'tv shows', 'lists', 'users'].map((tab) => (
-                        <div
-                            key={tab}
-                            className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-                                } border-transparent border`}
-                            onClick={() => setSelectedTab(tab)}
-                        >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                        </div>
-                    ))}
+                {['movies', 'tv shows', 'lists', 'users'].map((tab) => (
+                    <div
+                        key={tab}
+                        className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 cursor-pointer transition-all text-xl duration-300 ease-in-out ${selectedTab === tab ? 'underline text-[#7B1450]' : 'text-[#989595] hover:text-[#fbc0e2] hover:underline'}`}
+                        onClick={() => setSelectedTab(tab)}>
+                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </div>
+                ))}
                 </div>
+
                 <div className="search-bar">
                     {showFilters && (
                         <div className="flex space-x-4">
