@@ -9,7 +9,7 @@ import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 const SearchBar = ({ movies, tvs }) => {
     const { lists } = useLists();
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedTab, setSelectedTab] = useState('movies');
+    const [selectedTab, setSelectedTab] = useState('all');
     const [showFilters, setShowFilters] = useState(false);
 
     const dropdownData = {
@@ -201,11 +201,10 @@ const SearchBar = ({ movies, tvs }) => {
                     </button>
                 </div>
                 <div className="bubbles-container flex justify-end mt-2">
-                {['movies', 'tv shows', 'lists', 'users'].map((tab) => (
+                {['all','movies', 'tv shows', 'lists', 'users'].map((tab) => (
                     <div
                         key={tab}
-                        className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 cursor-pointer transition-all text-xl duration-300 ease-in-out ${selectedTab === tab ? 'underline text-[#7B1450]' : 'text-[#989595] hover:text-[#fbc0e2] hover:underline'}`}
-                        onClick={() => setSelectedTab(tab)}>
+                        className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 cursor-pointer transition-all text-xl duration-300 ease-in-out ${selectedTab === tab ? 'underline text-[#7B1450]' : 'text-[#989595] hover:text-[#fbc0e2] hover:underline'}`}onClick={() => setSelectedTab(tab)}>
                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </div>
                 ))}
@@ -276,6 +275,17 @@ const SearchBar = ({ movies, tvs }) => {
                     ) : (
                         <div>No lists available.</div>
                     )
+                )}
+                {selectedTab === 'all' && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {filteredData.movies.length > 0 ? filteredData.movies.map(movie => (
+                            <ContentItem key={movie.id} id={movie.id} type="Movie" src={movie.image_url} alt={movie.title} rating={movie.rating} />
+                        )) : <div>No movies available.</div>}
+                    
+                        {filteredData.tvShows.length > 0 ? filteredData.tvShows.map(tv => (
+                            <ContentItem key={tv.id} id={tv.id} type="TV Show" src={getImageUrl(tv.image_url)} alt={tv.title} rating={tv.rating || undefined} />
+                        )) : <div>No TV shows available.</div>}
+                    </div>
                 )}
             </Scrollbar>
         </div>
