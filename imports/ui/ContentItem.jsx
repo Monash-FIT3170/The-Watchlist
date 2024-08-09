@@ -19,7 +19,7 @@ const ContentItem = ({ content, isUserSpecificRating }) => {
           isRatingLoading: false,
           rating: rating ? rating.rating : content.rating // Default to the existing content rating if no user-specific rating is found
         };
-      }, [content.id]);
+      }, [content.contentId]);
       
 
     const [isOpen, setOpen] = useState(false);
