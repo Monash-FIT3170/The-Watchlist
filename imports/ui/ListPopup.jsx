@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useTracker } from 'meteor/react-meteor-data';
 import RatingStar from "./RatingStar";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiGrid, FiList } from "react-icons/fi";
 import RenameListModal from "./RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { FaUser, FaGlobe } from "react-icons/fa";
 import { RatingCollection } from "../db/Rating";
 import ContentItem from "./ContentItem";
 import ContentInfoModal from "./ContentInfoModal";  // Import the modal component
+
 
 const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const popupRef = useRef(null); // Ref for ListPopup
@@ -37,14 +38,14 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     const listHandle = Meteor.subscribe('userLists', listId);
     const subscribedListHandle = Meteor.subscribe('subscribedLists', Meteor.userId());
     const ratingsHandle = Meteor.subscribe('userRatings', Meteor.userId());
-  
+
     const list = ListCollection.findOne({ _id: listId }) || {};
     const ratings = RatingCollection.find({ userId: Meteor.userId() }).fetch(); // Fetch logged-in user's ratings
     const loading = !listHandle.ready() || !subscribedListHandle.ready() || !ratingsHandle.ready();
-  
+
     return { list, loading, ratings };
   }, [listId]);
-  
+
 
   const isListOwner = list.userId === Meteor.userId();
 
@@ -78,7 +79,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     setSelectedContent(contentWithRating); // Set the content with rating to be shown in ContentInfoModal
     setModalOpen(true); // Open ContentInfoModal
   };
-  
+
 
   const handleSubscribe = (listId) => {
     if (list.userId === Meteor.userId()) {
@@ -263,48 +264,51 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
         ref={popupRef}  // Ref for the ListPopup
         className="list-popup bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
       >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">{list.title}</h2>
-          <div className="flex space-x-2">
+<div className="flex justify-between items-center mb-4">
+    <h2 className="text-2xl font-bold">{list.title}</h2>
+    <div className="flex space-x-2">
+        <button
+            onClick={handleRenameListClick}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full flex items-center justify-center"
+            title="Rename List"
+            style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
+        >
+            <FiEdit size="24" />
+        </button>
+        <button
+            onClick={() => confirmDeleteList(list._id)}
+            className="bg-red-500 hover:bg-red-700 text-white font-bold rounded-full flex items-center justify-center"
+            title="Delete List"
+            style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
+        >
+            <FiTrash2 size="24" />
+        </button>
+        <button
+            onClick={() => setIsGridView(!isGridView)}
+            className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+            title={isGridView ? "Switch to List View" : "Switch to Grid View"}
+            style={{ width: 44, height: 44 }}
+        >
+            {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
+        </button>
+        {/* Conditionally render subscribe/unsubscribe button */}
+        {list.userId !== Meteor.userId() && (
             <button
-              onClick={handleRenameListClick}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 rounded-full"
-              title="Rename List"
-            >
-              <FiEdit className="text-lg" />
-            </button>
-            <button
-              onClick={() => confirmDeleteList(list._id)}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded-full"
-              title="Delete List"
-            >
-              <FiTrash2 className="text-lg" />
-            </button>
-            <button
-              onClick={() => setIsGridView(!isGridView)}
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold p-2 rounded-full"
-              title={isGridView ? "Switch to List View" : "Switch to Grid View"}
-            >
-              {isGridView ? "List View" : "Grid View"}
-            </button>
-            {/* Conditionally render subscribe/unsubscribe button */}
-            {list.userId !== Meteor.userId() && (
-              <button
                 onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
                 className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
-              >
-                {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-              </button>
-            )}
-
-            <button
-              className="text-2xl font-bold text-gray-500 hover:text-gray-800"
-              onClick={onClose}
             >
-              &times;
+                {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
             </button>
-          </div>
-        </div>
+        )}
+        <button
+            className="text-2xl font-bold text-gray-500 hover:text-gray-800"
+            onClick={onClose}
+        >
+            &times;
+        </button>
+    </div>
+</div>
+
         <div className="bubbles-container flex justify-start mt-2">
           {['all', 'movies', 'tv shows'].map((tab) => (
             <div
@@ -401,20 +405,24 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
       )}
 
       {showConfirmDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div ref={confirmDialogRef} className="bg-darker p-6 rounded-lg">
-            <p className="text-white mb-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
+          <div
+            ref={confirmDialogRef}
+            className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-gray-300">
               Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
             </p>
             <div className="flex justify-end space-x-4">
               <button
-                className="bg-gray-500 hover:bg-gray-700 text-white font-bold p-2 rounded"
+                className="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
                 onClick={resetConfirmationState}
               >
                 Cancel
               </button>
               <button
-                className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded"
+                className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                 onClick={handleDeleteConfirmed}
               >
                 Confirm
