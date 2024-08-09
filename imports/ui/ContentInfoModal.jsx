@@ -7,6 +7,8 @@ import Modal from './Modal';
 const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
 
   const contentId = content.contentId || content.id;
+  console.log("Content id:")
+  console.log(contentId)
 
   const [showModal, setShowModal] = useState(false);
   const [value, setValue] = useState(null);

@@ -45,9 +45,9 @@ const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
 
     console.log("Modal content:")
     console.log(content)
-    console.log(`Modal content id: ${content.id}`)
+    console.log(`Modal content id: ${content.contentId}`)
 
-    if (list && list.content.some(item => item.contentId === content.id)) {
+    if (list && list.content.some(item => item.contentId === content.contentId)) {
       toast.warn("This item is already in the list.");
     } else {
       Meteor.call('list.addContent', { listId, userId: Meteor.userId(), content }, (error) => {

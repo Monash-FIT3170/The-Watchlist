@@ -20,7 +20,7 @@ export const Movie = Class.create({
     name: "Movie",
     collection: MovieCollection,
     fields: {
-        id: {
+        contentId: {
             type: Number
         },
         title: {
@@ -114,7 +114,7 @@ export const TV = Class.create({
     name: "TV",
     collection: TVCollection,
     fields: {
-        id: {
+        contentId: {
             type: Number
         },
         title: {

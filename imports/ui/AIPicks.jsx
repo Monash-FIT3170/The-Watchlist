@@ -37,7 +37,7 @@ export default function AIPicks({ movies, tvs, currentUser }) {
             title: genre,
             content: genreMovies.map(movie => ({
                 ...movie,  // Spread the entire movie object
-                rating: globalRatings[movie.id]?.average || 0,
+                rating: globalRatings[movie.contentId]?.average || 0,
                 type: "Movie"
             }))
         };
@@ -50,7 +50,7 @@ export default function AIPicks({ movies, tvs, currentUser }) {
             title: genre,
             content: genreShows.map(tv => ({
                 ...tv,  // Spread the entire TV show object
-                rating: globalRatings[tv.id]?.average || 0,
+                rating: globalRatings[tv.contentId]?.average || 0,
                 type: "TV Show"
             }))
         };

@@ -31,6 +31,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const [isGridView, setIsGridView] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
+  const confirmDialogRef = useRef(null);
 
   const { list, loading, ratings } = useTracker(() => {
     const listHandle = Meteor.subscribe('userLists', listId);
