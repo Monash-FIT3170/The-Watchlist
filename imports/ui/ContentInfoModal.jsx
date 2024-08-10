@@ -1,10 +1,11 @@
+// imports/ui/ContentInfoModal.jsx
 import React, { useEffect, useState, forwardRef, useRef } from 'react';
 import ClickableRatingStar from './ClickableRatingStar';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Rating as RatingDB } from '../db/Rating';
 import Modal from './Modal';
 
-const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
+const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref) => {
 
   const contentId = content.contentId || content.id;
   console.log("Content id:")
@@ -14,9 +15,6 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content }, ref) => {
   const [value, setValue] = useState(null);
   const [selectedSeason, setSelectedSeason] = useState(null);
   const [episodes, setEpisodes] = useState([]);
-  
-  // Define modalRef using useRef
-  const modalRef = useRef(null);
 
   useEffect(() => {
     if (0 < content.rating && content.rating < 6) {

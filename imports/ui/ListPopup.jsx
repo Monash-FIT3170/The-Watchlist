@@ -1,3 +1,4 @@
+// imports/ui/ListPopup.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useTracker } from 'meteor/react-meteor-data';
 import RatingStar from "./RatingStar";
@@ -17,6 +18,7 @@ import ContentInfoModal from "./ContentInfoModal";  // Import the modal componen
 const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const popupRef = useRef(null); // Ref for ListPopup
   const contentInfoModalRef = useRef(null); // Ref for ContentInfoModal
+  const modalRef = useRef(null) // Ref for Modal
   const [expandedItem, setExpandedItem] = useState(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [contentDetails, setContentDetails] = useState({});
@@ -45,7 +47,6 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
 
     return { list, loading, ratings };
   }, [listId]);
-
 
   const isListOwner = list.userId === Meteor.userId();
 
@@ -110,24 +111,33 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     });
   }
 
+  // Define the handleClickOutside function inside the component
   const handleClickOutside = (event) => {
-    // Debug logs
     console.log("Click detected. Target:", event.target);
     console.log("popupRef current:", popupRef.current);
     console.log("contentInfoModalRef current:", contentInfoModalRef.current);
+    console.log("ModalRef current:", modalRef.current);
 
-    // Check if the click is outside both ListPopup and ContentInfoModal
+    // Avoid accessing `modalRef.current` if it's null
+    if (modalRef.current) {
+      console.log("is modal open:", isModalOpen);
+      console.log("modalRef.current:", modalRef.current);
+      console.log("modalRef.current.contains(event.target)", modalRef.current.contains(event.target));
+    }
+
     if (
       popupRef.current && !popupRef.current.contains(event.target) &&
-      (!contentInfoModalRef.current || !contentInfoModalRef.current.contains(event.target))
+      (!contentInfoModalRef.current || !contentInfoModalRef.current.contains(event.target)) &&
+      (!isModalOpen || !modalRef.current || !modalRef.current.contains(event.target))
     ) {
-      console.log("Click outside both modals detected, closing ListPopup.");
-      // onClose();
+      console.log("Click outside all modals detected, closing ListPopup.");
+      onClose();
       event.stopPropagation();
     } else {
       console.log("Click inside a modal, should not close.");
     }
   };
+  
 
   const handleRenameListClick = () => {
     if (list.title === 'Favourite' || list.title === 'To Watch') {
@@ -142,8 +152,8 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
-
+  }, [isModalOpen]); // Run useEffect whenever `isModalOpen` changes
+  
   const handleExpandClick = (id, title) => {
     if (expandedItem === id) {
       setExpandedItem(null);
@@ -244,10 +254,6 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     }
   };
 
-  console.log("list")
-  console.log(list)
-
-
   const filteredContent = list.content?.filter(item =>
     selectedTab === 'all' ||
     (selectedTab === 'movies' && item.type === 'Movie') ||
@@ -264,51 +270,50 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
         ref={popupRef}  // Ref for the ListPopup
         className="list-popup bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
       >
-<div className="flex justify-between items-center mb-4">
-    <h2 className="text-2xl font-bold">{list.title}</h2>
-    <div className="flex space-x-2">
-        <button
-            onClick={handleRenameListClick}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full flex items-center justify-center"
-            title="Rename List"
-            style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
-        >
-            <FiEdit size="24" />
-        </button>
-        <button
-            onClick={() => confirmDeleteList(list._id)}
-            className="bg-red-500 hover:bg-red-700 text-white font-bold rounded-full flex items-center justify-center"
-            title="Delete List"
-            style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
-        >
-            <FiTrash2 size="24" />
-        </button>
-        <button
-            onClick={() => setIsGridView(!isGridView)}
-            className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
-            title={isGridView ? "Switch to List View" : "Switch to Grid View"}
-            style={{ width: 44, height: 44 }}
-        >
-            {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
-        </button>
-        {/* Conditionally render subscribe/unsubscribe button */}
-        {list.userId !== Meteor.userId() && (
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">{list.title}</h2>
+          <div className="flex space-x-2">
             <button
+              onClick={handleRenameListClick}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full flex items-center justify-center"
+              title="Rename List"
+              style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
+            >
+              <FiEdit size="24" />
+            </button>
+            <button
+              onClick={() => confirmDeleteList(list._id)}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold rounded-full flex items-center justify-center"
+              title="Delete List"
+              style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
+            >
+              <FiTrash2 size="24" />
+            </button>
+            <button
+              onClick={() => setIsGridView(!isGridView)}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+              title={isGridView ? "Switch to List View" : "Switch to Grid View"}
+              style={{ width: 44, height: 44 }}
+            >
+              {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
+            </button>
+            {/* Conditionally render subscribe/unsubscribe button */}
+            {list.userId !== Meteor.userId() && (
+              <button
                 onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
                 className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
-            >
+              >
                 {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+              </button>
+            )}
+            <button
+              className="text-2xl font-bold text-gray-500 hover:text-gray-800"
+              onClick={onClose}
+            >
+              &times;
             </button>
-        )}
-        <button
-            className="text-2xl font-bold text-gray-500 hover:text-gray-800"
-            onClick={onClose}
-        >
-            &times;
-        </button>
-    </div>
-</div>
-
+          </div>
+        </div>
         <div className="bubbles-container flex justify-start mt-2">
           {['all', 'movies', 'tv shows'].map((tab) => (
             <div
@@ -399,8 +404,9 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
         <ContentInfoModal
           ref={contentInfoModalRef}  // Ref for the ContentInfoModal
           isOpen={isModalOpen}
-          onClose={closeContentInfoModal}
+          onClose={() => setModalOpen(false)}
           content={selectedContent}
+          modalRef={modalRef}
         />
       )}
 
