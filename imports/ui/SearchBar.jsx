@@ -192,13 +192,6 @@ const SearchBar = ({ movies, tvs }) => {
                             <AiOutlineSearch className="text-gray-400" size={20} />
                         </span>
                     </div>
-                    <button
-                        type="button"
-                        className="ml-4"
-                        onClick={() => setShowFilters(!showFilters)}
-                    >
-                        <AiOutlineFilter size={20} />
-                    </button>
                 </div>
                 <div className="bubbles-container flex justify-end mt-2">
                 {['all','movies', 'tv shows', 'lists', 'users'].map((tab) => (
@@ -208,8 +201,15 @@ const SearchBar = ({ movies, tvs }) => {
                         {tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </div>
                 ))}
+                <button
+                        type="button"
+                        className="ml-4"
+                        onClick={() => setShowFilters(!showFilters)}
+                        style={{ position: 'relative', top: '-1mm' }}
+                    >
+                        <AiOutlineFilter size={20} />
+                </button>
                 </div>
-
                 <div className="search-bar">
                     {showFilters && (
                         <div className="flex space-x-4">
