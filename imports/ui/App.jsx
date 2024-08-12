@@ -89,7 +89,7 @@ export const App = () => {
   const [tvs, setTvs] = useState([]);
   const [lists, setLists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [contentLoading,setContentLoading] = useState(true);
+  const [contentLoading, setContentLoading] = useState(true);
   const user = useTracker(() => Meteor.user());
 
   const { currentUser, userLoading } = useTracker(() => {
@@ -116,26 +116,15 @@ export const App = () => {
         console.error("Error fetching content:", error);
       } else {
         if (response.movie) {
-          // Add type "Movie" to each movie item
-          const moviesWithType = response.movie.map(movie => ({
-            ...movie,
-            type: "Movie"
-          }));
-          setMovies(moviesWithType);
+          setMovies(response.movie);
         }
         if (response.tv) {
-          // Add type "TV Show" to each TV show item
-          const tvsWithType = response.tv.map(tv => ({
-            ...tv,
-            type: "TV Show"
-          }));
-          setTvs(tvsWithType);
+          setTvs(response.tv);
         }
       }
+      setContentLoading(false);
     });
-    setContentLoading(false);
   }, []);
-  
 
   if (userLoading || contentLoading || userListsLoading) {
     return <Loading />;
@@ -162,7 +151,7 @@ export const App = () => {
           <Scrollbar className="h-custom">
             <Routes>
               <Route path="/fetch-test" element={<FetchTest />} />
-              <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} currentUser={currentUser} />} />
+              <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
               <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
               <Route path="/profile" element={<UserProfile currentUser={currentUser} />} />
               <Route path="/ai-picks" element={<AIPicks movies={movies} tvs={tvs} currentUser={currentUser} />} />

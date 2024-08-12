@@ -8,7 +8,17 @@ import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList';
 import ProfileDropdown from './ProfileDropdown';
 
-const SearchBar = ({ movies, tvs, currentUser }) => {
+const SearchBar = ({ currentUser }) => {
+
+    const [selectedTab, setSelectedTab] = useState('movies');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [globalRatings, setGlobalRatings] = useState({});
+    const [filteredMovies, setFilteredMovies] = useState([]);
+    const [filteredTVShows, setFilteredTVShows] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+
+    const limit = 50; // Number of items per page
 
     // Fetch lists directly from the database using useTracker
     const fetchLists = useCallback(() => {
@@ -17,12 +27,7 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
         return ListCollection.find({ userId }).fetch();
     }, []);
 
-    const [selectedTab, setSelectedTab] = useState('movies');
-
     const lists = useTracker(fetchLists, []);
-
-    const [searchTerm, setSearchTerm] = useState('');
-    const [globalRatings, setGlobalRatings] = useState({});
 
     useEffect(() => {
         // Fetch global ratings using the Meteor method
@@ -44,23 +49,45 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
 
     const users = useTracker(fetchUsers, [searchTerm]);
 
+    const fetchContent = useCallback(() => {
+        Meteor.call('content.read', { searchString: searchTerm, limit, page: currentPage }, (error, result) => {
+            if (!error) {
+                console.log("Content read result:", result);  // Log the full result
+                setTotalPages(Math.ceil(result.total / limit));
+                setFilteredMovies(result.movie || []); // Set to empty array if undefined
+                setFilteredTVShows(result.tv || []); // Set to empty array if undefined
+            } else {
+                console.error("Error fetching content:", error);
+                setFilteredMovies([]); // Ensure arrays are never undefined
+                setFilteredTVShows([]); // Ensure arrays are never undefined
+            }
+        });
+    }, [searchTerm, currentPage]);
+
+    useEffect(() => {
+        fetchContent();
+    }, [fetchContent]);
+
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value.toLowerCase());
+        setCurrentPage(0);
     };
 
-    const filteredMovies = movies.map(movie => ({
-        ...movie,
-        rating: globalRatings[movie.contentId]?.average || 0
-    })).filter(movie =>
-        movie.title && movie.title.toLowerCase().includes(searchTerm)
-    );
+    useEffect(() => {
+        console.log("Filtered Movies updated:", filteredMovies);
+    }, [filteredMovies]);    
 
-    const filteredTVShows = tvs.map(tv => ({
-        ...tv,
-        rating: globalRatings[tv.contentId]?.average || 0
-    })).filter(tv =>
-        tv.title && tv.title.toLowerCase().includes(searchTerm)
-    );
+    const handleNextPage = () => {
+        if (currentPage < totalPages - 1) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
 
     const filteredLists = lists.filter(list =>
         (list.title && list.title.toLowerCase().includes(searchTerm)) ||
@@ -104,14 +131,14 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
                 {selectedTab === 'movies' && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {filteredMovies.length > 0 ? filteredMovies.map(movie => (
-                            <ContentItem content={movie} />
+                            <ContentItem content={movie} key={movie.contentId} />
                         )) : <div>No movies available.</div>}
                     </div>
                 )}
                 {selectedTab === 'tv shows' && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
-                            <ContentItem content={tv} />
+                            <ContentItem content={tv} key={tv.contentId} />
                         )) : <div>No TV shows available.</div>}
                     </div>
                 )}
@@ -130,6 +157,23 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
                     )
                 )}
             </Scrollbar>
+            {/* Pagination buttons */}
+            <div className="flex justify-between mt-4">
+                <button
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 0}
+                    className={`py-2 px-4 rounded-lg ${currentPage === 0 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'}`}
+                >
+                    Previous
+                </button>
+                <button
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages - 1}
+                    className={`py-2 px-4 rounded-lg ${currentPage === totalPages - 1 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'}`}
+                >
+                    Next
+                </button>
+            </div>
         </div>
     );
 };

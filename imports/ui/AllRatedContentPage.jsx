@@ -28,7 +28,7 @@ const AllRatedContentPage = ({ currentUser }) => {
       return {
         ...content,
         rating: rating.rating,
-        type: rating.contentType
+        contentType: rating.contentType
       };
     });
 

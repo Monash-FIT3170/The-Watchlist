@@ -113,7 +113,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
         </div>
         <div className="p-4 text-white bg-dark" onClick={handleModalClick}>
           <div className="flex justify-between text-gray-400 text-sm mb-2">
-            {content.type === 'TV Show' ? (
+            {content.contentType === 'TV Show' ? (
               <div>{`${firstAiredYear} - ${lastAiredYear}`} • {numberOfSeasons} seasons</div>
             ) : (
               <div>{content.release_year}{content.runtime && ` • ${content.runtime} minutes`}</div>
@@ -121,7 +121,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
             <div>{content.genres?.join(', ')}</div>
           </div>
           <p className="text-white mb-4">{content.overview}</p>
-          {content.type === 'TV Show' && content.seasons && (
+          {content.contentType === 'TV Show' && content.seasons && (
             <div>
               <h3 className="text-xl mb-2">Seasons</h3>
               <div className="flex space-x-2 mb-4">
@@ -157,7 +157,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
               totalStars={5}
               rating={userRating || 0}
               onChange={(newValue) => {
-                addRating(Meteor.userId(), contentId, content.type, newValue);
+                addRating(Meteor.userId(), contentId, content.contentType, newValue);
               }}
             />
             <p className="mt-2">Average Rating: {rating ? `${rating}/5 (${totalRatings} reviews)` : "Not Yet Rated"}</p>
@@ -165,7 +165,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
         </div>
       </div>
       {/* Pass modalRef to the Modal component */}
-      <Modal ref={modalRef} show={showModal} onClose={() => setShowModal(false)} content={content} type={content.type} />
+      <Modal ref={modalRef} show={showModal} onClose={() => setShowModal(false)} content={content} type={content.contentType} />
     </div>
   ) : null;
 });

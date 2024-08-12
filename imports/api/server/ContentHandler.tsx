@@ -34,11 +34,11 @@ type GetContentResults = {
 //     }
 // }
 
-function GetContent(searchObject: object, searchOptions: object): GetContentResults {
-    const movieData = Movie.find(searchObject, searchOptions).fetch().map(doc => doc.raw());
-    const tvData = TV.find(searchObject, searchOptions).fetch().map(doc => doc.raw());
+function GetContent(searchObject: object, searchOptions: object, sortOptions: object = { popularity: -1 }): GetContentResults {
+    const movieData = Movie.find(searchObject, { ...searchOptions, sort: sortOptions }).fetch();
+    const tvData = TV.find(searchObject, { ...searchOptions, sort: sortOptions }).fetch();
 
-    return { movie: movieData, tv: tvData }
+    return { movie: movieData, tv: tvData };
 }
 
 const readContent: HandlerFunc = {
@@ -49,20 +49,29 @@ const readContent: HandlerFunc = {
         let searchOptions = {
             limit: limit ?? 50,
             skip: limit && page ? limit * page : 0
-        }
+        };
 
         let searchCriteria = {};
-        if (searchString == null) {
-            console.log('Fetching all content...');
+        if (searchString == null || searchString.trim() === '') {
+            console.log('Fetching all content or default content...');
+            searchCriteria = {}; // Fetch all content without filtering
         } else {
             console.log('Performing search with:', searchString);
             searchCriteria = { "$text": { "$search": searchString } };
         }
 
+        // Include a sort option for popularity
+        const sortOptions = { popularity: -1 };  // Sorting by popularity in descending order
+
         // Fetch content using the updated search criteria and convert to raw objects
-        const results = GetContent(searchCriteria, searchOptions);
-        // console.log('Fetched content:', results);
-        return results;
+        const results = GetContent(searchCriteria, searchOptions, sortOptions);
+
+        // Use optional chaining to safely access and map over results
+        const moviesWithType = results.movie?.map(movie => ({ ...movie, contentType: "Movie" })) || [];
+        const tvsWithType = results.tv?.map(tv => ({ ...tv, contentType: "TV Show" })) || [];
+
+        console.log('Results fetched:', { moviesWithType, tvsWithType });
+        return { movie: moviesWithType, tv: tvsWithType };
     }
 }
 

@@ -256,8 +256,8 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
 
   const filteredContent = list.content?.filter(item =>
     selectedTab === 'all' ||
-    (selectedTab === 'movies' && item.type === 'Movie') ||
-    (selectedTab === 'tv shows' && item.type === 'TV Show')
+    (selectedTab === 'movies' && item.contentType === 'Movie') ||
+    (selectedTab === 'tv shows' && item.contentType === 'TV Show')
   ) || [];
 
   if (loading) {
