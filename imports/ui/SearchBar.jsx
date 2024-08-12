@@ -176,6 +176,10 @@ const SearchBar = ({ movies, tvs }) => {
         }
     };
 
+    const toggleFilters = () => {
+        setShowFilters(!showFilters); 
+    };
+
     return (
         <div className="flex flex-col mb-2 bg-darker  overflow-hidden shadow-lg py-5 px-2 h-full ">
             <form className="flex flex-col items-start w-full pl-2">
@@ -202,35 +206,39 @@ const SearchBar = ({ movies, tvs }) => {
                     </div>
                 ))}
                 <button
-                        type="button"
-                        className="ml-4"
-                        onClick={() => setShowFilters(!showFilters)}
-                        style={{ position: 'relative', top: '-1mm' }}
-                    >
-                        <AiOutlineFilter size={20} />
+                    type="button"
+                    className={`ml-4 cursor-pointer transition-all duration-300 ease-in-out ${showFilters ? 'underline text-[#7B1450]' : 'text-[#989595]'} ${showFilters || 'hover:text-[#fbc0e2] hover:underline'}`}
+                    onClick={toggleFilters}
+                    style={{ position: 'relative', top: '-1mm' }}
+                >
+                    <AiOutlineFilter size={20} />
                 </button>
-                </div>
-                <div className="search-bar">
-                    {showFilters && (
-                        <div className="flex space-x-4">
-                            <FilterDropdown
-                                label="year"
-                                options={filters.year.options}
-                                selected={filters.year.selected}
-                                onFilterChange={handleFilterChange}
-                            />
-                            <FilterDropdown
-                                label="sort by"
-                                options={filters["sort by"].options}
-                                selected={filters["sort by"].selected}
-                                onFilterChange={handleFilterChange}
-                            />
-                            <FilterDropdown
-                                label="genres"
-                                options={filters.genres.options}
-                                selected={filters.genres.selected}
-                                onFilterChange={handleFilterChange}
-                            />
+                {showFilters && (
+                    <div className="flex space-x-4" style={{ display: 'inline-flex', marginLeft: '30px' }}>
+                            <div style={{ width: '80px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="year"
+                                    options={filters.year.options}
+                                    selected={filters.year.selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
+                            <div style={{ width: '90px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="sort by"
+                                    options={filters["sort by"].options}
+                                    selected={filters["sort by"].selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
+                            <div style={{ width: '90px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="genres"
+                                    options={filters.genres.options}
+                                    selected={filters.genres.selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
                         </div>
                     )}
                     {showFilters && (
