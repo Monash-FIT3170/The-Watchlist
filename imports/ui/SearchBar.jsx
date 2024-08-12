@@ -53,7 +53,12 @@ const SearchBar = ({ currentUser }) => {
         Meteor.call('content.read', { searchString: searchTerm, limit, page: currentPage }, (error, result) => {
             if (!error) {
                 console.log("Content read result:", result);  // Log the full result
-                setTotalPages(Math.ceil(result.total / limit));
+    
+                // Calculate the total number of pages using the lengths of the arrays
+                const totalItems = result.total;
+
+                setTotalPages(Math.ceil(totalItems / limit));
+    
                 setFilteredMovies(result.movie || []); // Set to empty array if undefined
                 setFilteredTVShows(result.tv || []); // Set to empty array if undefined
             } else {
@@ -66,7 +71,7 @@ const SearchBar = ({ currentUser }) => {
 
     useEffect(() => {
         fetchContent();
-    }, [fetchContent]);
+    }, [fetchContent, searchTerm]);
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value.toLowerCase());
@@ -78,16 +83,24 @@ const SearchBar = ({ currentUser }) => {
     }, [filteredMovies]);    
 
     const handleNextPage = () => {
+        console.log("Next clicked")
         if (currentPage < totalPages - 1) {
-            setCurrentPage(currentPage + 1);
+            setCurrentPage(prevPage => {
+                console.log("Next Page:", prevPage + 1);
+                return prevPage + 1;
+            });
         }
     };
-
+    
     const handlePreviousPage = () => {
         if (currentPage > 0) {
-            setCurrentPage(currentPage - 1);
+            setCurrentPage(prevPage => {
+                console.log("Previous Page:", prevPage - 1);
+                return prevPage - 1;
+            });
         }
     };
+    
 
     const filteredLists = lists.filter(list =>
         (list.title && list.title.toLowerCase().includes(searchTerm)) ||
@@ -168,8 +181,8 @@ const SearchBar = ({ currentUser }) => {
                 </button>
                 <button
                     onClick={handleNextPage}
-                    disabled={currentPage === totalPages - 1}
-                    className={`py-2 px-4 rounded-lg ${currentPage === totalPages - 1 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'}`}
+                    disabled={currentPage >= totalPages - 1}
+                    className={`py-2 px-4 rounded-lg ${currentPage >= totalPages - 1 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'}`}
                 >
                     Next
                 </button>
