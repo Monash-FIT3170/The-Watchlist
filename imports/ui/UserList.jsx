@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
+import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
 
-const UserList = React.memo(({ heading, users, searchTerm, onFollow, onUnfollow }) => {
+const UserList = React.memo(({ heading, users, searchTerm, onUnfollow }) => {
   const [containerWidth, setContainerWidth] = useState(0);
   const defaultAvatarUrl = './default-avatar.png';
   const navigate = useNavigate();
@@ -74,9 +74,9 @@ const UserList = React.memo(({ heading, users, searchTerm, onFollow, onUnfollow 
                 onClick={(e) => {
                   e.stopPropagation();
                   if (isFollowing(user._id)) {
-                    onUnfollow(user._id);
+                    handleUnfollow(user._id);
                   } else {
-                    onFollow(user._id);
+                    handleFollow(user._id);
                   }
                 }}
               >

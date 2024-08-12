@@ -31,24 +31,6 @@ const FollowersFollowingPage = ( { currentUser } ) => {
     <AllUsersPage 
       currentUser={currentUser}
       users={usersList}
-      onFollow={(userId) => {
-        Meteor.call('followUser', userId, (error) => {
-          if (error) {
-            console.error('Error following user:', error);
-          } else {
-            console.log('Followed user successfully');
-          }
-        });
-      }}
-      onUnfollow={(userId) => {
-        Meteor.call('unfollowUser', userId, (error) => {
-          if (error) {
-            console.error('Error unfollowing user:', error);
-          } else {
-            console.log('Unfollowed user successfully');
-          }
-        });
-      }}
     />
   );
 };

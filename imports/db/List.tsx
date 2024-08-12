@@ -31,7 +31,7 @@ export const ContentSummary = Class.create({
             type: Number,
             optional: true
         },
-        type: {
+        contentType: {
             type: String,
             validators: [{
                 type: 'choice',

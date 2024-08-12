@@ -109,9 +109,6 @@ const UserProfilePage = () => {
             <ProfileCard
               currentUser={currentUser}
               user={userProfile}
-              onFollow={() => {
-                // Define follow logic here
-              }}
               showFollowButton={Meteor.userId() !== userId}
             />
             <div className="p-6">

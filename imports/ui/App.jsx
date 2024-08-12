@@ -23,40 +23,6 @@ import AllRatedContentPage from "./AllRatedContentPage.jsx";
 import Loading from "./Loading.jsx";
 import { ListCollection } from '../db/List';
 
-const handleFollow = (userId) => {
-  Meteor.call('followUser', userId, (error, result) => {
-    if (error) {
-      console.error('Error following user:', error);
-    } else {
-      console.log('Followed user successfully');
-    }
-  });
-};
-
-const handleUnfollow = (userId) => {
-  Meteor.call('unfollowUser', userId, (error, result) => {
-    if (error) {
-      console.error('Error unfollowing user:', error);
-    } else {
-      console.log('Unfollowed user successfully');
-    }
-  });
-};
-
-const FetchTest = () => {
-  useEffect(() => {
-    Meteor.call("content.read", {}, (error, response) => {
-      if (error) {
-        console.error("Error fetching data:", error);
-      } else {
-        console.log("Received data:", response);
-      }
-    });
-  }, []);
-
-  return <div>Check console for fetched data.</div>;
-};
-
 const staticNavbarData = [
   {
     title: "Home",
@@ -85,11 +51,7 @@ const staticNavbarData = [
 ];
 
 export const App = () => {
-  const [movies, setMovies] = useState([]);
-  const [tvs, setTvs] = useState([]);
-  const [lists, setLists] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [contentLoading,setContentLoading] = useState(true);
   const user = useTracker(() => Meteor.user());
 
   const { currentUser, userLoading } = useTracker(() => {
@@ -110,38 +72,11 @@ export const App = () => {
     };
   }, []);
 
-  useEffect(() => {
-    Meteor.call("content.read", {}, (error, response) => {
-      if (error) {
-        console.error("Error fetching content:", error);
-      } else {
-        if (response.movie) {
-          // Add type "Movie" to each movie item
-          const moviesWithType = response.movie.map(movie => ({
-            ...movie,
-            type: "Movie"
-          }));
-          setMovies(moviesWithType);
-        }
-        if (response.tv) {
-          // Add type "TV Show" to each TV show item
-          const tvsWithType = response.tv.map(tv => ({
-            ...tv,
-            type: "TV Show"
-          }));
-          setTvs(tvsWithType);
-        }
-      }
-    });
-    setContentLoading(false);
-  }, []);
-  
-
-  if (userLoading || contentLoading || userListsLoading) {
+  if (userLoading || userListsLoading) {
     return <Loading />;
   }
 
-  if (!userLoading || !contentLoading) {
+  if (!userLoading) {
     if (!user) {
       return (
         <Routes>
@@ -152,7 +87,7 @@ export const App = () => {
     }
   }
 
-  if (!userLoading || !contentLoading) {
+  if (!userLoading) {
     return (
       <div className="app flex h-screen overflow-hidden bg-darkest text-white">
         <div>
@@ -161,16 +96,15 @@ export const App = () => {
         <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
           <Scrollbar className="h-custom">
             <Routes>
-              <Route path="/fetch-test" element={<FetchTest />} />
-              <Route path="/search" element={<SearchBar movies={movies} tvs={tvs} currentUser={currentUser} />} />
+              <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
               <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
               <Route path="/profile" element={<UserProfile currentUser={currentUser} />} />
-              <Route path="/ai-picks" element={<AIPicks movies={movies} tvs={tvs} currentUser={currentUser} />} />
+              <Route path="/ai-picks" element={<AIPicks currentUser={currentUser} />} />
               <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
               <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
               <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />
               <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
-              <Route path="/all-users" element={<AllUsersPage onFollow={handleFollow} onUnfollow={handleUnfollow} currentUser={currentUser} />} />
+              <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />
               <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
             </Routes>
           </Scrollbar>

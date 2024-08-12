@@ -26,26 +26,6 @@ const UserDiscovery = ({ currentUser }) => {
     setSearchTerm(event.target.value);
   };
 
-  const handleFollow = (userId) => {
-    Meteor.call('followUser', userId, (error, result) => {
-      if (error) {
-        console.error('Error following user:', error);
-      } else {
-        console.log('Followed user successfully');
-      }
-    });
-  };
-
-  const handleUnfollow = (userId) => {
-    Meteor.call('unfollowUser', userId, (error, result) => {
-      if (error) {
-        console.error('Error unfollowing user:', error);
-      } else {
-        console.log('Unfollowed user successfully');
-      }
-    });
-  };
-
   return (
     <div className="bg-darker min-h-screen p-4">
             <div className="absolute top-4 right-4">
@@ -66,9 +46,9 @@ const UserDiscovery = ({ currentUser }) => {
         </div>
       </div>
       <div>
-        <UserList heading="Popular Users" users={users} searchTerm={searchTerm} onFollow={handleFollow} onUnfollow={handleUnfollow} onSelectUser={selectUser} />
+        <UserList heading="Popular Users" users={users} searchTerm={searchTerm} onSelectUser={selectUser} />
         <div className="mt-8">
-          <UserList heading="Similar Users" users={users} searchTerm={searchTerm} onFollow={handleFollow} onUnfollow={handleUnfollow} onSelectUser={selectUser} />
+          <UserList heading="Similar Users" users={users} searchTerm={searchTerm} onSelectUser={selectUser} />
         </div>
       </div>
     </div>

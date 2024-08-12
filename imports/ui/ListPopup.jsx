@@ -117,18 +117,13 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     console.log("popupRef current:", popupRef.current);
     console.log("contentInfoModalRef current:", contentInfoModalRef.current);
     console.log("ModalRef current:", modalRef.current);
-
-    // Avoid accessing `modalRef.current` if it's null
-    if (modalRef.current) {
-      console.log("is modal open:", isModalOpen);
-      console.log("modalRef.current:", modalRef.current);
-      console.log("modalRef.current.contains(event.target)", modalRef.current.contains(event.target));
-    }
-
+    console.log("confirmDialogRef current:", confirmDialogRef.current);
+  
     if (
       popupRef.current && !popupRef.current.contains(event.target) &&
       (!contentInfoModalRef.current || !contentInfoModalRef.current.contains(event.target)) &&
-      (!isModalOpen || !modalRef.current || !modalRef.current.contains(event.target))
+      (!isModalOpen || !modalRef.current || !modalRef.current.contains(event.target)) &&
+      (!confirmDialogRef.current)
     ) {
       console.log("Click outside all modals detected, closing ListPopup.");
       onClose();
@@ -138,7 +133,6 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     }
   };
   
-
   const handleRenameListClick = () => {
     if (list.title === 'Favourite' || list.title === 'To Watch') {
       alert('Cannot rename Favourite or To Watch lists');
@@ -256,8 +250,8 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
 
   const filteredContent = list.content?.filter(item =>
     selectedTab === 'all' ||
-    (selectedTab === 'movies' && item.type === 'Movie') ||
-    (selectedTab === 'tv shows' && item.type === 'TV Show')
+    (selectedTab === 'movies' && item.contentType === 'Movie') ||
+    (selectedTab === 'tv shows' && item.contentType === 'TV Show')
   ) || [];
 
   if (loading) {
@@ -411,9 +405,8 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
       )}
 
       {showConfirmDialog && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50" ref={confirmDialogRef}>
           <div
-            ref={confirmDialogRef}
             className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
@@ -423,13 +416,19 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
             <div className="flex justify-end space-x-4">
               <button
                 className="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
-                onClick={resetConfirmationState}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetConfirmationState();
+                }}
               >
                 Cancel
               </button>
               <button
                 className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                onClick={handleDeleteConfirmed}
+                onClick={(e) => {
+                  e.stopPropagation();  // Stop propagation when confirming deletion
+                  handleDeleteConfirmed();
+                }}
               >
                 Confirm
               </button>

@@ -3,8 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Scrollbar from './ScrollBar';
 import ProfileDropdown from './ProfileDropdown';
 import { AiOutlineSearch } from 'react-icons/ai';
+import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
 
-const AllUsersPage = ({ users: propUsers, onFollow, onUnfollow, currentUser }) => {
+
+const AllUsersPage = ({ users: propUsers, currentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUserId = Meteor.userId();
@@ -66,9 +68,9 @@ const AllUsersPage = ({ users: propUsers, onFollow, onUnfollow, currentUser }) =
                     onClick={(e) => {
                       e.stopPropagation();
                       if (isFollowing(user._id)) {
-                        onUnfollow(user._id);
+                        handleUnfollow(user._id);
                       } else {
-                        onFollow(user._id);
+                        handleFollow(user._id);
                       }
                     }}
                   >

@@ -6,3 +6,9 @@ body {
   /* font-family: sans-serif; */
   font-family: "Roboto", sans-serif;
 }
+
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem; /* Adjust this gap as needed */
+}
