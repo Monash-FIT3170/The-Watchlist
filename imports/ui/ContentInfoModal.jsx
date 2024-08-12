@@ -13,8 +13,20 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
   const [selectedSeason, setSelectedSeason] = useState(null);
   const [episodes, setEpisodes] = useState([]);
   const scrollContainerRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [showEpisodes, setShowEpisodes] = useState(false);
+  const [selectedSeasonEpisodes, setSelectedSeasonEpisodes] = useState([]);
+
+  const loadEpisodes = (seasonNumber) => {
+    const selectedSeason = content.seasons.find(season => season.season_number === seasonNumber);
+    if (selectedSeason) {
+      setSelectedSeasonEpisodes(selectedSeason.episodes);
+      setShowEpisodes(true);
+    }
+  };
+
+  const handleBackClick = () => {
+    setShowEpisodes(false);
+  };
 
   useEffect(() => {
     if (0 < content.rating && content.rating < 6) {
@@ -63,17 +75,6 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
     });
   };
 
-  const loadEpisodes = (seasonNumber) => {
-    Meteor.call('tv.getEpisodes', contentId, seasonNumber, (error, result) => {
-      if (error) {
-        console.error('Failed to load episodes:', error);
-      } else {
-        setEpisodes(result);
-        setSelectedSeason(seasonNumber);
-      }
-    });
-  };
-
   const handleScroll = (direction) => {
     if (scrollContainerRef.current) {
       const scrollAmount = 200; // adjust this value to scroll more or less
@@ -113,41 +114,41 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
 
   return isOpen ? (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-      onClick={handleCloseClick}
-      style={{ zIndex: 1000 }}
-    >
-      <div
-        ref={ref} // Attach the forwarded ref here
-        className="modal-content w-1/2 bg-gray-800 bg-opacity-90 rounded-lg shadow-lg overflow-hidden relative"
-        onClick={handleModalBackgroundClick}
-      >
-        <div className="relative">
-          <img
-            src={content.background_url || content.image_url}
-            alt={content.title}
-            className="w-full h-auto object-cover opacity-75"
-          />
-          <div className="absolute bottom-4 left-4 text-white text-3xl font-bold">
-            {content.title}
-            <button
-              className="ml-5 p-0 w-12 h-12 bg-magenta rounded-full hover:bg-dark-magenta active:shadow-lg mouse shadow transition ease-in duration-200 focus:outline-none"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowModal(true);
-              }}
-            >
-              <svg viewBox="0 0 20 20" enableBackground="new 0 0 20 20" className="w-6 h-6 inline-block">
-                <path
-                  fill="#FFFFFF"
-                  d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601
-                   C4.049,11,4,10.553,4,10c0-0.553,0.049-1,0.601-1H9V4.601C9,4.048,9.447,4,10,4c0.553,0,1,0.048,1,0.601V9h4.399
-                   C15.952,9,16,9.447,16,10z"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
+  className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+  onClick={handleCloseClick}
+  style={{ zIndex: 1000 }}
+>
+  <div
+    ref={ref}
+    className="modal-content w-1/2 max-h-[80vh] bg-gray-800 bg-opacity-90 rounded-lg shadow-lg overflow-y-auto relative"
+    onClick={handleModalBackgroundClick}
+  >
+    <div className="relative">
+      <img
+        src={content.background_url || content.image_url}
+        alt={content.title}
+        className="w-full h-auto object-cover opacity-75"
+      />
+      <div className="absolute bottom-4 left-4 text-white text-3xl font-bold">
+        {content.title}
+        <button
+          className="ml-5 p-0 w-12 h-12 bg-magenta rounded-full hover:bg-dark-magenta active:shadow-lg mouse shadow transition ease-in duration-200 focus:outline-none"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowModal(true);
+          }}
+        >
+          <svg viewBox="0 0 20 20" enableBackground="new 0 0 20 20" className="w-6 h-6 inline-block">
+            <path
+              fill="#FFFFFF"
+              d="M16,10c0,0.553-0.048,1-0.601,1H11v4.399C11,15.951,10.553,16,10,16c-0.553,0-1-0.049-1-0.601V11H4.601
+              C4.049,11,4,10.553,4,10c0-0.553,0.049-1,0.601-1H9V4.601C9,4.048,9.447,4,10,4c0.553,0,1,0.048,1,0.601V9h4.399
+              C15.952,9,16,9.447,16,10z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
         <div className="p-4 text-white bg-dark" onClick={handleModalClick}>
           <div className="flex justify-between text-gray-400 text-sm mb-2">
             {content.contentType === 'TV Show' ? (
@@ -158,7 +159,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
             <div>{content.genres?.join(', ')}</div>
           </div>
           <p className="text-white mb-4">{content.overview}</p>
-          {content.contentType === 'TV Show' && content.seasons && (
+          {content.contentType === 'TV Show' && content.seasons && !showEpisodes ? (
             <div>
               <h3 className="text-xl mb-2">Seasons</h3>
               <div className="relative flex items-center">
@@ -178,7 +179,26 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
                 </Scrollbar>
               </div>
             </div>
-          )}
+          ) : showEpisodes ? (
+            <div>
+              <button onClick={handleBackClick} className="mb-4 text-gray-400 hover:text-white">
+                &larr; Back to seasons
+              </button>
+              <h3 className="text-xl mb-2">Episodes</h3>
+              <Scrollbar className="max-h-28" backgroundColor="#FFFFFF">
+                <ul>
+                  {selectedSeasonEpisodes.map((episode, index) => (
+                    <li key={index} className="mb-2">
+                      <div className="text-lg">{`Episode ${episode.episode_number}: ${episode.title}`}</div>
+                      <div className="text-sm text-gray-400">Runtime: {episode.runtime} minutes</div>
+                    </li>
+                  ))}
+                </ul>
+              </Scrollbar>
+
+            </div>
+
+          ) : null}
           <div className="flex flex-col items-start mb-4 mt-2">
             <ClickableRatingStar
               totalStars={5}
@@ -191,10 +211,10 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
           </div>
         </div>
       </div>
-      {/* Pass modalRef to the Modal component */}
       <Modal ref={modalRef} show={showModal} onClose={() => setShowModal(false)} content={content} type={content.contentType} />
     </div>
   ) : null;
+
 });
 
 export default ContentInfoModal;
