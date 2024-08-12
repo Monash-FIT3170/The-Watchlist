@@ -141,35 +141,37 @@ const SearchBar = ({ currentUser }) => {
                 </div>
             </form>
             <Scrollbar className="search-results-container flex-grow overflow-auto">
-                {selectedTab === 'movies' && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {filteredMovies.length > 0 ? filteredMovies.map(movie => (
-                            <ContentItem content={movie} key={movie.contentId} />
-                        )) : <div>No movies available.</div>}
-                    </div>
-                )}
-                {selectedTab === 'tv shows' && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
-                            <ContentItem content={tv} key={tv.contentId} />
-                        )) : <div>No TV shows available.</div>}
-                    </div>
-                )}
-                {selectedTab === 'lists' && (
-                    filteredLists.length > 0 ? (
-                        <ListDisplay listData={filteredLists} />
-                    ) : (
-                        <div>No lists available.</div>
-                    )
-                )}
-                {selectedTab === 'users' && (
-                    users.length > 0 ? (
-                        <UserList users={users} searchTerm={searchTerm} currentUser={currentUser} />
-                    ) : (
-                        <div>No users found.</div>
-                    )
-                )}
-            </Scrollbar>
+    {selectedTab === 'movies' && (
+        <div className="grid-responsive">
+            {filteredMovies.length > 0 ? filteredMovies.map(movie => (
+                <ContentItem content={movie} key={movie.contentId} />
+            )) : <div>No movies available.</div>}
+        </div>
+    )}
+    {selectedTab === 'tv shows' && (
+        <div className="grid-responsive">
+            {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
+                <ContentItem content={tv} key={tv.contentId} />
+            )) : <div>No TV shows available.</div>}
+        </div>
+    )}
+    {selectedTab === 'lists' && (
+        filteredLists.length > 0 ? (
+            <ListDisplay listData={filteredLists} />
+        ) : (
+            <div>No lists available.</div>
+        )
+    )}
+    {selectedTab === 'users' && (
+        users.length > 0 ? (
+            <UserList users={users} searchTerm={searchTerm} currentUser={currentUser} />
+        ) : (
+            <div>No users found.</div>
+        )
+    )}
+</Scrollbar>
+
+
             {/* Pagination buttons */}
             <div className="flex justify-between mt-4">
                 <button

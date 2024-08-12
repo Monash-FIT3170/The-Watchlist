@@ -75,7 +75,6 @@ export default function UserProfile() {
       <ProfileCard
         currentUser={currentUser}
         user={userProfile}
-        onFollow={null}
         showFollowButton={false}
       />
       <div className="p-6">

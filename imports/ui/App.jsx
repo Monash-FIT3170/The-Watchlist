@@ -23,26 +23,6 @@ import AllRatedContentPage from "./AllRatedContentPage.jsx";
 import Loading from "./Loading.jsx";
 import { ListCollection } from '../db/List';
 
-const handleFollow = (userId) => {
-  Meteor.call('followUser', userId, (error, result) => {
-    if (error) {
-      console.error('Error following user:', error);
-    } else {
-      console.log('Followed user successfully');
-    }
-  });
-};
-
-const handleUnfollow = (userId) => {
-  Meteor.call('unfollowUser', userId, (error, result) => {
-    if (error) {
-      console.error('Error unfollowing user:', error);
-    } else {
-      console.log('Unfollowed user successfully');
-    }
-  });
-};
-
 const staticNavbarData = [
   {
     title: "Home",
@@ -124,7 +104,7 @@ export const App = () => {
               <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
               <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />
               <Route path="/" element={user ? <Navigate to="/home" /> : <Navigate to="/login" />} />
-              <Route path="/all-users" element={<AllUsersPage onFollow={handleFollow} onUnfollow={handleUnfollow} currentUser={currentUser} />} />
+              <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />
               <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
             </Routes>
           </Scrollbar>
