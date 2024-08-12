@@ -21,11 +21,11 @@ export const Movie = Class.create({
     collection: MovieCollection,
     fields: {
         contentId: {
-            type: Number
+            type: Number,
+            index: 1
         },
         title: {
-            type: String,
-            index: 'text'
+            type: String
         },
         overview: {
             type: String
@@ -115,11 +115,11 @@ export const TV = Class.create({
     collection: TVCollection,
     fields: {
         contentId: {
-            type: Number
+            type: Number,
+            index: 1
         },
         title: {
-            type: String,
-            index: 'text'
+            type: String
         },
         popularity: {
             type: Number,
