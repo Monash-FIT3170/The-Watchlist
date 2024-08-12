@@ -50,14 +50,14 @@ const SearchBar = ({ movies, tvs, currentUser }) => {
 
     const filteredMovies = movies.map(movie => ({
         ...movie,
-        rating: globalRatings[movie.id]?.average || 0
+        rating: globalRatings[movie.contentId]?.average || 0
     })).filter(movie =>
         movie.title && movie.title.toLowerCase().includes(searchTerm)
     );
 
     const filteredTVShows = tvs.map(tv => ({
         ...tv,
-        rating: globalRatings[tv.id]?.average || 0
+        rating: globalRatings[tv.contentId]?.average || 0
     })).filter(tv =>
         tv.title && tv.title.toLowerCase().includes(searchTerm)
     );

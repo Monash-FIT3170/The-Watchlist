@@ -22,7 +22,7 @@ const createRating: HandlerFunc = {
 
         // Check that the content with the specified ID exists
         const contentCollection = contentType === "TV Show" ? TV : Movie;
-        if (!contentCollection.findOne({id: contentId})) {
+        if (!contentCollection.findOne({contentId: contentId})) {
             throw new Meteor.Error('not-found', `Content of type ${contentType} with ID ${contentId} does not exist!`);
         }
         

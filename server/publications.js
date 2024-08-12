@@ -71,8 +71,8 @@ Meteor.publish('ratedContent', function (userId) {
 
   return [
     RatingCollection.find({ userId }),
-    MovieCollection.find({ id: { $in: movieIds } }),
-    TVCollection.find({ id: { $in: tvIds } })
+    MovieCollection.find({ contentId: { $in: movieIds } }),
+    TVCollection.find({ contentId: { $in: tvIds } })
   ];
 });
 

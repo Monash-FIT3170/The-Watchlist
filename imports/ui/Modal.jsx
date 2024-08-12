@@ -4,11 +4,16 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { ListCollection } from '../db/List';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Scrollbar from './ScrollBar'; // Import the Scrollbar component
+import Scrollbar from './ScrollBar';
 
 const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
+  const modalRef = ref || useRef();
 
-  const modalRef = useRef();
+  useEffect(() => {
+    if (show) {
+      console.log("ModalRef after render:", modalRef.current);
+    }
+  }, [show]);
 
   // Fetch the lists for the current user
   const { lists, loading } = useTracker(() => {
@@ -22,19 +27,17 @@ const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Check if the click was outside the modal
       if (modalRef.current && !modalRef.current.contains(event.target)) {
-        if (!event.target.closest('button')) {
-          onClose();
-        }
+        onClose();
       }
     };
-  
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [onClose]);
-  
 
   if (!show || loading) return null;
 
@@ -45,9 +48,9 @@ const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
 
     console.log("Modal content:")
     console.log(content)
-    console.log(`Modal content id: ${content.id}`)
+    console.log(`Modal content id: ${content.contentId}`)
 
-    if (list && list.content.some(item => item.contentId === content.id)) {
+    if (list && list.content.some(item => item.contentId === content.contentId)) {
       toast.warn("This item is already in the list.");
     } else {
       Meteor.call('list.addContent', { listId, userId: Meteor.userId(), content }, (error) => {
@@ -61,11 +64,10 @@ const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
     }
   };
 
-
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-1050">
       <ToastContainer style={{ zIndex: 1001 }} />
-      <div ref={ref || modalRef} className="bg-gray-900 rounded-lg shadow-lg p-8 max-w-2xl w-full h-3/4 relative">
+      <div ref={modalRef} className="bg-gray-900 rounded-lg shadow-lg p-8 max-w-2xl w-full h-3/4 relative" onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-2 right-2 text-white text-xl">×</button>
         <div className="mb-4 h-full">
           <div className="bg-gray-800 rounded-lg shadow-lg p-4 h-full overflow-hidden">

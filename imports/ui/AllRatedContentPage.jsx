@@ -19,19 +19,23 @@ const AllRatedContentPage = ({ currentUser }) => {
     const subscription = Meteor.subscribe('ratedContent', userId);
     const isCurrentUser = userId === currentUser._id;
     const ratings = userSpecific 
-    ? RatingCollection.find({ userId: currentUser._id }).fetch() 
-    : RatingCollection.find({ userId }).fetch();
+      ? RatingCollection.find({ userId: currentUser._id }).fetch() 
+      : RatingCollection.find({ userId }).fetch();
     const contentDetails = ratings.map(rating => {
       const collection = rating.contentType === 'Movie' ? MovieCollection : TVCollection;
+      const content = collection.findOne({ contentId: rating.contentId });
+
       return {
-        ...collection.findOne({ id: rating.contentId }),
+        ...content,
         rating: rating.rating,
-        contentType: rating.contentType
+        type: rating.contentType
       };
     });
 
+    const filteredContent = contentDetails.filter(content => content.title && content.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
     return {
-      ratedContent: contentDetails.filter(content => content.title && content.title.toLowerCase().includes(searchTerm.toLowerCase())),
+      ratedContent: filteredContent,
       isLoading: !subscription.ready()
     };
   }, [userId, searchTerm, currentUser, userSpecific]);
