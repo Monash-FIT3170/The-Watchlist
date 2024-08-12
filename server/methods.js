@@ -6,6 +6,7 @@ import { RatingCollection } from '../imports/db/Rating';
 import Lists from '../imports/db/List';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { ListCollection } from '../imports/db/List';
+import { MovieCollection, TVCollection } from '../imports/db/Content';
 
 Meteor.methods({
   followUser(targetUserId) {
@@ -280,8 +281,17 @@ Meteor.methods({
     return rating ? rating.rating : null; // Return null if no rating exists
   },
 });
+Meteor.methods({
+  'genres.getAll': async function () {
+    const movieGenres = await MovieCollection.rawCollection().distinct("genres");
+    const tvGenres = await TVCollection.rawCollection().distinct("genres");
 
-// In methods.js
+    // Combine and deduplicate the genres
+    const allGenres = Array.from(new Set([...movieGenres, ...tvGenres]));
+
+    return allGenres;
+  }
+});
 Meteor.methods({
   'ratings.getGlobalAverages'() {
     const ratings = RatingCollection.find().fetch();
