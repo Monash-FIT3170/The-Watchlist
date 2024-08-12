@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const Scrollbar = ({ children, className = '', backgroundColor = '#FFFFFF' }) => {
+const Scrollbar = ({ children, className = '', backgroundColor = '#FFFFFF', horizontal = false }) => {
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollRef = useRef(null);
 
@@ -19,17 +19,20 @@ const Scrollbar = ({ children, className = '', backgroundColor = '#FFFFFF' }) =>
     scrollableElement.addEventListener('scroll', handleScroll);
 
     return () => {
-      scrollableElement.removeEventListener('scroll', handleScroll);
+      if (scrollableElement) {
+        scrollableElement.removeEventListener('scroll', handleScroll);
+      }
     };
   }, []);
 
   return (
     <div
       ref={scrollRef}
-      className={`${className} relative overflow-y-auto scrollbar-webkit`}
+      className={`${className} relative overflow-${horizontal ? 'x-auto' : 'y-auto'} scrollbar-webkit`}
       style={{
-        overflowY: 'overlay',
-        paddingRight: '8px',
+        overflowY: horizontal ? 'hidden' : 'overlay',
+        overflowX: horizontal ? 'auto' : 'hidden',
+        paddingRight: horizontal ? '0' : '8px',
         boxSizing: 'content-box',
         '--scrollbar-thumb-color': isScrolling ? "#808080" : "#101010", // Change color to match background when scrolling
         '--scrollbar-thumb-bg': backgroundColor

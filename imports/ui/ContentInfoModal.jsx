@@ -1,26 +1,30 @@
-// imports/ui/ContentInfoModal.jsx
 import React, { useEffect, useState, forwardRef, useRef } from 'react';
 import ClickableRatingStar from './ClickableRatingStar';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Rating as RatingDB } from '../db/Rating';
 import Modal from './Modal';
+import Scrollbar from './ScrollBar';
 
 const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref) => {
 
   const contentId = content.contentId || content.id;
-  console.log("Content id:")
-  console.log(contentId)
-
   const [showModal, setShowModal] = useState(false);
   const [value, setValue] = useState(null);
   const [selectedSeason, setSelectedSeason] = useState(null);
   const [episodes, setEpisodes] = useState([]);
+  const scrollContainerRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   useEffect(() => {
     if (0 < content.rating && content.rating < 6) {
       setValue(content.rating);
     }
   }, [content]);
+
+  useEffect(() => {
+    updateScrollButtons();
+  }, [content.seasons]);
 
   const handleRating = (newValue) => {
     content.rating = newValue;
@@ -35,6 +39,10 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
     onClose();
   };
 
+  const handleModalClick = (event) => {
+    event.stopPropagation();
+  }
+
   const { rating, userRating, totalRatings } = useTracker(() => {
     const ratings = RatingDB.find({ contentId: contentId }).fetch();
     const total = ratings.reduce((acc, cur) => acc + cur.rating, 0);
@@ -46,7 +54,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
       totalRatings: ratings.length
     };
   });
-  
+
   const addRating = (userId, contentId, contentType, rating) => {
     Meteor.call('ratings.addOrUpdate', { userId, contentId, contentType, rating }, (error) => {
       if (error) {
@@ -66,9 +74,38 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
     });
   };
 
-  const handleModalClick = (event) => {
-    event.stopPropagation();
+  const handleScroll = (direction) => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 200; // adjust this value to scroll more or less
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+    }
   };
+
+  const updateScrollButtons = () => {
+    if (scrollContainerRef.current) {
+      setCanScrollLeft(scrollContainerRef.current.scrollLeft > 0);
+      setCanScrollRight(
+        scrollContainerRef.current.scrollWidth >
+        scrollContainerRef.current.clientWidth + scrollContainerRef.current.scrollLeft
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.addEventListener('scroll', updateScrollButtons);
+    }
+
+    return () => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.removeEventListener('scroll', updateScrollButtons);
+      }
+    };
+  }, []);
+
 
   const firstAiredYear = new Date(content.first_aired).getFullYear();
   const lastAiredYear = content.last_aired ? new Date(content.last_aired).getFullYear() : 'present';
@@ -124,35 +161,25 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
           {content.contentType === 'TV Show' && content.seasons && (
             <div>
               <h3 className="text-xl mb-2">Seasons</h3>
-              <div className="flex space-x-2 mb-4">
-                {content.seasons.map((season, index) => (
-                  <button
-                    key={index}
-                    className={`px-4 py-2 rounded ${selectedSeason === season.season_number ? 'bg-gray-700' : 'bg-gray-500'}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      loadEpisodes(season.season_number);
-                    }}
-                  >
-                    Season {season.season_number}
-                  </button>
-                ))}
+              <div className="relative flex items-center">
+                <Scrollbar className="whitespace-nowrap" horizontal>
+                  {content.seasons.map((season, index) => (
+                    <button
+                      key={index}
+                      className={`px-6 py-2 mb-2 mr-2 rounded ${selectedSeason === season.season_number ? 'bg-gray-700' : 'bg-gray-500'}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        loadEpisodes(season.season_number);
+                      }}
+                    >
+                      Season {season.season_number}
+                    </button>
+                  ))}
+                </Scrollbar>
               </div>
-              {episodes.length > 0 && (
-                <div>
-                  <h4 className="text-lg mb-2">Episodes</h4>
-                  <ul className="space-y-2">
-                    {episodes.map((episode, index) => (
-                      <li key={index} className="border-b border-gray-600 pb-2">
-                        <strong>Episode {episode.episode_number}:</strong> {episode.title}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           )}
-          <div className="flex flex-col items-start mb-4">
+          <div className="flex flex-col items-start mb-4 mt-2">
             <ClickableRatingStar
               totalStars={5}
               rating={userRating || 0}

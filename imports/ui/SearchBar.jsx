@@ -145,28 +145,28 @@ const SearchBar = ({ currentUser }) => {
         <div className="grid-responsive">
             {filteredMovies.length > 0 ? filteredMovies.map(movie => (
                 <ContentItem content={movie} key={movie.contentId} />
-            )) : <div>No movies available.</div>}
+            )) : <div></div>}
         </div>
     )}
     {selectedTab === 'tv shows' && (
         <div className="grid-responsive">
             {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
                 <ContentItem content={tv} key={tv.contentId} />
-            )) : <div>No TV shows available.</div>}
+            )) : <div></div>}
         </div>
     )}
     {selectedTab === 'lists' && (
         filteredLists.length > 0 ? (
             <ListDisplay listData={filteredLists} />
         ) : (
-            <div>No lists available.</div>
+            <div></div>
         )
     )}
     {selectedTab === 'users' && (
         users.length > 0 ? (
             <UserList users={users} searchTerm={searchTerm} currentUser={currentUser} />
         ) : (
-            <div>No users found.</div>
+            <div></div>
         )
     )}
 </Scrollbar>
