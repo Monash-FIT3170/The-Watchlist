@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import ContentList from './ContentList.jsx';
 import Scrollbar from './ScrollBar';
 import { Meteor } from 'meteor/meteor';
-import { check } from 'meteor/check';
-import ProfileDropdown from './ProfileDropdown.jsx';
 import AIPicksHeader from './AIPicksHeader.jsx';
 import { useTracker } from 'meteor/react-meteor-data';
 import { ListCollection } from '../db/List';
@@ -16,10 +14,7 @@ export default function AIPicks() {
     const DISPLAY_SHOWS = "Display Show";
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
     const [globalRatings, setGlobalRatings] = useState({});
-    const [movies, setMovies] = useState([]);
-    const [tvs, setTvs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [genres, setGenres] = useState([]);
     const [recommendedMovies, setRecommendedMovies] = useState([]);
     const [recommendedShows, setRecommendedShows] = useState([]);
     const [randomMovieNames, setRandomMovieNames] = useState([]);
@@ -55,26 +50,7 @@ export default function AIPicks() {
       }, []);
 
     useEffect(() => {
-        // Fetch all genres from the backend
-       // Meteor.call('genres.getAll', (error, result) => {
-         //   if (!error) {
-          //      setGenres(result);
-         //   } else {
-         //       console.error("Error fetching genres:", error);
-         //   }
-       // });
-
-        // Fetch content using content.read method
-        //Meteor.call('content.read', { limit: 500 }, (error, result) => {  // Adjust the limit as needed
-            //if (!error) {
-               // setMovies(result.movie || []);
-               // setTvs(result.tv || []);
-           // } else {
-               // console.error("Error fetching content:", error);
-           // }
-           // setLoading(false);
-       // });
-
+        
 
         // Fetch global ratings using the Meteor method
         Meteor.call('ratings.getGlobalAverages', (error, result) => {
@@ -105,17 +81,19 @@ export default function AIPicks() {
 
                 const favouritesList = lists.find(list => list.listType === 'Favourite');
                 const toWatchList = lists.find(list => list.listType === 'To Watch');
-                const customList = lists.find(list => list.listType === 'Custom');
-
                 
 
-                const randomSelections = [
-                    selectRandomContent(favouritesList,5),
-                    selectRandomContent(toWatchList,5),
-                    selectRandomContent(customList,5)
-                ].filter(Boolean);  // Filter out null values
+                const randomSelections = []
+                //ensure we actually have content in the list before selecting random content   
+                if (favouritesList.content.length !=0) {
+                    randomSelections.push(selectRandomContent(favouritesList, 5));
+                }
+                if (toWatchList.content.length !=0) {
+                    randomSelections.push(selectRandomContent(toWatchList, 5));
+                }
 
                
+                //map the titles of the selections and set them
                 const titles = randomSelections.map(item => item[0].title);
                 setRandomMovieNames(titles);
                 
@@ -126,7 +104,6 @@ export default function AIPicks() {
                 // Separate selected items into movies and TV shows
                 for (const selection of randomSelections) {
                     const item = selection[0]
-                    
                     if (item.contentType === 'Movie') {
                         movieTitles.push(item.title);
                     } else if (item.contentType === 'TV Show') {
@@ -187,31 +164,6 @@ export default function AIPicks() {
         fetchRecommendations();
     }, [lists, loading2]);
 
-    //let movieContentLists = genres.map(genre => {
-      //  const genreMovies = movies.filter(item => item.genres && item.genres.includes(genre)).slice(0, 10);
-        //return {
-          //  listId: genre + "Movies",
-            //title: genre,
-            //content: genreMovies.map(movie => ({
-              //  ...movie,  // Spread the entire movie object
-                //rating: globalRatings[movie.contentId]?.average || 0,
-              //  contentType: "Movie"
-           // }))
-       // };
-    //});
-
-    //let showContentLists = genres.map(genre => {
-       // const genreShows = tvs.filter(item => item.genres && item.genres.includes(genre)).slice(0, 10);
-      //  return {
-       //     listId: genre + "Shows",
-        //    title: genre,
-        //    content: genreShows.map(tv => ({
-        //        ...tv,  // Spread the entire TV show object
-        //        rating: globalRatings[tv.contentId]?.average || 0,
-         //       contentType: "TV Show"
-         //   }))
-       // };
-   // });
 
    if (loading2) return <div>Loading recommendations...</div>;
 
