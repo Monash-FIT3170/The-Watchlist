@@ -23,7 +23,7 @@ type GetContentResults = {
 
 // Function to get content by IDs
 export function GetContentByIds(ids: string[], title: string): GetContentResults {
-    const searchObject = { id: { $in: ids.map(Number) } };
+    const searchObject = { contentId: { $in: ids.map(Number) } };
     const movieData = MovieCollection.find(searchObject).fetch();
     const tvData = TVCollection.find(searchObject).fetch();
 

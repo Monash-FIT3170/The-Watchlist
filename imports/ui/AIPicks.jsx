@@ -30,7 +30,7 @@ export default function AIPicks() {
       }, []);
 
 
-    const { lists, subscribedLists, followUser, unfollowUser, ratings, loading2 } = useTracker(() => {
+    const { lists, loading2 } = useTracker(() => {
         const listsHandler = Meteor.subscribe('userLists', Meteor.userId());
         const subscribedHandler = Meteor.subscribe('subscribedLists', Meteor.userId());
         const ratingsHandler = Meteor.subscribe('userRatings', Meteor.userId());
@@ -71,8 +71,10 @@ export default function AIPicks() {
                 const selectRandomContent = (list, maxItems) => {
                     const selectedItems = [];
                     const listCopy = [...list.content];
+                    
                     while (selectedItems.length < maxItems && listCopy.length > 0) {
                         const randomIndex = Math.floor(Math.random() * listCopy.length);
+                        console.log(randomIndex);  
                         selectedItems.push(listCopy.splice(randomIndex, 1)[0]);
                     }
                     return selectedItems;
