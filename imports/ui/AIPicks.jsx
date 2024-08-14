@@ -74,8 +74,8 @@ export default function AIPicks() {
                     
                     while (selectedItems.length < maxItems && listCopy.length > 0) {
                         const randomIndex = Math.floor(Math.random() * listCopy.length);
-                        console.log(randomIndex);  
                         selectedItems.push(listCopy.splice(randomIndex, 1)[0]);
+                        
                     }
                     return selectedItems;
                 };
@@ -89,6 +89,7 @@ export default function AIPicks() {
                 //ensure we actually have content in the list before selecting random content   
                 if (favouritesList.content.length !=0) {
                     randomSelections.push(selectRandomContent(favouritesList, 5));
+                    
                 }
                 if (toWatchList.content.length !=0) {
                     randomSelections.push(selectRandomContent(toWatchList, 5));
@@ -96,7 +97,13 @@ export default function AIPicks() {
 
                
                 //map the titles of the selections and set them
-                const titles = randomSelections.map(item => item[0].title);
+                const titles = []
+                for (const selection of randomSelections) {
+                    for (const item of selection) {
+                        titles.push(item.title);
+                    }
+                }
+                
                 setRandomMovieNames(titles);
                 
                 const movieTitles = [];
@@ -105,13 +112,16 @@ export default function AIPicks() {
             
                 // Separate selected items into movies and TV shows
                 for (const selection of randomSelections) {
-                    const item = selection[0]
+                    for (const item of selection) {
                     if (item.contentType === 'Movie') {
                         movieTitles.push(item.title);
                     } else if (item.contentType === 'TV Show') {
                         tvIds.push(item.title);
                     }
                 }
+                }
+
+                console.log(movieTitles);
                 
                 
 
