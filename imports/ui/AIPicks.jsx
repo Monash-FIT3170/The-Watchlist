@@ -18,6 +18,8 @@ export default function AIPicks() {
     const [recommendedMovies, setRecommendedMovies] = useState([]);
     const [recommendedShows, setRecommendedShows] = useState([]);
     const [randomMovieNames, setRandomMovieNames] = useState([]);
+    const [contentMovieNone, setContentMovieNone] = useState(true);
+    const [contentTVNone, setContentTVNone] = useState(true);
 
 
 
@@ -95,6 +97,8 @@ export default function AIPicks() {
                     randomSelections.push(selectRandomContent(toWatchList, 5));
                 }
 
+                
+
                
                 //map the titles of the selections and set them
                 const titles = []
@@ -122,8 +126,10 @@ export default function AIPicks() {
                 }
 
                 
-                
+                setContentMovieNone(movieTitles.length === 0);
+                setContentTVNone(tvTitles.length === 0);
 
+                
                 // Fetch recommendations for movies
                 if (movieTitles.length > 0) {
                     const movieResponse = await fetch('/similar_movies_titles.json');
@@ -182,10 +188,23 @@ export default function AIPicks() {
    if (loading2) return <div>Loading recommendations...</div>;
 
    
+   const randomIntros = [
+    (title) => `Because you liked ${title}, you'll love these:`,
+    (title) => `Based on your love for ${title}, we recommend:`,
+    (title) => `${title} was a great choice! Here are more:`,
+    (title) => `If you enjoyed ${title}, check out these:`,
+    (title) => `We also loved ${title}, and here are the AI's other favourites:`,
+    ];
+
+    // Function to get a random intro
+    const getRandomIntro = (title) => {
+        const randomIndex = Math.floor(Math.random() * randomIntros.length);
+        return randomIntros[randomIndex](title);
+    };
     // Map random movie names to their corresponding recommended movies
     const movieContentLists = recommendedMovies.map((result, index) => ({
         listId: `RecommendedMovies${index}`,
-        title: `Because you liked ${result.title}`,
+        title: getRandomIntro(result.title),
         content: result.movie.map(movie => ({
             ...movie,
             rating: globalRatings[movie.contentId]?.average || 0,
@@ -196,7 +215,7 @@ export default function AIPicks() {
 // Map random movie names to their corresponding recommended movies
 const tvContentLists = recommendedShows.map((result, index) => ({
     listId: `RecommendedShows${index}`,
-    title: `Because you liked ${result.title}`,
+    title: getRandomIntro(result.title),
     content: result.tv.map(show => ({
         ...show,
         rating: globalRatings[show.contentId]?.average || 0,
@@ -204,21 +223,37 @@ const tvContentLists = recommendedShows.map((result, index) => ({
     }))
 }));
 
-    return (
-        <div className="flex flex-col min-h-screen bg-darker">
-            <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
-            <Scrollbar className="w-full overflow-y-auto">
-                {display === DISPLAY_MOVIES && movieContentLists.map(list => (
-                    <div key={list.listId} className="px-8 py-2">
-                        <ContentList list={list} isUserOwned={false} />
+return (
+    <div className="flex flex-col min-h-screen bg-darker">
+        <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
+        <Scrollbar className="w-full overflow-y-auto">
+            {display === DISPLAY_MOVIES && (
+                contentMovieNone ? (
+                    <div className="px-8 py-2 mt-10 text-white text-3xl">
+                        No Movies are added. Add some to your favourites or watchlist to get started!
                     </div>
-                ))}
-                {display === DISPLAY_SHOWS && tvContentLists.map(list => (
-                    <div key={list.listId} className="px-8 py-5">
-                        <ContentList list={list} isUserOwned={false} />
+                ) : (
+                    movieContentLists.map(list => (
+                        <div key={list.listId} className="px-8 py-2">
+                            <ContentList list={list} isUserOwned={false} />
+                        </div>
+                    ))
+                )
+            )}
+            {display === DISPLAY_SHOWS && (
+                contentTVNone ? (
+                    <div className="px-8 py-2 mt-10 text-white text-3xl">
+                        No TV Shows are added. Add some to your favourites or watchlist to get started!
                     </div>
-                ))}
-            </Scrollbar>
-        </div>
-    );
+                ) : (
+                    tvContentLists.map(list => (
+                        <div key={list.listId} className="px-8 py-2">
+                            <ContentList list={list} isUserOwned={false} />
+                        </div>
+                    ))
+                )
+            )}
+        </Scrollbar>
+    </div>
+);
 }
