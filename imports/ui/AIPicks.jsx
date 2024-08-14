@@ -107,7 +107,7 @@ export default function AIPicks() {
                 setRandomMovieNames(titles);
                 
                 const movieTitles = [];
-                const tvIds = [];
+                const tvTitles = [];
 
             
                 // Separate selected items into movies and TV shows
@@ -116,12 +116,11 @@ export default function AIPicks() {
                     if (item.contentType === 'Movie') {
                         movieTitles.push(item.title);
                     } else if (item.contentType === 'TV Show') {
-                        tvIds.push(item.title);
+                        tvTitles.push(item.title);
                     }
                 }
                 }
 
-                console.log(movieTitles);
                 
                 
 
@@ -149,23 +148,26 @@ export default function AIPicks() {
                 }
 
                 // Fetch recommendations for TV shows
-                if (tvIds.length > 0) {
-                    const tvResponse = await fetch('/formatted_similar_tvs.json');
+                if (tvTitles.length > 0) {
+                    const tvResponse = await fetch('/similar_tvs_title.json');
                     const tvRecommendationsJson = await tvResponse.json();
 
-                    const recommendedTvIds = tvIds.flatMap(id => {
-                        const recommendation = tvRecommendationsJson.find(rec => rec._id === id);
-                        return recommendation ? recommendation.similar_content.slice(0, 5) : [];
+                    const recommendedTvPromises = tvTitles.map(title => {
+                        const recommendedTvIds = tvRecommendationsJson.find(rec => rec.Title === title)?.similar_tvs.slice(0, 5) || [];
+                        return new Promise((resolve, reject) => {
+                            Meteor.call('content.search', { ids: recommendedTvIds, title }, (err, result) => {
+                                if (err) {
+                                    console.error("Error fetching recommended movies:", err);
+                                    reject(err);
+                                } else {
+                                    resolve(result);
+                                }
+                            });
+                        });
                     });
 
-                    // Fetch TV show details using the content.read handler
-                    Meteor.call('content.search', { ids: recommendedTvIds }, (err, result) => {
-                        if (err) {
-                            console.error("Error fetching recommended TV shows:", err);
-                        } else {
-                            setRecommendedShows(result.tv || []);
-                        }
-                    });
+                    const recommendedTvs = await Promise.all(recommendedTvPromises);
+                    setRecommendedShows(recommendedTvs);
                 }
             } catch (error) {
                 console.error("Error during recommendations fetching:", error);
@@ -191,21 +193,16 @@ export default function AIPicks() {
         }))
     }));
 
-// Map random TV show names to their corresponding recommended TV shows
-const tvContentLists = randomMovieNames.map((name, index) => {
-    const start = index * 5;
-    const end = start + 5;
-
-    return {
-        listId: `RecommendedShows${index}`,
-        title: `Because you liked "${name}"`,
-        content: recommendedShows.slice(start, end).map(tv => ({
-            ...tv,
-            rating: globalRatings[tv.contentId]?.average || 0,
-            type: "TV Show"
-        }))
-    };
-});
+// Map random movie names to their corresponding recommended movies
+const tvContentLists = recommendedShows.map((result, index) => ({
+    listId: `RecommendedShows${index}`,
+    title: `Because you liked ${result.title}`,
+    content: result.tv.map(show => ({
+        ...show,
+        rating: globalRatings[show.contentId]?.average || 0,
+        type: "TV Show"
+    }))
+}));
 
     return (
         <div className="flex flex-col min-h-screen bg-darker">
