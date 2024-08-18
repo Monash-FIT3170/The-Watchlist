@@ -5,9 +5,12 @@
 
 import { Handler, HandlerFunc } from './Handler';
 import { Movie, TV } from "../../db/Content";
+import { MovieCollection, TVCollection } from '../../db/Content';
 
 type GetContentOptions = {
-    searchString: string | null
+    searchString: string | null,
+    limit: number,
+    page: number
 }
 
 type GetContentResults = {
@@ -32,40 +35,52 @@ type GetContentResults = {
 //     }
 // }
 
-function GetContent(searchObject: object): GetContentResults {
-    const movieData = Movie.find(searchObject).fetch().map(doc => doc.raw()); // Convert each document to a raw object
-    const tvData = TV.find(searchObject).fetch().map(doc => doc.raw()); // Convert each document to a raw object
+function GetContent(searchObject: object, searchOptions: object, sortOptions: object = { popularity: -1 }): GetContentResults {
+    const movieData = Movie.find(searchObject, { ...searchOptions, sort: sortOptions }).fetch();
+    const tvData = TV.find(searchObject, { ...searchOptions, sort: sortOptions }).fetch();
 
-    return {
-        movie: movieData,
-        tv: tvData,
-    }
+    return { movie: movieData, tv: tvData };
 }
 
-
-
-// In your /imports/api/server/ContentHandler.tsx file, within the readContent function
 const readContent: HandlerFunc = {
     validate: null,
-    run: ({searchString}: GetContentOptions) => {
-        console.log('Search string received:', searchString);
+    run: ({ searchString, limit, page }: GetContentOptions) => {
+
+        let searchOptions = {
+            limit: limit ?? 50,
+            skip: limit && page ? limit * page : 0
+        };
 
         let searchCriteria = {};
-
-        if (searchString == null) {
-            console.log('Fetching all content...');
-            searchCriteria = {};
+        if (searchString == null || searchString.trim() === '') {
+            searchCriteria = {}; // Fetch all content without filtering
         } else {
-            console.log('Performing search with:', searchString);
             searchCriteria = { "$text": { "$search": searchString } };
         }
 
-        // Fetch content using the updated search criteria and convert to raw objects
-        const results = GetContent(searchCriteria);
-        // console.log('Fetched content:', results);
-        return results;
+        // Include a sort option for popularity
+        const sortOptions = { popularity: -1 };  // Sorting by popularity in descending order
+
+        // Fetch content using the updated search criteria
+        const results = GetContent(searchCriteria, searchOptions, sortOptions);
+
+        // Count the total number of items that match the criteria (without pagination)
+        const totalMovies = MovieCollection.find(searchCriteria).count();
+        const totalTVShows = TVCollection.find(searchCriteria).count();
+        const totalCount = totalMovies + totalTVShows;
+
+        // Use optional chaining to safely access and map over results
+        const moviesWithType = results.movie?.map(movie => ({ ...movie, contentType: "Movie" })) || [];
+        const tvsWithType = results.tv?.map(tv => ({ ...tv, contentType: "TV Show" })) || [];
+
+        return { 
+            movie: moviesWithType, 
+            tv: tvsWithType,
+            total: totalCount
+        };
     }
 }
+
 
 
 const ContentHandler = new Handler("content")

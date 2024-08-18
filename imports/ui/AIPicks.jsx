@@ -1,95 +1,91 @@
 import React, { useState, useEffect } from 'react';
-import ContentList from './ContentList.tsx';
+import ContentList from './ContentList.jsx';
 import Scrollbar from './ScrollBar';
+import ProfileDropdown from './ProfileDropdown.jsx';
+import AIPicksHeader from './AIPicksHeader.jsx';
 
-export default function AIPicks({ movies, tvs }) {
-    // console.log("Movies")
-    // console.log(movies)
-    // console.log(tvs)
-
-    // Use react "state" to keep track of whether the component is displaying movies or TV shows
+export default function AIPicks({ currentUser }) {
     const DISPLAY_MOVIES = "Display Movie";
     const DISPLAY_SHOWS = "Display Show";
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
-    const [isLoading, setIsLoading] = useState(true); // Loading state
+    const [globalRatings, setGlobalRatings] = useState({});
+    const [movies, setMovies] = useState([]);
+    const [tvs, setTvs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [genres, setGenres] = useState([]);
 
-    // Create content lists for each genre
-    genres = [
-        "Action", "Adventure", "Animation", "Anime", "Awards Show", "Children",
-        "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "Food",
-        "Game Show", "History", "Home and Garden", "Horror", "Indie", "Martial Arts",
-        "Mini-Series", "Musical", "Mystery", "News", "Podcast", "Reality",
-        "Romance", "Science Fiction", "Soap", "Sport", "Suspense", "Talk Show",
-        "Thriller", "Travel", "War", "Western"
-    ]
-    let movieContentLists = []
-    let showContentLists = []
-    genres.forEach(genre => {
-        const genreMovies = movies.filter(item => item.genres.includes(genre)).slice(0, 10)
-        const movieContentList = {
+    useEffect(() => {
+        // Fetch all genres from the backend
+        Meteor.call('genres.getAll', (error, result) => {
+            if (!error) {
+                setGenres(result);
+            } else {
+                console.error("Error fetching genres:", error);
+            }
+        });
+
+        // Fetch content using content.read method
+        Meteor.call('content.read', { limit: 500 }, (error, result) => {  // Adjust the limit as needed
+            if (!error) {
+                setMovies(result.movie || []);
+                setTvs(result.tv || []);
+            } else {
+                console.error("Error fetching content:", error);
+            }
+            setLoading(false);
+        });
+
+        // Fetch global ratings using the Meteor method
+        Meteor.call('ratings.getGlobalAverages', (error, result) => {
+            if (!error) {
+                setGlobalRatings(result);
+            } else {
+                console.error("Error fetching global ratings:", error);
+            }
+        });
+    }, []);
+
+    let movieContentLists = genres.map(genre => {
+        const genreMovies = movies.filter(item => item.genres && item.genres.includes(genre)).slice(0, 10);
+        return {
             listId: genre + "Movies",
             title: genre,
-            content: genreMovies
-        }
-        movieContentLists.push(movieContentList)
+            content: genreMovies.map(movie => ({
+                ...movie,  // Spread the entire movie object
+                rating: globalRatings[movie.contentId]?.average || 0,
+                contentType: "Movie"
+            }))
+        };
+    });
 
-        const genreShows = tvs.filter(item => item.genres.includes(genre)).slice(0, 10)
-        const showContentList = {
+    let showContentLists = genres.map(genre => {
+        const genreShows = tvs.filter(item => item.genres && item.genres.includes(genre)).slice(0, 10);
+        return {
             listId: genre + "Shows",
             title: genre,
-            content: genreShows
-        }
-        showContentLists.push(showContentList)
-    })
+            content: genreShows.map(tv => ({
+                ...tv,  // Spread the entire TV show object
+                rating: globalRatings[tv.contentId]?.average || 0,
+                contentType: "TV Show"
+            }))
+        };
+    });
 
-    // useEffect(() => {
-    //     if (movies && movies > 0) {
-    //         setIsLoading(false); // Set loading to false when lists are loaded
-    //     }
-    // }, [movies]);
-
-    // if (isLoading) {
-    //     return <div>Loading...</div>; // Show loading indicator while lists are loading
-    // }
 
     return (
-        <div className="flex flex-col gap-6 overflow-y-hidden h-custom">
-            <div className="bg-darker rounded-lg items-center flex flex-col justify-center">
-                <h1 className="text-5xl font-semibold mt-8">AI Picks</h1>
-                <div className="my-8 items-center w-1/2 flex flex-row">
-                    <button
-                        className="border border-solid rounded-full px-8 py-4 w-1/3 focus:bg-magenta"
-                        onClick={() => setDisplay(DISPLAY_MOVIES)}
-                    >
-                        Movies
-                    </button>
-                    <div className="w-1/3"></div>
-                    <button
-                        className="border border-solid rounded-full px-8 py-4 w-1/3 focus:bg-magenta"
-                        onClick={() => setDisplay(DISPLAY_SHOWS)}
-                    >
-                        TV Shows
-                    </button>
-                </div>
-            </div>
-            <Scrollbar className="overflow-y-auto scrollbar-webkit">
-                {/* Display Movies */}
-                {display === DISPLAY_MOVIES && movieContentLists && (
-                    <>
-                        {movieContentLists.map(list => (
-                            <ContentList key={list._id} list={list} />
-                        ))}
-                    </>
-                )}
-
-                {/* Display TV Shows */}
-                {display === DISPLAY_SHOWS && showContentLists && (
-                    <>
-                        {showContentLists.map(list => (
-                            <ContentList key={list._id} list={list} />
-                        ))}
-                    </>
-                )}
+        <div className="flex flex-col min-h-screen bg-darker">
+            <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
+            <Scrollbar className="w-full overflow-y-auto">
+                {!loading && display === "Display Movie" && movieContentLists.map(list => (
+                    <div key={list.listId} className="px-8 py-2">
+                        <ContentList list={list} isUserOwned={false} />
+                    </div>
+                ))}
+                {!loading && display === "Display Show" && showContentLists.map(list => (
+                    <div key={list.listId} className="px-8 py-5">
+                        <ContentList list={list} isUserOwned={false} />
+                    </div>
+                ))}
             </Scrollbar>
         </div>
     );
