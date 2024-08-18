@@ -2,4 +2,7 @@ node_modules/
 .env
 .vscode
 development_secrets.json
+venv/
+750k-movies.json
+data/
 .bat
