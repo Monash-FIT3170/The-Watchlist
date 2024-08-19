@@ -7,6 +7,8 @@ import { ListCollection } from '../db/List';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList';
 import ProfileDropdown from './ProfileDropdown';
+import { debounce } from 'lodash';
+
 
 const SearchBar = ({ currentUser }) => {
 
@@ -73,10 +75,12 @@ const SearchBar = ({ currentUser }) => {
         fetchContent();
     }, [fetchContent, searchTerm]);
 
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value.toLowerCase());
-        setCurrentPage(0);
-    };
+    const handleSearchChange = useCallback(
+        debounce((e) => {
+            setSearchTerm(e.target.value.toLowerCase());
+            setCurrentPage(0);
+        }, 300), []
+    );    
 
     useEffect(() => {
         console.log("Filtered Movies updated:", filteredMovies);

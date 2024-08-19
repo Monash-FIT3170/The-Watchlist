@@ -8,9 +8,10 @@ Meteor.startup(() => {
   const container = document.getElementById('react-target');
   const root = createRoot(container);
   root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </React.StrictMode>);
+  // </React.StrictMode>);
+  )
 });

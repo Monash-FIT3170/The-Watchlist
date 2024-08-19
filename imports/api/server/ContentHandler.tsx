@@ -50,7 +50,9 @@ function GetContent(searchObject: object, searchOptions: object, sortOptions: ob
 const readContent: HandlerFunc = {
     validate: null,
     run: ({ searchString, limit, page }: GetContentOptions) => {
-
+        console.log(`readContent start: searchString=${searchString}, limit=${limit}, page=${page}`);
+        
+        const startTime = Date.now();
         let searchOptions = {
             limit: limit ?? 50,
             skip: limit && page ? limit * page : 0
@@ -79,7 +81,9 @@ const readContent: HandlerFunc = {
             const totalTVShows = TVCollection.find(searchCriteria).count();
             totalCount = totalMovies + totalTVShows;
         }
-        
+
+        const fetchDuration = Date.now() - startTime;
+        console.log(`readContent end: Total fetched movies=${results.movie?.length || 0}, Total fetched TV shows=${results.tv?.length || 0}, Duration=${fetchDuration}ms`);
 
         // Use optional chaining to safely access and map over results
         const moviesWithType = results.movie?.map(movie => ({ ...movie, contentType: "Movie" })) || [];
@@ -92,6 +96,9 @@ const readContent: HandlerFunc = {
         };
     }
 }
+
+
+
 
 
 
