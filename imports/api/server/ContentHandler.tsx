@@ -18,6 +18,9 @@ type GetContentResults = {
     tv: typeof TV[] | null
 }
 
+const completeTotalMovies = MovieCollection.find().count();
+const completeTotalTVShows = TVCollection.find().count();
+const completeTotalCount = completeTotalMovies + completeTotalTVShows;
 
 
 /**
@@ -37,13 +40,9 @@ type GetContentResults = {
 //     }
 // }
 
-//const totalMovies = MovieCollection.find().count();
-//const totalTVShows = TVCollection.find().count();
-//const totalCount = totalMovies + totalTVShows;
-
 function GetContent(searchObject: object, searchOptions: object, sortOptions: object = { popularity: -1 }): GetContentResults {
-    const movieData = Movie.find(searchObject, { ...searchOptions}).fetch();
-    const tvData = TV.find(searchObject, { ...searchOptions}).fetch();
+    const movieData = Movie.find(searchObject, { ...searchOptions, sort: sortOptions }).fetch();
+    const tvData = TV.find(searchObject, { ...searchOptions, sort: sortOptions }).fetch();
 
     return { movie: movieData, tv: tvData };
 }
@@ -70,7 +69,16 @@ const readContent: HandlerFunc = {
         // Fetch content using the updated search criteria
         const results = GetContent(searchCriteria, searchOptions, sortOptions);
 
+        let totalCount = 0;
         // Count the total number of items that match the criteria (without pagination)
+        if (Object.keys(searchCriteria).length == 0) {
+            totalCount = completeTotalCount;
+        }
+        else {
+            const totalMovies = MovieCollection.find(searchCriteria).count();
+            const totalTVShows = TVCollection.find(searchCriteria).count();
+            totalCount = totalMovies + totalTVShows;
+        }
         
 
         // Use optional chaining to safely access and map over results
@@ -79,7 +87,8 @@ const readContent: HandlerFunc = {
 
         return { 
             movie: moviesWithType, 
-            tv: tvsWithType
+            tv: tvsWithType,
+            total: totalCount
         };
     }
 }
