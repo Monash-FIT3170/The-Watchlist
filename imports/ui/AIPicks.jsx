@@ -12,6 +12,8 @@ import { RatingCollection } from '../db/Rating';
 export default function AIPicks() {
     const DISPLAY_MOVIES = "Display Movie";
     const DISPLAY_SHOWS = "Display Show";
+    const NUM_RECOMMENDATIONS = 25;
+    const NUM_LIST_SLOTS = 6;
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
     const [globalRatings, setGlobalRatings] = useState({});
     const [loading, setLoading] = useState(true);
@@ -22,6 +24,8 @@ export default function AIPicks() {
     const [contentTVNone, setContentTVNone] = useState(true);
     const [movieIntros, setMovieIntros] = useState([]);
     const [tvIntros, setTvIntros] = useState([]);
+    const [movieLockToggle, setMovieLockToggle] = useState([]);
+    const [tvLockToggle, setTvLockToggle] = useState([]);
 
 
 
@@ -134,48 +138,18 @@ export default function AIPicks() {
                 
                 // Fetch recommendations for movies
                 if (movieTitles.length > 0) {
-                    const movieResponse = await fetch('/similar_movies_titles.json');
-                    const movieRecommendationsJson = await movieResponse.json();
-
-                    const recommendedMoviePromises = movieTitles.map(title => {
-                        const recommendedMovieIds = movieRecommendationsJson.find(rec => rec.Title === title)?.similar_movies.slice(0, 5) || [];
-                        return new Promise((resolve, reject) => {
-                            Meteor.call('content.search', { ids: recommendedMovieIds, title }, (err, result) => {
-                                if (err) {
-                                    console.error("Error fetching recommended movies:", err);
-                                    reject(err);
-                                } else {
-                                    resolve(result);
-                                }
-                            });
-                        });
-                    });
-
-                    const recommendedMovies = await Promise.all(recommendedMoviePromises);
-                    setRecommendedMovies(recommendedMovies);
+                    const recommendedMov = await fetchMovies(movieTitles);
+                    console.log(recommendedMov);
+                    
+                    setRecommendedMovies(recommendedMov);
+                    setMovieLockToggle(new Array(recommendedMov.length).fill(true));
                 }
 
                 // Fetch recommendations for TV shows
                 if (tvTitles.length > 0) {
-                    const tvResponse = await fetch('/similar_tvs_title.json');
-                    const tvRecommendationsJson = await tvResponse.json();
-
-                    const recommendedTvPromises = tvTitles.map(title => {
-                        const recommendedTvIds = tvRecommendationsJson.find(rec => rec.Title === title)?.similar_tvs.slice(0, 5) || [];
-                        return new Promise((resolve, reject) => {
-                            Meteor.call('content.search', { ids: recommendedTvIds, title }, (err, result) => {
-                                if (err) {
-                                    console.error("Error fetching recommended movies:", err);
-                                    reject(err);
-                                } else {
-                                    resolve(result);
-                                }
-                            });
-                        });
-                    });
-
-                    const recommendedTvs = await Promise.all(recommendedTvPromises);
+                    const recommendedTvs = await fetchTvs(tvTitles);
                     setRecommendedShows(recommendedTvs);
+                    setTvLockToggle(new Array(recommendedTvs.length).fill(true));
                 }
             } catch (error) {
                 console.error("Error during recommendations fetching:", error);
@@ -216,9 +190,9 @@ export default function AIPicks() {
    if (loading2) return <div>Loading recommendations...</div>;
 
    
-   
+   rand = Array.from({ length: NUM_LIST_SLOTS }, () => Math.floor(Math.random() * NUM_RECOMMENDATIONS));
     // Map random movie names to their corresponding recommended movies
-    const movieContentLists = recommendedMovies.map((result, index) => ({
+    let movieContentLists = recommendedMovies.map((result, index) => ({
         listId: `RecommendedMovies${index}`,
         title: movieIntros[index],
         content: result.movie.map(movie => ({
@@ -227,9 +201,10 @@ export default function AIPicks() {
             contentType: "Movie"
         }))
     }));
-
+    // console.log(movieContentLists);
+    
 // Map random movie names to their corresponding recommended movies
-const tvContentLists = recommendedShows.map((result, index) => ({
+let tvContentLists = recommendedShows.map((result, index) => ({
     listId: `RecommendedShows${index}`,
     title: tvIntros[index],
     content: result.tv.map(show => ({
@@ -238,6 +213,101 @@ const tvContentLists = recommendedShows.map((result, index) => ({
         contentType: "TV Show"
     }))
 }));
+// console.log(movieContentLists)
+// rand = Array.from({ length: NUM_LIST_SLOTS }, () => Math.floor(Math.random() * NUM_RECOMMENDATIONS));
+
+//! need to move this to a hook
+movieContentLists.forEach((element, index) => {
+    if (!movieLockToggle[index]){
+        element["content"] = element["content"].filter((_,index) => rand.includes(index))
+    }
+    else {
+        element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
+    }
+});
+tvContentLists.forEach((element, index) => {
+    if (!tvLockToggle[index]){
+        element["content"] = element["content"].filter((_,index) => rand.includes(index))
+    }
+    else {
+        element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
+    }
+});
+console.log(movieContentLists)
+
+console.log(tvContentLists);
+
+const fetchMovies = async (movieTitles) => {
+    const movieResponse = await fetch('/similar_movies_titles.json');
+    const movieRecommendationsJson = await movieResponse.json();
+
+    const recommendedMoviePromises = movieTitles.map(title => {
+        const recommendedMovieIds = movieRecommendationsJson.find(rec => rec.Title === title)?.similar_movies.slice(0, NUM_RECOMMENDATIONS - 1) || [];
+        return new Promise((resolve, reject) => {
+            Meteor.call('content.search', { ids: recommendedMovieIds, title }, (err, result) => {
+                if (err) {
+                    console.error("Error fetching recommended movies:", err);
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    });
+    
+    const recommended = await Promise.all(recommendedMoviePromises);
+    return recommended;
+};
+
+const fetchTvs = async (tvTitles) => {
+
+    const tvResponse = await fetch('/similar_tvs_title.json');
+    const tvRecommendationsJson = await tvResponse.json();
+
+    const recommendedTvPromises = tvTitles.map(title => {
+        const recommendedTvIds = tvRecommendationsJson.find(rec => rec.Title === title)?.similar_tvs.slice(0, NUM_RECOMMENDATIONS - 1) || [];
+        return new Promise((resolve, reject) => {
+            Meteor.call('content.search', { ids: recommendedTvIds, title }, (err, result) => {
+                if (err) {
+                    console.error("Error fetching recommended movies:", err);
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    });
+
+    return await Promise.all(recommendedTvPromises);
+}
+
+// helper function to return just the number from a string
+const retNum = (str) => { 
+    let num = str.replace(/[^0-9]/g, ''); 
+    return parseInt(num,10); 
+}
+
+const lockToggle = (listId) => {
+    // listId is a string which will be "RecommendedMovies" if the element is for a movie or "RecommendedShows" if a tvshow.
+    // The final character of listId is an int corresponding to the index of the content in the 'recommendedMovies' / 'recommendedShows' useState.
+    
+    if (listId.includes("RecommendedMovies")){
+        // recommendedMovies[retNum(listId)].movie = ;
+        let temp = [...movieLockToggle];
+        temp[retNum(listId)] = !movieLockToggle[retNum(listId)];
+        setMovieLockToggle(temp);
+
+
+    }
+    else if (listId.includes("RecommendedShows")){
+        // item = recommendedShows[retNum(listId)];
+        let temp = [...tvLockToggle];
+        temp[retNum(listId)] = !tvLockToggle[retNum(listId)];
+        setTvLockToggle(temp);
+    }
+
+}
+
 
 return (
     <div className="flex flex-col min-h-screen bg-darker">
@@ -249,11 +319,27 @@ return (
                         Not enough Movies yet. Add some to your favourites or watchlist to get started!
                     </div>
                 ) : (
-                    movieContentLists.map(list => (
+                    // movieContentLists.map(list => (
+                    //     <div key={list.listId} className="px-8 py-2">
+                    //         <ContentList list={list} isUserOwned={false} />
+                    //         <button onClick={() => this.lockToggle( list.listId )}>Locked</button>
+                    //     </div>
+                    // )
+
+
+                  
+                    movieContentLists.map(list => movieLockToggle[retNum(list.listId)] == true ? (
                         <div key={list.listId} className="px-8 py-2">
                             <ContentList list={list} isUserOwned={false} />
+                            <button onClick={() => lockToggle( list.listId )}>Locked</button>
                         </div>
-                    ))
+                    ) : (
+                        <div key={list.listId} className="px-8 py-2">
+                            <ContentList list={list} isUserOwned={false} />
+                            <button onClick={() => lockToggle( list.listId )}>Unlocked</button>
+                        </div>
+                    )
+                )
                 )
             )}
             {display === DISPLAY_SHOWS && (
@@ -262,11 +348,24 @@ return (
                         Not enough TV Shows yet. Add some to your favourites or watchlist to get started!
                     </div>
                 ) : (
-                    tvContentLists.map(list => (
+                    // tvContentLists.map(list => (
+                    //     <div key={list.listId} className="px-8 py-2">
+                    //         <ContentList list={list} isUserOwned={false} />
+                    //         <button onClick={() => this.lockToggle( list.listId )}>Locked</button>
+                    //     </div>
+                    // )
+                    tvContentLists.map(list => tvLockToggle[retNum(list.listId)] == true ? (
                         <div key={list.listId} className="px-8 py-2">
                             <ContentList list={list} isUserOwned={false} />
+                            <button onClick={() => lockToggle( list.listId )}>Locked</button>
                         </div>
-                    ))
+                    ) : (
+                        <div key={list.listId} className="px-8 py-2">
+                        <ContentList list={list} isUserOwned={false} />
+                        <button onClick={() => lockToggle( list.listId )}>Unlocked</button>
+                    </div>
+                    )
+                    )
                 )
             )}
         </Scrollbar>
