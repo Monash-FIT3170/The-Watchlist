@@ -8,7 +8,7 @@ import ListPopup from "./ListPopup";
 import NewListModal from "./NewListModal";
 import usePopup from './usePopup';
 import { ListCollection } from "../db/List";
-import Scrollbar from './ScrollBar'; 
+import Scrollbar from './ScrollBar';
 
 const popcornUrl = "./ExampleResources/popcorn.png";
 
@@ -36,7 +36,7 @@ export default function Navbar({ staticNavData }) {
   return (
     <div className="flex flex-col h-screen">
       <IconContext.Provider value={{ size: "20px" }}>
-        <div className="flex flex-col w-64 p-0 mx-2 my-4 h-custom">
+        <div className="flex flex-col w-66 p-0 mx-2 my-4 h-custom">
           <div className="bg-darker rounded-lg shadow-lg pt-4 px-2 mb-4 flex-none">
             <nav>
               <ul className="flex flex-col w-full">
@@ -59,7 +59,7 @@ export default function Navbar({ staticNavData }) {
               <h2 className="flex justify-start items-center space-x-5 w-full px-4 py-2 mb-2 font-bold text-grey text-lg">
                 <MdMovieFilter size={"20px"} />
                 <span>Your Watchlists</span>
-                <button onClick={handleAddList}>
+                <button onClick={handleAddList} className="relative flex justify-center items-center p-2 rounded-full hover:bg-gray-200 transition-colors duration-300">
                   <AiOutlinePlus size={"12px"} />
                 </button>
               </h2>
