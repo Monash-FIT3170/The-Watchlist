@@ -54,7 +54,7 @@ const ContentItem = ({ content, isUserSpecificRating }) => {
                 textOverflow: 'ellipsis'
             }}>{content.title}</div>
             <div className="flex items-center ml-2 mt-1">
-                {isUserSpecificRating ? <FaUser className="mr-1 text-blue-500" /> : <FaGlobe className="mr-1 text-green-500" />}
+                {isUserSpecificRating ? <FaUser className="mr-1 text-blue-500"  title="User rating"/> : <FaGlobe className="mr-1 text-green-500" title="Global average rating" />}
                 <RatingStar totalStars={5} rating={rating} isLoading={isRatingLoading} />
             </div>
         </div>
