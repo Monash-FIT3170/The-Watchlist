@@ -5,6 +5,8 @@ import { Rating as RatingDB } from '../db/Rating';
 import Modal from './Modal';
 import Scrollbar from './ScrollBar';
 
+const popcornUrl = "./ExampleResources/popcorn-banner.png"; // Default image URL
+
 const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref) => {
 
   const contentId = content.contentId || content.id;
@@ -111,6 +113,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
   const firstAiredYear = new Date(content.first_aired).getFullYear();
   const lastAiredYear = content.last_aired ? new Date(content.last_aired).getFullYear() : 'present';
   const numberOfSeasons = content.seasons ? content.seasons.length : 0;
+  
 
   return isOpen ? (
     <div
@@ -125,7 +128,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
   >
     <div className="relative">
       <img
-        src={content.background_url || content.image_url}
+        src={content.background_url || content.image_url || popcornUrl}
         alt={content.title}
         className="w-full h-auto object-cover opacity-75"
       />
