@@ -20,6 +20,8 @@ export default function AIPicks() {
     const [randomMovieNames, setRandomMovieNames] = useState([]);
     const [contentMovieNone, setContentMovieNone] = useState(true);
     const [contentTVNone, setContentTVNone] = useState(true);
+    const [movieIntros, setMovieIntros] = useState([]);
+    const [tvIntros, setTvIntros] = useState([]);
 
 
 
@@ -181,45 +183,59 @@ export default function AIPicks() {
             }
         };
 
-        fetchRecommendations();
+        if (!recommendedMovies.length && !recommendedShows.length) {
+            fetchRecommendations();
+        }
     }, [lists, loading2]);
+
+    useEffect(() => {
+        if (recommendedMovies.length > 0 && movieIntros.length === 0) {
+            const generatedMovieIntros = recommendedMovies.map(result => getRandomIntro(result.title));
+            setMovieIntros(generatedMovieIntros);
+        }
+
+        if (recommendedShows.length > 0 && tvIntros.length === 0) {
+            const generatedTvIntros = recommendedShows.map(result => getRandomIntro(result.title));
+            setTvIntros(generatedTvIntros);
+        }
+    }, [recommendedMovies, recommendedShows]);
+
+    const getRandomIntro = (title) => {
+        const randomIntros = [
+            `Because you liked ${title}, you'll love these:`,
+            `Based on your love for ${title}, we recommend:`,
+            `${title} was a great choice! Here are more:`,
+            `If you enjoyed ${title}, check out these:`,
+            `We also loved ${title}, and here are the AI's other favourites:`,
+        ];
+        const randomIndex = Math.floor(Math.random() * randomIntros.length);
+        return randomIntros[randomIndex];
+    };
 
 
    if (loading2) return <div>Loading recommendations...</div>;
 
    
-   const randomIntros = [
-    (title) => `Because you liked ${title}, you'll love these:`,
-    (title) => `Based on your love for ${title}, we recommend:`,
-    (title) => `${title} was a great choice! Here are more:`,
-    (title) => `If you enjoyed ${title}, check out these:`,
-    (title) => `We also loved ${title}, and here are the AI's other favourites:`,
-    ];
-
-    // Function to get a random intro
-    const getRandomIntro = (title) => {
-        const randomIndex = Math.floor(Math.random() * randomIntros.length);
-        return randomIntros[randomIndex](title);
-    };
+   
     // Map random movie names to their corresponding recommended movies
     const movieContentLists = recommendedMovies.map((result, index) => ({
         listId: `RecommendedMovies${index}`,
-        title: getRandomIntro(result.title),
+        title: movieIntros[index],
         content: result.movie.map(movie => ({
             ...movie,
             rating: globalRatings[movie.contentId]?.average || 0,
-            type: "Movie"
+            contentType: "Movie"
         }))
     }));
 
 // Map random movie names to their corresponding recommended movies
 const tvContentLists = recommendedShows.map((result, index) => ({
     listId: `RecommendedShows${index}`,
-    title: getRandomIntro(result.title),
+    title: tvIntros[index],
     content: result.tv.map(show => ({
         ...show,
         rating: globalRatings[show.contentId]?.average || 0,
-        type: "TV Show"
+        contentType: "TV Show"
     }))
 }));
 
@@ -230,7 +246,7 @@ return (
             {display === DISPLAY_MOVIES && (
                 contentMovieNone ? (
                     <div className="px-8 py-2 mt-10 text-white text-3xl">
-                        No Movies are added. Add some to your favourites or watchlist to get started!
+                        Not enough Movies yet. Add some to your favourites or watchlist to get started!
                     </div>
                 ) : (
                     movieContentLists.map(list => (
@@ -243,7 +259,7 @@ return (
             {display === DISPLAY_SHOWS && (
                 contentTVNone ? (
                     <div className="px-8 py-2 mt-10 text-white text-3xl">
-                        No TV Shows are added. Add some to your favourites or watchlist to get started!
+                        Not enough TV Shows yet. Add some to your favourites or watchlist to get started!
                     </div>
                 ) : (
                     tvContentLists.map(list => (
