@@ -123,7 +123,8 @@ export const TV = Class.create({
         },
         popularity: {
             type: Number,
-            optional: true
+            optional: true,
+            index: -1
         },
         overview: {
             type: String,
