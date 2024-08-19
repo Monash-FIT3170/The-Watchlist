@@ -10,7 +10,7 @@ import ProfileDropdown from './ProfileDropdown';
 
 const SearchBar = ({ currentUser }) => {
 
-    const [selectedTab, setSelectedTab] = useState('movies');
+    const [selectedTab, setSelectedTab] = useState('Movies');
     const [searchTerm, setSearchTerm] = useState('');
     const [globalRatings, setGlobalRatings] = useState({});
     const [filteredMovies, setFilteredMovies] = useState([]);
