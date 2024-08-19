@@ -16,6 +16,20 @@ export const EpisodeDetails = Class.create({
     }
 });
 
+export const SeasonDetails = Class.create({
+    name: "SeasonDetails",
+    fields: {
+        season_number: {
+            type: Number
+        },
+        episodes: {
+            type: [EpisodeDetails], // Using the previously defined EpisodeDetails class
+            optional: true
+        }
+    }
+});
+
+
 export const ContentSummary = Class.create({
     name: "ContentSummary",
     fields: {
@@ -58,8 +72,20 @@ export const ContentSummary = Class.create({
             type: [String],
             optional: true
         },
+        first_aired: {
+            type: Date,
+            optional: true
+        },
+        last_aired: {
+            type: Date, 
+            optional: true
+        },
         keywords: {
             type: [String],
+            optional: true
+        },
+        seasons: {
+            type: [SeasonDetails], // Adding seasons field
             optional: true
         }
     }

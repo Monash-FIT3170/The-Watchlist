@@ -113,11 +113,6 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
 
   // Define the handleClickOutside function inside the component
   const handleClickOutside = (event) => {
-    console.log("Click detected. Target:", event.target);
-    console.log("popupRef current:", popupRef.current);
-    console.log("contentInfoModalRef current:", contentInfoModalRef.current);
-    console.log("ModalRef current:", modalRef.current);
-    console.log("confirmDialogRef current:", confirmDialogRef.current);
   
     if (
       popupRef.current && !popupRef.current.contains(event.target) &&
@@ -125,11 +120,9 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
       (!isModalOpen || !modalRef.current || !modalRef.current.contains(event.target)) &&
       (!confirmDialogRef.current)
     ) {
-      console.log("Click outside all modals detected, closing ListPopup.");
       onClose();
       event.stopPropagation();
     } else {
-      console.log("Click inside a modal, should not close.");
     }
   };
   
@@ -248,6 +241,9 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     }
   };
 
+  console.log("list content")
+  console.log(list.content)
+
   const filteredContent = list.content?.filter(item =>
     selectedTab === 'all' ||
     (selectedTab === 'movies' && item.contentType === 'Movie') ||
@@ -346,9 +342,9 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
                           <h3 className="text-xl font-bold">{item.title}</h3>
                           <div className="flex items-center">
                             {isUserSpecificRating ? (
-                              <FaUser className="mr-1 text-blue-500" />
+                              <FaUser className="mr-1 text-blue-500" title="User rating"/>
                             ) : (
-                              <FaGlobe className="mr-1 text-green-500" />
+                              <FaGlobe className="mr-1 text-green-500" title="Global average rating"/>
                             )}
                             <RatingStar totalStars={5} rating={rating} />
                           </div>

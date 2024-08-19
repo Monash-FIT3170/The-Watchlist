@@ -9,12 +9,6 @@ import Scrollbar from './ScrollBar';
 const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
   const modalRef = ref || useRef();
 
-  useEffect(() => {
-    if (show) {
-      console.log("ModalRef after render:", modalRef.current);
-    }
-  }, [show]);
-
   // Fetch the lists for the current user
   const { lists, loading } = useTracker(() => {
     const userId = Meteor.userId();
@@ -46,10 +40,6 @@ const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
 
     const list = lists.find(list => list._id === listId);
 
-    console.log("Modal content:")
-    console.log(content)
-    console.log(`Modal content id: ${content.contentId}`)
-
     if (list && list.content.some(item => item.contentId === content.contentId)) {
       toast.warn("This item is already in the list.");
     } else {
@@ -59,6 +49,7 @@ const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
         } else {
           toast.success("Item successfully added to the list.");
           console.log("Item successfully added")
+          console.log(content)
         }
       });
     }
