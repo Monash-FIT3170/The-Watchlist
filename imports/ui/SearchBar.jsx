@@ -225,17 +225,17 @@ const SearchBar = ({ movies, tvs }) => {
                             </div>
                             <div style={{ width: '90px', marginTop: '2mm' }}>
                                 <FilterDropdown
-                                    label="sort by"
-                                    options={filters["sort by"].options}
-                                    selected={filters["sort by"].selected}
+                                    label="genres"
+                                    options={filters.genres.options}
+                                    selected={filters.genres.selected}
                                     onFilterChange={handleFilterChange}
                                 />
                             </div>
                             <div style={{ width: '90px', marginTop: '2mm' }}>
                                 <FilterDropdown
-                                    label="genres"
-                                    options={filters.genres.options}
-                                    selected={filters.genres.selected}
+                                    label="sort by"
+                                    options={filters["sort by"].options}
+                                    selected={filters["sort by"].selected}
                                     onFilterChange={handleFilterChange}
                                 />
                             </div>
