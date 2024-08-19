@@ -56,6 +56,7 @@ const ContentList = ({ list, isUserOwned }) => {
           <ContentItem 
             content={item}
             isUserSpecificRating={item.isUserSpecificRating}
+            contentType={item.contentType}
           />
         ))).slice(0, visibleContentCount)}
       </div>

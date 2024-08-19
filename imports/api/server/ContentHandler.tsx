@@ -62,58 +62,68 @@ const completeTotalCount = completeTotalMovies + completeTotalTVShows;
 //     }
 // }
 
-function GetContent(searchObject: object, searchOptions: object, sortOptions: object = { popularity: -1 }): GetContentResults {
-    const movieData = Movie.find(searchObject, { ...searchOptions, sort: sortOptions }).fetch();
-    const tvData = TV.find(searchObject, { ...searchOptions, sort: sortOptions }).fetch();
+function GetContent(searchObject: object, searchOptions: object, fullDetails: boolean = false, sortOptions: object = { popularity: -1 }): GetContentResults {
+    let projection = {};
+
+    if (!fullDetails) {
+        projection = {
+            fields: {
+                contentId: 1,
+                title: 1,
+                image_url: 1
+            }
+        };
+    }
+
+    const movieData = Movie.find(searchObject, { ...searchOptions, ...projection, sort: sortOptions }).fetch();
+    const tvData = TV.find(searchObject, { ...searchOptions, ...projection, sort: sortOptions }).fetch();
 
     return { movie: movieData, tv: tvData };
 }
 
+
 const readContent: HandlerFunc = {
     validate: null,
-    run: ({ searchString, limit, page }: GetContentOptions) => {
-
+    run: ({ id, searchString, limit, page }: GetContentOptions & { id?: string }) => {
         let searchOptions = {
             limit: limit ?? 50,
             skip: limit && page ? limit * page : 0
         };
 
         let searchCriteria = {};
-        if (searchString == null || searchString.trim() === '') {
-            searchCriteria = {}; // Fetch all content without filtering
-        } else {
+        let fullDetails = false;
+
+        if (id) {
+            searchCriteria = { contentId: Number(id) }; // Assuming `id` is numeric
+            fullDetails = true;
+        } else if (searchString && searchString.trim() !== '') {
             searchCriteria = { "$text": { "$search": searchString } };
         }
 
-        // Include a sort option for popularity
         const sortOptions = { popularity: -1 };  // Sorting by popularity in descending order
 
-        // Fetch content using the updated search criteria
-        const results = GetContent(searchCriteria, searchOptions, sortOptions);
+        const results = GetContent(searchCriteria, searchOptions, fullDetails, sortOptions);
 
         let totalCount = 0;
-        // Count the total number of items that match the criteria (without pagination)
-        if (Object.keys(searchCriteria).length == 0) {
+        if (!id && Object.keys(searchCriteria).length == 0) {
             totalCount = completeTotalCount;
-        }
-        else {
+        } else if (!id) {
             const totalMovies = MovieCollection.find(searchCriteria).count();
             const totalTVShows = TVCollection.find(searchCriteria).count();
             totalCount = totalMovies + totalTVShows;
         }
-        
 
-        // Use optional chaining to safely access and map over results
         const moviesWithType = results.movie?.map(movie => ({ ...movie, contentType: "Movie" })) || [];
         const tvsWithType = results.tv?.map(tv => ({ ...tv, contentType: "TV Show" })) || [];
 
-        return { 
-            movie: moviesWithType, 
+        return {
+            movie: moviesWithType,
             tv: tvsWithType,
             total: totalCount
         };
     }
-}
+};
+
 
 
 
