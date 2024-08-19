@@ -113,11 +113,6 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
 
   // Define the handleClickOutside function inside the component
   const handleClickOutside = (event) => {
-    console.log("Click detected. Target:", event.target);
-    console.log("popupRef current:", popupRef.current);
-    console.log("contentInfoModalRef current:", contentInfoModalRef.current);
-    console.log("ModalRef current:", modalRef.current);
-    console.log("confirmDialogRef current:", confirmDialogRef.current);
   
     if (
       popupRef.current && !popupRef.current.contains(event.target) &&
@@ -125,11 +120,9 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
       (!isModalOpen || !modalRef.current || !modalRef.current.contains(event.target)) &&
       (!confirmDialogRef.current)
     ) {
-      console.log("Click outside all modals detected, closing ListPopup.");
       onClose();
       event.stopPropagation();
     } else {
-      console.log("Click inside a modal, should not close.");
     }
   };
   
@@ -247,6 +240,9 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
       };
     }
   };
+
+  console.log("list content")
+  console.log(list.content)
 
   const filteredContent = list.content?.filter(item =>
     selectedTab === 'all' ||
