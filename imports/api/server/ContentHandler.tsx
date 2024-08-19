@@ -6,6 +6,8 @@
 import { Handler, HandlerFunc } from './Handler';
 import { Movie, TV } from "../../db/Content";
 import { MovieCollection, TVCollection } from '../../db/Content';
+import { check } from 'meteor/check';
+
 
 type GetContentOptions = {
     searchString: string | null,
@@ -16,7 +18,27 @@ type GetContentOptions = {
 type GetContentResults = {
     movie: typeof Movie[] | null
     tv: typeof TV[] | null
+    title?: string 
 }
+
+// Function to get content by IDs
+export function GetContentByIds(ids: string[], title: string): GetContentResults {
+    const searchObject = { contentId: { $in: ids.map(Number) } };
+    const movieData = MovieCollection.find(searchObject).fetch();
+    const tvData = TVCollection.find(searchObject).fetch();
+
+    return { movie: movieData, tv: tvData, title: title };
+}
+
+
+// Register the Meteor method for fetching content by IDs
+Meteor.methods({
+    'content.search'({ ids, title }: { ids: string[], title: string }) {
+        check(ids, [String]);
+        check(title, String);
+        return GetContentByIds(ids, title);
+    }
+});
 
 const completeTotalMovies = MovieCollection.find().count();
 const completeTotalTVShows = TVCollection.find().count();
@@ -97,6 +119,8 @@ const readContent: HandlerFunc = {
 
 const ContentHandler = new Handler("content")
     .addReadHandler(readContent)
+
+
 
 
 /**

@@ -1,39 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import ContentList from './ContentList.jsx';
 import Scrollbar from './ScrollBar';
-import ProfileDropdown from './ProfileDropdown.jsx';
+import { Meteor } from 'meteor/meteor';
 import AIPicksHeader from './AIPicksHeader.jsx';
+import { useTracker } from 'meteor/react-meteor-data';
+import { ListCollection } from '../db/List';
+import { RatingCollection } from '../db/Rating'; 
 
-export default function AIPicks({ currentUser }) {
+
+
+export default function AIPicks() {
     const DISPLAY_MOVIES = "Display Movie";
     const DISPLAY_SHOWS = "Display Show";
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
     const [globalRatings, setGlobalRatings] = useState({});
-    const [movies, setMovies] = useState([]);
-    const [tvs, setTvs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [genres, setGenres] = useState([]);
+    const [recommendedMovies, setRecommendedMovies] = useState([]);
+    const [recommendedShows, setRecommendedShows] = useState([]);
+    const [randomMovieNames, setRandomMovieNames] = useState([]);
+    const [contentMovieNone, setContentMovieNone] = useState(true);
+    const [contentTVNone, setContentTVNone] = useState(true);
+    const [movieIntros, setMovieIntros] = useState([]);
+    const [tvIntros, setTvIntros] = useState([]);
+
+
+
+    const currentUser = useTracker(() => {
+        const handler = Meteor.subscribe('userData', Meteor.userId());
+        if (handler.ready()) {
+          return Meteor.user();
+        }
+        return null;
+      }, []);
+
+
+    const { lists, loading2 } = useTracker(() => {
+        const listsHandler = Meteor.subscribe('userLists', Meteor.userId());
+        const subscribedHandler = Meteor.subscribe('subscribedLists', Meteor.userId());
+        const ratingsHandler = Meteor.subscribe('userRatings', Meteor.userId());
+    
+        const lists = ListCollection.find({ userId: Meteor.userId() }).fetch();
+        const subscribedLists = ListCollection.find({
+          subscribers: { $in: [Meteor.userId()] }
+        }).fetch();
+        const ratings = RatingCollection.find({ userId: Meteor.userId() }).fetch();
+    
+        return {
+          lists,
+          subscribedLists,
+          ratings,
+          loading2: !listsHandler.ready() || !subscribedHandler.ready() || !ratingsHandler.ready(),
+        };
+      }, []);
 
     useEffect(() => {
-        // Fetch all genres from the backend
-        Meteor.call('genres.getAll', (error, result) => {
-            if (!error) {
-                setGenres(result);
-            } else {
-                console.error("Error fetching genres:", error);
-            }
-        });
-
-        // Fetch content using content.read method
-        Meteor.call('content.read', { limit: 500 }, (error, result) => {  // Adjust the limit as needed
-            if (!error) {
-                setMovies(result.movie || []);
-                setTvs(result.tv || []);
-            } else {
-                console.error("Error fetching content:", error);
-            }
-            setLoading(false);
-        });
+        
 
         // Fetch global ratings using the Meteor method
         Meteor.call('ratings.getGlobalAverages', (error, result) => {
@@ -45,48 +66,210 @@ export default function AIPicks({ currentUser }) {
         });
     }, []);
 
-    let movieContentLists = genres.map(genre => {
-        const genreMovies = movies.filter(item => item.genres && item.genres.includes(genre)).slice(0, 10);
-        return {
-            listId: genre + "Movies",
-            title: genre,
-            content: genreMovies.map(movie => ({
-                ...movie,  // Spread the entire movie object
-                rating: globalRatings[movie.contentId]?.average || 0,
-                contentType: "Movie"
-            }))
+    useEffect(() => {
+        const fetchRecommendations = async () => {
+            try {
+                if (loading2) return;
+
+                // Select up to 5 random movies or TV shows from the lists
+                const selectRandomContent = (list, maxItems) => {
+                    const selectedItems = [];
+                    const listCopy = [...list.content];
+                    
+                    while (selectedItems.length < maxItems && listCopy.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * listCopy.length);
+                        selectedItems.push(listCopy.splice(randomIndex, 1)[0]);
+                        
+                    }
+                    return selectedItems;
+                };
+
+
+                const favouritesList = lists.find(list => list.listType === 'Favourite');
+                const toWatchList = lists.find(list => list.listType === 'To Watch');
+                
+
+                const randomSelections = []
+                //ensure we actually have content in the list before selecting random content   
+                if (favouritesList.content.length !=0) {
+                    randomSelections.push(selectRandomContent(favouritesList, 5));
+                    
+                }
+                if (toWatchList.content.length !=0) {
+                    randomSelections.push(selectRandomContent(toWatchList, 5));
+                }
+
+                
+
+               
+                //map the titles of the selections and set them
+                const titles = []
+                for (const selection of randomSelections) {
+                    for (const item of selection) {
+                        titles.push(item.title);
+                    }
+                }
+                
+                setRandomMovieNames(titles);
+                
+                const movieTitles = [];
+                const tvTitles = [];
+
+            
+                // Separate selected items into movies and TV shows
+                for (const selection of randomSelections) {
+                    for (const item of selection) {
+                    if (item.contentType === 'Movie') {
+                        movieTitles.push(item.title);
+                    } else if (item.contentType === 'TV Show') {
+                        tvTitles.push(item.title);
+                    }
+                }
+                }
+
+                
+                setContentMovieNone(movieTitles.length === 0);
+                setContentTVNone(tvTitles.length === 0);
+
+                
+                // Fetch recommendations for movies
+                if (movieTitles.length > 0) {
+                    const movieResponse = await fetch('/similar_movies_titles.json');
+                    const movieRecommendationsJson = await movieResponse.json();
+
+                    const recommendedMoviePromises = movieTitles.map(title => {
+                        const recommendedMovieIds = movieRecommendationsJson.find(rec => rec.Title === title)?.similar_movies.slice(0, 5) || [];
+                        return new Promise((resolve, reject) => {
+                            Meteor.call('content.search', { ids: recommendedMovieIds, title }, (err, result) => {
+                                if (err) {
+                                    console.error("Error fetching recommended movies:", err);
+                                    reject(err);
+                                } else {
+                                    resolve(result);
+                                }
+                            });
+                        });
+                    });
+
+                    const recommendedMovies = await Promise.all(recommendedMoviePromises);
+                    setRecommendedMovies(recommendedMovies);
+                }
+
+                // Fetch recommendations for TV shows
+                if (tvTitles.length > 0) {
+                    const tvResponse = await fetch('/similar_tvs_title.json');
+                    const tvRecommendationsJson = await tvResponse.json();
+
+                    const recommendedTvPromises = tvTitles.map(title => {
+                        const recommendedTvIds = tvRecommendationsJson.find(rec => rec.Title === title)?.similar_tvs.slice(0, 5) || [];
+                        return new Promise((resolve, reject) => {
+                            Meteor.call('content.search', { ids: recommendedTvIds, title }, (err, result) => {
+                                if (err) {
+                                    console.error("Error fetching recommended movies:", err);
+                                    reject(err);
+                                } else {
+                                    resolve(result);
+                                }
+                            });
+                        });
+                    });
+
+                    const recommendedTvs = await Promise.all(recommendedTvPromises);
+                    setRecommendedShows(recommendedTvs);
+                }
+            } catch (error) {
+                console.error("Error during recommendations fetching:", error);
+                setLoading(false);
+            }
         };
-    });
 
-    let showContentLists = genres.map(genre => {
-        const genreShows = tvs.filter(item => item.genres && item.genres.includes(genre)).slice(0, 10);
-        return {
-            listId: genre + "Shows",
-            title: genre,
-            content: genreShows.map(tv => ({
-                ...tv,  // Spread the entire TV show object
-                rating: globalRatings[tv.contentId]?.average || 0,
-                contentType: "TV Show"
-            }))
-        };
-    });
+        if (!recommendedMovies.length && !recommendedShows.length) {
+            fetchRecommendations();
+        }
+    }, [lists, loading2]);
+
+    useEffect(() => {
+        if (recommendedMovies.length > 0 && movieIntros.length === 0) {
+            const generatedMovieIntros = recommendedMovies.map(result => getRandomIntro(result.title));
+            setMovieIntros(generatedMovieIntros);
+        }
+
+        if (recommendedShows.length > 0 && tvIntros.length === 0) {
+            const generatedTvIntros = recommendedShows.map(result => getRandomIntro(result.title));
+            setTvIntros(generatedTvIntros);
+        }
+    }, [recommendedMovies, recommendedShows]);
+
+    const getRandomIntro = (title) => {
+        const randomIntros = [
+            `Because you liked ${title}, you'll love these:`,
+            `Based on your love for ${title}, we recommend:`,
+            `${title} was a great choice! Here are more:`,
+            `If you enjoyed ${title}, check out these:`,
+            `We also loved ${title}, and here are the AI's other favourites:`,
+        ];
+        const randomIndex = Math.floor(Math.random() * randomIntros.length);
+        return randomIntros[randomIndex];
+    };
 
 
-    return (
-        <div className="flex flex-col min-h-screen bg-darker">
-            <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
-            <Scrollbar className="w-full overflow-y-auto">
-                {!loading && display === "Display Movie" && movieContentLists.map(list => (
-                    <div key={list.listId} className="px-8 py-2">
-                        <ContentList list={list} isUserOwned={false} />
+   if (loading2) return <div>Loading recommendations...</div>;
+
+   
+   
+    // Map random movie names to their corresponding recommended movies
+    const movieContentLists = recommendedMovies.map((result, index) => ({
+        listId: `RecommendedMovies${index}`,
+        title: movieIntros[index],
+        content: result.movie.map(movie => ({
+            ...movie,
+            rating: globalRatings[movie.contentId]?.average || 0,
+            contentType: "Movie"
+        }))
+    }));
+
+// Map random movie names to their corresponding recommended movies
+const tvContentLists = recommendedShows.map((result, index) => ({
+    listId: `RecommendedShows${index}`,
+    title: tvIntros[index],
+    content: result.tv.map(show => ({
+        ...show,
+        rating: globalRatings[show.contentId]?.average || 0,
+        contentType: "TV Show"
+    }))
+}));
+
+return (
+    <div className="flex flex-col min-h-screen bg-darker">
+        <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
+        <Scrollbar className="w-full overflow-y-auto">
+            {display === DISPLAY_MOVIES && (
+                contentMovieNone ? (
+                    <div className="px-8 py-2 mt-10 text-white text-3xl">
+                        Not enough Movies yet. Add some to your favourites or watchlist to get started!
                     </div>
-                ))}
-                {!loading && display === "Display Show" && showContentLists.map(list => (
-                    <div key={list.listId} className="px-8 py-5">
-                        <ContentList list={list} isUserOwned={false} />
+                ) : (
+                    movieContentLists.map(list => (
+                        <div key={list.listId} className="px-8 py-2">
+                            <ContentList list={list} isUserOwned={false} />
+                        </div>
+                    ))
+                )
+            )}
+            {display === DISPLAY_SHOWS && (
+                contentTVNone ? (
+                    <div className="px-8 py-2 mt-10 text-white text-3xl">
+                        Not enough TV Shows yet. Add some to your favourites or watchlist to get started!
                     </div>
-                ))}
-            </Scrollbar>
-        </div>
-    );
+                ) : (
+                    tvContentLists.map(list => (
+                        <div key={list.listId} className="px-8 py-2">
+                            <ContentList list={list} isUserOwned={false} />
+                        </div>
+                    ))
+                )
+            )}
+        </Scrollbar>
+    </div>
+);
 }
