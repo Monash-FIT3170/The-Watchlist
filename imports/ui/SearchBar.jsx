@@ -141,28 +141,28 @@ const SearchBar = ({ currentUser }) => {
                 </div>
             </form>
             <Scrollbar className="search-results-container flex-grow overflow-auto">
-                {selectedTab === 'movies' && (
+                {selectedTab === 'Movies' && (
                     <div className="grid-responsive">
                         {filteredMovies.length > 0 ? filteredMovies.map(movie => (
                             <ContentItem content={movie} key={movie.contentId} />
                         )) : <div></div>}
                     </div>
                 )}
-                {selectedTab === 'tv shows' && (
+                {selectedTab === 'TV Shows' && (
                     <div className="grid-responsive">
                         {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
                             <ContentItem content={tv} key={tv.contentId} />
                         )) : <div></div>}
                     </div>
                 )}
-                {selectedTab === 'lists' && (
+                {selectedTab === 'Lists' && (
                     filteredLists.length > 0 ? (
                         <ListDisplay listData={filteredLists} />
                     ) : (
                         <div></div>
                     )
                 )}
-                {selectedTab === 'users' && (
+                {selectedTab === 'Users' && (
                     users.length > 0 ? (
                         <UserList users={users} searchTerm={searchTerm} currentUser={currentUser} />
                     ) : (
