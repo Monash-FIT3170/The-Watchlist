@@ -30,6 +30,7 @@ export function GetContentByIds(ids: string[], title: string): GetContentResults
     return { movie: movieData, tv: tvData, title: title };
 }
 
+
 // Register the Meteor method for fetching content by IDs
 Meteor.methods({
     'content.search'({ ids, title }: { ids: string[], title: string }) {
@@ -38,6 +39,11 @@ Meteor.methods({
         return GetContentByIds(ids, title);
     }
 });
+
+const completeTotalMovies = MovieCollection.find().count();
+const completeTotalTVShows = TVCollection.find().count();
+const completeTotalCount = completeTotalMovies + completeTotalTVShows;
+
 
 /**
  * Defines two functions:
@@ -85,10 +91,17 @@ const readContent: HandlerFunc = {
         // Fetch content using the updated search criteria
         const results = GetContent(searchCriteria, searchOptions, sortOptions);
 
+        let totalCount = 0;
         // Count the total number of items that match the criteria (without pagination)
-        const totalMovies = MovieCollection.find(searchCriteria).count();
-        const totalTVShows = TVCollection.find(searchCriteria).count();
-        const totalCount = totalMovies + totalTVShows;
+        if (Object.keys(searchCriteria).length == 0) {
+            totalCount = completeTotalCount;
+        }
+        else {
+            const totalMovies = MovieCollection.find(searchCriteria).count();
+            const totalTVShows = TVCollection.find(searchCriteria).count();
+            totalCount = totalMovies + totalTVShows;
+        }
+        
 
         // Use optional chaining to safely access and map over results
         const moviesWithType = results.movie?.map(movie => ({ ...movie, contentType: "Movie" })) || [];

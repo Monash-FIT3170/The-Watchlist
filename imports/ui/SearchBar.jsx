@@ -10,7 +10,7 @@ import ProfileDropdown from './ProfileDropdown';
 
 const SearchBar = ({ currentUser }) => {
 
-    const [selectedTab, setSelectedTab] = useState('movies');
+    const [selectedTab, setSelectedTab] = useState('Movies');
     const [searchTerm, setSearchTerm] = useState('');
     const [globalRatings, setGlobalRatings] = useState({});
     const [filteredMovies, setFilteredMovies] = useState([]);
@@ -53,12 +53,12 @@ const SearchBar = ({ currentUser }) => {
         Meteor.call('content.read', { searchString: searchTerm, limit, page: currentPage }, (error, result) => {
             if (!error) {
                 console.log("Content read result:", result);  // Log the full result
-    
+
                 // Calculate the total number of pages using the lengths of the arrays
                 const totalItems = result.total;
 
                 setTotalPages(Math.ceil(totalItems / limit));
-    
+
                 setFilteredMovies(result.movie || []); // Set to empty array if undefined
                 setFilteredTVShows(result.tv || []); // Set to empty array if undefined
             } else {
@@ -80,7 +80,7 @@ const SearchBar = ({ currentUser }) => {
 
     useEffect(() => {
         console.log("Filtered Movies updated:", filteredMovies);
-    }, [filteredMovies]);    
+    }, [filteredMovies]);
 
     const handleNextPage = () => {
         console.log("Next clicked")
@@ -91,7 +91,7 @@ const SearchBar = ({ currentUser }) => {
             });
         }
     };
-    
+
     const handlePreviousPage = () => {
         if (currentPage > 0) {
             setCurrentPage(prevPage => {
@@ -100,7 +100,7 @@ const SearchBar = ({ currentUser }) => {
             });
         }
     };
-    
+
 
     const filteredLists = lists.filter(list =>
         (list.title && list.title.toLowerCase().includes(searchTerm)) ||
@@ -128,48 +128,48 @@ const SearchBar = ({ currentUser }) => {
                     </div>
                 </div>
                 <div className="bubbles-container flex justify-end mt-2">
-                    {['movies', 'tv shows', 'lists', 'users'].map((tab) => (
+                    {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
                         <div
-                            key={tab}
+                            key={tab.toLowerCase()}
                             className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
                                 } border-transparent border`}
                             onClick={() => setSelectedTab(tab)}
                         >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            {tab}
                         </div>
                     ))}
                 </div>
             </form>
             <Scrollbar className="search-results-container flex-grow overflow-auto">
-    {selectedTab === 'movies' && (
-        <div className="grid-responsive">
-            {filteredMovies.length > 0 ? filteredMovies.map(movie => (
-                <ContentItem content={movie} key={movie.contentId} />
-            )) : <div></div>}
-        </div>
-    )}
-    {selectedTab === 'tv shows' && (
-        <div className="grid-responsive">
-            {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
-                <ContentItem content={tv} key={tv.contentId} />
-            )) : <div></div>}
-        </div>
-    )}
-    {selectedTab === 'lists' && (
-        filteredLists.length > 0 ? (
-            <ListDisplay listData={filteredLists} />
-        ) : (
-            <div></div>
-        )
-    )}
-    {selectedTab === 'users' && (
-        users.length > 0 ? (
-            <UserList users={users} searchTerm={searchTerm} currentUser={currentUser} />
-        ) : (
-            <div></div>
-        )
-    )}
-</Scrollbar>
+                {selectedTab === 'Movies' && (
+                    <div className="grid-responsive">
+                        {filteredMovies.length > 0 ? filteredMovies.map(movie => (
+                            <ContentItem content={movie} key={movie.contentId} />
+                        )) : <div></div>}
+                    </div>
+                )}
+                {selectedTab === 'TV Shows' && (
+                    <div className="grid-responsive">
+                        {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
+                            <ContentItem content={tv} key={tv.contentId} />
+                        )) : <div></div>}
+                    </div>
+                )}
+                {selectedTab === 'Lists' && (
+                    filteredLists.length > 0 ? (
+                        <ListDisplay listData={filteredLists} />
+                    ) : (
+                        <div></div>
+                    )
+                )}
+                {selectedTab === 'Users' && (
+                    users.length > 0 ? (
+                        <UserList users={users} searchTerm={searchTerm} currentUser={currentUser} />
+                    ) : (
+                        <div></div>
+                    )
+                )}
+            </Scrollbar>
 
 
             {/* Pagination buttons */}

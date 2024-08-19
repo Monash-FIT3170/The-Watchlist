@@ -17,6 +17,17 @@ type GetListOptions = {
     userId: string
 }
 
+type EpisodeDetails = {
+    episode_number: number,
+    title: string,
+    runtime?: number  // Optional runtime in minutes
+};
+
+type SeasonDetails = {
+    season_number: number,
+    episodes?: EpisodeDetails[]
+};
+
 type AddContentToListOptions = {
     listId: string,
     userId: string,
@@ -33,6 +44,9 @@ type AddContentToListOptions = {
         language?: string,
         origin_country?: string[],
         genres?: string[],
+        first_aired?: Date,
+        last_aired?: Date,
+        seasons?: SeasonDetails[],
         episode_details?: {
             season_number: number,
             episode_number: number
@@ -74,6 +88,9 @@ interface List {
             release_year: content.release_year,
             language: content.language,
             origin_country: content.origin_country,
+            first_aired: content.first_aired,
+            last_aired: content.last_aired, 
+            seasons: content.seasons,
             genres: content.genres
         };
 

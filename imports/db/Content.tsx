@@ -37,7 +37,8 @@ export const Movie = Class.create({
             type: Number
         },
         popularity: {
-            type: Number
+            type: Number,
+            index: -1
         },
         language: {
             type: String
@@ -123,7 +124,8 @@ export const TV = Class.create({
         },
         popularity: {
             type: Number,
-            optional: true
+            optional: true,
+            index: -1
         },
         overview: {
             type: String,
