@@ -128,14 +128,14 @@ const SearchBar = ({ currentUser }) => {
                     </div>
                 </div>
                 <div className="bubbles-container flex justify-end mt-2">
-                    {['movies', 'tv shows', 'lists', 'users'].map((tab) => (
+                    {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
                         <div
-                            key={tab}
+                            key={tab.toLowerCase()}
                             className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
                                 } border-transparent border`}
                             onClick={() => setSelectedTab(tab)}
                         >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            {tab}
                         </div>
                     ))}
                 </div>
