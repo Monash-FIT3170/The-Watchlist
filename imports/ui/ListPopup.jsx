@@ -346,9 +346,9 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
                           <h3 className="text-xl font-bold">{item.title}</h3>
                           <div className="flex items-center">
                             {isUserSpecificRating ? (
-                              <FaUser className="mr-1 text-blue-500" />
+                              <FaUser className="mr-1 text-blue-500" title="User rating"/>
                             ) : (
-                              <FaGlobe className="mr-1 text-green-500" />
+                              <FaGlobe className="mr-1 text-green-500" title="Global average rating"/>
                             )}
                             <RatingStar totalStars={5} rating={rating} />
                           </div>

@@ -23,7 +23,7 @@ const List = ({ list, onContentClick }) => {
                   <h3 className="text-xl font-bold">{item.title}</h3>
                   <p className="text-sm">{item.description}</p>
                   <div className="flex items-center">
-                    {item.isUserSpecificRating && <FaUser className="mr-1 text-blue-500" />}
+                    {item.isUserSpecificRating && <FaUser className="mr-1 text-blue-500" title="User rating"/>}
                     <RatingStar totalStars={5} rating={item.rating} />
                   </div>
                 </div>
