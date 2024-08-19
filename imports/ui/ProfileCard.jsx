@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaPlus, FaPencilAlt } from 'react-icons/fa';
+import { FaUserPlus, FaPencilAlt } from 'react-icons/fa';
 import { Meteor } from 'meteor/meteor';
 import ProfileDropdown from './ProfileDropdown';
 import { RatingCollection } from '../db/Rating';
@@ -88,29 +88,33 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
           </div>
         </div>
 
-        <div>
-          <h2 className="p-2 text-8xl font-bold truncate">{user.userName || 'Loading...'}</h2>
-          <div className="flex gap-2">
-            <button className="p-1 text-lg flex-initial hover:underline" onClick={() => navigate(`/followers-following/${user._id}/followers`)}>
-              • {user.followers} Followers
-            </button>
-            <button className="p-1 text-lg flex-initial hover:underline" onClick={() => navigate(`/followers-following/${user._id}/following`)}>
-              • {user.following} Following
-            </button>
-            <button
-              className="p-1 text-lg flex-initial hover:underline"
-              onClick={() => {
-                if (user._id === currentUser._id) {
-                  navigate(`/user/${user._id}/ratings?userSpecific=true`);
-                } else {
-                  navigate(`/user/${user._id}/ratings`);
-                }
-              }}>
-              • {ratingsCount} Ratings
-            </button>
+        <div className="flex flex-col gap-2">
+          <h2 className="pl-1 text-8xl font-bold truncate">{user.userName || 'Loading...'}</h2>
+          <div className="flex flex-col gap-2 pl-2">
+            <div className="flex gap-2 items-center">
+              <button className="p-1 text-lg flex-initial hover:underline" onClick={() => navigate(`/followers-following/${user._id}/followers`)}>
+                {user.followers} Followers
+              </button>
+              <span className="text-lg">•</span>
+              <button className="p-1 text-lg flex-initial hover:underline" onClick={() => navigate(`/followers-following/${user._id}/following`)}>
+                {user.following} Following
+              </button>
+              <span className="text-lg">•</span>
+              <button
+                className="p-1 text-lg flex-initial hover:underline"
+                onClick={() => {
+                  if (user._id === currentUser._id) {
+                    navigate(`/user/${user._id}/ratings?userSpecific=true`);
+                  } else {
+                    navigate(`/user/${user._id}/ratings`);
+                  }
+                }}>
+                {ratingsCount} Ratings
+              </button>
+            </div>
             <Link to="/user-discovery">
-              <button className="mt-2 p-1 bg-darker rounded-lg">
-                <FaPlus />
+              <button className="mt-2 ml-1 p-3 text-xl bg-transparent border-2 border-white rounded-full hover:bg-white hover:text-zinc-900 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-zinc-700 focus:ring-opacity-50">
+                <FaUserPlus />
               </button>
             </Link>
           </div>
