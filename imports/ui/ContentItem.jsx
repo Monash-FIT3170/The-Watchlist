@@ -7,7 +7,7 @@ import { RatingCollection } from '../db/Rating';
 
 const popcornUrl = "./ExampleResources/popcorn.png"; // Default image URL
 
-const ContentItem = ({ content, isUserSpecificRating }) => {
+const ContentItem = ({ content, isUserSpecificRating, contentType }) => {
     const [isOpen, setOpen] = useState(false);
     const [fullContent, setFullContent] = useState(null);
 
@@ -16,11 +16,16 @@ const ContentItem = ({ content, isUserSpecificRating }) => {
         if (!fullContent) {
             console.log("Fetching full content details for content ID:", content.contentId);
             // Fetch full content details only when the modal is opened
-            Meteor.call('content.read', { id: content.contentId }, (error, result) => {
+            Meteor.call('content.read', { id: content.contentId, contentType }, (error, result) => {
                 if (!error) {
-                    const movieContent = result.movie && result.movie.length > 0 ? result.movie[0] : null;
-                    console.log("Full content details fetched:", movieContent);
-                    setFullContent(movieContent); // Store the full content details
+                    let contentDetails = null;
+                    if (contentType === 'Movie' && result.movie?.length > 0) {
+                        contentDetails = result.movie[0];
+                    } else if (contentType === 'TV Show' && result.tv?.length > 0) {
+                        contentDetails = result.tv[0];
+                    }
+                    console.log("Full content details fetched:", contentDetails);
+                    setFullContent(contentDetails); // Store the full content details
                     setOpen(true); // Open the modal after fetching
                 } else {
                     console.error("Error fetching full content details:", error);
@@ -31,6 +36,9 @@ const ContentItem = ({ content, isUserSpecificRating }) => {
             setOpen(!isOpen);
         }
     };
+    
+    
+    
 
     const { rating, isRatingLoading } = useTracker(() => {
         const subscription = Meteor.subscribe('userRatings', Meteor.userId());
