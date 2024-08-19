@@ -36,8 +36,8 @@ type GetContentResults = {
 // }
 
 function GetContent(searchObject: object, searchOptions: object, sortOptions: object = { popularity: -1 }): GetContentResults {
-    const movieData = Movie.find(searchObject, { ...searchOptions, sort: sortOptions }).fetch();
-    const tvData = TV.find(searchObject, { ...searchOptions, sort: sortOptions }).fetch();
+    const movieData = Movie.find(searchObject, { ...searchOptions}).fetch();
+    const tvData = TV.find(searchObject, { ...searchOptions}).fetch();
 
     return { movie: movieData, tv: tvData };
 }
