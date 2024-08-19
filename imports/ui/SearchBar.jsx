@@ -198,11 +198,11 @@ const SearchBar = ({ movies, tvs }) => {
                     </div>
                 </div>
                 <div className="bubbles-container flex justify-end mt-2">
-                {['all','movies', 'tv shows', 'lists', 'users'].map((tab) => (
+                {['All','Movies', 'TV shows', 'Lists', 'Users'].map((tab) => (
                     <div
-                        key={tab}
-                        className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 cursor-pointer transition-all text-xl duration-300 ease-in-out ${selectedTab === tab ? 'underline text-[#7B1450]' : 'text-[#989595] hover:text-[#fbc0e2] hover:underline'}`}onClick={() => setSelectedTab(tab)}>
-                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        key={tab.toLowerCase()}
+                        className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 cursor-pointer transition-all text-xl duration-300 ease-in-out ${selectedTab === tab.toLowerCase() ? 'underline text-[#7B1450]' : 'text-[#989595] hover:text-[#fbc0e2] hover:underline'}`}onClick={() => setSelectedTab(tab.toLowerCase())}>
+                        {tab}
                     </div>
                 ))}
                 <button
