@@ -18,6 +18,8 @@ type GetContentResults = {
     tv: typeof TV[] | null
 }
 
+
+
 /**
  * Defines two functions:
  * validate - a validation function to check that the provided parameters are acceptable. Can be null for no validation.
@@ -34,6 +36,10 @@ type GetContentResults = {
 //         return
 //     }
 // }
+
+//const totalMovies = MovieCollection.find().count();
+//const totalTVShows = TVCollection.find().count();
+//const totalCount = totalMovies + totalTVShows;
 
 function GetContent(searchObject: object, searchOptions: object, sortOptions: object = { popularity: -1 }): GetContentResults {
     const movieData = Movie.find(searchObject, { ...searchOptions}).fetch();
@@ -65,9 +71,7 @@ const readContent: HandlerFunc = {
         const results = GetContent(searchCriteria, searchOptions, sortOptions);
 
         // Count the total number of items that match the criteria (without pagination)
-        const totalMovies = MovieCollection.find(searchCriteria).count();
-        const totalTVShows = TVCollection.find(searchCriteria).count();
-        const totalCount = totalMovies + totalTVShows;
+        
 
         // Use optional chaining to safely access and map over results
         const moviesWithType = results.movie?.map(movie => ({ ...movie, contentType: "Movie" })) || [];
@@ -75,8 +79,7 @@ const readContent: HandlerFunc = {
 
         return { 
             movie: moviesWithType, 
-            tv: tvsWithType,
-            total: totalCount
+            tv: tvsWithType
         };
     }
 }
