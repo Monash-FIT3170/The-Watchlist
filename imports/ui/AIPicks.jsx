@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ContentList from './ContentList.jsx';
 import Scrollbar from './ScrollBar';
 import { Meteor } from 'meteor/meteor';
@@ -12,7 +12,7 @@ import { RatingCollection } from '../db/Rating';
 export default function AIPicks() {
     const DISPLAY_MOVIES = "Display Movie";
     const DISPLAY_SHOWS = "Display Show";
-    const NUM_RECOMMENDATIONS = 25;
+    const NUM_RECOMMENDATIONS = 35;
     const NUM_LIST_SLOTS = 6;
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
     const [globalRatings, setGlobalRatings] = useState({});
@@ -26,6 +26,9 @@ export default function AIPicks() {
     const [tvIntros, setTvIntros] = useState([]);
     const [movieLockToggle, setMovieLockToggle] = useState([]);
     const [tvLockToggle, setTvLockToggle] = useState([]);
+
+    movieToggle = useRef(new Array());
+    tvToggle = useRef(new Array())
 
 
 
@@ -143,6 +146,7 @@ export default function AIPicks() {
                     
                     setRecommendedMovies(recommendedMov);
                     setMovieLockToggle(new Array(recommendedMov.length).fill(true));
+                    // movieToggle.current = new Array(recommendedMov.length).fill(true);
                 }
 
                 // Fetch recommendations for TV shows
@@ -150,6 +154,7 @@ export default function AIPicks() {
                     const recommendedTvs = await fetchTvs(tvTitles);
                     setRecommendedShows(recommendedTvs);
                     setTvLockToggle(new Array(recommendedTvs.length).fill(true));
+                    // tvToggle.current = new Array(recommendedTvs.length).fill(true);
                 }
             } catch (error) {
                 console.error("Error during recommendations fetching:", error);
@@ -218,7 +223,8 @@ let tvContentLists = recommendedShows.map((result, index) => ({
 
 //! need to move this to a hook
 movieContentLists.forEach((element, index) => {
-    if (!movieLockToggle[index]){
+    // if (!movieLockToggle[index]){
+    if (!movieToggle.current[index]){
         element["content"] = element["content"].filter((_,index) => rand.includes(index))
     }
     else {
@@ -226,7 +232,8 @@ movieContentLists.forEach((element, index) => {
     }
 });
 tvContentLists.forEach((element, index) => {
-    if (!tvLockToggle[index]){
+    // if (!tvLockToggle[index]){
+    if (!tvToggle.current[index]){
         element["content"] = element["content"].filter((_,index) => rand.includes(index))
     }
     else {
@@ -236,6 +243,9 @@ tvContentLists.forEach((element, index) => {
 console.log(movieContentLists)
 
 console.log(tvContentLists);
+
+// setMovieLockToggle(new Array(recommendedMovies.length).fill(true));
+// setTvLockToggle(new Array(recommendedShows.length).fill(true));
 
 const fetchMovies = async (movieTitles) => {
     const movieResponse = await fetch('/similar_movies_titles.json');
@@ -265,7 +275,7 @@ const fetchTvs = async (tvTitles) => {
     const tvRecommendationsJson = await tvResponse.json();
 
     const recommendedTvPromises = tvTitles.map(title => {
-        const recommendedTvIds = tvRecommendationsJson.find(rec => rec.Title === title)?.similar_tvs.slice(0, NUM_RECOMMENDATIONS - 1) || [];
+        const recommendedTvIds = tvRecommendationsJson.find(rec => rec.Title === title)?.similar_tvs.slice(0, NUM_RECOMMENDATIONS) || [];
         return new Promise((resolve, reject) => {
             Meteor.call('content.search', { ids: recommendedTvIds, title }, (err, result) => {
                 if (err) {
@@ -297,14 +307,23 @@ const lockToggle = (listId) => {
         temp[retNum(listId)] = !movieLockToggle[retNum(listId)];
         setMovieLockToggle(temp);
 
+        // // recommendedMovies[retNum(listId)].movie = ;
+        // let temp = [...movieToggle.current];
+        // temp[retNum(listId)] = !movieToggle.current[retNum(listId)];
+        // movieToggle.current = temp;
+
 
     }
     else if (listId.includes("RecommendedShows")){
-        // item = recommendedShows[retNum(listId)];
+        // // item = recommendedShows[retNum(listId)];
         let temp = [...tvLockToggle];
         temp[retNum(listId)] = !tvLockToggle[retNum(listId)];
         setTvLockToggle(temp);
+        // let temp = [...tvToggle.current];
+        // temp[retNum(listId)] = !tvToggle.current[retNum(listId)];
+        // tvToggle.current = temp;
     }
+    
 
 }
 
@@ -312,6 +331,7 @@ const lockToggle = (listId) => {
 return (
     <div className="flex flex-col min-h-screen bg-darker">
         <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
+        <button onClick={() => lockToggle( "RecommendedMovies0" )}>Refresh</button>
         <Scrollbar className="w-full overflow-y-auto">
             {display === DISPLAY_MOVIES && (
                 contentMovieNone ? (
@@ -319,28 +339,31 @@ return (
                         Not enough Movies yet. Add some to your favourites or watchlist to get started!
                     </div>
                 ) : (
-                    // movieContentLists.map(list => (
-                    //     <div key={list.listId} className="px-8 py-2">
-                    //         <ContentList list={list} isUserOwned={false} />
-                    //         <button onClick={() => this.lockToggle( list.listId )}>Locked</button>
-                    //     </div>
-                    // )
+                    movieContentLists.map(list => (
+                        <div key={list.listId} className="px-8 py-2">
+                            <ContentList list={list} isUserOwned={false} />
+                            {/* <button onClick={() => lockToggle( list.listId )}>Refresh</button> */}
+                        </div>
+                    )
 
 
                   
-                    movieContentLists.map(list => movieLockToggle[retNum(list.listId)] == true ? (
-                        <div key={list.listId} className="px-8 py-2">
-                            <ContentList list={list} isUserOwned={false} />
-                            <button onClick={() => lockToggle( list.listId )}>Locked</button>
-                        </div>
-                    ) : (
-                        <div key={list.listId} className="px-8 py-2">
-                            <ContentList list={list} isUserOwned={false} />
-                            <button onClick={() => lockToggle( list.listId )}>Unlocked</button>
-                        </div>
-                    )
+                //     movieContentLists.map(list => movieLockToggle[retNum(list.listId)] == true ? (
+                //         <div key={list.listId} className="px-8 py-2">
+                //             <ContentList list={list} isUserOwned={false} />
+                //             <button onClick={() => lockToggle( list.listId )}>Locked</button>
+                //         </div>
+                //     ) : (
+                //         <div key={list.listId} className="px-8 py-2">
+                //             <ContentList list={list} isUserOwned={false} />
+                //             <button onClick={() => lockToggle( list.listId )}>Unlocked</button>
+                //         </div>
+                //     )
+                // )
+                  
                 )
-                )
+                
+            )
             )}
             {display === DISPLAY_SHOWS && (
                 contentTVNone ? (
@@ -348,24 +371,25 @@ return (
                         Not enough TV Shows yet. Add some to your favourites or watchlist to get started!
                     </div>
                 ) : (
-                    // tvContentLists.map(list => (
-                    //     <div key={list.listId} className="px-8 py-2">
-                    //         <ContentList list={list} isUserOwned={false} />
-                    //         <button onClick={() => this.lockToggle( list.listId )}>Locked</button>
-                    //     </div>
-                    // )
-                    tvContentLists.map(list => tvLockToggle[retNum(list.listId)] == true ? (
+                    tvContentLists.map(list => (
                         <div key={list.listId} className="px-8 py-2">
                             <ContentList list={list} isUserOwned={false} />
-                            <button onClick={() => lockToggle( list.listId )}>Locked</button>
+                            {/* <button onClick={() => lockToggle( list.listId )}>Refresh</button> */}
                         </div>
-                    ) : (
-                        <div key={list.listId} className="px-8 py-2">
-                        <ContentList list={list} isUserOwned={false} />
-                        <button onClick={() => lockToggle( list.listId )}>Unlocked</button>
-                    </div>
                     )
-                    )
+                )
+                    // tvContentLists.map(list => tvLockToggle[retNum(list.listId)] == true ? (
+                    //     <div key={list.listId} className="px-8 py-2">
+                    //         <ContentList list={list} isUserOwned={false} />
+                    //         <button onClick={() => lockToggle( list.listId )}>Locked</button>
+                    //     </div>
+                    // ) : (
+                    //     <div key={list.listId} className="px-8 py-2">
+                    //     <ContentList list={list} isUserOwned={false} />
+                    //     <button onClick={() => lockToggle( list.listId )}>Unlocked</button>
+                    // </div>
+                    // )
+                    // )
                 )
             )}
         </Scrollbar>
