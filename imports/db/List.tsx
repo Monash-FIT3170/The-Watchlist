@@ -87,7 +87,15 @@ export const ContentSummary = Class.create({
         seasons: {
             type: [SeasonDetails], // Adding seasons field
             optional: true
-        }
+        },
+        directors: {
+            type: [String],
+            optional: true
+        },
+        actors: {
+            type: [String],
+            optional: true
+        },
     }
 });
 

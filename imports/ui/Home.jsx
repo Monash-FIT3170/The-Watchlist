@@ -27,10 +27,6 @@ const Home = ({ currentUser }) => {
   const favouritesList = lists.filter(list => list.listType === 'Favourite');
   const toWatchList = lists.filter(list => list.listType === 'To Watch');
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div className="flex justify-between overflow-hidden">
       <div className="absolute top-4 right-8">

@@ -46,6 +46,8 @@ type AddContentToListOptions = {
         genres?: string[],
         first_aired?: Date,
         last_aired?: Date,
+        directors?: string[],
+        actors?: string[],
         seasons?: SeasonDetails[],
         episode_details?: {
             season_number: number,
@@ -91,7 +93,9 @@ interface List {
             first_aired: content.first_aired,
             last_aired: content.last_aired, 
             seasons: content.seasons,
-            genres: content.genres
+            genres: content.genres,
+            directors: content.directors,
+            actors: content.actors
         };
 
         ListCollection.update(
