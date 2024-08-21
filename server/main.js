@@ -57,7 +57,7 @@ Meteor.startup(() => {
     if (Meteor.isProduction){
         Meteor.absoluteUrl.defaultOptions.rootUrl = "https://www.thewatchlist.xyz/"; // create callback url to our domain
     } else if(Meteor.isDevelopment){
-        Meteor.absoluteUrl.defaultOptions.rootUrl = "http://localhost:3000";
+        Meteor.absoluteUrl.defaultOptions.rootUrl = "http://localhost:3000/";
     }
 
 });
