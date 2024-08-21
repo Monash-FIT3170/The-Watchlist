@@ -10,6 +10,7 @@ const FullContentList = ({ list, onDeleteList, onRenameList }) => {
   const content = contentarr.map((item, index) => (
     <ContentItem
       content={item}
+      popularity={item.popularity}
     />
   ));
 

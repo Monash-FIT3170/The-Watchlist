@@ -211,7 +211,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
           </div>
         </div>
       </div>
-      <Modal ref={modalRef} show={showModal} onClose={() => setShowModal(false)} content={content} type={content.contentType} />
+      <Modal ref={modalRef} show={showModal} onClose={() => setShowModal(false)} content={content} type={content.contentType} popularity={content.popularity}/>
     </div>
   ) : null;
 

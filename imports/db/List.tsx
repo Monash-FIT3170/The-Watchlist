@@ -1,3 +1,4 @@
+import { popoverClasses } from '@mui/material';
 import { Class , Enum } from 'meteor/jagi:astronomy';
 
 // Define the Mongo collection where lists will be stored
@@ -41,6 +42,7 @@ export const ContentSummary = Class.create({
         },
         image_url: String,
         background_url: String,
+        popularity: Number,
         user_rating: {
             type: Number,
             optional: true

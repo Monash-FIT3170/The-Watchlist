@@ -73,6 +73,7 @@ const AllRatedContentPage = ({ currentUser }) => {
             <ContentItem
               content={content}
               isUserSpecificRating={userSpecific}
+              popularity={content.popularity}
             />
           )) : <p>No rated content available.</p>}
         </div>
