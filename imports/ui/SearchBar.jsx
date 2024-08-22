@@ -10,13 +10,15 @@ import ProfileDropdown from './ProfileDropdown';
 
 const SearchBar = ({ currentUser }) => {
 
-    const [selectedTab, setSelectedTab] = useState('Movies');
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedTab, setSelectedTab] = useState('all');
+    const [showFilters, setShowFilters] = useState(false);
     const [globalRatings, setGlobalRatings] = useState({});
     const [filteredMovies, setFilteredMovies] = useState([]);
     const [filteredTVShows, setFilteredTVShows] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+
 
     const limit = 50; // Number of items per page
 
@@ -137,16 +139,68 @@ const SearchBar = ({ currentUser }) => {
                     </div>
                 </div>
                 <div className="bubbles-container flex justify-end mt-2">
-                    {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
-                        <div
-                            key={tab.toLowerCase()}
-                            className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-                                } border-transparent border`}
-                            onClick={() => setSelectedTab(tab)}
-                        >
-                            {tab}
+                {['All','Movies', 'TV shows', 'Lists', 'Users'].map((tab) => (
+                    <div
+                        key={tab.toLowerCase()}
+                        className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 cursor-pointer transition-all text-xl duration-300 ease-in-out ${selectedTab === tab.toLowerCase() ? 'underline text-[#7B1450]' : 'text-[#989595] hover:text-[#fbc0e2] hover:underline'}`}onClick={() => setSelectedTab(tab.toLowerCase())}>
+                        {tab}
+                    </div>
+                ))}
+                <button
+                    type="button"
+                    className={`ml-4 cursor-pointer transition-all duration-300 ease-in-out ${showFilters ? 'underline text-[#7B1450]' : 'text-[#989595]'} ${showFilters || 'hover:text-[#fbc0e2] hover:underline'}`}
+                    onClick={toggleFilters}
+                    style={{ position: 'relative', top: '-1mm' }}
+                >
+                    <AiOutlineFilter size={20} />
+                </button>
+                {showFilters && (
+                    <div className="flex space-x-4" style={{ display: 'inline-flex', marginLeft: '30px' }}>
+                            <div style={{ width: '80px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="year"
+                                    options={filters.year.options}
+                                    selected={filters.year.selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
+                            <div style={{ width: '90px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="genres"
+                                    options={filters.genres.options}
+                                    selected={filters.genres.selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
+                            <div style={{ width: '90px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="sort by"
+                                    options={filters["sort by"].options}
+                                    selected={filters["sort by"].selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
                         </div>
-                    ))}
+                    )}
+                    {showFilters && (
+                        <div className="filter-tags">
+                            {Object.entries(filters).filter(([_, value]) => {
+                                return Array.isArray(value.selected) ? value.selected.length > 0 : value.selected
+                            }).map(([key, value]) => (
+                                <div key={key} className="inline-block bg-gray-500 rounded-full px-2.5 py-1.5 m-1 mt-3 text-sm">
+                                    {`${key}: ${Array.isArray(value.selected) ? value.selected.join(', ') : value.selected}`}
+                                    <button type="button" onClick={() => handleRemoveFilter(key)} className="bg-transparent border-none cursor-pointer text-gray-800 ml-2.5">
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                            {Object.entries(filters).some(([_, value]) => Array.isArray(value.selected) ? value.selected.length > 0 : value.selected) && (
+                                <button className="inline-block bg-gray-500 rounded-full px-2.5 py-1.5 m-1 text-sm" onClick={handleClearFilters}>
+                                    Clear All Filters
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
             </form>
             <Scrollbar className="search-results-container flex-grow overflow-auto">
@@ -177,6 +231,17 @@ const SearchBar = ({ currentUser }) => {
                     ) : (
                         <div></div>
                     )
+                )}
+                {selectedTab === 'all' && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {filteredData.movies.length > 0 ? filteredData.movies.map(movie => (
+                            <ContentItem key={movie.id} id={movie.id} type="Movie" src={movie.image_url} alt={movie.title} rating={movie.rating} />
+                        )) : <div>No movies available.</div>}
+                    
+                        {filteredData.tvShows.length > 0 ? filteredData.tvShows.map(tv => (
+                            <ContentItem key={tv.id} id={tv.id} type="TV Show" src={getImageUrl(tv.image_url)} alt={tv.title} rating={tv.rating || undefined} />
+                        )) : <div>No TV shows available.</div>}
+                    </div>
                 )}
             </Scrollbar>
 
