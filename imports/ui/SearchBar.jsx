@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { AiOutlineSearch } from 'react-icons/ai';
+import { AiOutlineSearch, AiOutlineDown, AiOutlineFilter } from 'react-icons/ai';
 import ContentItem from './ContentItem';
 import ListDisplay from './ListDisplay';
 import { useTracker } from 'meteor/react-meteor-data';
@@ -7,7 +7,6 @@ import { ListCollection } from '../db/List';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList';
 import ProfileDropdown from './ProfileDropdown';
-import { AiOutlineFilter } from 'react-icons/ai';
 
 const SearchBar = ({ currentUser }) => {
 
@@ -19,7 +18,7 @@ const SearchBar = ({ currentUser }) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [showFilters, setShowFilters] = useState(false); 
-    const dropdownData = {
+    const [filters, setFilters] = useState({
         year: {
             options: [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000, 1999, 1998, 1997, 1996, 1995, 1994, 1993, 1992, 1991, 1990],
             selected: []
@@ -39,29 +38,16 @@ const SearchBar = ({ currentUser }) => {
             options: ["rating", "runtime"],
             selected: "" // this is string as opposed to arrays above due to lack of multi-select
         }
-    };
+    });
 
-    const [filters, setFilters] = useState(dropdownData);
-
-    const handleFilterChange = (filterType, value) => {
-        console.log("handleFilterChange called");
-        console.log("Current Filters State:", filters);
-        console.log("Filter Type:", filterType);
-        console.log("Filters Object for Type:", filters[filterType]);  // Add this to check if it's defined
-        if (filters[filterType] && Array.isArray(filters[filterType].selected)) {  // Also check if filters[filterType] is defined
-            const updatedSelected = filters[filterType].selected.includes(value)
-                ? filters[filterType].selected.filter(item => item !== value)
-                : [...filters[filterType].selected, value];
-            setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: updatedSelected } }));
-        } else if (filters[filterType]) {  // Handle single-select options safely
-            setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: value } }));
-        } else {
-            console.error("Filter type is undefined:", filterType);
-        }
-    };
-
-    const FilterDropdown = ({ label, options, selected }) => {
+    const FilterDropdown = ({ label, options, selected, onFilterChange }) => {
         const [dropdownOpen, setDropdownOpen] = useState(false);
+
+        const handleOptionClick = (option) => {
+            onFilterChange(label, option);
+            setDropdownOpen(false); // Close the dropdown after selection
+        };
+
         return (
             <div className="relative bg-dark text-white text-xs rounded-lg">
                 <button
@@ -79,7 +65,7 @@ const SearchBar = ({ currentUser }) => {
                                 <a
                                     key={option}
                                     className={`block px-4 py-2 text-sm hover:bg-gray-700 ${selected.includes(option) ? 'font-bold bg-gray-700' : 'bg-transparent'}`}
-                                    onClick={() => handleFilterChange(label, option)}
+                                    onClick={() => handleOptionClick(option)}
                                     role="menuitem"
                                 >
                                     {option}
@@ -92,41 +78,7 @@ const SearchBar = ({ currentUser }) => {
         );
     };
 
-    const applyFilters = (data) => {
-        let filtered = [...data]; // Clone the data array to avoid direct modifications
-
-        // Filter by year if any year is selected
-        if (filters.year.selected.length > 0) {
-            filtered = filtered.filter(item => filters.year.selected.includes(item.release_year));
-        }
-
-        // Filter by genre if any genre is selected and the tab is either 'movies' or 'tv shows'
-        if (filters.genres.selected.length > 0 && (selectedTab === 'movies' || selectedTab === 'tv shows')) {
-            filtered = filtered.filter(item => {
-                console.log("Checking genres for item:", item);
-                return Array.isArray(item.genres) && item.genres.some(genre => filters.genres.selected.includes(genre));
-            });
-        }
-
-        // Sorting logic
-        if (filters["sort by"].selected) {
-            filtered = filtered.sort((a, b) => {
-                if (filters["sort by"].selected === 'rating') {
-                    return b.rating - a.rating;
-                } else if (filters["sort by"].selected === 'runtime') {
-                    return b.runtime - a.runtime;
-                }
-                return 0;
-            });
-        }
-
-        return filtered;
-    };
-
-    // Existing code for fetching lists, users, and content...
-
     const toggleFilters = () => setShowFilters(!showFilters);
-
 
     const limit = 50; // Number of items per page
 
@@ -160,7 +112,12 @@ const SearchBar = ({ currentUser }) => {
     const users = useTracker(fetchUsers, [searchTerm]);
 
     const fetchContent = useCallback((id = null, contentType = null) => {
-        const options = { searchString: searchTerm, limit, page: currentPage };
+        const options = {
+            searchString: searchTerm,
+            limit,
+            page: currentPage,
+            ...filters // Include filters in the options
+        };
         if (id) {
             options.id = id;
             options.contentType = contentType; // Pass content type when fetching single item
@@ -184,13 +141,11 @@ const SearchBar = ({ currentUser }) => {
                 setFilteredTVShows([]);
             }
         });
-    }, [searchTerm, currentPage]);
-
-
+    }, [searchTerm, currentPage, filters]);
 
     useEffect(() => {
         fetchContent();
-    }, [fetchContent, searchTerm]);
+    }, [fetchContent, searchTerm, filters]);
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value.toLowerCase());
@@ -225,6 +180,23 @@ const SearchBar = ({ currentUser }) => {
         (list.description && list.description.toLowerCase().includes(searchTerm))
     );
 
+    const handleFilterChange = (label, option) => {
+        setFilters(prevFilters => {
+            const updatedFilters = { ...prevFilters };
+            if (label === 'Year' || label === 'Genres') {
+                const isSelected = updatedFilters[label.toLowerCase()].selected.includes(option);
+                if (isSelected) {
+                    updatedFilters[label.toLowerCase()].selected = updatedFilters[label.toLowerCase()].selected.filter(item => item !== option);
+                } else {
+                    updatedFilters[label.toLowerCase()].selected = [...updatedFilters[label.toLowerCase()].selected, option];
+                }
+            } else if (label === 'Sort By') {
+                updatedFilters[label.toLowerCase()].selected = option;
+            }
+            return updatedFilters;
+        });
+    };
+
     return (
         <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
             <div className="absolute top-4 right-4">
@@ -257,17 +229,17 @@ const SearchBar = ({ currentUser }) => {
                     ))}
                     <button
                         type="button"
-                        className={`ml-4 cursor-pointer transition-all duration-300 ease-in-out ${showFilters ? 'underline text-[#7B1450]' : 'text-[#989595]'} ${showFilters || 'hover:text-[#fbc0e2] hover:underline'}`}
+                        className={`ml-4 transition-all duration-300 ease-in-out ${showFilters ? 'underline text-[#7B1450]' : 'text-[#989595]'} ${!showFilters && 'hover:text-[#fbc0e2] hover:underline'}`}
                         onClick={toggleFilters}
                         style={{ position: 'relative', top: '-1mm' }}
-                        >
-                            <AiOutlineFilter size={20} />
+                    >
+                        <AiOutlineFilter size={20} />
                     </button>
                     {showFilters && (
-                    <div className="flex space-x-4" style={{ display: 'inline-flex', marginLeft: '30px' }}>
+                        <div className="flex space-x-4" style={{ display: 'inline-flex', marginLeft: '30px' }}>
                             <div style={{ width: '80px', marginTop: '2mm' }}>
                                 <FilterDropdown
-                                    label="year"
+                                    label="Year"
                                     options={filters.year.options}
                                     selected={filters.year.selected}
                                     onFilterChange={handleFilterChange}
@@ -275,39 +247,20 @@ const SearchBar = ({ currentUser }) => {
                             </div>
                             <div style={{ width: '90px', marginTop: '2mm' }}>
                                 <FilterDropdown
-                                    label="genres"
+                                    label="Genres"
                                     options={filters.genres.options}
                                     selected={filters.genres.selected}
                                     onFilterChange={handleFilterChange}
                                 />
                             </div>
-                            <div style={{ width: '90px', marginTop: '2mm' }}>
+                            <div style={{ width: '110px' , marginTop: '2mm' }}>
                                 <FilterDropdown
-                                    label="sort by"
+                                    label="Sort By"
                                     options={filters["sort by"].options}
                                     selected={filters["sort by"].selected}
                                     onFilterChange={handleFilterChange}
                                 />
                             </div>
-                        </div>
-                    )}
-                    {showFilters && (
-                        <div className="filter-tags">
-                            {Object.entries(filters).filter(([_, value]) => {
-                                return Array.isArray(value.selected) ? value.selected.length > 0 : value.selected
-                            }).map(([key, value]) => (
-                                <div key={key} className="inline-block bg-gray-500 rounded-full px-2.5 py-1.5 m-1 mt-3 text-sm">
-                                    {`${key}: ${Array.isArray(value.selected) ? value.selected.join(', ') : value.selected}`}
-                                    <button type="button" onClick={() => handleRemoveFilter(key)} className="bg-transparent border-none cursor-pointer text-gray-800 ml-2.5">
-                                        ×
-                                    </button>
-                                </div>
-                            ))}
-                            {Object.entries(filters).some(([_, value]) => Array.isArray(value.selected) ? value.selected.length > 0 : value.selected) && (
-                                <button className="inline-block bg-gray-500 rounded-full px-2.5 py-1.5 m-1 text-sm" onClick={handleClearFilters}>
-                                    Clear All Filters
-                                </button>
-                            )}
                         </div>
                     )}
                 </div>
@@ -353,7 +306,6 @@ const SearchBar = ({ currentUser }) => {
                     </div>
                 )}
             </Scrollbar>
-
 
             {/* Pagination buttons */}
             <div className="flex justify-between mt-4">
