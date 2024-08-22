@@ -140,8 +140,7 @@ const SearchBar = ({ currentUser }) => {
                     {['All','Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
                         <div
                             key={tab.toLowerCase()}
-                            className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-                                } border-transparent border`}
+                            className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 cursor-pointer transition-all text-xl duration-300 ease-in-out ${selectedTab === tab ? 'underline text-[#7B1450]' : 'text-[#989595] hover:text-[#fbc0e2] hover:underline'}`}
                             onClick={() => setSelectedTab(tab)}
                         >
                             {tab}
