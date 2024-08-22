@@ -1,96 +1,275 @@
 import React, { useState, useEffect } from 'react';
-import ContentList from './ContentList.tsx';
+import ContentList from './ContentList.jsx';
 import Scrollbar from './ScrollBar';
+import { Meteor } from 'meteor/meteor';
+import AIPicksHeader from './AIPicksHeader.jsx';
+import { useTracker } from 'meteor/react-meteor-data';
+import { ListCollection } from '../db/List';
+import { RatingCollection } from '../db/Rating'; 
 
-export default function AIPicks({ movies, tvs }) {
-    // console.log("Movies")
-    // console.log(movies)
-    // console.log(tvs)
 
-    // Use react "state" to keep track of whether the component is displaying movies or TV shows
+
+export default function AIPicks() {
     const DISPLAY_MOVIES = "Display Movie";
     const DISPLAY_SHOWS = "Display Show";
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
-    const [isLoading, setIsLoading] = useState(true); // Loading state
+    const [globalRatings, setGlobalRatings] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [recommendedMovies, setRecommendedMovies] = useState([]);
+    const [recommendedShows, setRecommendedShows] = useState([]);
+    const [randomMovieNames, setRandomMovieNames] = useState([]);
+    const [contentMovieNone, setContentMovieNone] = useState(true);
+    const [contentTVNone, setContentTVNone] = useState(true);
+    const [movieIntros, setMovieIntros] = useState([]);
+    const [tvIntros, setTvIntros] = useState([]);
 
-    // Create content lists for each genre
-    genres = [
-        "Action", "Adventure", "Animation", "Anime", "Awards Show", "Children",
-        "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "Food",
-        "Game Show", "History", "Home and Garden", "Horror", "Indie", "Martial Arts",
-        "Mini-Series", "Musical", "Mystery", "News", "Podcast", "Reality",
-        "Romance", "Science Fiction", "Soap", "Sport", "Suspense", "Talk Show",
-        "Thriller", "Travel", "War", "Western"
-    ]
-    let movieContentLists = []
-    let showContentLists = []
-    genres.forEach(genre => {
-        const genreMovies = movies.filter(item => item.genres.includes(genre)).slice(0, 10)
-        const movieContentList = {
-            listId: genre + "Movies",
-            title: genre,
-            content: genreMovies
+
+
+    const currentUser = useTracker(() => {
+        const handler = Meteor.subscribe('userData', Meteor.userId());
+        if (handler.ready()) {
+          return Meteor.user();
         }
-        movieContentLists.push(movieContentList)
+        return null;
+      }, []);
 
-        const genreShows = tvs.filter(item => item.genres.includes(genre)).slice(0, 10)
-        const showContentList = {
-            listId: genre + "Shows",
-            title: genre,
-            content: genreShows
+
+    const { lists, loading2 } = useTracker(() => {
+        const listsHandler = Meteor.subscribe('userLists', Meteor.userId());
+        const subscribedHandler = Meteor.subscribe('subscribedLists', Meteor.userId());
+        const ratingsHandler = Meteor.subscribe('userRatings', Meteor.userId());
+    
+        const lists = ListCollection.find({ userId: Meteor.userId() }).fetch();
+        const subscribedLists = ListCollection.find({
+          subscribers: { $in: [Meteor.userId()] }
+        }).fetch();
+        const ratings = RatingCollection.find({ userId: Meteor.userId() }).fetch();
+    
+        return {
+          lists,
+          subscribedLists,
+          ratings,
+          loading2: !listsHandler.ready() || !subscribedHandler.ready() || !ratingsHandler.ready(),
+        };
+      }, []);
+
+    useEffect(() => {
+        
+
+        // Fetch global ratings using the Meteor method
+        Meteor.call('ratings.getGlobalAverages', (error, result) => {
+            if (!error) {
+                setGlobalRatings(result);
+            } else {
+                console.error("Error fetching global ratings:", error);
+            }
+        });
+    }, []);
+
+    useEffect(() => {
+        const fetchRecommendations = async () => {
+            try {
+                if (loading2) return;
+
+                // Select up to 5 random movies or TV shows from the lists
+                const selectRandomContent = (list, maxItems) => {
+                    const selectedItems = [];
+                    const listCopy = [...list.content];
+                    
+                    while (selectedItems.length < maxItems && listCopy.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * listCopy.length);
+                        selectedItems.push(listCopy.splice(randomIndex, 1)[0]);
+                        
+                    }
+                    return selectedItems;
+                };
+
+
+                const favouritesList = lists.find(list => list.listType === 'Favourite');
+                const toWatchList = lists.find(list => list.listType === 'To Watch');
+                
+
+                const randomSelections = []
+                //ensure we actually have content in the list before selecting random content   
+                if (favouritesList.content.length !=0) {
+                    randomSelections.push(selectRandomContent(favouritesList, 5));
+                    
+                }
+                if (toWatchList.content.length !=0) {
+                    randomSelections.push(selectRandomContent(toWatchList, 5));
+                }
+
+                
+
+               
+                //map the titles of the selections and set them
+                const titles = []
+                for (const selection of randomSelections) {
+                    for (const item of selection) {
+                        titles.push(item.title);
+                    }
+                }
+                
+                setRandomMovieNames(titles);
+                
+                const movieTitles = [];
+                const tvTitles = [];
+
+            
+                // Separate selected items into movies and TV shows
+                for (const selection of randomSelections) {
+                    for (const item of selection) {
+                    if (item.contentType === 'Movie') {
+                        movieTitles.push(item.title);
+                    } else if (item.contentType === 'TV Show') {
+                        tvTitles.push(item.title);
+                    }
+                }
+                }
+
+                
+                setContentMovieNone(movieTitles.length === 0);
+                setContentTVNone(tvTitles.length === 0);
+
+                
+                // Fetch recommendations for movies
+                if (movieTitles.length > 0) {
+                    const movieResponse = await fetch('/similar_movies_titles.json');
+                    const movieRecommendationsJson = await movieResponse.json();
+
+                    const recommendedMoviePromises = movieTitles.map(title => {
+                        const recommendedMovieIds = movieRecommendationsJson.find(rec => rec.Title === title)?.similar_movies.slice(0, 5) || [];
+                        return new Promise((resolve, reject) => {
+                            Meteor.call('content.search', { ids: recommendedMovieIds, title }, (err, result) => {
+                                if (err) {
+                                    console.error("Error fetching recommended movies:", err);
+                                    reject(err);
+                                } else {
+                                    resolve(result);
+                                }
+                            });
+                        });
+                    });
+
+                    const recommendedMovies = await Promise.all(recommendedMoviePromises);
+                    setRecommendedMovies(recommendedMovies);
+                }
+
+                // Fetch recommendations for TV shows
+                if (tvTitles.length > 0) {
+                    const tvResponse = await fetch('/similar_tvs_title.json');
+                    const tvRecommendationsJson = await tvResponse.json();
+
+                    const recommendedTvPromises = tvTitles.map(title => {
+                        const recommendedTvIds = tvRecommendationsJson.find(rec => rec.Title === title)?.similar_tvs.slice(0, 5) || [];
+                        return new Promise((resolve, reject) => {
+                            Meteor.call('content.search', { ids: recommendedTvIds, title }, (err, result) => {
+                                if (err) {
+                                    console.error("Error fetching recommended movies:", err);
+                                    reject(err);
+                                } else {
+                                    resolve(result);
+                                }
+                            });
+                        });
+                    });
+
+                    const recommendedTvs = await Promise.all(recommendedTvPromises);
+                    setRecommendedShows(recommendedTvs);
+                }
+            } catch (error) {
+                console.error("Error during recommendations fetching:", error);
+                setLoading(false);
+            }
+        };
+
+        if (!recommendedMovies.length && !recommendedShows.length) {
+            fetchRecommendations();
         }
-        showContentLists.push(showContentList)
-    })
+    }, [lists, loading2]);
 
-    // useEffect(() => {
-    //     if (movies && movies > 0) {
-    //         setIsLoading(false); // Set loading to false when lists are loaded
-    //     }
-    // }, [movies]);
+    useEffect(() => {
+        if (recommendedMovies.length > 0 && movieIntros.length === 0) {
+            const generatedMovieIntros = recommendedMovies.map(result => getRandomIntro(result.title));
+            setMovieIntros(generatedMovieIntros);
+        }
 
-    // if (isLoading) {
-    //     return <div>Loading...</div>; // Show loading indicator while lists are loading
-    // }
+        if (recommendedShows.length > 0 && tvIntros.length === 0) {
+            const generatedTvIntros = recommendedShows.map(result => getRandomIntro(result.title));
+            setTvIntros(generatedTvIntros);
+        }
+    }, [recommendedMovies, recommendedShows]);
 
-    return (
-        <div className="flex flex-col gap-6 overflow-y-hidden h-custom">
-            <div className="bg-darker rounded-lg items-center flex flex-col justify-center">
-                <h1 className="text-5xl font-semibold mt-8">AI Picks</h1>
-                <div className="my-8 items-center w-1/2 flex flex-row">
-                    <button
-                        className="border border-solid rounded-full px-8 py-4 w-1/3 focus:bg-magenta"
-                        onClick={() => setDisplay(DISPLAY_MOVIES)}
-                    >
-                        Movies
-                    </button>
-                    <div className="w-1/3"></div>
-                    <button
-                        className="border border-solid rounded-full px-8 py-4 w-1/3 focus:bg-magenta"
-                        onClick={() => setDisplay(DISPLAY_SHOWS)}
-                    >
-                        TV Shows
-                    </button>
-                </div>
-            </div>
-            <Scrollbar className="overflow-y-auto scrollbar-webkit">
-                {/* Display Movies */}
-                {display === DISPLAY_MOVIES && movieContentLists && (
-                    <>
-                        {movieContentLists.map(list => (
-                            <ContentList key={list._id} list={list} />
-                        ))}
-                    </>
-                )}
+    const getRandomIntro = (title) => {
+        const randomIntros = [
+            `Because you liked ${title}, you'll love these:`,
+            `Based on your love for ${title}, we recommend:`,
+            `${title} was a great choice! Here are more:`,
+            `If you enjoyed ${title}, check out these:`,
+            `We also loved ${title}, and here are the AI's other favourites:`,
+        ];
+        const randomIndex = Math.floor(Math.random() * randomIntros.length);
+        return randomIntros[randomIndex];
+    };
 
-                {/* Display TV Shows */}
-                {display === DISPLAY_SHOWS && showContentLists && (
-                    <>
-                        {showContentLists.map(list => (
-                            <ContentList key={list._id} list={list} />
-                        ))}
-                    </>
-                )}
-            </Scrollbar>
-        </div>
-    );
+
+   if (loading2) return <div>Loading recommendations...</div>;
+
+   
+   
+    // Map random movie names to their corresponding recommended movies
+    const movieContentLists = recommendedMovies.map((result, index) => ({
+        listId: `RecommendedMovies${index}`,
+        title: movieIntros[index],
+        content: result.movie.map(movie => ({
+            ...movie,
+            rating: globalRatings[movie.contentId]?.average || 0,
+            contentType: "Movie"
+        }))
+    }));
+
+// Map random movie names to their corresponding recommended movies
+const tvContentLists = recommendedShows.map((result, index) => ({
+    listId: `RecommendedShows${index}`,
+    title: tvIntros[index],
+    content: result.tv.map(show => ({
+        ...show,
+        rating: globalRatings[show.contentId]?.average || 0,
+        contentType: "TV Show"
+    }))
+}));
+
+return (
+    <div className="flex flex-col min-h-screen bg-darker">
+        <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
+        <Scrollbar className="w-full overflow-y-auto">
+            {display === DISPLAY_MOVIES && (
+                contentMovieNone ? (
+                    <div className="px-8 py-2 mt-10 text-white text-3xl">
+                        Not enough Movies yet. Add some to your favourites or watchlist to get started!
+                    </div>
+                ) : (
+                    movieContentLists.map(list => (
+                        <div key={list.listId} className="px-8 py-2">
+                            <ContentList list={list} isUserOwned={false} />
+                        </div>
+                    ))
+                )
+            )}
+            {display === DISPLAY_SHOWS && (
+                contentTVNone ? (
+                    <div className="px-8 py-2 mt-10 text-white text-3xl">
+                        Not enough TV Shows yet. Add some to your favourites or watchlist to get started!
+                    </div>
+                ) : (
+                    tvContentLists.map(list => (
+                        <div key={list.listId} className="px-8 py-2">
+                            <ContentList list={list} isUserOwned={false} />
+                        </div>
+                    ))
+                )
+            )}
+        </Scrollbar>
+    </div>
+);
 }

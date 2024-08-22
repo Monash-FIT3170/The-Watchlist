@@ -1,18 +1,24 @@
+// imports/ui/ListPopup.jsx
 import React, { useEffect, useRef, useState } from "react";
+import { useTracker } from 'meteor/react-meteor-data';
 import RatingStar from "./RatingStar";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiGrid, FiList } from "react-icons/fi";
 import RenameListModal from "./RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import { useNavigate } from 'react-router-dom';
-import { useLists } from './ListContext';
-import { getImageUrl } from "./imageUtils";
-import Scrollbar from './ScrollBar'; // Import the Scrollbar component
+import { ListCollection } from "../db/List";
+import Scrollbar from './ScrollBar';
+import { FaUser, FaGlobe } from "react-icons/fa";
+import { RatingCollection } from "../db/Rating";
+import ContentItem from "./ContentItem";
+import ContentInfoModal from "./ContentInfoModal";  // Import the modal component
 
-const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
-  const { handleRemoveContent, fetchLists, lists } = useLists();
-  const popupRef = useRef(null);
-  const confirmDialogRef = useRef(null);
+
+const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
+  const popupRef = useRef(null); // Ref for ListPopup
+  const contentInfoModalRef = useRef(null); // Ref for ContentInfoModal
+  const modalRef = useRef(null) // Ref for Modal
   const [expandedItem, setExpandedItem] = useState(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [contentDetails, setContentDetails] = useState({});
@@ -21,29 +27,144 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [contentToDelete, setContentToDelete] = useState(null);
   const [listToDelete, setListToDelete] = useState(null);
-  const [updatedList, setUpdatedList] = useState(list); // Track updated list
   const [selectedTab, setSelectedTab] = useState('all'); // Track selected tab
   const [imageStyles, setImageStyles] = useState({});
-  const navigate = useNavigate();
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [globalRatings, setGlobalRatings] = useState({});
+  const [isGridView, setIsGridView] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedContent, setSelectedContent] = useState(null);
+  const confirmDialogRef = useRef(null);
 
-  const handleRedirect = (type, id) => {
-    onClose();
-    navigate(`/${type}${id}`);
+  const { list, loading, ratings } = useTracker(() => {
+    const listHandle = Meteor.subscribe('userLists', listId);
+    const subscribedListHandle = Meteor.subscribe('subscribedLists', Meteor.userId());
+    const ratingsHandle = Meteor.subscribe('userRatings', Meteor.userId());
+
+    const list = ListCollection.findOne({ _id: listId }) || {};
+    const ratings = RatingCollection.find({ userId: Meteor.userId() }).fetch(); // Fetch logged-in user's ratings
+    const loading = !listHandle.ready() || !subscribedListHandle.ready() || !ratingsHandle.ready();
+
+    return { list, loading, ratings };
+  }, [listId]);
+
+  const [sortOrder, setSortOrder] = useState('ascending');
+  const [sortCriterion, setSortCriterion] = useState('title'); // New state for sorting criterion
+  
+  const toggleSortOrder = () => {
+    setSortOrder(currentOrder => currentOrder === 'ascending' ? 'descending' : 'ascending');
   };
 
+
+    // Function to change sorting criterion
+    const changeSortCriterion = (criterion) => {
+      setSortCriterion(criterion);
+    };
+
+    // Sort content based on the selected criterion and order
+    const sortContent = (content) => {
+      return content.sort((a, b) => {
+        if (sortOrder === 'ascending') {
+          if (sortCriterion === 'title') {
+            return a.title.localeCompare(b.title);
+          } else {
+            console.log(`Comparing ${a.title} (${a.release_year}) with ${b.title} (${b.release_year})`);
+            return a.release_year - b.release_year;
+          }
+        } else {
+          if (sortCriterion === 'title') {
+            return b.title.localeCompare(a.title);
+          } else {
+            console.log(`Comparing ${a.title} (${a.release_year}) with ${b.title} (${b.release_year})`);
+            return b.release_year - a.release_year;
+          }
+        }
+      });
+    };
+
+  const isListOwner = list.userId === Meteor.userId();
+
+  useEffect(() => {
+    Meteor.call('ratings.getGlobalAverages', (error, result) => {
+      if (error) {
+        console.error("Error fetching global ratings:", error);
+      } else {
+        setGlobalRatings(result);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (list.subscribers && Array.isArray(list.subscribers)) {
+      const isSubscribed = list.subscribers.includes(Meteor.userId());
+      setIsSubscribed(isSubscribed);
+    }
+  }, [list.subscribers]);
+
+  // Separate close handlers for each modal
+  const closeContentInfoModal = () => {
+    setModalOpen(false);
+    setSelectedContent(null);
+  };
+
+  const handleContentClick = (item, event) => {
+    event.stopPropagation(); // Prevents the event from bubbling up
+    const userRating = ratings.find(r => r.contentId === item.contentId);
+    const contentWithRating = { ...item, rating: userRating?.rating || 0 };
+    setSelectedContent(contentWithRating); // Set the content with rating to be shown in ContentInfoModal
+    setModalOpen(true); // Open ContentInfoModal
+  };
+
+
+  const handleSubscribe = (listId) => {
+    if (list.userId === Meteor.userId()) {
+      console.log('Cannot subscribe to your own list');
+      return;
+    }
+    Meteor.call('list.subscribe', listId, (error) => {
+      if (error) {
+        console.error('Subscription error:', error);
+      } else {
+        setIsSubscribed(true);
+      }
+    });
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedContent(null);
+  };
+
+  const handleUnsubscribe = (listId) => {
+    Meteor.call('list.unsubscribe', listId, (error) => {
+      if (error) {
+        console.error('Unsubscription error:', error);
+      } else {
+        setIsSubscribed(false);
+      }
+    });
+  }
+
+  // Define the handleClickOutside function inside the component
   const handleClickOutside = (event) => {
-    const target = event.target;
+  
     if (
-      popupRef.current &&
-      !popupRef.current.contains(target) &&
-      !target.closest(".rename-modal") &&
-      (!confirmDialogRef.current || !confirmDialogRef.current.contains(target))
+      popupRef.current && !popupRef.current.contains(event.target) &&
+      (!contentInfoModalRef.current || !contentInfoModalRef.current.contains(event.target)) &&
+      (!isModalOpen || !modalRef.current || !modalRef.current.contains(event.target)) &&
+      (!confirmDialogRef.current)
     ) {
       onClose();
+      event.stopPropagation();
+    } else {
     }
   };
-
+  
   const handleRenameListClick = () => {
+    if (list.title === 'Favourite' || list.title === 'To Watch') {
+      alert('Cannot rename Favourite or To Watch lists');
+      return;
+    }
     setIsRenameModalOpen(true);
   };
 
@@ -52,16 +173,8 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
-
-  useEffect(() => {
-    // Find the updated list in the lists array from context
-    const updatedList = lists.find(l => l._id === list._id);
-    if (updatedList) {
-      setUpdatedList(updatedList);
-    }
-  }, [lists, list._id]); // Depend on lists and list._id
-
+  }, [isModalOpen]); // Run useEffect whenever `isModalOpen` changes
+  
   const handleExpandClick = (id, title) => {
     if (expandedItem === id) {
       setExpandedItem(null);
@@ -89,10 +202,15 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
       }
     });
   };
-
   const handleRemoveContentClick = (contentId) => {
     if (contentId !== null) {
-      handleRemoveContent(list._id, contentId, fetchLists);
+      Meteor.call('list.removeContent', { listId: list._id, contentId }, (error) => {
+        if (error) {
+          console.error("Error removing content:", error);
+        } else {
+          console.log("Content removed successfully");
+        }
+      });
     }
   };
 
@@ -103,8 +221,11 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
   };
 
   const confirmDeleteList = (listId) => {
+    if (list.title === 'Favourite' || list.title === 'To Watch') {
+      alert('This list cannot be deleted.');
+      return;
+    }
     setListToDelete(listId);
-    setContentToDelete(null);
     setShowConfirmDialog(true);
   };
 
@@ -112,8 +233,13 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
     if (contentToDelete !== null) {
       handleRemoveContentClick(contentToDelete);
     } else if (listToDelete !== null) {
-      onDeleteList(listToDelete);
-      onClose();
+      Meteor.call('list.delete', { listId: listToDelete }, (error) => {
+        if (error) {
+          console.error("Error deleting list:", error);
+        } else {
+          onClose();
+        }
+      });
     }
     resetConfirmationState();
   };
@@ -133,35 +259,79 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
     }
   };
 
-  const filteredContent = updatedList.content.filter(item =>
+  const getRatingForContent = (contentId) => {
+    if (isListOwner) {
+      const userRating = ratings.find(r => r.contentId === contentId);
+      return {
+        rating: userRating ? userRating.rating : 0,
+        isUserSpecificRating: !!userRating
+      };
+    } else {
+      return {
+        rating: globalRatings[contentId]?.average || 0,
+        isUserSpecificRating: false
+      };
+    }
+  };
+
+  console.log("list content")
+  console.log(list.content)
+
+  const filteredContent = list.content?.filter(item =>
     selectedTab === 'all' ||
-    (selectedTab === 'movies' && item.type === 'Movie') ||
-    (selectedTab === 'tv shows' && item.type === 'TV Show')
-  );
+    (selectedTab === 'movies' && item.contentType === 'Movie') ||
+    (selectedTab === 'tv shows' && item.contentType === 'TV Show')
+  ) || [];
+
+  const sortedContent = sortContent(filteredContent);
+
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div
-        ref={popupRef}
-        className="bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
+        ref={popupRef}  // Ref for the ListPopup
+        className="list-popup bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">{updatedList.title}</h2>
+          <h2 className="text-2xl font-bold">{list.title}</h2>
           <div className="flex space-x-2">
             <button
               onClick={handleRenameListClick}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold p-2 rounded-full"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full flex items-center justify-center"
               title="Rename List"
+              style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
             >
-              <FiEdit className="text-lg" />
+              <FiEdit size="24" />
             </button>
             <button
               onClick={() => confirmDeleteList(list._id)}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded-full"
+              className="bg-red-500 hover:bg-red-700 text-white font-bold rounded-full flex items-center justify-center"
               title="Delete List"
+              style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
             >
-              <FiTrash2 className="text-lg" />
+              <FiTrash2 size="24" />
             </button>
+            <button
+              onClick={() => setIsGridView(!isGridView)}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+              title={isGridView ? "Switch to List View" : "Switch to Grid View"}
+              style={{ width: 44, height: 44 }}
+            >
+              {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
+            </button>
+            {/* Conditionally render subscribe/unsubscribe button */}
+            {list.userId !== Meteor.userId() && (
+              <button
+                onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
+                className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
+              >
+                {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+              </button>
+            )}
             <button
               className="text-2xl font-bold text-gray-500 hover:text-gray-800"
               onClick={onClose}
@@ -170,7 +340,8 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
             </button>
           </div>
         </div>
-        <div className="bubbles-container flex justify-start mt-2">
+        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-wrap">
           {['all', 'movies', 'tv shows'].map((tab) => (
             <div
               key={tab}
@@ -182,104 +353,138 @@ const ListPopup = ({ list, onClose, onDeleteList, onRenameList }) => {
             </div>
           ))}
         </div>
-        <Scrollbar className="space-y-8 max-h-[calc(100vh-10rem)]">
-          {filteredContent.map((item) => (
-            <div key={item.content_id} className="block relative">
-              <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101">
-                <div className="relative">
-                  <img
-                    src={getImageUrl(item.background_url)}
-                    alt={item.title}
-                    className="cursor-pointer" // Change to maintain aspect ratio
-                    style={imageStyles[item.content_id] || {}}
-                    onLoad={(e) => handleImageLoad(e, item.content_id)}
-                    onClick={() => {
-                      console.log(`Image clicked: ${item.type}, ${item.content_id}`);
-                      handleRedirect(item.type, item.content_id);
-                    }}
+        <div className="flex-shrink-0">
+          <div className="flex space-x-2">
+            <select
+              value={sortCriterion}
+              onChange={(e) => changeSortCriterion(e.target.value)}
+              className="inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out bg-[#282525] text-white border-transparent border"
+            >
+              <option value="title">Sort by Title</option>
+              <option value="release_year">Sort by Release Year</option>
+            </select>
+            <button
+              onClick={toggleSortOrder}
+              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
+                ${sortOrder === 'ascending' ? 'bg-[#7B1450] text-white' : 'bg-[#7B1450] text-white'} 
+                border-transparent border`}
+            >
+              Toggle Sort Order ({sortOrder === 'ascending' ? 'Ascending' : 'Descending'})
+            </button>
+          </div>
+        </div>
+      </div>
+        <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
+          {sortedContent.map((item) => {
+            const { rating = 0, isUserSpecificRating = false } = getRatingForContent(item.contentId);
+            return (
+              <div key={item.contentId} className={isGridView ? '' : 'block relative'}>
+                {isGridView ? (
+                  <ContentItem
+                    content={item}
+                    isUserSpecificRating={isUserSpecificRating}
+                    popularity = {item.popularity}
+                    onClick={() => handleContentClick(item)}  // Open modal on click
+                    contentType={item.contentType}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60" style={{ pointerEvents: 'none' }}>
-                    <div className="absolute bottom-4 left-4 text-white" style={{ pointerEvents: 'auto' }}>
-                      <h3 className="text-xl font-bold ml-1">{item.title}</h3>
-                      <RatingStar totalStars={5} rating={3.5} />
+                ) : (
+                  <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101" onClick={(e) => handleContentClick(item, e)}>
+                    <div className="relative">
+                      <img
+                        src={item.background_url}
+                        alt={item.title}
+                        className="cursor-pointer w-full h-48 object-cover rounded-t-lg"
+                        style={imageStyles[item.contentId] || {}}
+                        onLoad={(e) => handleImageLoad(e, item.contentId)}
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60">
+                        <div className="absolute bottom-4 left-4 text-white">
+                          <h3 className="text-xl font-bold">{item.title}</h3>
+                          <div className="flex items-center">
+                            {isUserSpecificRating ? (
+                              <FaUser className="mr-1 text-blue-500" title="User rating"/>
+                            ) : (
+                              <FaGlobe className="mr-1 text-green-500" title="Global average rating"/>
+                            )}
+                            <RatingStar totalStars={5} rating={rating} />
+                          </div>
+                        </div>
+                        <button
+                          className="absolute bottom-4 right-4 text-white text-2xl"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleExpandClick(item.contentId, item.title);
+                          }}
+                        >
+                          {expandedItem === item.contentId ? <FaChevronUp /> : <FaChevronDown />}
+                        </button>
+                        <button
+                          className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            confirmRemoveContent(item.contentId);
+                          }}
+                          title="Remove from List"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      className="absolute bottom-4 right-4 text-white text-2xl"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent the click from propagating to the image
-                        handleExpandClick(item.content_id, item.title);
-                      }}
-                      style={{ pointerEvents: 'auto' }}
-                    >
-                      {expandedItem === item.content_id ? <FaChevronUp /> : <FaChevronDown />}
-                    </button>
-                    <button
-                      className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent the click from propagating to the image
-                        confirmRemoveContent(item.content_id);
-                      }}
-                      title="Remove from List"
-                      style={{ pointerEvents: 'auto' }}
-                    >
-                      <FiTrash2 />
-                    </button>
                   </div>
-                </div>
+                )}
               </div>
-              {expandedItem === item.content_id && (
-                <div className="mt-4 p-4 bg-gray-900 rounded-lg">
-                  {loadingDetails[item.content_id] ? (
-                    <p>Loading...</p>
-                  ) : errorDetails[item.content_id] ? (
-                    <p>Error loading details.</p>
-                  ) : contentDetails[item.content_id] ? (
-                    <>
-                      <p>
-                        <strong>Synopsis:</strong> {contentDetails[item.content_id].overview}
-                      </p>
-                      <p>
-                        <strong>Director:</strong> Example Director
-                      </p>
-                    </>
-                  ) : (
-                    <p>No details available.</p>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </Scrollbar>
       </div>
-      <div className="z-50">
-        {isRenameModalOpen && (
-          <RenameListModal
-            isOpen={isRenameModalOpen}
-            onClose={() => setIsRenameModalOpen(false)}
-            onRename={(newName) => {
-              onRenameList(list._id, newName);
-              list.title = newName; // Update the list title locally
-            }}
-            currentName={list.title}
-          />
-        )}
-      </div>
+
+      {isRenameModalOpen && (
+        <RenameListModal
+          isOpen={isRenameModalOpen}
+          onClose={() => setIsRenameModalOpen(false)}
+          onRename={(newName) => {
+            onRenameList(newName);
+            list.title = newName; // Update the list title locally
+          }}
+          currentName={list.title}
+        />
+      )}
+
+      {isModalOpen && selectedContent && (
+        <ContentInfoModal
+          ref={contentInfoModalRef}  // Ref for the ContentInfoModal
+          isOpen={isModalOpen}
+          onClose={() => setModalOpen(false)}
+          content={selectedContent}
+          modalRef={modalRef}
+        />
+      )}
+
       {showConfirmDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div ref={confirmDialogRef} className="bg-darker p-6 rounded-lg">
-            <p className="text-white mb-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50" ref={confirmDialogRef}>
+          <div
+            className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-gray-300">
               Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
             </p>
             <div className="flex justify-end space-x-4">
               <button
-                className="bg-gray-500 hover:bg-gray-700 text-white font-bold p-2 rounded"
-                onClick={resetConfirmationState}
+                className="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetConfirmationState();
+                }}
               >
                 Cancel
               </button>
               <button
-                className="bg-red-500 hover:bg-red-700 text-white font-bold p-2 rounded"
-                onClick={handleDeleteConfirmed}
+                className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                onClick={(e) => {
+                  e.stopPropagation();  // Stop propagation when confirming deletion
+                  handleDeleteConfirmed();
+                }}
               >
                 Confirm
               </button>

@@ -5,15 +5,45 @@
 
 import { Handler, HandlerFunc } from './Handler';
 import { Movie, TV } from "../../db/Content";
+import { MovieCollection, TVCollection } from '../../db/Content';
+import { check } from 'meteor/check';
+
 
 type GetContentOptions = {
-    searchString: string | null
+    searchString: string | null,
+    limit: number,
+    page: number
 }
 
 type GetContentResults = {
     movie: typeof Movie[] | null
     tv: typeof TV[] | null
+    title?: string 
 }
+
+// Function to get content by IDs
+export function GetContentByIds(ids: string[], title: string): GetContentResults {
+    const searchObject = { contentId: { $in: ids.map(Number) } };
+    const movieData = MovieCollection.find(searchObject).fetch();
+    const tvData = TVCollection.find(searchObject).fetch();
+
+    return { movie: movieData, tv: tvData, title: title };
+}
+
+
+// Register the Meteor method for fetching content by IDs
+Meteor.methods({
+    'content.search'({ ids, title }: { ids: string[], title: string }) {
+        check(ids, [String]);
+        check(title, String);
+        return GetContentByIds(ids, title);
+    }
+});
+
+const completeTotalMovies = MovieCollection.find().count();
+const completeTotalTVShows = TVCollection.find().count();
+const completeTotalCount = completeTotalMovies + completeTotalTVShows;
+
 
 /**
  * Defines two functions:
@@ -32,44 +62,75 @@ type GetContentResults = {
 //     }
 // }
 
-function GetContent(searchObject: object): GetContentResults {
-    const movieData = Movie.find(searchObject).fetch().map(doc => doc.raw()); // Convert each document to a raw object
-    const tvData = TV.find(searchObject).fetch().map(doc => doc.raw()); // Convert each document to a raw object
+function GetContent(searchObject: object, searchOptions: object, fullDetails: boolean = false, sortOptions: object = { popularity: -1 }): GetContentResults {
+    let projection = {};
 
-    return {
-        movie: movieData,
-        tv: tvData,
+    if (!fullDetails) {
+        projection = {
+            fields: {
+                contentId: 1,
+                title: 1,
+                image_url: 1
+            }
+        };
     }
+
+    const movieData = Movie.find(searchObject, { ...searchOptions, ...projection, sort: sortOptions }).fetch();
+    const tvData = TV.find(searchObject, { ...searchOptions, ...projection, sort: sortOptions }).fetch();
+
+    return { movie: movieData, tv: tvData };
 }
 
 
-
-// In your /imports/api/server/ContentHandler.tsx file, within the readContent function
 const readContent: HandlerFunc = {
     validate: null,
-    run: ({searchString}: GetContentOptions) => {
-        console.log('Search string received:', searchString);
+    run: ({ id, searchString, limit, page }: GetContentOptions & { id?: string }) => {
+        let searchOptions = {
+            limit: limit ?? 50,
+            skip: limit && page ? limit * page : 0
+        };
 
         let searchCriteria = {};
+        let fullDetails = false;
 
-        if (searchString == null) {
-            console.log('Fetching all content...');
-            searchCriteria = {};
-        } else {
-            console.log('Performing search with:', searchString);
+        if (id) {
+            searchCriteria = { contentId: Number(id) }; // Assuming `id` is numeric
+            fullDetails = true;
+        } else if (searchString && searchString.trim() !== '') {
             searchCriteria = { "$text": { "$search": searchString } };
         }
 
-        // Fetch content using the updated search criteria and convert to raw objects
-        const results = GetContent(searchCriteria);
-        // console.log('Fetched content:', results);
-        return results;
+        const sortOptions = { popularity: -1 };  // Sorting by popularity in descending order
+
+        const results = GetContent(searchCriteria, searchOptions, fullDetails, sortOptions);
+
+        let totalCount = 0;
+        if (!id && Object.keys(searchCriteria).length == 0) {
+            totalCount = completeTotalCount;
+        } else if (!id) {
+            const totalMovies = MovieCollection.find(searchCriteria).count();
+            const totalTVShows = TVCollection.find(searchCriteria).count();
+            totalCount = totalMovies + totalTVShows;
+        }
+
+        const moviesWithType = results.movie?.map(movie => ({ ...movie, contentType: "Movie" })) || [];
+        const tvsWithType = results.tv?.map(tv => ({ ...tv, contentType: "TV Show" })) || [];
+
+        return {
+            movie: moviesWithType,
+            tv: tvsWithType,
+            total: totalCount
+        };
     }
-}
+};
+
+
 
 
 const ContentHandler = new Handler("content")
     .addReadHandler(readContent)
+
+
 
 
 /**

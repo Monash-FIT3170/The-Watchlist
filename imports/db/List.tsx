@@ -16,30 +16,89 @@ export const EpisodeDetails = Class.create({
     }
 });
 
+export const SeasonDetails = Class.create({
+    name: "SeasonDetails",
+    fields: {
+        season_number: {
+            type: Number
+        },
+        episodes: {
+            type: [EpisodeDetails], // Using the previously defined EpisodeDetails class
+            optional: true
+        }
+    }
+});
+
+
 export const ContentSummary = Class.create({
     name: "ContentSummary",
     fields: {
-        content_id: Number, // lookup id for the content
+        contentId: Number, // lookup id for the content
         title: String,
+        overview: {
+            type: String,
+            optional: true
+        },
         image_url: String,
+        background_url: String,
         user_rating: {
             type: Number,
             optional: true
         },
-        type: {
+        contentType: {
             type: String,
             validators: [{
                 type: 'choice',
                 param: ['Movie', 'TV Show', 'Episode']
             }]
         },
-        episode_details: {
-            type: EpisodeDetails,
+        runtime: {
+            type: Number,
             optional: true
         },
-        background_url: String
+        release_year: {
+            type: Number,
+            optional: true
+        },
+        language: {
+            type: String,
+            optional: true
+        },
+        origin_country: {
+            type: [String],
+            optional: true
+        },
+        genres: {
+            type: [String],
+            optional: true
+        },
+        first_aired: {
+            type: Date,
+            optional: true
+        },
+        last_aired: {
+            type: Date, 
+            optional: true
+        },
+        keywords: {
+            type: [String],
+            optional: true
+        },
+        seasons: {
+            type: [SeasonDetails], // Adding seasons field
+            optional: true
+        },
+        directors: {
+            type: [String],
+            optional: true
+        },
+        actors: {
+            type: [String],
+            optional: true
+        },
     }
 });
+
 
 
 // Define the schema for the List
@@ -47,7 +106,7 @@ const List = Class.create({
     name: 'List',
     collection: ListCollection,
     fields: {
-        userId: Number,
+        userId: String,
         userName: String,
         title: String,
         description: {
@@ -63,6 +122,12 @@ const List = Class.create({
         },
         content: {
             type: [ContentSummary],
+            default: function() {
+                return [];
+            }
+        },
+        subscribers: {
+            type: [String], // array of userIds
             default: function() {
                 return [];
             }
