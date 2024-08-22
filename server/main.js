@@ -21,6 +21,13 @@ const googleClientId = Meteor.settings.private.google.clientId;
 const googleClientSecret = Meteor.settings.private.google.clientSecret;
 
 Meteor.startup(() => {
+    if (Meteor.isProduction){
+        Meteor.absoluteUrl.defaultOptions.rootUrl = "https://www.thewatchlist.xyz/"; // create callback url to our domain
+        console.log("Prod");
+    } else if(Meteor.isDevelopment){
+        Meteor.absoluteUrl.defaultOptions.rootUrl = "http://localhost:3000/";
+        console.log("Dev");
+    }
     // Define or use an existing collection
     const testCollection = new Mongo.Collection('test');
 
@@ -54,11 +61,7 @@ Meteor.startup(() => {
         }
     );
 
-    if (Meteor.isProduction){
-        Meteor.absoluteUrl.defaultOptions.rootUrl = "https://www.thewatchlist.xyz/"; // create callback url to our domain
-    } else if(Meteor.isDevelopment){
-        Meteor.absoluteUrl.defaultOptions.rootUrl = "http://localhost:3000/";
-    }
+
 
 });
 
