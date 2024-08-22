@@ -40,14 +40,9 @@ const SearchBar = ({ currentUser }) => {
         }
     });
 
-    const FilterDropdown = ({ label, options, selected, onFilterChange }) => {
+    const FilterDropdown = ({ label, options, selected }) => {
         const [dropdownOpen, setDropdownOpen] = useState(false);
-
-        const handleOptionClick = (option) => {
-            onFilterChange(label, option);
-            setDropdownOpen(false); // Close the dropdown after selection
-        };
-
+    
         return (
             <div className="relative bg-dark text-white text-xs rounded-lg">
                 <button
@@ -60,15 +55,15 @@ const SearchBar = ({ currentUser }) => {
                 </button>
                 {dropdownOpen && (
                     <div className="absolute left-0 mt-1 w-full rounded-md shadow-lg bg-gray-900 z-50 overflow-auto max-h-60">
-                        <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                        <div className="py-1" role="menu" aria-orientation="vertical">
                             {options.map(option => (
                                 <a
                                     key={option}
-                                    className={`block px-4 py-2 text-sm hover:bg-gray-700 ${selected.includes(option) ? 'font-bold bg-gray-700' : 'bg-transparent'}`}
-                                    onClick={() => handleOptionClick(option)}
+                                    className={`block px-4 py-2 text-sm hover:bg-gray-700 cursor-pointer ${selected.includes(option) ? 'font-bold bg-gray-700' : 'bg-transparent'}`}
+                                    onClick={() => handleFilterChange(label, option)}
                                     role="menuitem"
                                 >
-                                    {option}
+                                    {option} 
                                 </a>
                             ))}
                         </div>
@@ -77,8 +72,58 @@ const SearchBar = ({ currentUser }) => {
             </div>
         );
     };
+    
 
     const toggleFilters = () => setShowFilters(!showFilters);
+
+    const applyFilters = (data) => {
+        let filtered = [...data]; // Clone the data array to avoid direct modifications
+
+        // Filter by year if any year is selected
+        if (filters.year.selected.length > 0) {
+            filtered = filtered.filter(item => filters.year.selected.includes(item.release_year));
+        }
+
+        // Filter by genre if any genre is selected and the tab is either 'movies' or 'tv shows'
+        if (filters.genres.selected.length > 0 && (selectedTab === 'movies' || selectedTab === 'tv shows')) {
+            filtered = filtered.filter(item => {
+                console.log("Checking genres for item:", item);
+                return Array.isArray(item.genres) && item.genres.some(genre => filters.genres.selected.includes(genre));
+            });
+        }
+
+        // Sorting logic
+        if (filters["sort by"].selected) {
+            filtered = filtered.sort((a, b) => {
+                if (filters["sort by"].selected === 'rating') {
+                    return b.rating - a.rating;
+                } else if (filters["sort by"].selected === 'runtime') {
+                    return b.runtime - a.runtime;
+                }
+                return 0;
+            });
+        }
+
+        return filtered;
+    };
+
+    // useEffect(() => {
+    //     const newFilteredData = {
+    //         movies: applyFilters(movies),
+    //         tvShows: applyFilters(tv shows),
+    //         users: [], // Apply similar filtering logic if required
+    //         lists: applyFilters(Lists) // Use lists from context
+    //     };
+    //     setFilteredData(newFilteredData);
+    // }, [filters, movies, tvs, lists]);
+
+    // const [filteredData, setFilteredData] = useState({
+    //     movies: movies,
+    //     tvShows: tvs,
+    //     users: [], // there will be a similar dummy data array for users
+    //     lists: lists  // there will be a similar dummy data array for lists
+    // });
+
 
     const limit = 50; // Number of items per page
 
@@ -180,21 +225,21 @@ const SearchBar = ({ currentUser }) => {
         (list.description && list.description.toLowerCase().includes(searchTerm))
     );
 
-    const handleFilterChange = (label, option) => {
-        setFilters(prevFilters => {
-            const updatedFilters = { ...prevFilters };
-            if (label === 'Year' || label === 'Genres') {
-                const isSelected = updatedFilters[label.toLowerCase()].selected.includes(option);
-                if (isSelected) {
-                    updatedFilters[label.toLowerCase()].selected = updatedFilters[label.toLowerCase()].selected.filter(item => item !== option);
-                } else {
-                    updatedFilters[label.toLowerCase()].selected = [...updatedFilters[label.toLowerCase()].selected, option];
-                }
-            } else if (label === 'Sort By') {
-                updatedFilters[label.toLowerCase()].selected = option;
-            }
-            return updatedFilters;
-        });
+    const handleFilterChange = (filterType, value) => {
+        console.log("handleFilterChange called");
+        console.log("Current Filters State:", filters);
+        console.log("Filter Type:", filterType);
+        console.log("Filters Object for Type:", filters[filterType]);  // Add this to check if it's defined
+        if (filters[filterType] && Array.isArray(filters[filterType].selected)) {  // Also check if filters[filterType] is defined
+            const updatedSelected = filters[filterType].selected.includes(value)
+                ? filters[filterType].selected.filter(item => item !== value)
+                : [...filters[filterType].selected, value];
+            setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: updatedSelected } }));
+        } else if (filters[filterType]) {  // Handle single-select options safely
+            setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: value } }));
+        } else {
+            console.error("Filter type is undefined:", filterType);
+        }
     };
 
     return (
