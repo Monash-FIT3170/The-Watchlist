@@ -12,24 +12,32 @@ import { RatingCollection } from '../db/Rating';
 export default function AIPicks() {
     const DISPLAY_MOVIES = "Display Movie";
     const DISPLAY_SHOWS = "Display Show";
+    // the number of recommendations collected for each movie/show. The onscreen display will be a selection from this pool
     const NUM_RECOMMENDATIONS = 35;
+    // the number of slots to fill on the screen
     const NUM_LIST_SLOTS = 6;
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
     const [globalRatings, setGlobalRatings] = useState({});
     const [loading, setLoading] = useState(true);
+
+    // recommendedMovies and recommendedShows are a POOL of movies / shows associated with their assigned target movies / shows.
+    // Each target movie / show will have a pool of movies corresponding to NUM_RECOMMENDATIONS
     const [recommendedMovies, setRecommendedMovies] = useState([]);
     const [recommendedShows, setRecommendedShows] = useState([]);
+
     const [randomMovieNames, setRandomMovieNames] = useState([]);
     const [contentMovieNone, setContentMovieNone] = useState(true);
     const [contentTVNone, setContentTVNone] = useState(true);
     const [movieIntros, setMovieIntros] = useState([]);
     const [tvIntros, setTvIntros] = useState([]);
-    const [movieLockToggle, setMovieLockToggle] = useState([]);
-    const [tvLockToggle, setTvLockToggle] = useState([]);
+    const [refreshToggle, setRefreshToggle] = useState(false);
 
-    movieToggle = useRef(new Array());
-    tvToggle = useRef(new Array())
 
+    // useRefs are similar to useState, except that a rerender will NOT be triggered when their value is updated
+    //      The following useRefs hold the array of movies, and their corresponding recommendations TO BE DISPLAYED.
+    //      IE. only a selection of 6 movies from the larger pool of the associated recommendedMovies 
+    movieDisplayRef = useRef(new Array());
+    tvDisplayRef = useRef(new Array());
 
 
     const currentUser = useTracker(() => {
@@ -60,8 +68,8 @@ export default function AIPicks() {
         };
       }, []);
 
+    // runs whenever the page is loaded
     useEffect(() => {
-        
 
         // Fetch global ratings using the Meteor method
         Meteor.call('ratings.getGlobalAverages', (error, result) => {
@@ -73,6 +81,8 @@ export default function AIPicks() {
         });
     }, []);
 
+    // runs whenever the user's favourites / towatch lists are changed
+    // will grab a new selection of movies from these lists and then fetch a new pool of recommendations, stored in recommendedMovies / Shows
     useEffect(() => {
         const fetchRecommendations = async () => {
             try {
@@ -145,16 +155,13 @@ export default function AIPicks() {
                     console.log(recommendedMov);
                     
                     setRecommendedMovies(recommendedMov);
-                    setMovieLockToggle(new Array(recommendedMov.length).fill(true));
-                    // movieToggle.current = new Array(recommendedMov.length).fill(true);
+
                 }
 
                 // Fetch recommendations for TV shows
                 if (tvTitles.length > 0) {
                     const recommendedTvs = await fetchTvs(tvTitles);
                     setRecommendedShows(recommendedTvs);
-                    setTvLockToggle(new Array(recommendedTvs.length).fill(true));
-                    // tvToggle.current = new Array(recommendedTvs.length).fill(true);
                 }
             } catch (error) {
                 console.error("Error during recommendations fetching:", error);
@@ -167,6 +174,8 @@ export default function AIPicks() {
         }
     }, [lists, loading2]);
 
+    // Will run whenever 'recommendedMovies' or 'recommendedShows' is changed. 
+    // Main occurence is when the page first loads, or when the users lists are updated
     useEffect(() => {
         if (recommendedMovies.length > 0 && movieIntros.length === 0) {
             const generatedMovieIntros = recommendedMovies.map(result => getRandomIntro(result.title));
@@ -177,7 +186,105 @@ export default function AIPicks() {
             const generatedTvIntros = recommendedShows.map(result => getRandomIntro(result.title));
             setTvIntros(generatedTvIntros);
         }
+
+        // Map random movie names to their corresponding recommended movies
+        let movieContentLists = recommendedMovies.map((result, index) => ({
+            listId: `RecommendedMovies${index}`,
+            title: movieIntros[index],
+            content: result.movie.map(movie => ({
+                ...movie,
+                rating: globalRatings[movie.contentId]?.average || 0,
+                contentType: "Movie"
+            }))
+        }));
+            
+        // Map random movie names to their corresponding recommended movies
+        let tvContentLists = recommendedShows.map((result, index) => ({
+            listId: `RecommendedShows${index}`,
+            title: tvIntros[index],
+            content: result.tv.map(show => ({
+                ...show,
+                rating: globalRatings[show.contentId]?.average || 0,
+                contentType: "TV Show"
+            }))
+        }));
+        
+        // grab the first 6 recommendations for each movie
+        movieContentLists.forEach((element) => {
+            element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
+            // if (!movieToggle.current[index]){
+            //     element["content"] = element["content"].filter((_,index) => rand.includes(index))
+            // }
+            // else {
+            //     element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
+            // }
+        });
+        // grab the first 6 recommendations for each tv show
+        tvContentLists.forEach((element) => {
+            element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
+            // if (!tvToggle.current[index]){
+            //     element["content"] = element["content"].filter((_,index) => rand.includes(index))
+            // }
+            // else {
+            //     element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
+            // }
+        });
+
+        // The following useRefs are used in render, and will be updated whenever the display of movies is to be changed (eg. refresh)
+        movieDisplayRef.current = movieContentLists;
+        tvDisplayRef.current = tvContentLists;
+
     }, [recommendedMovies, recommendedShows]);
+
+    // Runs whenever the refreshToggle is set.
+    // Will grab a random selection of movies / shows to display from the pool stored in recommendedMovies and recommendedShows.
+    //! Bug introduced where the user must click refresh twice before the display is actually refreshed. 
+    //! Believe this occurs due to the fact that useEffect triggers AFTER rendering has already occurred. IE. the display is the useRef's value from just BEFORE the refresh toggle is clicked
+    useEffect(() => {
+        // Map random movie names to their corresponding recommended movies
+        let movieContentLists = recommendedMovies.map((result, index) => ({
+            listId: `RecommendedMovies${index}`,
+            title: movieIntros[index],
+            content: result.movie.map(movie => ({
+                ...movie,
+                rating: globalRatings[movie.contentId]?.average || 0,
+                contentType: "Movie"
+            }))
+        }));
+        // console.log(movieContentLists);
+            
+        // Map random movie names to their corresponding recommended movies
+        let tvContentLists = recommendedShows.map((result, index) => ({
+            listId: `RecommendedShows${index}`,
+            title: tvIntros[index],
+            content: result.tv.map(show => ({
+                ...show,
+                rating: globalRatings[show.contentId]?.average || 0,
+                contentType: "TV Show"
+            }))
+        }));
+        // console.log(tvContentLists)
+
+        //! The rest of the code in this useEffect is a potential cause of bug.
+        //! Bug will cause some refreshes to show less than 6 movies in each list
+
+        // create an array of random indexes. There should be 6 numbers total, 
+        // and the numbers should be between 0 and 35, representing the 35 different options in the pool of movies retrieved from recommendedMovies / Shows
+        rand = Array.from({ length: NUM_LIST_SLOTS }, () => Math.floor(Math.random() * NUM_RECOMMENDATIONS));
+        
+        // for each chosen movie, run through its list of content (IE similar movies), and include the 6 movies dictated by the rand array
+        movieContentLists.forEach((element) => {
+            element["content"] = element["content"].filter((_,index) => rand.includes(index));
+        });
+        tvContentLists.forEach((element) => {
+            element["content"] = element["content"].filter((_,index) => rand.includes(index));
+        });
+
+        // update the useRef accordingly
+        // these useRefs are referenced in render
+        movieDisplayRef.current = movieContentLists;
+        tvDisplayRef.current = tvContentLists;
+    }, [refreshToggle])
 
     const getRandomIntro = (title) => {
         const randomIntros = [
@@ -191,147 +298,66 @@ export default function AIPicks() {
         return randomIntros[randomIndex];
     };
 
-
-   if (loading2) return <div>Loading recommendations...</div>;
-
-   
-   rand = Array.from({ length: NUM_LIST_SLOTS }, () => Math.floor(Math.random() * NUM_RECOMMENDATIONS));
-    // Map random movie names to their corresponding recommended movies
-    let movieContentLists = recommendedMovies.map((result, index) => ({
-        listId: `RecommendedMovies${index}`,
-        title: movieIntros[index],
-        content: result.movie.map(movie => ({
-            ...movie,
-            rating: globalRatings[movie.contentId]?.average || 0,
-            contentType: "Movie"
-        }))
-    }));
-    // console.log(movieContentLists);
-    
-// Map random movie names to their corresponding recommended movies
-let tvContentLists = recommendedShows.map((result, index) => ({
-    listId: `RecommendedShows${index}`,
-    title: tvIntros[index],
-    content: result.tv.map(show => ({
-        ...show,
-        rating: globalRatings[show.contentId]?.average || 0,
-        contentType: "TV Show"
-    }))
-}));
-// console.log(movieContentLists)
-// rand = Array.from({ length: NUM_LIST_SLOTS }, () => Math.floor(Math.random() * NUM_RECOMMENDATIONS));
-
-//! need to move this to a hook
-movieContentLists.forEach((element, index) => {
-    // if (!movieLockToggle[index]){
-    if (!movieToggle.current[index]){
-        element["content"] = element["content"].filter((_,index) => rand.includes(index))
-    }
-    else {
-        element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
-    }
-});
-tvContentLists.forEach((element, index) => {
-    // if (!tvLockToggle[index]){
-    if (!tvToggle.current[index]){
-        element["content"] = element["content"].filter((_,index) => rand.includes(index))
-    }
-    else {
-        element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
-    }
-});
-console.log(movieContentLists)
-
-console.log(tvContentLists);
-
-// setMovieLockToggle(new Array(recommendedMovies.length).fill(true));
-// setTvLockToggle(new Array(recommendedShows.length).fill(true));
-
-const fetchMovies = async (movieTitles) => {
-    const movieResponse = await fetch('/similar_movies_titles.json');
-    const movieRecommendationsJson = await movieResponse.json();
-
-    const recommendedMoviePromises = movieTitles.map(title => {
-        const recommendedMovieIds = movieRecommendationsJson.find(rec => rec.Title === title)?.similar_movies.slice(0, NUM_RECOMMENDATIONS - 1) || [];
-        return new Promise((resolve, reject) => {
-            Meteor.call('content.search', { ids: recommendedMovieIds, title }, (err, result) => {
-                if (err) {
-                    console.error("Error fetching recommended movies:", err);
-                    reject(err);
-                } else {
-                    resolve(result);
-                }
+    //TODO: condense fetchMovies and fetchTvs into one function
+    const fetchMovies = async (movieTitles) => {
+        const movieResponse = await fetch('/similar_movies_titles.json');
+        const movieRecommendationsJson = await movieResponse.json();
+        
+        const recommendedMoviePromises = movieTitles.map(title => {
+            //! bug causing less than 6 items to appear on refresh could be happening due to following line? Although, quite unlikely
+            const recommendedMovieIds = movieRecommendationsJson.find(rec => rec.Title === title)?.similar_movies.slice(0, NUM_RECOMMENDATIONS) || [];
+            return new Promise((resolve, reject) => {
+                Meteor.call('content.search', { ids: recommendedMovieIds, title }, (err, result) => {
+                    if (err) {
+                        console.error("Error fetching recommended movies:", err);
+                        reject(err);
+                    } else {
+                        resolve(result);
+                    }
+                });
             });
         });
-    });
-    
-    const recommended = await Promise.all(recommendedMoviePromises);
-    return recommended;
-};
+        
+        const recommended = await Promise.all(recommendedMoviePromises);
+        return recommended;
+    };
 
-const fetchTvs = async (tvTitles) => {
-
-    const tvResponse = await fetch('/similar_tvs_title.json');
-    const tvRecommendationsJson = await tvResponse.json();
-
-    const recommendedTvPromises = tvTitles.map(title => {
-        const recommendedTvIds = tvRecommendationsJson.find(rec => rec.Title === title)?.similar_tvs.slice(0, NUM_RECOMMENDATIONS) || [];
-        return new Promise((resolve, reject) => {
-            Meteor.call('content.search', { ids: recommendedTvIds, title }, (err, result) => {
-                if (err) {
-                    console.error("Error fetching recommended movies:", err);
-                    reject(err);
-                } else {
-                    resolve(result);
-                }
+    const fetchTvs = async (tvTitles) => {
+        
+        const tvResponse = await fetch('/similar_tvs_title.json');
+        const tvRecommendationsJson = await tvResponse.json();
+        
+        const recommendedTvPromises = tvTitles.map(title => {
+            //! bug causing less than 6 items to appear on refresh could be happening due to following line? Although, quite unlikely
+            const recommendedTvIds = tvRecommendationsJson.find(rec => rec.Title === title)?.similar_tvs.slice(0, NUM_RECOMMENDATIONS) || [];
+            return new Promise((resolve, reject) => {
+                Meteor.call('content.search', { ids: recommendedTvIds, title }, (err, result) => {
+                    if (err) {
+                        console.error("Error fetching recommended movies:", err);
+                        reject(err);
+                    } else {
+                        resolve(result);
+                    }
+                });
             });
         });
-    });
-
-    return await Promise.all(recommendedTvPromises);
-}
-
-// helper function to return just the number from a string
-const retNum = (str) => { 
-    let num = str.replace(/[^0-9]/g, ''); 
-    return parseInt(num,10); 
-}
-
-const lockToggle = (listId) => {
-    // listId is a string which will be "RecommendedMovies" if the element is for a movie or "RecommendedShows" if a tvshow.
-    // The final character of listId is an int corresponding to the index of the content in the 'recommendedMovies' / 'recommendedShows' useState.
-    
-    if (listId.includes("RecommendedMovies")){
-        // recommendedMovies[retNum(listId)].movie = ;
-        let temp = [...movieLockToggle];
-        temp[retNum(listId)] = !movieLockToggle[retNum(listId)];
-        setMovieLockToggle(temp);
-
-        // // recommendedMovies[retNum(listId)].movie = ;
-        // let temp = [...movieToggle.current];
-        // temp[retNum(listId)] = !movieToggle.current[retNum(listId)];
-        // movieToggle.current = temp;
-
-
-    }
-    else if (listId.includes("RecommendedShows")){
-        // // item = recommendedShows[retNum(listId)];
-        let temp = [...tvLockToggle];
-        temp[retNum(listId)] = !tvLockToggle[retNum(listId)];
-        setTvLockToggle(temp);
-        // let temp = [...tvToggle.current];
-        // temp[retNum(listId)] = !tvToggle.current[retNum(listId)];
-        // tvToggle.current = temp;
+        
+        return await Promise.all(recommendedTvPromises);
     }
     
-
-}
-
-
+    // the value of the refreshToggle state doesn't matter
+    // the change in value is used to trigger a useEffect that changes the display of movies / tv from the pool
+    const toggleRefresh = () => {
+        setRefreshToggle(!refreshToggle);
+    }
+    
+    
+    if (loading2) return <div>Loading recommendations...</div>;
+    
 return (
     <div className="flex flex-col min-h-screen bg-darker">
         <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
-        <button onClick={() => lockToggle( "RecommendedMovies0" )}>Refresh</button>
+        <button onClick={() => toggleRefresh()}>Refresh</button>
         <Scrollbar className="w-full overflow-y-auto">
             {display === DISPLAY_MOVIES && (
                 contentMovieNone ? (
@@ -339,28 +365,11 @@ return (
                         Not enough Movies yet. Add some to your favourites or watchlist to get started!
                     </div>
                 ) : (
-                    movieContentLists.map(list => (
+                    movieDisplayRef.current.map(list => (
                         <div key={list.listId} className="px-8 py-2">
                             <ContentList list={list} isUserOwned={false} />
-                            {/* <button onClick={() => lockToggle( list.listId )}>Refresh</button> */}
                         </div>
                     )
-
-
-                  
-                //     movieContentLists.map(list => movieLockToggle[retNum(list.listId)] == true ? (
-                //         <div key={list.listId} className="px-8 py-2">
-                //             <ContentList list={list} isUserOwned={false} />
-                //             <button onClick={() => lockToggle( list.listId )}>Locked</button>
-                //         </div>
-                //     ) : (
-                //         <div key={list.listId} className="px-8 py-2">
-                //             <ContentList list={list} isUserOwned={false} />
-                //             <button onClick={() => lockToggle( list.listId )}>Unlocked</button>
-                //         </div>
-                //     )
-                // )
-                  
                 )
                 
             )
@@ -371,25 +380,12 @@ return (
                         Not enough TV Shows yet. Add some to your favourites or watchlist to get started!
                     </div>
                 ) : (
-                    tvContentLists.map(list => (
+                    tvDisplayRef.current.map(list => (
                         <div key={list.listId} className="px-8 py-2">
                             <ContentList list={list} isUserOwned={false} />
-                            {/* <button onClick={() => lockToggle( list.listId )}>Refresh</button> */}
                         </div>
                     )
                 )
-                    // tvContentLists.map(list => tvLockToggle[retNum(list.listId)] == true ? (
-                    //     <div key={list.listId} className="px-8 py-2">
-                    //         <ContentList list={list} isUserOwned={false} />
-                    //         <button onClick={() => lockToggle( list.listId )}>Locked</button>
-                    //     </div>
-                    // ) : (
-                    //     <div key={list.listId} className="px-8 py-2">
-                    //     <ContentList list={list} isUserOwned={false} />
-                    //     <button onClick={() => lockToggle( list.listId )}>Unlocked</button>
-                    // </div>
-                    // )
-                    // )
                 )
             )}
         </Scrollbar>
