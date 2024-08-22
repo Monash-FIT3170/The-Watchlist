@@ -122,8 +122,8 @@ const SearchBar = ({ currentUser }) => {
                 <ProfileDropdown user={currentUser} />
             </div>
             <form className="flex flex-col items-start w-full pl-1">
-                <div className="flex justify-between items-center w-full max-w-xl">
-                    <div className="relative flex-grow">
+                <div className="flex justify-between items-center w-full max-w-6xl">
+                    <div className="relative flex-grow ml-20 mr-20">
                         <input
                             type="text"
                             className="rounded-full bg-dark border border-gray-300 pl-10 pr-3 py-3 w-full focus:border-custom-border"
