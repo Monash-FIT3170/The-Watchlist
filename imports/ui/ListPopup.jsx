@@ -385,6 +385,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
                     isUserSpecificRating={isUserSpecificRating}
                     popularity = {item.popularity}
                     onClick={() => handleContentClick(item)}  // Open modal on click
+                    contentType={item.contentType}
                   />
                 ) : (
                   <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101" onClick={(e) => handleContentClick(item, e)}>

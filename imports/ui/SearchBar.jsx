@@ -49,25 +49,34 @@ const SearchBar = ({ currentUser }) => {
 
     const users = useTracker(fetchUsers, [searchTerm]);
 
-    const fetchContent = useCallback(() => {
-        Meteor.call('content.read', { searchString: searchTerm, limit, page: currentPage }, (error, result) => {
+    const fetchContent = useCallback((id = null, contentType = null) => {
+        const options = { searchString: searchTerm, limit, page: currentPage };
+        if (id) {
+            options.id = id;
+            options.contentType = contentType; // Pass content type when fetching single item
+        }
+
+        Meteor.call('content.read', options, (error, result) => {
             if (!error) {
-                console.log("Content read result:", result);  // Log the full result
-
-                // Calculate the total number of pages using the lengths of the arrays
-                const totalItems = result.total;
-
-                setTotalPages(Math.ceil(totalItems / limit));
-
-                setFilteredMovies(result.movie || []); // Set to empty array if undefined
-                setFilteredTVShows(result.tv || []); // Set to empty array if undefined
+                if (id) {
+                    // Handle single content details
+                    console.log("Single content details:", result);
+                } else {
+                    // Handle paginated results
+                    const totalItems = result.total;
+                    setTotalPages(Math.ceil(totalItems / limit));
+                    setFilteredMovies(result.movie?.map(movie => ({ ...movie, contentType: 'Movie' })) || []);
+                    setFilteredTVShows(result.tv?.map(tv => ({ ...tv, contentType: 'TV Show' })) || []);
+                }
             } else {
                 console.error("Error fetching content:", error);
-                setFilteredMovies([]); // Ensure arrays are never undefined
-                setFilteredTVShows([]); // Ensure arrays are never undefined
+                setFilteredMovies([]);
+                setFilteredTVShows([]);
             }
         });
     }, [searchTerm, currentPage]);
+
+
 
     useEffect(() => {
         fetchContent();
@@ -144,14 +153,14 @@ const SearchBar = ({ currentUser }) => {
                 {selectedTab === 'Movies' && (
                     <div className="grid-responsive">
                         {filteredMovies.length > 0 ? filteredMovies.map(movie => (
-                            <ContentItem content={movie} key={movie.contentId} />
+                            <ContentItem content={movie} contentType="Movie" key={movie.contentId} />
                         )) : <div></div>}
                     </div>
                 )}
                 {selectedTab === 'TV Shows' && (
                     <div className="grid-responsive">
                         {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
-                            <ContentItem content={tv} key={tv.contentId} />
+                            <ContentItem content={tv} contentType="TV Show" key={tv.contentId} />
                         )) : <div></div>}
                     </div>
                 )}
@@ -194,3 +203,4 @@ const SearchBar = ({ currentUser }) => {
 };
 
 export default SearchBar;
+

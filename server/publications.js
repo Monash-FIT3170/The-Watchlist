@@ -98,3 +98,26 @@ Meteor.publish('subscribedLists', function (viewedUserId) {
     }
   });
 });
+
+Meteor.publish('contentById', function (contentId, contentType) {
+  if (!this.userId) {
+    return this.ready();
+  }
+  const collection = contentType === 'Movie' ? MovieCollection : TVCollection;
+  return collection.find({ contentId: contentId });
+});
+
+Meteor.publish('searchContent', function(searchParams) {
+  const { searchTerm, type, limit, skip } = searchParams;
+  if (!this.userId) return this.ready();
+
+  const collection = type === 'Movie' ? MovieCollection : TVCollection;
+  const query = searchTerm ? { title: { $regex: searchTerm, $options: 'i' } } : {};
+
+  return collection.find(query, {
+    fields: { title: 1, contentId: 1, image_url: 1, popularity: 1 }, // only necessary fields
+    limit,
+    skip,
+    sort: { popularity: -1 }
+  });
+});
