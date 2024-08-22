@@ -7,6 +7,7 @@ import { ListCollection } from '../db/List';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList';
 import ProfileDropdown from './ProfileDropdown';
+import { AiOutlineFilter } from 'react-icons/ai';
 
 const SearchBar = ({ currentUser }) => {
 
@@ -17,6 +18,115 @@ const SearchBar = ({ currentUser }) => {
     const [filteredTVShows, setFilteredTVShows] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [showFilters, setShowFilters] = useState(false); 
+    const dropdownData = {
+        year: {
+            options: [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000, 1999, 1998, 1997, 1996, 1995, 1994, 1993, 1992, 1991, 1990],
+            selected: []
+        },
+        genres: {
+            options: [
+                "Action", "Adventure", "Animation", "Anime", "Awards Show", "Children",
+                "Comedy", "Crime", "Documentary", "Drama", "Family", "Fantasy", "Food",
+                "Game Show", "History", "Home and Garden", "Horror", "Indie", "Martial Arts",
+                "Mini-Series", "Musical", "Mystery", "News", "Podcast", "Reality",
+                "Romance", "Science Fiction", "Soap", "Sport", "Suspense", "Talk Show",
+                "Thriller", "Travel", "War", "Western"
+            ],
+            selected: []
+        },
+        "sort by": {
+            options: ["rating", "runtime"],
+            selected: "" // this is string as opposed to arrays above due to lack of multi-select
+        }
+    };
+
+    const [filters, setFilters] = useState(dropdownData);
+
+    const handleFilterChange = (filterType, value) => {
+        console.log("handleFilterChange called");
+        console.log("Current Filters State:", filters);
+        console.log("Filter Type:", filterType);
+        console.log("Filters Object for Type:", filters[filterType]);  // Add this to check if it's defined
+        if (filters[filterType] && Array.isArray(filters[filterType].selected)) {  // Also check if filters[filterType] is defined
+            const updatedSelected = filters[filterType].selected.includes(value)
+                ? filters[filterType].selected.filter(item => item !== value)
+                : [...filters[filterType].selected, value];
+            setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: updatedSelected } }));
+        } else if (filters[filterType]) {  // Handle single-select options safely
+            setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: value } }));
+        } else {
+            console.error("Filter type is undefined:", filterType);
+        }
+    };
+
+    const FilterDropdown = ({ label, options, selected }) => {
+        const [dropdownOpen, setDropdownOpen] = useState(false);
+        return (
+            <div className="relative bg-dark text-white text-xs rounded-lg">
+                <button
+                    type="button"
+                    className="bg-dark px-4 py-2 rounded-md flex items-center justify-between w-full"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                    {label}
+                    <AiOutlineDown className="ml-2 h-3 w-3" aria-hidden="true" />
+                </button>
+                {dropdownOpen && (
+                    <div className="absolute left-0 mt-1 w-full rounded-md shadow-lg bg-gray-900 z-50 overflow-auto max-h-60">
+                        <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                            {options.map(option => (
+                                <a
+                                    key={option}
+                                    className={`block px-4 py-2 text-sm hover:bg-gray-700 ${selected.includes(option) ? 'font-bold bg-gray-700' : 'bg-transparent'}`}
+                                    onClick={() => handleFilterChange(label, option)}
+                                    role="menuitem"
+                                >
+                                    {option}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const applyFilters = (data) => {
+        let filtered = [...data]; // Clone the data array to avoid direct modifications
+
+        // Filter by year if any year is selected
+        if (filters.year.selected.length > 0) {
+            filtered = filtered.filter(item => filters.year.selected.includes(item.release_year));
+        }
+
+        // Filter by genre if any genre is selected and the tab is either 'movies' or 'tv shows'
+        if (filters.genres.selected.length > 0 && (selectedTab === 'movies' || selectedTab === 'tv shows')) {
+            filtered = filtered.filter(item => {
+                console.log("Checking genres for item:", item);
+                return Array.isArray(item.genres) && item.genres.some(genre => filters.genres.selected.includes(genre));
+            });
+        }
+
+        // Sorting logic
+        if (filters["sort by"].selected) {
+            filtered = filtered.sort((a, b) => {
+                if (filters["sort by"].selected === 'rating') {
+                    return b.rating - a.rating;
+                } else if (filters["sort by"].selected === 'runtime') {
+                    return b.runtime - a.runtime;
+                }
+                return 0;
+            });
+        }
+
+        return filtered;
+    };
+
+    // Existing code for fetching lists, users, and content...
+
+    const toggleFilters = () => setShowFilters(!showFilters);
+
 
     const limit = 50; // Number of items per page
 
@@ -110,7 +220,6 @@ const SearchBar = ({ currentUser }) => {
         }
     };
 
-
     const filteredLists = lists.filter(list =>
         (list.title && list.title.toLowerCase().includes(searchTerm)) ||
         (list.description && list.description.toLowerCase().includes(searchTerm))
@@ -146,6 +255,61 @@ const SearchBar = ({ currentUser }) => {
                             {tab}
                         </div>
                     ))}
+                    <button
+                        type="button"
+                        className={`ml-4 cursor-pointer transition-all duration-300 ease-in-out ${showFilters ? 'underline text-[#7B1450]' : 'text-[#989595]'} ${showFilters || 'hover:text-[#fbc0e2] hover:underline'}`}
+                        onClick={toggleFilters}
+                        style={{ position: 'relative', top: '-1mm' }}
+                        >
+                            <AiOutlineFilter size={20} />
+                    </button>
+                    {showFilters && (
+                    <div className="flex space-x-4" style={{ display: 'inline-flex', marginLeft: '30px' }}>
+                            <div style={{ width: '80px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="year"
+                                    options={filters.year.options}
+                                    selected={filters.year.selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
+                            <div style={{ width: '90px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="genres"
+                                    options={filters.genres.options}
+                                    selected={filters.genres.selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
+                            <div style={{ width: '90px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="sort by"
+                                    options={filters["sort by"].options}
+                                    selected={filters["sort by"].selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
+                        </div>
+                    )}
+                    {showFilters && (
+                        <div className="filter-tags">
+                            {Object.entries(filters).filter(([_, value]) => {
+                                return Array.isArray(value.selected) ? value.selected.length > 0 : value.selected
+                            }).map(([key, value]) => (
+                                <div key={key} className="inline-block bg-gray-500 rounded-full px-2.5 py-1.5 m-1 mt-3 text-sm">
+                                    {`${key}: ${Array.isArray(value.selected) ? value.selected.join(', ') : value.selected}`}
+                                    <button type="button" onClick={() => handleRemoveFilter(key)} className="bg-transparent border-none cursor-pointer text-gray-800 ml-2.5">
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                            {Object.entries(filters).some(([_, value]) => Array.isArray(value.selected) ? value.selected.length > 0 : value.selected) && (
+                                <button className="inline-block bg-gray-500 rounded-full px-2.5 py-1.5 m-1 text-sm" onClick={handleClearFilters}>
+                                    Clear All Filters
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
             </form>
             <Scrollbar className="search-results-container flex-grow overflow-auto">
