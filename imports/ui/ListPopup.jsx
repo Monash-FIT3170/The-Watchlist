@@ -68,12 +68,14 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
           if (sortCriterion === 'title') {
             return a.title.localeCompare(b.title);
           } else {
+            console.log(`Comparing ${a.title} (${a.release_year}) with ${b.title} (${b.release_year})`);
             return a.release_year - b.release_year;
           }
         } else {
           if (sortCriterion === 'title') {
             return b.title.localeCompare(a.title);
           } else {
+            console.log(`Comparing ${a.title} (${a.release_year}) with ${b.title} (${b.release_year})`);
             return b.release_year - a.release_year;
           }
         }
@@ -281,6 +283,9 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     (selectedTab === 'tv shows' && item.contentType === 'TV Show')
   ) || [];
 
+  const sortedContent = sortContent(filteredContent);
+
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -350,22 +355,14 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
         </div>
         <div className="flex-shrink-0">
           <div className="flex space-x-2">
-            <button
-              onClick={() => changeSortCriterion('title')}
-              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
-                ${sortCriterion === 'title' ? 'bg-[#7B1450] text-white' : 'bg-[#282525] text-white'} 
-                border-transparent border`}
+            <select
+              value={sortCriterion}
+              onChange={(e) => changeSortCriterion(e.target.value)}
+              className="inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out bg-[#282525] text-white border-transparent border"
             >
-              Sort by Title
-            </button>
-            <button
-              onClick={() => changeSortCriterion('release_year')}
-              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
-                ${sortCriterion === 'release_year' ? 'bg-[#7B1450] text-white' : 'bg-[#282525] text-white'} 
-                border-transparent border`}
-            >
-              Sort by Release Year
-            </button>
+              <option value="title">Sort by Title</option>
+              <option value="release_year">Sort by Release Year</option>
+            </select>
             <button
               onClick={toggleSortOrder}
               className={`inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
@@ -378,7 +375,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
         </div>
       </div>
         <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
-          {filteredContent.map((item) => {
+          {sortedContent.map((item) => {
             const { rating = 0, isUserSpecificRating = false } = getRatingForContent(item.contentId);
             return (
               <div key={item.contentId} className={isGridView ? '' : 'block relative'}>
