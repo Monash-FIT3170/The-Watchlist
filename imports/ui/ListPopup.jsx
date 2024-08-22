@@ -13,6 +13,7 @@ import { FaUser, FaGlobe } from "react-icons/fa";
 import { RatingCollection } from "../db/Rating";
 import ContentItem from "./ContentItem";
 import ContentInfoModal from "./ContentInfoModal";  // Import the modal component
+import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 
 
 const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
@@ -50,37 +51,37 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
 
   const [sortOrder, setSortOrder] = useState('ascending');
   const [sortCriterion, setSortCriterion] = useState('title'); // New state for sorting criterion
-  
+
   const toggleSortOrder = () => {
     setSortOrder(currentOrder => currentOrder === 'ascending' ? 'descending' : 'ascending');
   };
 
 
-    // Function to change sorting criterion
-    const changeSortCriterion = (criterion) => {
-      setSortCriterion(criterion);
-    };
+  // Function to change sorting criterion
+  const changeSortCriterion = (criterion) => {
+    setSortCriterion(criterion);
+  };
 
-    // Sort content based on the selected criterion and order
-    const sortContent = (content) => {
-      return content.sort((a, b) => {
-        if (sortOrder === 'ascending') {
-          if (sortCriterion === 'title') {
-            return a.title.localeCompare(b.title);
-          } else {
-            console.log(`Comparing ${a.title} (${a.release_year}) with ${b.title} (${b.release_year})`);
-            return a.release_year - b.release_year;
-          }
+  // Sort content based on the selected criterion and order
+  const sortContent = (content) => {
+    return content.sort((a, b) => {
+      if (sortOrder === 'ascending') {
+        if (sortCriterion === 'title') {
+          return a.title.localeCompare(b.title);
         } else {
-          if (sortCriterion === 'title') {
-            return b.title.localeCompare(a.title);
-          } else {
-            console.log(`Comparing ${a.title} (${a.release_year}) with ${b.title} (${b.release_year})`);
-            return b.release_year - a.release_year;
-          }
+          console.log(`Comparing ${a.title} (${a.release_year}) with ${b.title} (${b.release_year})`);
+          return a.release_year - b.release_year;
         }
-      });
-    };
+      } else {
+        if (sortCriterion === 'title') {
+          return b.title.localeCompare(a.title);
+        } else {
+          console.log(`Comparing ${a.title} (${a.release_year}) with ${b.title} (${b.release_year})`);
+          return b.release_year - a.release_year;
+        }
+      }
+    });
+  };
 
   const isListOwner = list.userId === Meteor.userId();
 
@@ -147,7 +148,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
 
   // Define the handleClickOutside function inside the component
   const handleClickOutside = (event) => {
-  
+
     if (
       popupRef.current && !popupRef.current.contains(event.target) &&
       (!contentInfoModalRef.current || !contentInfoModalRef.current.contains(event.target)) &&
@@ -159,7 +160,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
     } else {
     }
   };
-  
+
   const handleRenameListClick = () => {
     if (list.title === 'Favourite' || list.title === 'To Watch') {
       alert('Cannot rename Favourite or To Watch lists');
@@ -174,7 +175,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isModalOpen]); // Run useEffect whenever `isModalOpen` changes
-  
+
   const handleExpandClick = (id, title) => {
     if (expandedItem === id) {
       setExpandedItem(null);
@@ -341,39 +342,48 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
           </div>
         </div>
         <div className="flex justify-between items-center mb-4">
-        <div className="flex flex-wrap">
-          {['all', 'movies', 'tv shows'].map((tab) => (
-            <div
-              key={tab}
-              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-                } border-transparent border`}
-              onClick={() => setSelectedTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </div>
-          ))}
-        </div>
-        <div className="flex-shrink-0">
-          <div className="flex space-x-2">
-            <select
-              value={sortCriterion}
-              onChange={(e) => changeSortCriterion(e.target.value)}
-              className="inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out bg-[#282525] text-white border-transparent border"
-            >
-              <option value="title">Sort by Title</option>
-              <option value="release_year">Sort by Release Year</option>
-            </select>
-            <button
-              onClick={toggleSortOrder}
-              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
-                ${sortOrder === 'ascending' ? 'bg-[#7B1450] text-white' : 'bg-[#7B1450] text-white'} 
-                border-transparent border`}
-            >
-              Toggle Sort Order ({sortOrder === 'ascending' ? 'Ascending' : 'Descending'})
-            </button>
+          <div className="flex flex-wrap">
+            {['all', 'movies', 'tv shows'].map((tab) => (
+              <div
+                key={tab}
+                className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
+                  } border-transparent border`}
+                onClick={() => setSelectedTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </div>
+            ))}
           </div>
+          <div className="flex-shrink-0">
+            <div className="flex space-x-2">
+              <select
+                value={sortCriterion}
+                onChange={(e) => changeSortCriterion(e.target.value)}
+                className="inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out bg-[#282525] text-white border-transparent border appearance-none pr-8 w-auto" // Changed pr-8 and added w-auto
+                style={{
+                  backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="white" d="M7 7l3-3 3 3m-6 4l3 3 3-3" /%3E%3C/svg%3E')`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 0.75rem center',
+                  backgroundSize: '1rem 1rem',
+                }}
+              >
+                <option value="title">Sort by Title</option>
+                <option value="release_year">Sort by Release Year</option>
+              </select>
+
+              <button
+                onClick={toggleSortOrder}
+                className={`flex items-center justify-center px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
+        ${sortOrder === 'ascending' ? 'bg-[#7B1450] text-white' : 'bg-[#7B1450] text-white'} 
+        border-transparent border`}
+              >
+                {sortOrder === 'ascending' ? <FaSortAmountUp className="mr-1" /> : <FaSortAmountDown className="mr-1" />}
+                Sort Order
+              </button>
+            </div>
+          </div>
+
         </div>
-      </div>
         <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
           {sortedContent.map((item) => {
             const { rating = 0, isUserSpecificRating = false } = getRatingForContent(item.contentId);
@@ -383,7 +393,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
                   <ContentItem
                     content={item}
                     isUserSpecificRating={isUserSpecificRating}
-                    popularity = {item.popularity}
+                    popularity={item.popularity}
                     onClick={() => handleContentClick(item)}  // Open modal on click
                     contentType={item.contentType}
                   />
@@ -402,9 +412,9 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
                           <h3 className="text-xl font-bold">{item.title}</h3>
                           <div className="flex items-center">
                             {isUserSpecificRating ? (
-                              <FaUser className="mr-1 text-blue-500" title="User rating"/>
+                              <FaUser className="mr-1 text-blue-500" title="User rating" />
                             ) : (
-                              <FaGlobe className="mr-1 text-green-500" title="Global average rating"/>
+                              <FaGlobe className="mr-1 text-green-500" title="Global average rating" />
                             )}
                             <RatingStar totalStars={5} rating={rating} />
                           </div>
