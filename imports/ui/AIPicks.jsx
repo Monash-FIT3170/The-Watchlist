@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ContentList from './ContentList.jsx';
+import ContentListAI from './ContentListAI.jsx';
 import Scrollbar from './ScrollBar';
 import { Meteor } from 'meteor/meteor';
 import AIPicksHeader from './AIPicksHeader.jsx';
@@ -15,10 +15,10 @@ export default function AIPicks() {
     // the number of recommendations collected for each movie/show. The onscreen display will be a selection from this pool
     const NUM_RECOMMENDATIONS = 35;
     // the number of slots to fill on the screen
-    const NUM_LIST_SLOTS = 6;
+    const NUM_LIST_SLOTS = 10;
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
     const [globalRatings, setGlobalRatings] = useState({});
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     // recommendedMovies and recommendedShows are a POOL of movies / shows associated with their assigned target movies / shows.
     // Each target movie / show will have a pool of movies corresponding to NUM_RECOMMENDATIONS
@@ -177,114 +177,103 @@ export default function AIPicks() {
     // Will run whenever 'recommendedMovies' or 'recommendedShows' is changed. 
     // Main occurence is when the page first loads, or when the users lists are updated
     useEffect(() => {
-        if (recommendedMovies.length > 0 && movieIntros.length === 0) {
-            const generatedMovieIntros = recommendedMovies.map(result => getRandomIntro(result.title));
-            setMovieIntros(generatedMovieIntros);
-        }
-
-        if (recommendedShows.length > 0 && tvIntros.length === 0) {
-            const generatedTvIntros = recommendedShows.map(result => getRandomIntro(result.title));
-            setTvIntros(generatedTvIntros);
-        }
-
-        // Map random movie names to their corresponding recommended movies
-        let movieContentLists = recommendedMovies.map((result, index) => ({
-            listId: `RecommendedMovies${index}`,
-            title: movieIntros[index],
-            content: result.movie.map(movie => ({
-                ...movie,
-                rating: globalRatings[movie.contentId]?.average || 0,
-                contentType: "Movie"
-            }))
-        }));
+        if (recommendedMovies.length > 0 || recommendedShows.length > 0) {
+            let updatedMovieIntros = movieIntros;
+            let updatedTvIntros = tvIntros;
+    
+            // Generate intros if not already generated
+            if (recommendedMovies.length > 0 && movieIntros.length === 0) {
+                updatedMovieIntros = recommendedMovies.map(result => getRandomIntro(result.title));
+                setMovieIntros(updatedMovieIntros);
+            }
+    
+            if (recommendedShows.length > 0 && tvIntros.length === 0) {
+                updatedTvIntros = recommendedShows.map(result => getRandomIntro(result.title));
+                setTvIntros(updatedTvIntros);
+            }
+    
+            // Map random movie names to their corresponding recommended movies
+            let movieContentLists = recommendedMovies.map((result, index) => ({
+                listId: `RecommendedMovies${index}`,
+                title: updatedMovieIntros[index],
+                content: result.movie.map(movie => ({
+                    ...movie,
+                    rating: globalRatings[movie.contentId]?.average || 0,
+                    contentType: "Movie"
+                }))
+            }));
+                
+            // Map random TV show names to their corresponding recommended shows
+            let tvContentLists = recommendedShows.map((result, index) => ({
+                listId: `RecommendedShows${index}`,
+                title: updatedTvIntros[index],
+                content: result.tv.map(show => ({
+                    ...show,
+                    rating: globalRatings[show.contentId]?.average || 0,
+                    contentType: "TV Show"
+                }))
+            }));
             
-        // Map random movie names to their corresponding recommended movies
-        let tvContentLists = recommendedShows.map((result, index) => ({
-            listId: `RecommendedShows${index}`,
-            title: tvIntros[index],
-            content: result.tv.map(show => ({
-                ...show,
-                rating: globalRatings[show.contentId]?.average || 0,
-                contentType: "TV Show"
-            }))
-        }));
-        
-        // grab the first 6 recommendations for each movie
-        movieContentLists.forEach((element) => {
-            element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
-            // if (!movieToggle.current[index]){
-            //     element["content"] = element["content"].filter((_,index) => rand.includes(index))
-            // }
-            // else {
-            //     element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
-            // }
-        });
-        // grab the first 6 recommendations for each tv show
-        tvContentLists.forEach((element) => {
-            element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
-            // if (!tvToggle.current[index]){
-            //     element["content"] = element["content"].filter((_,index) => rand.includes(index))
-            // }
-            // else {
-            //     element["content"] = element["content"].filter((_,index) => index < NUM_LIST_SLOTS)
-            // }
-        });
-
-        // The following useRefs are used in render, and will be updated whenever the display of movies is to be changed (eg. refresh)
-        movieDisplayRef.current = movieContentLists;
-        tvDisplayRef.current = tvContentLists;
-
-    }, [recommendedMovies, recommendedShows]);
+            // Ensure the lists only have NUM_LIST_SLOTS items
+            movieContentLists.forEach((element) => {
+                element["content"] = element["content"].filter((_, index) => index < NUM_LIST_SLOTS);
+            });
+            tvContentLists.forEach((element) => {
+                element["content"] = element["content"].filter((_, index) => index < NUM_LIST_SLOTS);
+            });
+    
+            // Update the display refs
+            movieDisplayRef.current = movieContentLists;
+            tvDisplayRef.current = tvContentLists;
+        }
+    }, [recommendedMovies, recommendedShows, movieIntros, tvIntros, globalRatings]);
 
     // Runs whenever the refreshToggle is set.
     // Will grab a random selection of movies / shows to display from the pool stored in recommendedMovies and recommendedShows.
     //! Bug introduced where the user must click refresh twice before the display is actually refreshed. 
     //! Believe this occurs due to the fact that useEffect triggers AFTER rendering has already occurred. IE. the display is the useRef's value from just BEFORE the refresh toggle is clicked
     useEffect(() => {
-        // Map random movie names to their corresponding recommended movies
-        let movieContentLists = recommendedMovies.map((result, index) => ({
-            listId: `RecommendedMovies${index}`,
-            title: movieIntros[index],
-            content: result.movie.map(movie => ({
-                ...movie,
-                rating: globalRatings[movie.contentId]?.average || 0,
-                contentType: "Movie"
-            }))
-        }));
-        // console.log(movieContentLists);
-            
-        // Map random movie names to their corresponding recommended movies
-        let tvContentLists = recommendedShows.map((result, index) => ({
-            listId: `RecommendedShows${index}`,
-            title: tvIntros[index],
-            content: result.tv.map(show => ({
-                ...show,
-                rating: globalRatings[show.contentId]?.average || 0,
-                contentType: "TV Show"
-            }))
-        }));
-        // console.log(tvContentLists)
+        if (!refreshToggle) return;
 
-        //! The rest of the code in this useEffect is a potential cause of bug.
-        //! Bug will cause some refreshes to show less than 6 movies in each list
+        setLoading(true);
+    
+        setTimeout(() => {
+            const movieContentLists = recommendedMovies.map((result, index) => ({
+                listId: `RecommendedMovies${index}`,
+                title: movieIntros[index],
+                content: result.movie.map(movie => ({
+                    ...movie,
+                    rating: globalRatings[movie.contentId]?.average || 0,
+                    contentType: "Movie"
+                }))
+            }));
 
-        // create an array of random indexes. There should be 6 numbers total, 
-        // and the numbers should be between 0 and 35, representing the 35 different options in the pool of movies retrieved from recommendedMovies / Shows
-        rand = Array.from({ length: NUM_LIST_SLOTS }, () => Math.floor(Math.random() * NUM_RECOMMENDATIONS));
-        
-        // for each chosen movie, run through its list of content (IE similar movies), and include the 6 movies dictated by the rand array
-        movieContentLists.forEach((element) => {
-            element["content"] = element["content"].filter((_,index) => rand.includes(index));
-        });
-        tvContentLists.forEach((element) => {
-            element["content"] = element["content"].filter((_,index) => rand.includes(index));
-        });
+            const tvContentLists = recommendedShows.map((result, index) => ({
+                listId: `RecommendedShows${index}`,
+                title: tvIntros[index],
+                content: result.tv.map(show => ({
+                    ...show,
+                    rating: globalRatings[show.contentId]?.average || 0,
+                    contentType: "TV Show"
+                }))
+            }));
 
-        // update the useRef accordingly
-        // these useRefs are referenced in render
-        movieDisplayRef.current = movieContentLists;
-        tvDisplayRef.current = tvContentLists;
-    }, [refreshToggle])
+            const rand = Array.from({ length: NUM_LIST_SLOTS }, () => Math.floor(Math.random() * NUM_RECOMMENDATIONS));
+            movieContentLists.forEach(element => {
+                element.content = element.content.filter((_, index) => rand.includes(index));
+            });
+            tvContentLists.forEach(element => {
+                element.content = element.content.filter((_, index) => rand.includes(index));
+            });
+
+            movieDisplayRef.current = movieContentLists;
+            tvDisplayRef.current = tvContentLists;
+
+            setLoading(false); // Hide loading animation
+            setRefreshToggle(false); // Reset the refresh toggle
+        }, 2000); // Simulate a 2-second loading time
+    }, [refreshToggle]);
+
 
     const getRandomIntro = (title) => {
         const randomIntros = [
@@ -348,16 +337,31 @@ export default function AIPicks() {
     // the value of the refreshToggle state doesn't matter
     // the change in value is used to trigger a useEffect that changes the display of movies / tv from the pool
     const toggleRefresh = () => {
-        setRefreshToggle(!refreshToggle);
-    }
+        setRefreshToggle(prevToggle => !prevToggle);
+    };
     
     
     if (loading2) return <div>Loading recommendations...</div>;
+
+    if (loading) {
+        return (
+            <div className="flex flex-col min-h-screen bg-darker">
+                <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
+                <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
+                    <div className="-mt-52 animate-spin rounded-full h-32 w-32 border-t-4 border-blue-500 mb-4"></div>
+                    <p className="text-xl font-semibold">Loading Updated AI Recommendations...</p>
+                    <p className="text-gray-400 mt-2">Please wait a moment while we fetch your content.</p>
+                </div>
+            </div>
+        );
+    }
     
 return (
     <div className="flex flex-col min-h-screen bg-darker">
         <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
-        <button onClick={() => toggleRefresh()}>Refresh</button>
+        <button className="px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
+         focus:outline-none focus:ring-4 focus:ring-purple-300 transform active:scale-95 transition-transform duration-200" 
+        onClick={() => toggleRefresh()}>Refresh AI Recommendations</button>
         <Scrollbar className="w-full overflow-y-auto">
             {display === DISPLAY_MOVIES && (
                 contentMovieNone ? (
@@ -367,7 +371,7 @@ return (
                 ) : (
                     movieDisplayRef.current.map(list => (
                         <div key={list.listId} className="px-8 py-2">
-                            <ContentList list={list} isUserOwned={false} />
+                            <ContentListAI list={list} isUserOwned={false} />
                         </div>
                     )
                 )
@@ -382,7 +386,7 @@ return (
                 ) : (
                     tvDisplayRef.current.map(list => (
                         <div key={list.listId} className="px-8 py-2">
-                            <ContentList list={list} isUserOwned={false} />
+                            <ContentListAI list={list} isUserOwned={false} />
                         </div>
                     )
                 )
