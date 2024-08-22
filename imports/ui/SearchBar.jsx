@@ -10,7 +10,7 @@ import ProfileDropdown from './ProfileDropdown';
 
 const SearchBar = ({ currentUser }) => {
 
-    const [selectedTab, setSelectedTab] = useState('Movies');
+    const [selectedTab, setSelectedTab] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
     const [globalRatings, setGlobalRatings] = useState({});
     const [filteredMovies, setFilteredMovies] = useState([]);
@@ -137,7 +137,7 @@ const SearchBar = ({ currentUser }) => {
                     </div>
                 </div>
                 <div className="bubbles-container flex justify-end mt-2">
-                    {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
+                    {['All','Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
                         <div
                             key={tab.toLowerCase()}
                             className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
@@ -177,6 +177,17 @@ const SearchBar = ({ currentUser }) => {
                     ) : (
                         <div></div>
                     )
+                )}
+                {selectedTab === 'All' && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {filteredMovies.length > 0 ? filteredMovies.map(movie => (
+                            <ContentItem content={movie} contentType="Movie" key={movie.contentId} />
+                        )) : <div></div>}
+                    
+                        {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
+                            <ContentItem content={tv} contentType="TV Show" key={tv.contentId} />
+                        )) : <div></div>}
+                    </div>
                 )}
             </Scrollbar>
 
