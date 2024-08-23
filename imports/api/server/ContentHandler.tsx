@@ -75,7 +75,7 @@ function GetContent(searchObject: object, searchOptions: object, fullDetails: bo
                 first_aired: 1,
                 genres: 1,
                 popularity: 1,
-                
+                origin_country: 1
             }
         };
     }

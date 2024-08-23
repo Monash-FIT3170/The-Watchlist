@@ -36,15 +36,23 @@ const SearchBar = ({ currentUser }) => {
             ],
             selected: []
         },
+        continents:{
+            options: ["North America", "Asia", "Europe"],
+            selected: []
+        },
         "sort by": {
-            options: ["year", "title", "popularity"],
+            options: ["Year", "Title", "Popularity"],
             selected: "" // this is string as opposed to arrays above due to lack of multi-select
         }
     });
 
-    const FilterDropdown = ({ label, options, selected }) => {
+    const america = ['US', 'CA', 'MX'];
+    const asia = ['CN', 'JP', 'KR', 'IN'];
+    const europe = ['FR', 'IT','DE', 'GB']
+
+    const FilterDropdown = ({ label, options, selected, onFilterChange }) => {
         const [dropdownOpen, setDropdownOpen] = useState(false);
-    
+        
         return (
             (selectedTab === 'Movies' || selectedTab === 'TV Shows' || selectedTab === 'All') && (
                 <div className="relative bg-dark text-white text-xs rounded-lg">
@@ -63,7 +71,7 @@ const SearchBar = ({ currentUser }) => {
                                     <a
                                         key={option}
                                         className={`block px-4 py-2 text-sm hover:bg-gray-700 cursor-pointer ${selected.includes(option) ? 'font-bold bg-gray-700' : 'bg-transparent'}`}
-                                        onClick={() => handleFilterChange(label, option)}
+                                        onClick={() => onFilterChange(label, option)}
                                         role="menuitem"
                                     >
                                         {option}
@@ -75,8 +83,8 @@ const SearchBar = ({ currentUser }) => {
                 </div>
             )
         );
-        
     };
+    
 
     const toggleFilters = () => setShowFilters(!showFilters);
 
@@ -145,7 +153,7 @@ const SearchBar = ({ currentUser }) => {
                 } else if (filters["sort by"].selected === "popularity") {
                     movies = movies.sort((a, b) => b.popularity - a.popularity); 
                     tvShows = tvShows.sort((a, b) => b.popularity - a.popularity); 
-                }
+                } 
 
                 if (filters.genres.selected.length > 0) {
                     movies = movies.filter(movie => movie.genres.some(genre => filters.genres.selected.includes(genre)));
@@ -155,6 +163,19 @@ const SearchBar = ({ currentUser }) => {
                 if (filters.year.selected.length > 0) {
                     movies = movies.filter(movie => filters.year.selected.includes(movie.release_year));
                     tvShows = tvShows.filter(tv => filters.year.selected.includes(tv.first_aired));
+                }
+                
+                if (filters.continents.selected.length > 0){
+                    if(filters.continents.selected.includes('North America')){
+                        movies = movies.filter(movie =>  america.includes(movie.origin_country[0]));
+                        tvShows = tvShows.filter(tv =>  america.includes(tv.origin_country[0]));
+                    } else if(filters.continents.selected.includes('Asia')){
+                        movies = movies.filter(movie =>  asia.includes(movie.origin_country[0]));
+                        tvShows = tvShows.filter(tv =>  asia.includes(tv.origin_country[0]));
+                    }else if(filters.continents.selected.includes('Europe')){
+                        movies = movies.filter(movie =>  europe.includes(movie.origin_country[0]));
+                        tvShows = tvShows.filter(tv =>  europe.includes(tv.origin_country[0]));
+                    }
                 }
     
                 setFilteredMovies(movies);
@@ -225,10 +246,9 @@ const SearchBar = ({ currentUser }) => {
         setFilters(prevFilters => {
             const updatedFilters = { ...prevFilters };
             const filterKey = filterType.toLowerCase();
-    
             if (filterType === "Sort By") {
                 updatedFilters[filterKey].selected = value;
-            } else if (filterType === "Year" || filterType === "Genres") {
+            } else if (filterType === "Year" || filterType === "Genres" || filterType === "Continents") {
                 const selected = updatedFilters[filterKey].selected;
                 if (selected.includes(value)) {
                     updatedFilters[filterKey].selected = selected.filter(v => v !== value);
@@ -303,6 +323,14 @@ const SearchBar = ({ currentUser }) => {
                                     label="Genres"
                                     options={filters.genres.options}
                                     selected={filters.genres.selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
+                            <div style={{ width: '110px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="Continents"
+                                    options={filters.continents.options}
+                                    selected={filters.continents.selected}
                                     onFilterChange={handleFilterChange}
                                 />
                             </div>
