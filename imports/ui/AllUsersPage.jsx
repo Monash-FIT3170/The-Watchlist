@@ -5,26 +5,46 @@ import ProfileDropdown from './ProfileDropdown';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
 
-
 const AllUsersPage = ({ users: propUsers, currentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUserId = Meteor.userId();
+  
+  // State for search term, sorting option, and dropdown visibility
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState('alphabetical'); // Default sort option
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  // Helper function to check if the current user is following another user
   const isFollowing = (userId) => {
     return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
   };
 
+  // Handle changes in the search input
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value.toLowerCase());
   };
 
+  // Get the list of users from props or location state
   const users = propUsers || location.state?.users || [];
 
-  const filteredUsers = users.filter(user =>
-    user.username.toLowerCase().includes(searchTerm)
-  );
+  // Sorting function based on selected option
+  const sortUsers = (users, option) => {
+    const filteredUsers = users.filter(user => user.username.toLowerCase().includes(searchTerm));
+    if (option === 'alphabetical') {
+      return [...filteredUsers].sort((a, b) => {
+        const nameA = a.username || ''; // Fallback to an empty string if name is undefined
+        const nameB = b.username || ''; // Fallback to an empty string if name is undefined
+        return nameA.localeCompare(nameB);
+      });
+    } else if (option === 'percentage') {
+      return [...filteredUsers].sort((a, b) => b.percentageMatch - a.percentageMatch);
+    }
+    return filteredUsers;
+  };
+
+  // Get the sorted list of users
+  const sortedUsersList = sortUsers(users, sortOption);
 
   useEffect(() => {
     console.log('AllUsersPage loaded with users:', users);
@@ -49,10 +69,41 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
               <AiOutlineSearch className="text-gray-400" size={20} />
             </span>
           </div>
+          {/* Sorting Dropdown */}
+          <div className="relative border border-solid rounded-full px-4 py-2 focus:bg-magenta">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="text-sm text-white"
+            >
+              Sort by
+            </button>
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-darkest rounded-lg shadow-lg z-50">
+                <ul className="py-1">
+                  <li>
+                    <button
+                      onClick={() => { setSortOption('alphabetical'); setIsDropdownOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
+                    >
+                      Alphabetical Order
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => { setSortOption('percentage'); setIsDropdownOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
+                    >
+                      Percentage Match
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
         <Scrollbar className="w-full">
           <div className="flex flex-wrap justify-start items-start gap-8 p-4">
-            {filteredUsers.map((user, index) => (
+            {sortedUsersList.map((user, index) => (
               <div
                 key={index}
                 className="min-w-[200px] max-w-[200px] flex flex-col items-center p-2 rounded-lg hover:bg-gray-700 transition-colors duration-300"
