@@ -4,6 +4,7 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
 import ProfileDropdown from './ProfileDropdown';
+import SimilarUserList from './SimilarUserList';
 
 const UserDiscovery = ({ currentUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,9 +47,9 @@ const UserDiscovery = ({ currentUser }) => {
         </div>
       </div>
       <div>
-        <UserList heading="Popular Users" users={users} searchTerm={searchTerm} onSelectUser={selectUser} />
+        <SimilarUserList />
         <div className="mt-8">
-          <UserList heading="Similar Users" users={users} searchTerm={searchTerm} onSelectUser={selectUser} />
+          <UserList users={users} searchTerm={searchTerm} onSelectUser={selectUser} />
         </div>
       </div>
     </div>

@@ -91,6 +91,10 @@ Meteor.methods({
       $set: { avatarUrl: avatarUrl }
     });
   },
+
+  // add method here
+
+
 });
 
 const createDefaultLists = (userId) => {
@@ -312,5 +316,80 @@ Meteor.methods({
     }
 
     return ratingMap;
+  }
+});
+Meteor.methods({
+  'users.getSimilarUsers'() {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to find similar users.');
+    }
+
+    const currentUser = Meteor.users.findOne(this.userId);
+    if (!currentUser) {
+      throw new Meteor.Error('user-not-found', 'User not found.');
+    }
+
+    const currentUserFavourites = ListCollection.findOne({
+      userId: this.userId,
+      listType: 'Favourite'
+    });
+
+    if (!currentUserFavourites || !currentUserFavourites.content) {
+      throw new Meteor.Error('no-favourites', 'You do not have any favourites.');
+    }
+
+    const currentUserFavouritesSet = new Set(currentUserFavourites.content);
+
+    // Get 100 random users using rawCollection and aggregate
+    const randomUsers = Meteor.users.rawCollection().aggregate([
+      { $sample: { size: 100 } }
+    ]).toArray(); // Use toArray to return a promise
+
+    console.log("Finding random users...");
+
+    const randomUsersPromise = Meteor.wrapAsync((cb) => randomUsers.then((res) => cb(null, res)).catch(cb));
+
+    const users = randomUsersPromise();
+
+    const userScores = users.map(user => {
+      if (user._id === this.userId) {
+        return null; 
+      }
+
+      const userFavourites = ListCollection.findOne({
+        userId: user._id,
+        listType: 'Favourite'
+      });
+
+      if (!userFavourites || !userFavourites.content) {
+        return null;
+      }
+
+      const userFavouritesSet = new Set(userFavourites.content);
+      const commonFavourites = [...currentUserFavouritesSet].filter(item => 
+        [...userFavouritesSet].some(userItem => userItem.contentId === item.contentId)
+      );
+
+      // Match score based on the number of matching entries
+      const matchScore = commonFavourites.length;
+
+      return {
+        user: user,
+        matchScore: matchScore
+      };
+    });
+
+    // Filter out null values and sort by matchScore in descending order
+    const sortedUserScores = userScores.filter(Boolean).sort((a, b) => b.matchScore - a.matchScore);
+
+    // set top user as 100 match, etc
+    sortedUserScores.forEach((user, index) => {
+      user.matchScore = 100 - index;
+    });
+
+    console.log("Sorted user scores:", sortedUserScores.slice(0, 10));
+
+    // Return the top 10 users with the highest match score
+    return sortedUserScores.slice(0, 10);
   }
 });

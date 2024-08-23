@@ -38,25 +38,22 @@ const UserList = React.memo(({ heading, users, searchTerm, onUnfollow }) => {
   const filteredUsers = users.filter(user =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  
+  useEffect(() => {
+    console.log('Filtered Users:', filteredUsers);
+  }, [filteredUsers]);
+  
   // Calculate the maximum number of users that can be shown without adjusting card size
   const maxUsersToShow = Math.floor(containerWidth / 220); // assuming 220px is an optimal width per card
   const displayedUsers = filteredUsers.slice(0, maxUsersToShow);
 
-  const handleViewAll = () => {
-    navigate("/all-users", { state: { users: filteredUsers.length > 0 ? filteredUsers : users } });
-  };
+  const containerStyle = !searchTerm ? { display: 'none' } : {};
 
   return (
-    <div className="user-list-container bg-transparent py-0">
+    <div className="user-list-container bg-transparent py-0" style={containerStyle}>
       <div className="flex justify-between items-center">
         <h2 className="text-white text-2xl font-semibold">{heading}</h2>
         {console.log('Filtered Users:', filteredUsers)}
-        {console.log("Navigating to /all-users with users:", filteredUsers)}
-
-        <button onClick={handleViewAll} className="text-sm text-blue-400">
-          View All
-        </button>
       </div>
       <div className="flex overflow-hidden">
         {displayedUsers.map((user, index) => (
