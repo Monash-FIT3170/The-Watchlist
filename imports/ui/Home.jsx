@@ -28,11 +28,11 @@ const Home = ({ currentUser }) => {
   const toWatchList = lists.filter(list => list.listType === 'To Watch');
 
   return (
-    <div className="flex flex-row min-h-screen bg-darker overflow-hidden">
+    <div className="flex flex-row min-h-screen bg-darker">
       <div className="absolute top-4 right-8">
         <ProfileDropdown user={currentUser} />
       </div>
-      <div className="w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center overflow-hidden">
+      <div className="w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center">
         <HomeList
           title="Favourites"
           lists={favouritesList.map(list => ({
@@ -45,7 +45,7 @@ const Home = ({ currentUser }) => {
           }))}
         />
       </div>
-      <div className="mx-5 w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center overflow-hidden">
+      <div className="mx-5 w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center">
         <HomeList
           title="To Watch"
           lists={toWatchList.map(list => ({

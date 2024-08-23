@@ -1,7 +1,6 @@
-// imports/ui/App.jsx
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Meteor } from "meteor/meteor";
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { FaRegUserCircle } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { AiOutlineHome, AiOutlineSearch } from "react-icons/ai";
@@ -25,6 +24,8 @@ import { ListCollection } from '../db/List';
 
 export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const location = useLocation(); // Use to check the current route
 
   // Move useMemo inside the App component
   const staticNavbarData = React.useMemo(() => [
@@ -70,20 +71,26 @@ export const App = () => {
         <Navbar staticNavData={staticNavbarData} currentUser={currentUser}/>
       </div>
       <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
-        <Scrollbar className="h-custom">
+        {location.pathname !== '/home' ? (
+          <Scrollbar className="h-custom">
+            <Routes>
+              <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
+              <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
+              <Route path="/profile" element={<UserProfile currentUser={currentUser} />} />
+              <Route path="/ai-picks" element={<AIPicks currentUser={currentUser} />} />
+              <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
+              <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
+              <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />
+              <Route path="/" element={currentUser ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+              <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />
+              <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
+            </Routes>
+          </Scrollbar>
+        ) : (
           <Routes>
-            <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
             <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
-            <Route path="/profile" element={<UserProfile currentUser={currentUser} />} />
-            <Route path="/ai-picks" element={<AIPicks currentUser={currentUser} />} />
-            <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
-            <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
-            <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />
-            <Route path="/" element={currentUser ? <Navigate to="/home" /> : <Navigate to="/login" />} />
-            <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />
-            <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
           </Routes>
-        </Scrollbar>
+        )}
       </div>
       {currentUser && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
     </div>
