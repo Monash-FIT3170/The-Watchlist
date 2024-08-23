@@ -46,9 +46,9 @@ const SearchBar = ({ currentUser }) => {
         }
     });
 
-    const FilterDropdown = ({ label, options, selected }) => {
+    const FilterDropdown = ({ label, options, selected, onFilterChange }) => {
         const [dropdownOpen, setDropdownOpen] = useState(false);
-    
+        
         return (
             (selectedTab === 'Movies' || selectedTab === 'TV Shows' || selectedTab === 'All') && (
                 <div className="relative bg-dark text-white text-xs rounded-lg">
@@ -67,7 +67,7 @@ const SearchBar = ({ currentUser }) => {
                                     <a
                                         key={option}
                                         className={`block px-4 py-2 text-sm hover:bg-gray-700 cursor-pointer ${selected.includes(option) ? 'font-bold bg-gray-700' : 'bg-transparent'}`}
-                                        onClick={() => handleFilterChange(label, option)}
+                                        onClick={() => onFilterChange(label, option)}
                                         role="menuitem"
                                     >
                                         {option}
@@ -79,8 +79,8 @@ const SearchBar = ({ currentUser }) => {
                 </div>
             )
         );
-        
     };
+    
 
     const toggleFilters = () => setShowFilters(!showFilters);
 
@@ -310,7 +310,7 @@ const SearchBar = ({ currentUser }) => {
                                     onFilterChange={handleFilterChange}
                                 />
                             </div>
-                            <div style={{ width: '80px', marginTop: '2mm' }}>
+                            <div style={{ width: '100px', marginTop: '2mm' }}>
                                 <FilterDropdown
                                     label="Country"
                                     options={filters.countries.options}
