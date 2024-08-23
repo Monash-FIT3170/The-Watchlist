@@ -3,9 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Scrollbar from './ScrollBar';
 import ProfileDropdown from './ProfileDropdown';
 import { AiOutlineSearch } from 'react-icons/ai';
-import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
+import { Meteor } from 'meteor/meteor';
 
-const AllUsersPage = ({ users: propUsers, currentUser }) => {
+const AllUsersPage = ({ users: propUsers, currentUser, fetchUsers }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUserId = Meteor.userId();
@@ -25,8 +25,25 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
     setSearchTerm(event.target.value.toLowerCase());
   };
 
-  // Get the list of users from props or location state
-  const users = propUsers || location.state?.users || [];
+  const handleFollow = (userId) => {
+    Meteor.call('followUser', userId, (error) => {
+      if (error) {
+        console.error('Error following user:', error);
+      } else {
+        fetchUsers(); // Re-fetch the updated users list after following
+      }
+    });
+  };
+
+  const handleUnfollow = (userId) => {
+    Meteor.call('unfollowUser', userId, (error) => {
+      if (error) {
+        console.error('Error unfollowing user:', error);
+      } else {
+        fetchUsers(); // Re-fetch the updated users list after unfollowing
+      }
+    });
+  };
 
   // Sorting function based on selected option
   const sortUsers = (users, option) => {
@@ -44,11 +61,11 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
   };
 
   // Get the sorted list of users
-  const sortedUsersList = sortUsers(users, sortOption);
+  const sortedUsersList = sortUsers(propUsers, sortOption);
 
   useEffect(() => {
-    console.log('AllUsersPage loaded with users:', users);
-  }, [users]);
+    console.log('AllUsersPage loaded with users:', propUsers);
+  }, [propUsers]);
 
   return (
     <div className="bg-darker min-h-screen p-4">
@@ -119,9 +136,9 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
                     onClick={(e) => {
                       e.stopPropagation();
                       if (isFollowing(user._id)) {
-                        handleUnfollow(user._id);
+                        handleUnfollow(user._id); // Call handleUnfollow and refetch data
                       } else {
-                        handleFollow(user._id);
+                        handleFollow(user._id); // Call handleFollow and refetch data
                       }
                     }}
                   >
