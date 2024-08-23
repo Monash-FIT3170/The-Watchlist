@@ -49,7 +49,7 @@ const UserDiscovery = ({ currentUser }) => {
       <div>
         <SimilarUserList />
         <div className="mt-8">
-          <UserList users={users} searchTerm={searchTerm} onSelectUser={selectUser} />
+          <UserList heading='Search Results' users={users} searchTerm={searchTerm} onSelectUser={selectUser} />
         </div>
       </div>
     </div>

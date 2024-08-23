@@ -384,7 +384,7 @@ Meteor.methods({
 
     // set top user as 100 match, etc
     sortedUserScores.forEach((user, index) => {
-      user.matchScore = 100 - index;
+      user.matchScore = 100 - index/sortedUserScores.length*50;
     });
 
     console.log("Sorted user scores:", sortedUserScores.slice(0, 10));
