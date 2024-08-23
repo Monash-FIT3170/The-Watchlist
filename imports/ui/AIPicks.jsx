@@ -15,7 +15,7 @@ export default function AIPicks() {
     // the number of recommendations collected for each movie/show. The onscreen display will be a selection from this pool
     const NUM_RECOMMENDATIONS = 35;
     // the number of slots to fill on the screen
-    const NUM_LIST_SLOTS = 10;
+    const NUM_LIST_SLOTS = 8;
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
     const [globalRatings, setGlobalRatings] = useState({});
     const [loading, setLoading] = useState(false);
@@ -31,6 +31,8 @@ export default function AIPicks() {
     const [movieIntros, setMovieIntros] = useState([]);
     const [tvIntros, setTvIntros] = useState([]);
     const [refreshToggle, setRefreshToggle] = useState(false);
+    const [prevRandNum, setPrevRandNum] = useState([]);
+    
 
 
     // useRefs are similar to useState, except that a rerender will NOT be triggered when their value is updated
@@ -257,8 +259,17 @@ export default function AIPicks() {
                     contentType: "TV Show"
                 }))
             }));
+            
+            let rand = [];
 
-            const rand = Array.from({ length: NUM_LIST_SLOTS }, () => Math.floor(Math.random() * NUM_RECOMMENDATIONS));
+            while (rand.length < NUM_LIST_SLOTS) {
+                let randomIndex = Math.floor(Math.random() * NUM_RECOMMENDATIONS);
+                if (!rand.includes(randomIndex) && !prevRandNum.includes(randomIndex)) {    
+                    rand.push(randomIndex);
+                }
+            }
+            setPrevRandNum(rand);
+            
             movieContentLists.forEach(element => {
                 element.content = element.content.filter((_, index) => rand.includes(index));
             });
