@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import RatingStar from './RatingStar';
 import { FaUser } from 'react-icons/fa';
-import ContentInfoModal from './ContentInfoModal';  // Import your modal component
+import ContentInfoModal from './ContentInfoModal';
+import Scrollbar from './ScrollBar';  // Import your Scrollbar component
 
 const List = ({ list, onContentClick }) => {
-
-  console.log(list)
 
   return (
     <div key={list._id} className="space-y-8">
@@ -23,7 +22,7 @@ const List = ({ list, onContentClick }) => {
                   <h3 className="text-xl font-bold">{item.title}</h3>
                   <p className="text-sm">{item.description}</p>
                   <div className="flex items-center">
-                    {item.isUserSpecificRating && <FaUser className="mr-1 text-blue-500" />}
+                    {item.isUserSpecificRating && <FaUser className="mr-1 text-blue-500" title="User rating" />}
                     <RatingStar totalStars={5} rating={item.rating} />
                   </div>
                 </div>
@@ -53,7 +52,7 @@ const HomeList = ({ title, lists }) => {
   const isEmpty = lists.every(list => list.content.length === 0);
 
   return (
-    <div className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl overflow-auto scrollbar-thumb-gray-900 scrollbar-track-gray-100 scrollbar-thin">
+    <div className="flex flex-col h-full overflow-hidden">
       <h1 className="font-sans font-bold text-4xl my-4 mt-0 mb-4">{title}</h1>
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center flex-grow">
@@ -66,11 +65,11 @@ const HomeList = ({ title, lists }) => {
           </button>
         </div>
       ) : (
-        <div className="w-full overflow-visible">
+        <Scrollbar className="flex-grow overflow-y-auto">  {/* Enable scrolling here */}
           {lists.map((list) => (
             <List key={list._id} list={list} onContentClick={handleContentClick} />
           ))}
-        </div>
+        </Scrollbar>
       )}
 
       {isModalOpen && selectedContent && (

@@ -7,16 +7,18 @@ import { ListCollection } from '../db/List';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList';
 import ProfileDropdown from './ProfileDropdown';
+import debounce from 'lodash.debounce';
 
 const SearchBar = ({ currentUser }) => {
 
-    const [selectedTab, setSelectedTab] = useState('movies');
+    const [selectedTab, setSelectedTab] = useState('Movies');
     const [searchTerm, setSearchTerm] = useState('');
     const [globalRatings, setGlobalRatings] = useState({});
     const [filteredMovies, setFilteredMovies] = useState([]);
     const [filteredTVShows, setFilteredTVShows] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
     const limit = 50; // Number of items per page
 
@@ -49,38 +51,59 @@ const SearchBar = ({ currentUser }) => {
 
     const users = useTracker(fetchUsers, [searchTerm]);
 
-    const fetchContent = useCallback(() => {
-        Meteor.call('content.read', { searchString: searchTerm, limit, page: currentPage }, (error, result) => {
-            if (!error) {
-                console.log("Content read result:", result);  // Log the full result
-    
-                // Calculate the total number of pages using the lengths of the arrays
-                const totalItems = result.total;
+    const fetchContent = useCallback((id = null, contentType = null) => {
+        const options = { searchString: searchTerm, limit, page: currentPage };
+        if (id) {
+            options.id = id;
+            options.contentType = contentType; // Pass content type when fetching single item
+        }
 
-                setTotalPages(Math.ceil(totalItems / limit));
-    
-                setFilteredMovies(result.movie || []); // Set to empty array if undefined
-                setFilteredTVShows(result.tv || []); // Set to empty array if undefined
+        Meteor.call('content.read', options, (error, result) => {
+            if (!error) {
+                if (id) {
+                    // Handle single content details
+                    console.log("Single content details:", result);
+                } else {
+                    // Handle paginated results
+                    const totalItems = result.total;
+                    setTotalPages(Math.ceil(totalItems / limit));
+                    setFilteredMovies(result.movie?.map(movie => ({ ...movie, contentType: 'Movie' })) || []);
+                    setFilteredTVShows(result.tv?.map(tv => ({ ...tv, contentType: 'TV Show' })) || []);
+                }
             } else {
                 console.error("Error fetching content:", error);
-                setFilteredMovies([]); // Ensure arrays are never undefined
-                setFilteredTVShows([]); // Ensure arrays are never undefined
+                setFilteredMovies([]);
+                setFilteredTVShows([]);
             }
         });
     }, [searchTerm, currentPage]);
 
-    useEffect(() => {
-        fetchContent();
-    }, [fetchContent, searchTerm]);
 
+
+    // Update searchTerm immediately on each keystroke
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value.toLowerCase());
-        setCurrentPage(0);
     };
+
+    // Debounce setting the debouncedSearchTerm
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 300);  // 300 ms delay
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [searchTerm]);
+
+    // Only fetch content when debouncedSearchTerm changes
+    useEffect(() => {
+        fetchContent();
+    }, [fetchContent, debouncedSearchTerm]);
 
     useEffect(() => {
         console.log("Filtered Movies updated:", filteredMovies);
-    }, [filteredMovies]);    
+    }, [filteredMovies]);
 
     const handleNextPage = () => {
         console.log("Next clicked")
@@ -91,7 +114,7 @@ const SearchBar = ({ currentUser }) => {
             });
         }
     };
-    
+
     const handlePreviousPage = () => {
         if (currentPage > 0) {
             setCurrentPage(prevPage => {
@@ -100,19 +123,23 @@ const SearchBar = ({ currentUser }) => {
             });
         }
     };
-    
+
 
     const filteredLists = lists.filter(list =>
         (list.title && list.title.toLowerCase().includes(searchTerm)) ||
         (list.description && list.description.toLowerCase().includes(searchTerm))
     );
 
+    const handleFormSubmit = (e) => {
+        e.preventDefault();  // Prevents the form from submitting
+    };
+
     return (
         <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
             <div className="absolute top-4 right-4">
                 <ProfileDropdown user={currentUser} />
             </div>
-            <form className="flex flex-col items-start w-full pl-1">
+            <form className="flex flex-col items-start w-full pl-1" onSubmit={handleFormSubmit}>
                 <div className="flex justify-between items-center w-full max-w-xl">
                     <div className="relative flex-grow">
                         <input
@@ -141,35 +168,35 @@ const SearchBar = ({ currentUser }) => {
                 </div>
             </form>
             <Scrollbar className="search-results-container flex-grow overflow-auto">
-    {selectedTab === 'movies' && (
-        <div className="grid-responsive">
-            {filteredMovies.length > 0 ? filteredMovies.map(movie => (
-                <ContentItem content={movie} key={movie.contentId} />
-            )) : <div></div>}
-        </div>
-    )}
-    {selectedTab === 'tv shows' && (
-        <div className="grid-responsive">
-            {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
-                <ContentItem content={tv} key={tv.contentId} />
-            )) : <div></div>}
-        </div>
-    )}
-    {selectedTab === 'lists' && (
-        filteredLists.length > 0 ? (
-            <ListDisplay listData={filteredLists} />
-        ) : (
-            <div></div>
-        )
-    )}
-    {selectedTab === 'users' && (
-        users.length > 0 ? (
-            <UserList users={users} searchTerm={searchTerm} currentUser={currentUser} />
-        ) : (
-            <div></div>
-        )
-    )}
-</Scrollbar>
+                {selectedTab === 'Movies' && (
+                    <div className="grid-responsive">
+                        {filteredMovies.length > 0 ? filteredMovies.map(movie => (
+                            <ContentItem content={movie} contentType="Movie" key={movie.contentId} />
+                        )) : <div></div>}
+                    </div>
+                )}
+                {selectedTab === 'TV Shows' && (
+                    <div className="grid-responsive">
+                        {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
+                            <ContentItem content={tv} contentType="TV Show" key={tv.contentId} />
+                        )) : <div></div>}
+                    </div>
+                )}
+                {selectedTab === 'Lists' && (
+                    filteredLists.length > 0 ? (
+                        <ListDisplay listData={filteredLists} />
+                    ) : (
+                        <div></div>
+                    )
+                )}
+                {selectedTab === 'Users' && (
+                    users.length > 0 ? (
+                        <UserList users={users} searchTerm={searchTerm} currentUser={currentUser} />
+                    ) : (
+                        <div></div>
+                    )
+                )}
+            </Scrollbar>
 
 
             {/* Pagination buttons */}

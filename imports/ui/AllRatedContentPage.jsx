@@ -16,27 +16,32 @@ const AllRatedContentPage = ({ currentUser }) => {
   const userSpecific = searchParams.get('userSpecific') === 'true';
 
   const { ratedContent, isLoading } = useTracker(() => {
-    const subscription = Meteor.subscribe('ratedContent', userId);
-    const isCurrentUser = userId === currentUser._id;
+    const ratingsHandle = Meteor.subscribe('userRatings', userId);
     const ratings = userSpecific 
       ? RatingCollection.find({ userId: currentUser._id }).fetch() 
       : RatingCollection.find({ userId }).fetch();
+
+    // Store all content subscriptions
+    const contentSubscriptions = ratings.map(rating => 
+      Meteor.subscribe('contentById', rating.contentId, rating.contentType)
+    );
+
     const contentDetails = ratings.map(rating => {
       const collection = rating.contentType === 'Movie' ? MovieCollection : TVCollection;
       const content = collection.findOne({ contentId: rating.contentId });
 
-      return {
+      return content ? {
         ...content,
         rating: rating.rating,
         contentType: rating.contentType
-      };
-    });
+      } : null;
+    }).filter(content => content && content.title && content.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const filteredContent = contentDetails.filter(content => content.title && content.title.toLowerCase().includes(searchTerm.toLowerCase()));
+    const allSubscriptionsReady = ratingsHandle.ready() && contentSubscriptions.every(sub => sub.ready());
 
     return {
-      ratedContent: filteredContent,
-      isLoading: !subscription.ready()
+      ratedContent: contentDetails,
+      isLoading: !allSubscriptionsReady
     };
   }, [userId, searchTerm, currentUser, userSpecific]);
 
@@ -73,6 +78,7 @@ const AllRatedContentPage = ({ currentUser }) => {
             <ContentItem
               content={content}
               isUserSpecificRating={userSpecific}
+              contentType={content.contentType}
             />
           )) : <p>No rated content available.</p>}
         </div>
@@ -82,3 +88,4 @@ const AllRatedContentPage = ({ currentUser }) => {
 };
 
 export default AllRatedContentPage;
+
