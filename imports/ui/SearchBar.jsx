@@ -45,56 +45,41 @@ const SearchBar = ({ currentUser }) => {
         const [dropdownOpen, setDropdownOpen] = useState(false);
     
         return (
-            <div className="relative bg-dark text-white text-xs rounded-lg">
-                <button
-                    type="button"
-                    className="bg-dark px-4 py-2 rounded-md flex items-center justify-between w-full"
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                >
-                    {label}
-                    <AiOutlineDown className="ml-2 h-3 w-3" aria-hidden="true" />
-                </button>
-                {dropdownOpen && (
-                    <div className="absolute left-0 mt-1 w-full rounded-md shadow-lg bg-gray-900 z-50 overflow-auto max-h-60">
-                        <div className="py-1" role="menu" aria-orientation="vertical">
-                            {options.map(option => (
-                                <a
-                                    key={option}
-                                    className={`block px-4 py-2 text-sm hover:bg-gray-700 cursor-pointer ${selected.includes(option) ? 'font-bold bg-gray-700' : 'bg-transparent'}`}
-                                    onClick={() => handleFilterChange(label, option)}
-                                    role="menuitem"
-                                >
-                                    {option} 
-                                </a>
-                            ))}
+            (selectedTab === 'Movies' || selectedTab === 'TV Shows' || selectedTab === 'All') && (
+                <div className="relative bg-dark text-white text-xs rounded-lg">
+                    <button
+                        type="button"
+                        className="bg-dark px-4 py-2 rounded-md flex items-center justify-between w-full"
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                    >
+                        {label}
+                        <AiOutlineDown className="ml-2 h-3 w-3" aria-hidden="true" />
+                    </button>
+                    {dropdownOpen && (
+                        <div className="absolute left-0 mt-1 w-full rounded-md shadow-lg bg-gray-900 z-50 overflow-auto max-h-60">
+                            <div className="py-1" role="menu" aria-orientation="vertical">
+                                {options.map(option => (
+                                    <a
+                                        key={option}
+                                        className={`block px-4 py-2 text-sm hover:bg-gray-700 cursor-pointer ${selected.includes(option) ? 'font-bold bg-gray-700' : 'bg-transparent'}`}
+                                        onClick={() => handleFilterChange(label, option)}
+                                        role="menuitem"
+                                    >
+                                        {option}
+                                    </a>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            )
         );
+        
     };
-    
 
     const toggleFilters = () => setShowFilters(!showFilters);
 
-    
 
-    // useEffect(() => {
-    //     const newFilteredData = {
-    //         movies: applyFilters(movies),
-    //         tvShows: applyFilters(tv shows),
-    //         users: [], // Apply similar filtering logic if required
-    //         lists: applyFilters(Lists) // Use lists from context
-    //     };
-    //     setFilteredData(newFilteredData);
-    // }, [filters, movies, tvs, lists]);
-
-    // const [filteredData, setFilteredData] = useState({
-    //     movies: movies,
-    //     tvShows: tvs,
-    //     users: [], // there will be a similar dummy data array for users
-    //     lists: lists  // there will be a similar dummy data array for lists
-    // });
 
 
     const limit = 50; // Number of items per page
@@ -269,14 +254,18 @@ const SearchBar = ({ currentUser }) => {
                             {tab}
                         </div>
                     ))}
-                    <button
-                        type="button"
-                        className={`ml-4 transition-all duration-300 ease-in-out ${showFilters ? 'underline text-[#7B1450]' : 'text-[#989595]'} ${!showFilters && 'hover:text-[#fbc0e2] hover:underline'}`}
-                        onClick={toggleFilters}
-                        style={{ position: 'relative', top: '-1mm' }}
-                    >
-                        <AiOutlineFilter size={20} />
-                    </button>
+                    {(selectedTab === 'Movies' || selectedTab === 'TV Shows' || selectedTab === 'All') && (
+                        <button
+                            type="button"
+                            className={`ml-4 transition-all duration-300 ease-in-out ${showFilters ? 'underline text-[#7B1450]' : 'text-[#989595]'} ${!showFilters && 'hover:text-[#fbc0e2] hover:underline'}`}
+                            onClick={toggleFilters}
+                            style={{ position: 'relative', top: '-1mm' }}
+                        >
+                            <AiOutlineFilter size={20} />
+                        </button>
+                        )}
+                   
+                        
                     {showFilters && (
                         <div className="flex space-x-4" style={{ display: 'inline-flex', marginLeft: '30px' }}>
                             <div style={{ width: '80px', marginTop: '2mm' }}>
