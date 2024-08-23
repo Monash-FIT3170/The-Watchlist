@@ -36,6 +36,10 @@ const SearchBar = ({ currentUser }) => {
             ],
             selected: []
         },
+        countries:{
+            options: ["North America", "Asia", "Europe"],
+            selected: []
+        },
         "sort by": {
             options: ["year", "title", "popularity"],
             selected: "" // this is string as opposed to arrays above due to lack of multi-select
@@ -303,6 +307,14 @@ const SearchBar = ({ currentUser }) => {
                                     label="Genres"
                                     options={filters.genres.options}
                                     selected={filters.genres.selected}
+                                    onFilterChange={handleFilterChange}
+                                />
+                            </div>
+                            <div style={{ width: '80px', marginTop: '2mm' }}>
+                                <FilterDropdown
+                                    label="Country"
+                                    options={filters.countries.options}
+                                    selected={filters.countries.selected}
                                     onFilterChange={handleFilterChange}
                                 />
                             </div>
