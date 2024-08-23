@@ -36,7 +36,7 @@ const SearchBar = ({ currentUser }) => {
             ],
             selected: []
         },
-        countries:{
+        continents:{
             options: ["North America", "Asia", "Europe"],
             selected: []
         },
@@ -45,6 +45,10 @@ const SearchBar = ({ currentUser }) => {
             selected: "" // this is string as opposed to arrays above due to lack of multi-select
         }
     });
+
+    const america = ['US', 'CA', 'MX'];
+    const asia = ['CN', 'JP', 'KR', 'IN'];
+    const europe = ['FR', 'IT','DE', 'GB']
 
     const FilterDropdown = ({ label, options, selected, onFilterChange }) => {
         const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -149,7 +153,7 @@ const SearchBar = ({ currentUser }) => {
                 } else if (filters["sort by"].selected === "popularity") {
                     movies = movies.sort((a, b) => b.popularity - a.popularity); 
                     tvShows = tvShows.sort((a, b) => b.popularity - a.popularity); 
-                }
+                } 
 
                 if (filters.genres.selected.length > 0) {
                     movies = movies.filter(movie => movie.genres.some(genre => filters.genres.selected.includes(genre)));
@@ -159,6 +163,19 @@ const SearchBar = ({ currentUser }) => {
                 if (filters.year.selected.length > 0) {
                     movies = movies.filter(movie => filters.year.selected.includes(movie.release_year));
                     tvShows = tvShows.filter(tv => filters.year.selected.includes(tv.first_aired));
+                }
+                
+                if (filters.continents.selected.length > 0){
+                    if(filters.continents.selected.includes('North America')){
+                        movies = movies.filter(movie =>  america.includes(movie.origin_country[0]));
+                        tvShows = tvShows.filter(tv =>  america.includes(tv.origin_country[0]));
+                    } else if(filters.continents.selected.includes('Asia')){
+                        movies = movies.filter(movie =>  asia.includes(movie.origin_country[0]));
+                        tvShows = tvShows.filter(tv =>  asia.includes(tv.origin_country[0]));
+                    }else if(filters.continents.selected.includes('Europe')){
+                        movies = movies.filter(movie =>  europe.includes(movie.origin_country[0]));
+                        tvShows = tvShows.filter(tv =>  europe.includes(tv.origin_country[0]));
+                    }
                 }
     
                 setFilteredMovies(movies);
@@ -229,10 +246,9 @@ const SearchBar = ({ currentUser }) => {
         setFilters(prevFilters => {
             const updatedFilters = { ...prevFilters };
             const filterKey = filterType.toLowerCase();
-    
             if (filterType === "Sort By") {
                 updatedFilters[filterKey].selected = value;
-            } else if (filterType === "Year" || filterType === "Genres") {
+            } else if (filterType === "Year" || filterType === "Genres" || filterType === "Continents") {
                 const selected = updatedFilters[filterKey].selected;
                 if (selected.includes(value)) {
                     updatedFilters[filterKey].selected = selected.filter(v => v !== value);
@@ -313,8 +329,8 @@ const SearchBar = ({ currentUser }) => {
                             <div style={{ width: '110px', marginTop: '2mm' }}>
                                 <FilterDropdown
                                     label="Continents"
-                                    options={filters.countries.options}
-                                    selected={filters.countries.selected}
+                                    options={filters.continents.options}
+                                    selected={filters.continents.selected}
                                     onFilterChange={handleFilterChange}
                                 />
                             </div>
