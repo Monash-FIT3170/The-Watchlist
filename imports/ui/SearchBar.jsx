@@ -21,7 +21,7 @@ const SearchBar = ({ currentUser }) => {
     const [showFilters, setShowFilters] = useState(false); 
     const [filters, setFilters] = useState({
         year: {
-            options: [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000, 1999, 1998, 1997, 1996, 1995, 1994, 1993, 1992, 1991, 1990],
+            options: [2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000, 1999, 1998, 1997, 1996, 1995, 1994, 1993, 1992, 1991, 1990],
             selected: []
         },
         genres: {
@@ -160,6 +160,11 @@ const SearchBar = ({ currentUser }) => {
                 if (filters.genres.selected.length > 0) {
                     movies = movies.filter(movie => movie.genres.some(genre => filters.genres.selected.includes(genre)));
                     tvShows = tvShows.filter(tv => tv.genres.some(genre => filters.genres.selected.includes(genre)));
+                }
+
+                if (filters.year.selected.length > 0) {
+                    movies = movies.filter(movie => filters.year.selected.includes(movie.release_year));
+                    tvShows = tvShows.filter(tv => filters.year.selected.includes(tv.first_aired));
                 }
     
                 setFilteredMovies(movies);
