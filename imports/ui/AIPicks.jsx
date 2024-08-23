@@ -403,7 +403,7 @@ return (
                 ) : (
                     tvDisplayRef.current.map(list => (
                         <div key={list.listId} className="px-8 py-2">
-                            <ContentListAI list={list} isUserOwned={false} />
+                            <ContentLisAI list={list} isUserOwned={false} />
                         </div>
                     )
                 )

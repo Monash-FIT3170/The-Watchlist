@@ -1,11 +1,15 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ContentItem from './ContentItem';
+import usePopup from './usePopup';
+import ListPopup from './ListPopup';
+import { Divider } from '@mui/material';
 
 const ContentListAI = ({ list, isUserOwned }) => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const [visibleContentCount, setVisibleContentCount] = useState(0);
+  const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
 
   // Calculate the number of content panels that fit in the container
   const updateVisibleContent = () => {
@@ -30,9 +34,17 @@ const ContentListAI = ({ list, isUserOwned }) => {
   return (
     <div className="flex flex-col mb-2 bg-transparent overflow-hidden shadow-none py-0 px-0">
       <div className="flex justify-between items-center mb-0 text-base">
-<div className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 bg-transparent border-none" 
-        >{list.title}
+        <div
+          className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 bg-transparent border-none" // Styling to make it look like the original h1 plus hover effect
+        >
+          {list.title}
         </div>
+
+        {isUserOwned && (
+          <button onClick={() => handleItemClick(list)} className="text-gray-400 text-base bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
+            Show all
+          </button>
+        )}
       </div>
       {list.content.length === 0 && (
           <div className="text-center text-gray-500 mt-2">
@@ -44,9 +56,18 @@ const ContentListAI = ({ list, isUserOwned }) => {
           <ContentItem 
             content={item}
             isUserSpecificRating={item.isUserSpecificRating}
+            contentType={item.contentType}
           />
         ))).slice(0, visibleContentCount)}
       </div>
+      {isPopupOpen && selectedList && (
+        <ListPopup
+          listId={selectedList._id}
+          onClose={handleClosePopup}
+          onDeleteList={() => console.log("Delete list")}
+          onRenameList={() => console.log("Rename list")}
+        />
+      )}
     </div>
   );
 };
