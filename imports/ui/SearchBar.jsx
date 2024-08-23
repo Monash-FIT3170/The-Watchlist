@@ -7,6 +7,7 @@ import { ListCollection } from '../db/List';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList';
 import ProfileDropdown from './ProfileDropdown';
+import { values } from '@babel/runtime/regenerator';
 
 const SearchBar = ({ currentUser }) => {
 
@@ -35,7 +36,7 @@ const SearchBar = ({ currentUser }) => {
             selected: []
         },
         "sort by": {
-            options: ["rating", "runtime"],
+            options: ["rating", "title"],
             selected: "" // this is string as opposed to arrays above due to lack of multi-select
         }
     });
@@ -76,36 +77,7 @@ const SearchBar = ({ currentUser }) => {
 
     const toggleFilters = () => setShowFilters(!showFilters);
 
-    const applyFilters = (data) => {
-        let filtered = [...data]; // Clone the data array to avoid direct modifications
-
-        // Filter by year if any year is selected
-        if (filters.year.selected.length > 0) {
-            filtered = filtered.filter(item => filters.year.selected.includes(item.release_year));
-        }
-
-        // Filter by genre if any genre is selected and the tab is either 'movies' or 'tv shows'
-        if (filters.genres.selected.length > 0 && (selectedTab === 'movies' || selectedTab === 'tv shows')) {
-            filtered = filtered.filter(item => {
-                console.log("Checking genres for item:", item);
-                return Array.isArray(item.genres) && item.genres.some(genre => filters.genres.selected.includes(genre));
-            });
-        }
-
-        // Sorting logic
-        if (filters["sort by"].selected) {
-            filtered = filtered.sort((a, b) => {
-                if (filters["sort by"].selected === 'rating') {
-                    return b.rating - a.rating;
-                } else if (filters["sort by"].selected === 'runtime') {
-                    return b.runtime - a.runtime;
-                }
-                return 0;
-            });
-        }
-
-        return filtered;
-    };
+    
 
     // useEffect(() => {
     //     const newFilteredData = {
@@ -167,19 +139,23 @@ const SearchBar = ({ currentUser }) => {
             options.id = id;
             options.contentType = contentType; // Pass content type when fetching single item
         }
-
+    
         Meteor.call('content.read', options, (error, result) => {
             if (!error) {
-                if (id) {
-                    // Handle single content details
-                    console.log("Single content details:", result);
-                } else {
-                    // Handle paginated results
-                    const totalItems = result.total;
-                    setTotalPages(Math.ceil(totalItems / limit));
-                    setFilteredMovies(result.movie?.map(movie => ({ ...movie, contentType: 'Movie' })) || []);
-                    setFilteredTVShows(result.tv?.map(tv => ({ ...tv, contentType: 'TV Show' })) || []);
+                const totalItems = result.total;
+                setTotalPages(Math.ceil(totalItems / limit));
+    
+                let movies = result.movie?.map(movie => ({ ...movie, contentType: 'Movie' })) || [];
+                let tvShows = result.tv?.map(tv => ({ ...tv, contentType: 'TV Show' })) || [];
+    
+                // Apply sorting here if a sort option is selected
+                if (filters["sort by"].selected === "title") {
+                    movies = movies.sort((a, b) => a.title.localeCompare(b.title));
+                    tvShows = tvShows.sort((a, b) => a.title.localeCompare(b.title));
                 }
+    
+                setFilteredMovies(movies);
+                setFilteredTVShows(tvShows);
             } else {
                 console.error("Error fetching content:", error);
                 setFilteredMovies([]);
@@ -187,6 +163,7 @@ const SearchBar = ({ currentUser }) => {
             }
         });
     }, [searchTerm, currentPage, filters]);
+    
 
     useEffect(() => {
         fetchContent();
@@ -226,22 +203,17 @@ const SearchBar = ({ currentUser }) => {
     );
 
     const handleFilterChange = (filterType, value) => {
-        console.log("handleFilterChange called");
-        console.log("Current Filters State:", filters);
-        console.log("Filter Type:", filterType);
-        console.log("Filters Object for Type:", filters[filterType]);  // Add this to check if it's defined
-        if (filters[filterType] && Array.isArray(filters[filterType].selected)) {  // Also check if filters[filterType] is defined
-            const updatedSelected = filters[filterType].selected.includes(value)
-                ? filters[filterType].selected.filter(item => item !== value)
-                : [...filters[filterType].selected, value];
-            setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: updatedSelected } }));
-        } else if (filters[filterType]) {  // Handle single-select options safely
-            setFilters(prev => ({ ...prev, [filterType]: { ...prev[filterType], selected: value } }));
-        } else {
-            console.error("Filter type is undefined:", filterType);
-        }
+        console.log("UpdatedFilters", filterType)
+        setFilters(prevFilters => {
+            const updatedFilters = { ...prevFilters };
+            if (filterType === "Sort By") {
+                updatedFilters[filterType.toLowerCase()].selected = value;
+            }
+            console.log("UpdatedFilters", updatedFilters)
+            return updatedFilters;
+        });
     };
-
+    
     return (
         <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
             <div className="absolute top-4 right-4">
@@ -311,6 +283,7 @@ const SearchBar = ({ currentUser }) => {
                 </div>
             </form>
             <Scrollbar className="search-results-container flex-grow overflow-auto">
+
                 {selectedTab === 'Movies' && (
                     <div className="grid-responsive">
                         {filteredMovies.length > 0 ? filteredMovies.map(movie => (
