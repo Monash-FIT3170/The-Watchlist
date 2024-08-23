@@ -41,7 +41,7 @@ const SearchBar = ({ currentUser }) => {
             selected: []
         },
         "sort by": {
-            options: ["year", "title", "popularity"],
+            options: ["Year", "Title", "Popularity"],
             selected: "" // this is string as opposed to arrays above due to lack of multi-select
         }
     });
@@ -310,9 +310,9 @@ const SearchBar = ({ currentUser }) => {
                                     onFilterChange={handleFilterChange}
                                 />
                             </div>
-                            <div style={{ width: '100px', marginTop: '2mm' }}>
+                            <div style={{ width: '110px', marginTop: '2mm' }}>
                                 <FilterDropdown
-                                    label="Country"
+                                    label="Continents"
                                     options={filters.countries.options}
                                     selected={filters.countries.selected}
                                     onFilterChange={handleFilterChange}
