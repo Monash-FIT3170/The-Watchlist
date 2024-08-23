@@ -54,7 +54,7 @@ const SimilarUserList = () => {
   return (
     <div className="user-list-container bg-transparent py-0">
       <div className="flex justify-between items-center">
-        <h2 className="text-white text-2xl font-semibold">Similar Users</h2>
+        <h2 className="text-white text-2xl font-semibold">Discover similar users</h2>
       </div>
       {loading ? (
         <div className="flex justify-center items-center py-4">
