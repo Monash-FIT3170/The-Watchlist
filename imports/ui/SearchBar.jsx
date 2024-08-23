@@ -130,12 +130,16 @@ const SearchBar = ({ currentUser }) => {
         (list.description && list.description.toLowerCase().includes(searchTerm))
     );
 
+    const handleFormSubmit = (e) => {
+        e.preventDefault();  // Prevents the form from submitting
+    };
+
     return (
         <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
             <div className="absolute top-4 right-4">
                 <ProfileDropdown user={currentUser} />
             </div>
-            <form className="flex flex-col items-start w-full pl-1">
+            <form className="flex flex-col items-start w-full pl-1" onSubmit={handleFormSubmit}>
                 <div className="flex justify-between items-center w-full max-w-xl">
                     <div className="relative flex-grow">
                         <input
