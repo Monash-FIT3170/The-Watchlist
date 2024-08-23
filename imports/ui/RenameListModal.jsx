@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, forwardRef } from "react";
 
-function RenameListModal({ isOpen, onClose, onRename, currentName }) {
+const RenameListModal = forwardRef(({ isOpen, onClose, onRename, currentName }, ref) => {
   const [newName, setNewName] = useState(currentName);
 
   useEffect(() => {
@@ -23,6 +23,7 @@ function RenameListModal({ isOpen, onClose, onRename, currentName }) {
       onClick={onClose}
     >
       <div
+        ref={ref} // Attach the ref here
         className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
         onClick={handleModalClick}
       >
@@ -55,6 +56,6 @@ function RenameListModal({ isOpen, onClose, onRename, currentName }) {
       </div>
     </div>
   ) : null;
-}
+});
 
 export default RenameListModal;
