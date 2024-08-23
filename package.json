@@ -19,6 +19,7 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "lodash": "^4.17.21",
+    "lodash.debounce": "^4.0.8",
     "meteor-node-stubs": "^1.2.9",
     "overlayscrollbars": "^2.8.0",
     "react": "^18.3.1",

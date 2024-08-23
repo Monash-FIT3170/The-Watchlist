@@ -52,7 +52,7 @@ const HomeList = ({ title, lists }) => {
   const isEmpty = lists.every(list => list.content.length === 0);
 
   return (
-    <div className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl">
+    <div className="flex flex-col h-full overflow-hidden">
       <h1 className="font-sans font-bold text-4xl my-4 mt-0 mb-4">{title}</h1>
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center flex-grow">
@@ -65,7 +65,7 @@ const HomeList = ({ title, lists }) => {
           </button>
         </div>
       ) : (
-        <Scrollbar className="w-full overflow-visible">
+        <Scrollbar className="flex-grow overflow-y-auto">  {/* Enable scrolling here */}
           {lists.map((list) => (
             <List key={list._id} list={list} onContentClick={handleContentClick} />
           ))}
