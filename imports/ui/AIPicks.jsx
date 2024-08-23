@@ -15,7 +15,7 @@ export default function AIPicks() {
     // the number of recommendations collected for each movie/show. The onscreen display will be a selection from this pool
     const NUM_RECOMMENDATIONS = 35;
     // the number of slots to fill on the screen
-    const NUM_LIST_SLOTS = 8;
+    const NUM_LIST_SLOTS = 5;
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
     const [globalRatings, setGlobalRatings] = useState({});
     const [loading, setLoading] = useState(false);
@@ -154,8 +154,6 @@ export default function AIPicks() {
                 // Fetch recommendations for movies
                 if (movieTitles.length > 0) {
                     const recommendedMov = await fetchMovies(movieTitles);
-                    console.log(recommendedMov);
-                    
                     setRecommendedMovies(recommendedMov);
 
                 }
@@ -398,12 +396,12 @@ return (
             {display === DISPLAY_SHOWS && (
                 contentTVNone ? (
                     <div className="px-8 py-2 mt-10 text-white text-3xl">
-                        Not enough TV Shows yet. Add some to your favourites or watchlist to get started!
+                        Not enough Shows yet. Add some to your favourites or watchlist to get started!
                     </div>
                 ) : (
                     tvDisplayRef.current.map(list => (
                         <div key={list.listId} className="px-8 py-2">
-                            <ContentLisAI list={list} isUserOwned={false} />
+                            <ContentListAI list={list} isUserOwned={false} />
                         </div>
                     )
                 )
