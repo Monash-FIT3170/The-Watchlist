@@ -72,7 +72,8 @@ function GetContent(searchObject: object, searchOptions: object, fullDetails: bo
                 title: 1,
                 image_url: 1,
                 release_year: 1,
-                first_aired: 1
+                first_aired: 1,
+                genres: 1
             }
         };
     }

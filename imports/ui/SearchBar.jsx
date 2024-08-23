@@ -153,8 +153,13 @@ const SearchBar = ({ currentUser }) => {
                     movies = movies.sort((a, b) => a.title.localeCompare(b.title));
                     tvShows = tvShows.sort((a, b) => a.title.localeCompare(b.title));
                 } else if (filters["sort by"].selected === "year") {
-                    movies = movies.sort((a, b) => b.release_year - a.release_year); // Sort by release year (descending)
-                    tvShows = tvShows.sort((a, b) => b.first_aired - a.first_aired); // Sort by release year (descending)
+                    movies = movies.sort((a, b) => b.release_year - a.release_year); 
+                    tvShows = tvShows.sort((a, b) => b.first_aired - a.first_aired);
+                }
+
+                if (filters.genres.selected.length > 0) {
+                    movies = movies.filter(movie => movie.genres.some(genre => filters.genres.selected.includes(genre)));
+                    tvShows = tvShows.filter(tv => tv.genres.some(genre => filters.genres.selected.includes(genre)));
                 }
     
                 setFilteredMovies(movies);
@@ -206,16 +211,25 @@ const SearchBar = ({ currentUser }) => {
     );
 
     const handleFilterChange = (filterType, value) => {
-        console.log("UpdatedFilters", filterType)
         setFilters(prevFilters => {
             const updatedFilters = { ...prevFilters };
+            const filterKey = filterType.toLowerCase();
+    
             if (filterType === "Sort By") {
-                updatedFilters[filterType.toLowerCase()].selected = value;
+                updatedFilters[filterKey].selected = value;
+            } else if (filterType === "Year" || filterType === "Genres") {
+                const selected = updatedFilters[filterKey].selected;
+                if (selected.includes(value)) {
+                    updatedFilters[filterKey].selected = selected.filter(v => v !== value);
+                } else {
+                    updatedFilters[filterKey].selected = [...selected, value];
+                }
             }
-            console.log("UpdatedFilters", updatedFilters)
+    
             return updatedFilters;
         });
     };
+    
     
     return (
         <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
