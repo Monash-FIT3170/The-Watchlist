@@ -28,7 +28,7 @@ const Home = ({ currentUser }) => {
   const toWatchList = lists.filter(list => list.listType === 'To Watch');
 
   return (
-    <div className="flex justify-between overflow-hidden">
+    <div className="flex flex-row min-h-screen bg-darker overflow-hidden">
       <div className="absolute top-4 right-8">
         <ProfileDropdown user={currentUser} />
       </div>
