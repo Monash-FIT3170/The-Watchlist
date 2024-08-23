@@ -35,6 +35,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
   const confirmDialogRef = useRef(null);
+  const renameListRef = useRef(null); // Ref for RenameListModal
 
   const { list, loading, ratings } = useTracker(() => {
     const listHandle = Meteor.subscribe('userLists', listId);
@@ -152,6 +153,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
       popupRef.current && !popupRef.current.contains(event.target) &&
       (!contentInfoModalRef.current || !contentInfoModalRef.current.contains(event.target)) &&
       (!isModalOpen || !modalRef.current || !modalRef.current.contains(event.target)) &&
+      (!renameListRef.current || !renameListRef.current.contains(event.target)) &&
       (!confirmDialogRef.current)
     ) {
       onClose();
@@ -447,6 +449,7 @@ const ListPopup = ({ listId, onClose, onDeleteList, onRenameList }) => {
             list.title = newName; // Update the list title locally
           }}
           currentName={list.title}
+          ref={renameListRef}
         />
       )}
 

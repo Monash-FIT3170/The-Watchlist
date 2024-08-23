@@ -52,7 +52,7 @@ const HomeList = ({ title, lists }) => {
   const isEmpty = lists.every(list => list.content.length === 0);
 
   return (
-    <div className="w-full h-full px-5 py-5 rounded-lg flex flex-col items-left shadow-xl">
+    <div className="px-50 py-5 rounded-lg shadow-xl">
       <h1 className="font-sans font-bold text-4xl my-4 mt-0 mb-4">{title}</h1>
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center flex-grow">

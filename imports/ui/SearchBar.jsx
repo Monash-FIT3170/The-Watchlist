@@ -7,6 +7,7 @@ import { ListCollection } from '../db/List';
 import Scrollbar from './ScrollBar';  // Import the Scrollbar component
 import UserList from './UserList';
 import ProfileDropdown from './ProfileDropdown';
+import debounce from 'lodash.debounce';
 
 const SearchBar = ({ currentUser }) => {
 
@@ -17,6 +18,7 @@ const SearchBar = ({ currentUser }) => {
     const [filteredTVShows, setFilteredTVShows] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
     const limit = 50; // Number of items per page
 
@@ -78,14 +80,26 @@ const SearchBar = ({ currentUser }) => {
 
 
 
-    useEffect(() => {
-        fetchContent();
-    }, [fetchContent, searchTerm]);
-
+    // Update searchTerm immediately on each keystroke
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value.toLowerCase());
-        setCurrentPage(0);
     };
+
+    // Debounce setting the debouncedSearchTerm
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 300);  // 300 ms delay
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [searchTerm]);
+
+    // Only fetch content when debouncedSearchTerm changes
+    useEffect(() => {
+        fetchContent();
+    }, [fetchContent, debouncedSearchTerm]);
 
     useEffect(() => {
         console.log("Filtered Movies updated:", filteredMovies);
@@ -116,12 +130,16 @@ const SearchBar = ({ currentUser }) => {
         (list.description && list.description.toLowerCase().includes(searchTerm))
     );
 
+    const handleFormSubmit = (e) => {
+        e.preventDefault();  // Prevents the form from submitting
+    };
+
     return (
         <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
             <div className="absolute top-4 right-4">
                 <ProfileDropdown user={currentUser} />
             </div>
-            <form className="flex flex-col items-start w-full pl-1">
+            <form className="flex flex-col items-start w-full pl-1" onSubmit={handleFormSubmit}>
                 <div className="flex justify-between items-center w-full max-w-xl">
                     <div className="relative flex-grow">
                         <input

@@ -97,7 +97,7 @@ const readContent: HandlerFunc = {
             searchCriteria = { contentId: Number(id) }; // Assuming `id` is numeric
             fullDetails = true;
         } else if (searchString && searchString.trim() !== '') {
-            searchCriteria = { "$text": { "$search": searchString } };
+            searchCriteria = { "$text": { "$search": `"${searchString}"` } };
         }
 
         const sortOptions = { popularity: -1 };  // Sorting by popularity in descending order
