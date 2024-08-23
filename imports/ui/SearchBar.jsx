@@ -36,7 +36,7 @@ const SearchBar = ({ currentUser }) => {
             selected: []
         },
         "sort by": {
-            options: ["rating", "title"],
+            options: ["year", "title"],
             selected: "" // this is string as opposed to arrays above due to lack of multi-select
         }
     });
@@ -152,6 +152,9 @@ const SearchBar = ({ currentUser }) => {
                 if (filters["sort by"].selected === "title") {
                     movies = movies.sort((a, b) => a.title.localeCompare(b.title));
                     tvShows = tvShows.sort((a, b) => a.title.localeCompare(b.title));
+                } else if (filters["sort by"].selected === "year") {
+                    movies = movies.sort((a, b) => b.release_year - a.release_year); // Sort by release year (descending)
+                    tvShows = tvShows.sort((a, b) => b.first_aired - a.first_aired); // Sort by release year (descending)
                 }
     
                 setFilteredMovies(movies);
