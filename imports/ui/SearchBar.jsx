@@ -171,14 +171,14 @@ const SearchBar = ({ currentUser }) => {
                 {selectedTab === 'Movies' && (
                     <div className="grid-responsive">
                         {filteredMovies.length > 0 ? filteredMovies.map(movie => (
-                            <ContentItem content={movie} contentType="Movie" key={movie.contentId} />
+                            <ContentItem content={movie} contentType="Movie" key={movie.contentId} globalRating={globalRatings[movie.contentId]?.average || 0} setGlobalRatings={setGlobalRatings}/>
                         )) : <div></div>}
                     </div>
                 )}
                 {selectedTab === 'TV Shows' && (
                     <div className="grid-responsive">
                         {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
-                            <ContentItem content={tv} contentType="TV Show" key={tv.contentId} />
+                            <ContentItem content={tv} contentType="TV Show" key={tv.contentId} globalRating={globalRatings[tv.contentId]?.average || 0} setGlobalRatings={setGlobalRatings}/>
                         )) : <div></div>}
                     </div>
                 )}
