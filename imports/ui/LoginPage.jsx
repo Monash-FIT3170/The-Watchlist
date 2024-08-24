@@ -95,7 +95,7 @@ const LoginPage = () => {
           className="w-full p-2 pl-4 mb-7 bg-dark text-white rounded-full"
           required
         />
-
+        {error && <p className="text-red-600 p-2 ">{error}</p>}
         <button type="submit" className="w-2/3 p-1.5 mb-3 bg-magenta font-bold text-white rounded-full hover:bg-pink-700">
           {isRegistering ? 'Sign Up' : 'Log In'}
         </button>
@@ -125,7 +125,7 @@ const LoginPage = () => {
         </div>
 
       </form>
-      {error && <p className="mt-4 text-red-500">{error}</p>}
+      
     </div>
   );
 };
