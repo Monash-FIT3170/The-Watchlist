@@ -4,10 +4,11 @@ import { useTracker } from 'meteor/react-meteor-data';
 import { Rating as RatingDB } from '../db/Rating';
 import Modal from './Modal';
 import Scrollbar from './ScrollBar';
+import { RatingCollection } from '../db/Rating';
 
 const popcornUrl = "./ExampleResources/popcorn-banner.png"; // Default image URL
 
-const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref) => {
+const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRatingUpdate }, ref) => {
 
   const contentId = content.contentId || content.id;
   const [showModal, setShowModal] = useState(false);
@@ -18,6 +19,9 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
   const [showEpisodes, setShowEpisodes] = useState(false);
   const [selectedSeasonEpisodes, setSelectedSeasonEpisodes] = useState([]);
   const [showFullCast, setShowFullCast] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [userRating, setUserRating] = useState(null);
+  const [totalRatings, setTotalRatings] = useState(0);
 
   const loadEpisodes = (seasonNumber) => {
     const selectedSeason = content.seasons.find(season => season.season_number === seasonNumber);
@@ -37,10 +41,6 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
     }
   }, [content]);
 
-  useEffect(() => {
-    updateScrollButtons();
-  }, [content.seasons]);
-
   const handleRating = (newValue) => {
     content.rating = newValue;
   };
@@ -57,6 +57,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
   const handleModalClick = (event) => {
     event.stopPropagation();
   }
+
 
   const handleToggleCast = () => {
     setShowFullCast(!showFullCast);
@@ -84,25 +85,76 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
     );
   };
 
-  const { rating, userRating, totalRatings } = useTracker(() => {
-    const ratings = RatingDB.find({ contentId: contentId }).fetch();
-    const total = ratings.reduce((acc, cur) => acc + cur.rating, 0);
-    const averageRating = ratings.length > 0 ? (total / ratings.length).toFixed(2) : 0;
-    const userRating = ratings.find(r => r.userId === Meteor.userId())?.rating;
-    return {
-      rating: averageRating,
-      userRating,
-      totalRatings: ratings.length
-    };
-  });
+  useEffect(() => {
+    console.log("Fetching data for contentId:", contentId);
+
+    Meteor.call('ratings.getAverage', { contentId, contentType: content.contentType }, (error, result) => {
+      if (error) {
+        console.error('Failed to get global average rating:', error);
+      } else {
+        console.log("Global average rating fetched for contentId:", contentId, "Result:", result);
+        setRating(result);
+      }
+    });
+
+    Meteor.call('ratings.getUserRating', { userId: Meteor.userId(), contentId, contentType: content.contentType }, (error, result) => {
+      if (error) {
+        console.error('Failed to get user rating:', error);
+      } else {
+        console.log("User rating fetched for contentId:", contentId, "Result:", result);
+        setUserRating(result);
+      }
+    });
+
+    Meteor.call('ratings.getGlobalAverages', (error, result) => {
+      if (error) {
+        console.error('Failed to get total ratings count:', error);
+      } else if (result[contentId]) {
+        console.log("Total ratings count fetched for contentId:", contentId, "Count:", result[contentId].count);
+        setTotalRatings(result[contentId].count);
+      } else {
+        console.log("No ratings found for contentId:", contentId);
+      }
+    });
+  }, [contentId, content.contentType]);
+
+  console.log("Rendered ContentInfoModal with rating:", rating, "userRating:", userRating, "totalRatings:", totalRatings);
+
 
   const addRating = (userId, contentId, contentType, rating) => {
     Meteor.call('ratings.addOrUpdate', { userId, contentId, contentType, rating }, (error) => {
-      if (error) {
-        console.error('Failed to update/add rating:', error);
-      }
+        if (error) {
+            console.error('Failed to update/add rating:', error);
+        } else {
+            // Fetch the updated average rating
+            Meteor.call('ratings.getAverage', { contentId, contentType }, (error, result) => {
+                if (error) {
+                    console.error('Failed to get updated global average rating:', error);
+                } else {
+                    console.log("Updated global average rating for contentId:", contentId, "Result:", result);
+                    setRating(result);
+                    if (typeof onRatingUpdate === 'function') {
+                        onRatingUpdate(); // Trigger the callback to update ratings in SearchBar
+                    }
+                }
+            });
+
+            // Fetch the updated total ratings count
+            Meteor.call('ratings.getGlobalAverages', (error, result) => {
+                if (error) {
+                    console.error('Failed to get updated total ratings count:', error);
+                } else if (result[contentId]) {
+                    console.log("Updated total ratings count for contentId:", contentId, "Count:", result[contentId].count);
+                    setTotalRatings(result[contentId].count);
+                } else {
+                    console.log("No ratings found for contentId after update:", contentId);
+                }
+            });
+        }
     });
-  };
+};
+
+
 
   const handleScroll = (direction) => {
     if (scrollContainerRef.current) {
@@ -233,14 +285,19 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef }, ref
             <div className="flex flex-col items-start mt-2">
               <ClickableRatingStar
                 totalStars={5}
-                rating={userRating || 0}
+                rating={userRating || 0} // This will show 0 if userRating is null
                 onChange={(newValue) => {
+                  console.log("New rating value:", newValue);
                   addRating(Meteor.userId(), contentId, content.contentType, newValue);
+                  setUserRating(newValue); // Update the user rating immediately after user interaction
                 }}
               />
+
               <p className="mt-2 mb-2 text-sm">
-                <span className="text-gray-400">Average Rating:</span>
-                <span className="text-white"> {rating ? `${rating}/5 (${totalRatings} reviews)` : "Not Yet Rated"}</span>
+                <span className="text-gray-400">Average Rating: </span>
+                <span className="text-white">
+                  {rating ? `${parseFloat(rating) % 1 === 0 ? parseInt(rating) : parseFloat(rating).toFixed(1)}/5 (${totalRatings} ${totalRatings === 1 ? 'review' : 'reviews'})` : "Not Yet Rated"}
+                </span>
               </p>
 
               {/* Directors */}
