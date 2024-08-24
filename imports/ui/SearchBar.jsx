@@ -54,7 +54,7 @@ const SearchBar = ({ currentUser }) => {
         const [dropdownOpen, setDropdownOpen] = useState(false);
         
         return (
-            (selectedTab === 'Movies' || selectedTab === 'TV Shows' || selectedTab === 'All') && (
+            (selectedTab === 'Movies' || selectedTab === 'TV Shows') && (
                 <div className="relative bg-dark text-white text-xs rounded-lg">
                     <button
                         type="button"
@@ -296,7 +296,7 @@ const SearchBar = ({ currentUser }) => {
                             {tab}
                         </div>
                     ))}
-                    {(selectedTab === 'Movies' || selectedTab === 'TV Shows' || selectedTab === 'All') && (
+                    {(selectedTab === 'Movies' || selectedTab === 'TV Shows') && (
                         <button
                             type="button"
                             className={`ml-4 transition-all duration-300 ease-in-out ${showFilters ? 'underline text-[#7B1450]' : 'text-[#989595]'} ${!showFilters && 'hover:text-[#fbc0e2] hover:underline'}`}
