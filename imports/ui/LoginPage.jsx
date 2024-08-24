@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import LoginWithGithub from './LoginWithGithub.jsx';
 import LoginWithGoogle from './LoginWithGoogle.jsx';
 
-
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -37,7 +36,7 @@ const LoginPage = () => {
           setError(err.reason);
         } else {
           createDefaultLists(Meteor.userId());
-          navigate('/home');
+          navigate('/search'); // Redirect to /search upon successful sign-up
         }
       });
     } else {
@@ -45,7 +44,7 @@ const LoginPage = () => {
         if (err) {
           setError("Username or Password Incorrect");
         } else {
-          navigate('/home');
+          navigate('/search'); // Redirect to /search upon successful login
         }
       });
     }
