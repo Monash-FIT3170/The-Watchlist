@@ -17,6 +17,13 @@ const AllRatedContentPage = ({ currentUser }) => {
   const searchParams = new URLSearchParams(window.location.search);
   const userSpecific = searchParams.get('userSpecific') === 'true';
 
+  // Mapping tab labels to contentType values
+  const tabMapping = {
+    All: 'All',
+    Movies: 'Movie',
+    'TV Shows': 'TV Show',
+  };
+
   const { ratedContent, isLoading } = useTracker(() => {
     const ratingsHandle = Meteor.subscribe('userRatings', userId);
     const ratings = userSpecific
@@ -51,7 +58,7 @@ const AllRatedContentPage = ({ currentUser }) => {
     // Filter content based on the search term and selected tab
     const filtered = ratedContent.filter(content => {
       const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTab = selectedTab === 'All' || content.contentType === selectedTab;
+      const matchesTab = selectedTab === 'All' || content.contentType === tabMapping[selectedTab];
       return matchesSearch && matchesTab;
     });
 
@@ -81,7 +88,7 @@ const AllRatedContentPage = ({ currentUser }) => {
             <input
               type="text"
               className="rounded-full bg-dark border border-gray-300 pl-10 pr-3 py-3 w-full focus:border-custom-border"
-              placeholder="Search for content, lists, or users"
+              placeholder="Search for rated content..."
               value={searchTerm}
               onChange={handleSearchChange}
             />
@@ -93,7 +100,7 @@ const AllRatedContentPage = ({ currentUser }) => {
 
         {/* Tabs for filtering */}
         <div className="bubbles-container flex justify-end mt-2">
-          {['All', 'Movies', 'TV Shows'].map((tab) => (
+          {Object.keys(tabMapping).map((tab) => (
             <div
               key={tab.toLowerCase()}
               className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
@@ -107,14 +114,16 @@ const AllRatedContentPage = ({ currentUser }) => {
       </form>
 
       <Scrollbar className="search-results-container flex-grow overflow-auto">
-        {filteredContent.length > 0 ? filteredContent.map((content, index) => (
-          <ContentItem
-            key={index}
-            content={content}
-            isUserSpecificRating={userSpecific}
-            contentType={content.contentType}
-          />
-        )) : <p>No rated content available.</p>}
+        <div className="grid-responsive">
+          {filteredContent.length > 0 ? filteredContent.map((content, index) => (
+            <ContentItem
+              key={index}
+              content={content}
+              isUserSpecificRating={userSpecific}
+              contentType={content.contentType}
+            />
+          )) : <p>No rated content available.</p>}
+        </div>
       </Scrollbar>
     </div>
   );
