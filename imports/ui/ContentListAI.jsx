@@ -10,6 +10,7 @@ const ContentListAI = ({ list, isUserOwned }) => {
   const containerRef = useRef(null);
   const [visibleContentCount, setVisibleContentCount] = useState(0);
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
+  const [globalRatings, setGlobalRatings] = useState({});
 
   // Calculate the number of content panels that fit in the container
   const updateVisibleContent = () => {
@@ -21,6 +22,17 @@ const ContentListAI = ({ list, isUserOwned }) => {
       setVisibleContentCount(visibleContent);
     }
   };
+
+  useEffect(() => {
+    // Fetch global ratings using the Meteor method
+    Meteor.call('ratings.getGlobalAverages', (error, result) => {
+        if (!error) {
+            setGlobalRatings(result);
+        } else {
+            console.error("Error fetching global ratings:", error);
+        }
+    });
+}, []);
 
   // Update visible content on resize
   useEffect(() => {
@@ -57,6 +69,8 @@ const ContentListAI = ({ list, isUserOwned }) => {
             content={item}
             isUserSpecificRating={item.isUserSpecificRating}
             contentType={item.contentType}
+            globalRating={globalRatings[item.contentId]?.average || 0} 
+            setGlobalRatings={setGlobalRatings}
           />
         ))).slice(0, visibleContentCount)}
       </div>
