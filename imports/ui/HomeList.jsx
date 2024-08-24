@@ -3,6 +3,7 @@ import RatingStar from './RatingStar';
 import { FaUser } from 'react-icons/fa';
 import ContentInfoModal from './ContentInfoModal';
 import Scrollbar from './ScrollBar';  // Import your Scrollbar component
+import { useNavigate } from 'react-router-dom';
 
 const List = ({ list, onContentClick }) => {
 
@@ -38,6 +39,7 @@ const List = ({ list, onContentClick }) => {
 const HomeList = ({ title, lists }) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState(null);
+  const navigate = useNavigate();
 
   const handleContentClick = (content) => {
     setSelectedContent(content);
