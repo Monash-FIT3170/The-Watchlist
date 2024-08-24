@@ -1,11 +1,21 @@
 import React from 'react';
 import { Meteor } from 'meteor/meteor';
+import { useNavigate } from 'react-router-dom';
 
 export const LoginWithGithub = () => {
+  const navigate = useNavigate(); 
+
   const handleGithubLogin = () => {
     Meteor.loginWithGithub({
       requestPermissions: ['user'],
       loginStyle: 'popup',
+    }, (error) => {
+      if (error) {
+        console.error('Login failed:', error);
+      } else {
+        // Redirect to /search upon successful login
+        navigate('/search');
+      }
     });
   };
 
