@@ -419,8 +419,6 @@ Meteor.methods({
       throw new Meteor.Error('not-found', 'List not found.');
     }
 
-    console.log(`List found: ${JSON.stringify(list)}`); // Log the found list
-
     return list;
   },
 });

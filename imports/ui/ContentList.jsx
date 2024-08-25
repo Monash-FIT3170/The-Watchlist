@@ -4,13 +4,12 @@ import ContentItem from './ContentItem';
 import usePopup from './usePopup';
 import ListPopup from './ListPopup';
 
-const ContentList = ({ list, isUserOwned }) => {
+const ContentList = ({ list, isUserOwned, globalRatings = {} }) => {
   const navigate = useNavigate();
   const containerRef = useRef(null);
   const [visibleContentCount, setVisibleContentCount] = useState(0);
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
 
-  // Calculate the number of content panels that fit in the container
   const updateVisibleContent = () => {
     const container = containerRef.current;
     if (container) {
@@ -21,7 +20,6 @@ const ContentList = ({ list, isUserOwned }) => {
     }
   };
 
-  // Update visible content on resize
   useEffect(() => {
     window.addEventListener('resize', updateVisibleContent);
     updateVisibleContent(); // Initial update
@@ -57,6 +55,7 @@ const ContentList = ({ list, isUserOwned }) => {
             content={item}
             isUserSpecificRating={item.isUserSpecificRating}
             contentType={item.contentType}
+            globalRating={globalRatings[item.contentId]?.average || 0} // Pass global ratings
           />
         ))).slice(0, visibleContentCount)}
       </div>

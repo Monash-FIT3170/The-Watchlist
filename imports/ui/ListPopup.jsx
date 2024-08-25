@@ -14,6 +14,7 @@ import { RatingCollection } from "../db/Rating";
 import ContentItem from "./ContentItem";
 import ContentInfoModal from "./ContentInfoModal";  // Import the modal component
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify';
 
 const SimpleListPopup = ({ listId, onClose, onRenameList }) => {
     const [list, setList] = useState(null);
@@ -40,7 +41,6 @@ const SimpleListPopup = ({ listId, onClose, onRenameList }) => {
 
     useEffect(() => {
         if (listId) {
-            console.log('Fetching list with listId:', listId);
             Meteor.call('list.getById', listId, (err, result) => {
                 setLoading(false);
                 if (err) {
@@ -152,7 +152,7 @@ const SimpleListPopup = ({ listId, onClose, onRenameList }) => {
 
     const handleRenameListClick = () => {
         if (list.title === 'Favourite' || list.title === 'To Watch') {
-            alert('Cannot rename Favourite or To Watch lists');
+            toast.error('Cannot rename Favourite or To Watch lists');
             return;
         }
         setIsRenameModalOpen(true);
@@ -193,28 +193,35 @@ const SimpleListPopup = ({ listId, onClose, onRenameList }) => {
         setShowConfirmDialog(true);
     };
 
-    const confirmDeleteList = (listId) => {
-        if (list.title === 'Favourite' || list.title === 'To Watch') {
-            alert('This list cannot be deleted.');
-            return;
-        }
-        setListToDelete(listId);
-        setShowConfirmDialog(true);
-    };
-
     const handleRemoveContentClick = (contentId) => {
         if (contentId !== null) {
             Meteor.call('list.removeContent', { listId: list._id, contentId }, (error) => {
                 if (error) {
                     console.error("Error removing content:", error);
+                    toast.error("You cannot remove content from another user's list!");
                 } else {
                     console.log("Content removed successfully");
-                    // Filter out the removed content and update the list state
+                    toast.success("Content removed successfully!");
                     const updatedContent = list.content.filter(item => item.contentId !== contentId);
                     setList({...list, content: updatedContent});
                 }
             });
         }
+    };    
+
+    const confirmDeleteList = (listId) => {
+        if (list.userId !== Meteor.userId()) {
+            toast.error("You cannot delete another user's list!");
+            return;
+        }
+
+        if (list.title === 'Favourite' || list.title === 'To Watch') {
+            toast.error('This list cannot be deleted.');
+            return;
+        }
+
+        setListToDelete(listId);
+        setShowConfirmDialog(true);
     };
     
 
@@ -453,6 +460,7 @@ const SimpleListPopup = ({ listId, onClose, onRenameList }) => {
                     </div>
                 </div>
             )}
+            <ToastContainer />
         </div>
     );
 };
