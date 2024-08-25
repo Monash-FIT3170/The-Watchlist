@@ -314,3 +314,26 @@ Meteor.methods({
     return ratingMap;
   }
 });
+Meteor.methods({
+  'list.getById': function (listId) {
+    console.log(`list.getById method called with listId: ${listId}`); // Log method call
+
+    check(listId, String);
+
+    if (!this.userId) {
+      console.log('User not authorized to view lists'); // Log unauthorized access
+      throw new Meteor.Error('not-authorized', 'You must be logged in to view lists.');
+    }
+
+    const list = ListCollection.findOne({ _id: listId });
+
+    if (!list) {
+      console.log(`List not found for listId: ${listId}`); // Log if list is not found
+      throw new Meteor.Error('not-found', 'List not found.');
+    }
+
+    console.log(`List found: ${JSON.stringify(list)}`); // Log the found list
+
+    return list;
+  },
+});
