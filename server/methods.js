@@ -334,18 +334,15 @@ Meteor.methods({
       listType: 'Favourite'
     });
 
-    if (!currentUserFavourites || !currentUserFavourites.content) {
+    if (!currentUserFavourites || currentUserFavourites.content.length === 0) {
       throw new Meteor.Error('no-favourites', 'You do not have any favourites.');
     }
 
     const currentUserFavouritesSet = new Set(currentUserFavourites.content);
 
-    // Get 100 random users using rawCollection and aggregate
     const randomUsers = Meteor.users.rawCollection().aggregate([
       { $sample: { size: 100 } }
-    ]).toArray(); // Use toArray to return a promise
-
-    console.log("Finding random users...");
+    ]).toArray();
 
     const randomUsersPromise = Meteor.wrapAsync((cb) => randomUsers.then((res) => cb(null, res)).catch(cb));
 
@@ -366,12 +363,25 @@ Meteor.methods({
       }
 
       const userFavouritesSet = new Set(userFavourites.content);
-      const commonFavourites = [...currentUserFavouritesSet].filter(item => 
-        [...userFavouritesSet].some(userItem => userItem.contentId === item.contentId)
+      
+      const userFavouritesArray = Array.from(userFavouritesSet);
+      const currentUserFavouritesArray = Array.from(currentUserFavouritesSet);
+
+      const commonFavourites = userFavouritesArray.filter(favourite =>
+        currentUserFavouritesArray.some(currentFavourite => currentFavourite.contentId === favourite.contentId)
       );
 
-      // Match score based on the number of matching entries
-      const matchScore = commonFavourites.length;
+      if (commonFavourites.size === 0) {
+        return null;
+      } 
+
+      const avgListLength = (userFavouritesArray.length + currentUserFavouritesArray.length) / 2;
+
+      matchScore = commonFavourites.length/avgListLength * 100 * 1.5;
+
+      if (matchScore > 100) {
+        matchScore = 100;
+      }
 
       return {
         user: user,
@@ -384,10 +394,8 @@ Meteor.methods({
 
     // set top user as 100 match, etc
     sortedUserScores.forEach((user, index) => {
-      user.matchScore = 100 - index/sortedUserScores.length*50;
+      user.matchScore = Math.floor(user.matchScore);
     });
-
-    console.log("Sorted user scores:", sortedUserScores.slice(0, 10));
 
     // Return the top 10 users with the highest match score
     return sortedUserScores.slice(0, 10);
