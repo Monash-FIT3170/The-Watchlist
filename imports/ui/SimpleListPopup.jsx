@@ -209,10 +209,14 @@ const SimpleListPopup = ({ listId, onClose, onRenameList }) => {
                     console.error("Error removing content:", error);
                 } else {
                     console.log("Content removed successfully");
+                    // Filter out the removed content and update the list state
+                    const updatedContent = list.content.filter(item => item.contentId !== contentId);
+                    setList({...list, content: updatedContent});
                 }
             });
         }
     };
+    
 
     const resetConfirmationState = () => {
         setShowConfirmDialog(false);
