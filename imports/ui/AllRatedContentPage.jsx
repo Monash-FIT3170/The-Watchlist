@@ -8,16 +8,17 @@ import ContentItem from './ContentItem';
 import { RatingCollection } from '../db/Rating';
 import { MovieCollection, TVCollection } from '../db/Content';
 import { AiOutlineSearch } from 'react-icons/ai';
+import { FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
 
 const AllRatedContentPage = ({ currentUser }) => {
   const { userId } = useParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('All');
   const [filteredContent, setFilteredContent] = useState([]);
+  const [sortOrder, setSortOrder] = useState('descending'); // Default to descending
   const searchParams = new URLSearchParams(window.location.search);
   const userSpecific = searchParams.get('userSpecific') === 'true';
 
-  // Mapping tab labels to contentType values
   const tabMapping = {
     All: 'All',
     Movies: 'Movie',
@@ -30,7 +31,6 @@ const AllRatedContentPage = ({ currentUser }) => {
       ? RatingCollection.find({ userId: currentUser._id }).fetch()
       : RatingCollection.find({ userId }).fetch();
 
-    // Store all content subscriptions
     const contentSubscriptions = ratings.map(rating =>
       Meteor.subscribe('contentById', rating.contentId, rating.contentType)
     );
@@ -55,18 +55,25 @@ const AllRatedContentPage = ({ currentUser }) => {
   }, [userId, currentUser, userSpecific]);
 
   useEffect(() => {
-    // Filter content based on the search term and selected tab
     const filtered = ratedContent.filter(content => {
       const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesTab = selectedTab === 'All' || content.contentType === tabMapping[selectedTab];
       return matchesSearch && matchesTab;
     });
 
-    setFilteredContent(filtered);
-  }, [searchTerm, selectedTab, ratedContent]);
+    const sorted = filtered.sort((a, b) => {
+      return sortOrder === 'ascending' ? a.rating - b.rating : b.rating - a.rating;
+    });
+
+    setFilteredContent(sorted);
+  }, [searchTerm, selectedTab, ratedContent, sortOrder]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
+  };
+
+  const toggleSortOrder = () => {
+    setSortOrder(prevOrder => prevOrder === 'ascending' ? 'descending' : 'ascending');
   };
 
   if (isLoading) {
@@ -74,7 +81,7 @@ const AllRatedContentPage = ({ currentUser }) => {
   }
 
   const handleFormSubmit = (e) => {
-    e.preventDefault();  // Prevent form submission
+    e.preventDefault();
   };
 
   return (
@@ -83,8 +90,8 @@ const AllRatedContentPage = ({ currentUser }) => {
         <ProfileDropdown user={currentUser} />
       </div>
       <form className="flex flex-col items-start w-full pl-1" onSubmit={handleFormSubmit}>
-        <div className="flex justify-between items-center w-full max-w-xl">
-          <div className="relative flex-grow">
+        <div className="flex justify-between items-center w-full">
+        <div className="relative flex-grow max-w-xl">
             <input
               type="text"
               className="rounded-full bg-dark border border-gray-300 pl-10 pr-3 py-3 w-full focus:border-custom-border"
@@ -98,18 +105,30 @@ const AllRatedContentPage = ({ currentUser }) => {
           </div>
         </div>
 
-        {/* Tabs for filtering */}
-        <div className="bubbles-container flex justify-end mt-2">
-          {Object.keys(tabMapping).map((tab) => (
-            <div
-              key={tab.toLowerCase()}
-              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-                } border-transparent border`}
-              onClick={() => setSelectedTab(tab)}
+        <div className="bubbles-container flex justify-between mt-2 w-full">
+          <div>
+            {Object.keys(tabMapping).map((tab) => (
+              <div
+                key={tab.toLowerCase()}
+                className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
+                  } border-transparent border`}
+                onClick={() => setSelectedTab(tab)}
+              >
+                {tab}
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center">
+            <button
+              onClick={toggleSortOrder}
+              className={`flex items-center justify-center px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
+                ${'bg-[#7B1450] text-white'} 
+                border-transparent border`}
             >
-              {tab}
-            </div>
-          ))}
+              {sortOrder === 'ascending' ? <FaSortAmountUp className="mr-1" /> : <FaSortAmountDown className="mr-1" />}
+              Rating Sort Order
+            </button>
+          </div>
         </div>
       </form>
 
