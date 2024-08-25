@@ -144,13 +144,13 @@ const SearchBar = ({ currentUser }) => {
                 let tvShows = result.tv?.map(tv => ({ ...tv, contentType: 'TV Show' })) || [];
     
                 // Apply sorting here if a sort option is selected
-                if (filters["sort by"].selected === "title") {
+                if (filters["sort by"].selected === "Title") {
                     movies = movies.sort((a, b) => a.title.localeCompare(b.title));
                     tvShows = tvShows.sort((a, b) => a.title.localeCompare(b.title));
-                } else if (filters["sort by"].selected === "year") {
+                } else if (filters["sort by"].selected === "Year") {
                     movies = movies.sort((a, b) => b.release_year - a.release_year); 
                     tvShows = tvShows.sort((a, b) => b.first_aired - a.first_aired);
-                } else if (filters["sort by"].selected === "popularity") {
+                } else if (filters["sort by"].selected === "Popularity") {
                     movies = movies.sort((a, b) => b.popularity - a.popularity); 
                     tvShows = tvShows.sort((a, b) => b.popularity - a.popularity); 
                 } 
