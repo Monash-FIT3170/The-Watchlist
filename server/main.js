@@ -14,11 +14,11 @@ import { ServiceConfiguration } from 'meteor/service-configuration';
 
 dotenv.config();
 
-const githubClientId = Meteor.settings.private.github.clientId;
-const githubClientSecret = Meteor.settings.private.github.clientSecret;
+const githubClientId = Meteor.settings.private?.github?.clientId || process.env.GITHUB_CLIENT_ID;
+const githubClientSecret = Meteor.settings.private?.github?.clientSecret || process.env.GITHUB_CLIENT_SECRET;
 
-const googleClientId = Meteor.settings.private.google.clientId;
-const googleClientSecret = Meteor.settings.private.google.clientSecret;
+const googleClientId = Meteor.settings.private?.google?.clientId || process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = Meteor.settings.private?.google?.clientSecret || process.env.GOOGLE_CLIENT_SECRET;
 
 Meteor.startup(() => {
     if (Meteor.isProduction){
@@ -28,10 +28,8 @@ Meteor.startup(() => {
         Meteor.absoluteUrl.defaultOptions.rootUrl = "http://localhost:3000/";
         console.log("Dev");
     }
-    // Define or use an existing collection
-    const testCollection = new Mongo.Collection('test');
 
-    // Insert a test document (optional)
+    const testCollection = new Mongo.Collection('test');
     testCollection.insert({ test: 'Connection check' }, (error, result) => {
         if (error) {
             console.error('Database connection failed:', error);
@@ -39,29 +37,26 @@ Meteor.startup(() => {
             console.log('Successfully inserted document:', result);
         }
     });
+
     ServiceConfiguration.configurations.upsert(
         { service: 'github' },
         {
             $set: {
                 loginStyle: 'popup',
-                clientId: githubClientId, // Replace with your GitHub Client ID
-                secret: githubClientSecret // Replace with your GitHub Client Secret
+                clientId: githubClientId,
+                secret: githubClientSecret
             }
         }
     );
-    // Configuration for Google
+
     ServiceConfiguration.configurations.upsert(
         { service: 'google' },
         {
             $set: {
                 loginStyle: 'popup',
-                clientId: googleClientId, // Replace with your Google Client ID
-                secret: googleClientSecret // Replace with your Google Client Secret
+                clientId: googleClientId,
+                secret: googleClientSecret
             }
         }
     );
-
-
-
 });
-
