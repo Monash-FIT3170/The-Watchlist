@@ -12,10 +12,6 @@ const UserProfilePage = () => {
   const [userLists, setUserLists] = useState([]);
   const [globalRatings, setGlobalRatings] = useState({});
 
-  const { userId } = useParams();
-  const [userLists, setUserLists] = useState([]);
-  const [globalRatings, setGlobalRatings] = useState({});
-
   const currentUser = useTracker(() => {
     const handler = Meteor.subscribe('userData', Meteor.userId());
     if (handler.ready()) {
@@ -59,20 +55,6 @@ const UserProfilePage = () => {
       }
     });
   }, []);
-
-  const { lists, subscribedLists, loading } = useTracker(() => {
-    const listsHandler = Meteor.subscribe('userLists', userId); // Subscribe to the lists of the viewed user
-    const subscribedHandler = Meteor.subscribe('subscribedLists', userId); // Subscribe to the lists subscribed by the viewed user
-    const lists = ListCollection.find({ userId: userId }).fetch(); // Fetch lists of the viewed user
-    const subscribedLists = ListCollection.find({
-      subscribers: { $in: [userId] } // Fetch lists where the viewed user is a subscriber
-    }).fetch();
-    return {
-      lists,
-      subscribedLists,
-      loading: !listsHandler.ready() && !subscribedHandler.ready(),
-    };
-  }, [userId]);
 
   const isFollowing = (userId) => {
     const currentUser = Meteor.user();
