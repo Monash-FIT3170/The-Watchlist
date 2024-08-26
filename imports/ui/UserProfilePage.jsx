@@ -92,33 +92,29 @@ const UserProfilePage = () => {
   }, [userId]);
 
   useEffect(() => {
-    if (userProfile) {
-      console.log('Fetching user lists for userId:', userId);
+    if (userId) {
       Meteor.call('list.read', { userId }, (error, result) => {
         if (error) {
           console.error('Error fetching user lists:', error);
         } else {
-          console.log('User lists fetched:', result);
           setUserLists(result);
         }
       });
     }
-  }, [userId, userProfile]);
+  }, [userId]);
 
   const favouritesList = userLists.find((list) => list.listType === 'Favourite');
   const toWatchList = userLists.find((list) => list.listType === 'To Watch');
   const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
 
-  console.log(userProfile)
-
   return (
     <Fragment>
-      {userProfile ? (
+      {currentUser ? (
         <div className="flex flex-col min-h-screen bg-darker">
           <div className="flex flex-col gap-0 flex-grow">
             <ProfileCard
               currentUser={currentUser}
-              user={userProfile}
+              user={userId}
               showFollowButton={Meteor.userId() !== userId}
             />
             <div className="p-6">
