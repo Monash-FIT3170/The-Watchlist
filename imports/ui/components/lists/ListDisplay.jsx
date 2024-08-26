@@ -1,6 +1,6 @@
 import React from 'react';
 import ListPopup from './ListPopup';
-import usePopup from './usePopup';
+import usePopup from '../../modals/usePopup';
 
 export default function ListDisplay({ listData, heading }) { // Added heading as a prop
     const { 

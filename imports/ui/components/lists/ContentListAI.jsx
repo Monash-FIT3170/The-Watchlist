@@ -1,9 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ContentItem from './ContentItem';
-import usePopup from './usePopup';
+import ContentItem from '../contentItems/ContentItem';
+import usePopup from '../../modals/usePopup';
 import ListPopup from './ListPopup';
-import { Divider } from '@mui/material';
 
 const ContentListAI = ({ list, isUserOwned }) => {
   const navigate = useNavigate();

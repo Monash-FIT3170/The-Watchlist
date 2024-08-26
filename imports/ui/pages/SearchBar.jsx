@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
-import ContentItem from './ContentItem';
-import ListDisplay from './ListDisplay';
+import ContentItem from '../components/contentItems/ContentItem';
+import ListDisplay from '../components/lists/ListDisplay';
 import { useTracker } from 'meteor/react-meteor-data';
-import { ListCollection } from '../db/List';
-import Scrollbar from './ScrollBar';  // Import the Scrollbar component
-import UserList from './UserList';
-import ProfileDropdown from './ProfileDropdown';
+import { ListCollection } from '../../db/List';
+import Scrollbar from '../components/scrollbar/ScrollBar';  // Import the Scrollbar component
+import UserList from '../components/lists/UserList';
+import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 import debounce from 'lodash.debounce';
 
 const SearchBar = ({ currentUser }) => {

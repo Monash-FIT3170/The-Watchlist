@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import RatingStar from './RatingStar';
+import RatingStar from '../ratings/RatingStar';
 import { FaUser } from 'react-icons/fa';
-import ContentInfoModal from './ContentInfoModal';
-import Scrollbar from './ScrollBar';  // Import your Scrollbar component
+import ContentInfoModal from '../../modals/ContentInfoModal';
+import Scrollbar from '../scrollbar/ScrollBar';  // Import your Scrollbar component
 import { useNavigate } from 'react-router-dom';
 
 const List = ({ list, onContentClick }) => {

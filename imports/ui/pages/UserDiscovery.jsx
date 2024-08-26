@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import UserList from './UserList';
+import UserList from '../components/lists/UserList';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { useTracker } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
-import ProfileDropdown from './ProfileDropdown';
-import SimilarUserList from './SimilarUserList';
+import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
+import SimilarUserList from '../components/lists/SimilarUserList';
 
 const UserDiscovery = ({ currentUser }) => {
   const [searchTerm, setSearchTerm] = useState('');

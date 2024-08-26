@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
 import { useTracker } from 'meteor/react-meteor-data';
-import Scrollbar from './ScrollBar';
-import ProfileDropdown from './ProfileDropdown';
-import ContentItem from './ContentItem';
-import { RatingCollection } from '../db/Rating';
-import { MovieCollection, TVCollection } from '../db/Content';
+import Scrollbar from '../components/scrollbar/ScrollBar';
+import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
+import ContentItem from '../components/contentItems/ContentItem';
+import { RatingCollection } from '../../db/Rating';
+import { MovieCollection, TVCollection } from '../../db/Content';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
 

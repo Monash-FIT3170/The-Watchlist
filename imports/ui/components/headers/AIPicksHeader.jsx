@@ -1,5 +1,5 @@
 import React from 'react';
-import ProfileDropdown from './ProfileDropdown';
+import ProfileDropdown from '../profileDropdown/ProfileDropdown';
 
 const AIPicksHeader = ({ setDisplay, currentDisplay, currentUser }) => {
   const DISPLAY_MOVIES = "Display Movie";

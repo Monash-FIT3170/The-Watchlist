@@ -2,10 +2,10 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTracker } from 'meteor/react-meteor-data';
-import ProfileCard from './ProfileCard';
-import ContentList from './ContentList';
-import { ListCollection } from '../db/List';
-import ListDisplay from './ListDisplay';
+import ProfileCard from '../components/headers/ProfileCard';
+import ContentList from '../components/lists/ContentList';
+import { ListCollection } from '../../db/List';
+import ListDisplay from '../components/lists/ListDisplay';
 
 const UserProfilePage = () => {
   const { userId } = useParams();

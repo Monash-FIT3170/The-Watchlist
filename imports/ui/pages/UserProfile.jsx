@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Meteor } from 'meteor/meteor';
-import ContentList from './ContentList';
-import ProfileCard from './ProfileCard';
+import ContentList from '../components/lists/ContentList';
+import ProfileCard from '../components/headers/ProfileCard';
 import { useTracker } from 'meteor/react-meteor-data';
-import { ListCollection } from '../db/List';
-import { RatingCollection } from '../db/Rating';
-import ListDisplay from './ListDisplay';
+import { ListCollection } from '../../db/List';
+import { RatingCollection } from '../../db/Rating';
+import ListDisplay from '../components/lists/ListDisplay';
 
 export default function UserProfile() {
   const currentUser = useTracker(() => {

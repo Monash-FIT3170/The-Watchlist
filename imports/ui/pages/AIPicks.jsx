@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ContentListAI from './ContentListAI.jsx';
-import Scrollbar from './ScrollBar';
+import ContentListAI from '../components/lists/ContentListAI.jsx';
+import Scrollbar from '../components/scrollbar/ScrollBar.jsx';
 import { Meteor } from 'meteor/meteor';
-import AIPicksHeader from './AIPicksHeader.jsx';
+import AIPicksHeader from '../components/headers/AIPicksHeader.jsx';
 import { useTracker } from 'meteor/react-meteor-data';
-import { ListCollection } from '../db/List';
-import { RatingCollection } from '../db/Rating'; 
+import { ListCollection } from '../../db/List.tsx';
+import { RatingCollection } from '../../db/Rating.tsx'; 
 
 
 

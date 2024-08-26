@@ -1,10 +1,10 @@
 import React from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
-import ProfileDropdown from './ProfileDropdown';
-import HomeList from './HomeList';
-import { RatingCollection } from '../db/Rating';
+import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
+import HomeList from '../components/lists/HomeList';
+import { RatingCollection } from '../../db/Rating';
 import { FaUser } from "react-icons/fa";
-import { ListCollection } from '../db/List';
+import { ListCollection } from '../../db/List';
 
 const Home = ({ currentUser }) => {
   const { lists, ratings, loading } = useTracker(() => {

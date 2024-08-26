@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, forwardRef } from 'react';
 import { MdMovieFilter, MdAdd } from 'react-icons/md';
 import { useTracker } from 'meteor/react-meteor-data';
-import { ListCollection } from '../db/List';
+import { ListCollection } from '../../db/List';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Scrollbar from './ScrollBar';
+import Scrollbar from '../components/scrollbar/ScrollBar';
 
 const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
   const modalRef = ref || useRef();

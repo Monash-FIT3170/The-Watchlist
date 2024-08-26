@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Scrollbar from './ScrollBar';
-import ProfileDropdown from './ProfileDropdown';
+import Scrollbar from '../components/scrollbar/ScrollBar';
+import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
 

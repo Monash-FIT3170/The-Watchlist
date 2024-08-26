@@ -1,4 +1,4 @@
-import {SetStateAction, useState} from 'react';
+import {useState} from 'react';
 
 const usePopup = () => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);

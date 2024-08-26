@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { useNavigate } from 'react-router-dom';
-import LoginWithGithub from './LoginWithGithub.jsx';
-import LoginWithGoogle from './LoginWithGoogle.jsx';
+import LoginWithGithub from '../components/login/LoginWithGithub'
+import LoginWithGoogle from '../components/login/LoginWithGoogle';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -54,7 +54,7 @@ const LoginPage = () => {
     <div
       className="flex flex-col items-center justify-center min-h-screen w-full"
       style={{
-        backgroundImage: `url(/test.jpg)`,
+        backgroundImage: `url(images/login-background.jpg)`,
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: 'center',

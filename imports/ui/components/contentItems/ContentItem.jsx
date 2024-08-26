@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
-import ContentInfoModal from './ContentInfoModal';
-import RatingStar from "./RatingStar";
+import ContentInfoModal from '../../modals/ContentInfoModal';
+import RatingStar from "../ratings/RatingStar";
 import { FaGlobe, FaUser } from "react-icons/fa";
-import { RatingCollection } from '../db/Rating';
+import { RatingCollection } from '../../../db/Rating';
 
 const popcornUrl = "./ExampleResources/popcorn.png"; // Default image URL
 

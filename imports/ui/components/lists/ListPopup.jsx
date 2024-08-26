@@ -1,22 +1,19 @@
 // imports/ui/ListPopup.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useTracker } from 'meteor/react-meteor-data';
-import RatingStar from "./RatingStar";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import RatingStar from "../ratings/RatingStar";
 import { FiEdit, FiTrash2, FiGrid, FiList } from "react-icons/fi";
-import RenameListModal from "./RenameListModal";
+import RenameListModal from "../../modals/RenameListModal";
 import { Meteor } from 'meteor/meteor';
-import { useNavigate } from 'react-router-dom';
-import { ListCollection } from "../db/List";
-import Scrollbar from './ScrollBar';
+import Scrollbar from '../scrollbar/ScrollBar';
 import { FaUser, FaGlobe } from "react-icons/fa";
-import { RatingCollection } from "../db/Rating";
-import ContentItem from "./ContentItem";
-import ContentInfoModal from "./ContentInfoModal";  // Import the modal component
+import { RatingCollection } from "../../../db/Rating";
+import ContentItem from "../contentItems/ContentItem";
+import ContentInfoModal from "../../modals/ContentInfoModal";  // Import the modal component
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 
-const SimpleListPopup = ({ listId, onClose, onRenameList }) => {
+const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [list, setList] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isGridView, setIsGridView] = useState(false);
@@ -465,4 +462,4 @@ const SimpleListPopup = ({ listId, onClose, onRenameList }) => {
     );
 };
 
-export default SimpleListPopup;
+export default ListPopup;

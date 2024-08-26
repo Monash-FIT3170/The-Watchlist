@@ -1,10 +1,7 @@
 import React, { useEffect, useState, forwardRef, useRef } from 'react';
-import ClickableRatingStar from './ClickableRatingStar';
-import { useTracker } from 'meteor/react-meteor-data';
-import { Rating as RatingDB } from '../db/Rating';
+import ClickableRatingStar from '../components/ratings/ClickableRatingStar';
 import Modal from './Modal';
-import Scrollbar from './ScrollBar';
-import { RatingCollection } from '../db/Rating';
+import Scrollbar from '../components/scrollbar/ScrollBar';
 
 const popcornUrl = "./ExampleResources/popcorn-banner.png"; // Default image URL
 

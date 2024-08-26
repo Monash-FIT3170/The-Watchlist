@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUserPlus, FaPencilAlt } from 'react-icons/fa';
 import { Meteor } from 'meteor/meteor';
-import ProfileDropdown from './ProfileDropdown';
-import { RatingCollection } from '../db/Rating';
+import ProfileDropdown from '../profileDropdown/ProfileDropdown';
 
 const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   const [isFollowing, setIsFollowing] = useState(false);
