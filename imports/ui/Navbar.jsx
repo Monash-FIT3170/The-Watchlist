@@ -90,7 +90,7 @@ export default function Navbar({ staticNavData, currentUser }) {
                   </button>
                 )}
               </h2>
-              <Scrollbar className="h-[calc(100vh_-_21rem)] overflow-y-hidden">
+              <Scrollbar className="h-[calc(100vh_-_25rem)] overflow-y-hidden">
                 <ul className="h-full">
                   {sortedLists.map((list) => (
                     <li key={list._id} className={`flex items-center text-sm text-white font-semibold ${isCollapsed ? '' : 'p-2'} rounded-lg hover:bg-dark`}>
