@@ -6,21 +6,21 @@ import { BsStars } from "react-icons/bs";
 import { AiOutlineHome, AiOutlineSearch } from "react-icons/ai";
 import { useTracker } from 'meteor/react-meteor-data';
 
-import Navbar from "./Navbar.jsx";
-import SearchBar from "./SearchBar.jsx";
-import Home from "./Home.jsx";
-import UserProfile from "./UserProfile.jsx";
-import NewListModal from "./NewListModal.tsx";
-import UserDiscovery from './UserDiscovery.jsx';
-import AIPicks from './AIPicks.jsx';
-import Scrollbar from './ScrollBar';
-import LoginPage from './LoginPage';
-import UserProfilePage from './UserProfilePage';
-import FollowersFollowingPage from "./FollowersFollowingPage.jsx";
-import AllUsersPage from "./AllUsersPage.jsx";
-import AllRatedContentPage from "./AllRatedContentPage.jsx";
-import Loading from "./Loading.jsx";
-import { ListCollection } from '../db/List';
+import Navbar from "./components/navbar/Navbar.jsx";
+import SearchBar from "./pages/SearchBar.jsx";
+import Home from "./pages/Home.jsx";
+import UserProfile from "./pages/UserProfile.jsx";
+import NewListModal from "./modals/NewListModal.tsx";
+import UserDiscovery from './pages/UserDiscovery.jsx';
+import AIPicks from './pages/AIPicks.jsx';
+import Scrollbar from './components/scrollbar/ScrollBar.jsx';
+import LoginPage from "./pages/LoginPage.jsx";
+import UserProfilePage from './pages/UserProfilePage.jsx';
+import FollowersFollowingPage from "./pages/FollowersFollowingPage.jsx";
+import AllUsersPage from "./pages/AllUsersPage.jsx";
+import AllRatedContentPage from "./pages/AllRatedContentPage.jsx";
+import Loading from "./pages/Loading.jsx";
+import { ListCollection } from '../db/List.tsx';
 
 export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
