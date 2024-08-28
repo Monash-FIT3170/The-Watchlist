@@ -183,7 +183,7 @@ package.json        # Node.js dependencies and project metadata
   - System Architect
 - Selsa Sony (sson0024@student.monash.edu)
   - Product Owner/Manager
-- Maddy
+- Maddy Neaves (mnea0003@student.monash.edu)
   - Product Owner/Manager   
 - Ishita Gupta
   - Release Train Engineer
