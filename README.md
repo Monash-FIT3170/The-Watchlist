@@ -19,6 +19,10 @@ The Watchlist is a web application designed to allow users to create, manage, an
       - [Option 1: Run with the `development_secrets.json` file](#option-1-run-with-the-development_secretsjson-file)
       - [Option 2: Run without the `development_secrets.json` file](#option-2-run-without-the-development_secretsjson-file)
   - [Deployment](#deployment)
+    - [Deploying from Scratch](#deploying-from-scratch)
+      - [1. Setting up MongoDB Atlas](#1-setting-up-mongodb-atlas)
+      - [2. Creating an Application in Heroku](#2-creating-an-application-in-heroku)
+      - [3. Configuring the CI/CD pipeline](#3-configuring-the-cicd-pipeline)
   - [Common Issues and Notes](#common-issues-and-notes)
     - [Node.js Version Compatibility](#nodejs-version-compatibility)
     - [`development_secrets.json`](#development_secretsjson)
@@ -116,17 +120,70 @@ The application will be accessible at [http://localhost:3000](http://localhost:3
 
 ## Deployment
 
-The Watchlist is deployed at [thewatchlist.xyz](https://www.thewatchlist.xyz). During deployment, ensure that the appropriate environment variables are set for production. In the `server/main.js` file, the root URL is set based on the environment:
+The Watchlist is deployed at [thewatchlist.xyz](https://www.thewatchlist.xyz). The application can be deployed on any platform, so long as it can connect to an external database.
+
+Currently, The Watchlist is deployed using the following ecosystem:
+* Meteor application host: Heroku
+* Heroku plan: eco tier
+* MongoDB database host: MongoDB Atlas on shared cluster
+* SSL certificate: Managed via Heroku (internally uses Let's Encrypt)
+* CI/CD: GitHub Actions using the [Deploy to Heroku](https://github.com/marketplace/actions/deploy-to-heroku) action
+* Heroku Deploy: Uses the [meter-buildpack-horse](https://elements.heroku.com/buildpacks/admithub/meteor-buildpack-horse) buildpack
+
+Please note that the entire project can be run with zero cost for ~6 months using an account registered with the GitHub Student Developer Pack. During all the following steps, when registering from an account, connect the account to GitHub if using a SDP account, which will provide free credits to use.
+
+You will also need to obtain a domain name (if you want to deploy to a custom domain). GoDaddy was the domain provider used to deploy [thewatchlist.xyz](https://www.thewatchlist.xyz).
+
+### Deploying from Scratch
+A complete deployment, using the above ecosystem, involves three steps:
+
+1. Setting up MongoDB Atlas
+2. Creating an application in Heroku
+3. Configuring the CI/CD pipeline
+
+
+#### 1. Setting up MongoDB Atlas
+1. Register for an account at https://cloud.mongodb.com/
+2. Create a new Atlas database instance.
+    - Click on the "Create" button.
+    - Click on "Go to Advanced Configuration" at the bottom.
+    - Change the server type to Shared
+    - Set the region to us-east-1 (so that it sits close to the location of the Heroku server)
+    - Set the cluster tier to M2 (2GB - which can hold the entire dataset)
+    - Rename the cluster to your name of choice
+3. When prompted, enter a username and password to connect to the server.
+4. When prompted, allow connections to the database from any IP (note: Heroku does not provide static IPs on their free tier, so we cannot whitelist a particular IP)
+
+#### 2. Creating an Application in Heroku
+1. Register for an account at https://dashboard.heroku.com/
+2. Go to Profile -> Settings -> Billing. Enable "Eco Dynos Plan". Copy the API key in the section below for future reference.
+3. Create a new app. The name should be `watchlist-monash`. The region should be US.
+4. Download the Heroku CLI from https://devcenter.heroku.com/articles/heroku-cli#install-the-heroku-cli
+5. In the cloned repository, run the following command in Terminal: `heroku git:remote watchlist-monash`. This will allow GitHub to deploy to your Heroku app.
+6. Navigate to your app in the Heroku dashboard. Click on "Settings".
+7. In the "Config Vars" section, click on "Reveal Config Vars". Set the following:
+    - `METEOR_SETTINGS`: copy-paste the complete contents of `development_secrets.json` (replacing all the values with production credentials)
+    - `MONGO_URL`: copy-paste the MongoDB connection URL, including username and password
+    - `ROOT_URL`: set to the domain name you purchased (or set to the Heroku URL provided in the app dashboard)
+8. In the "Domains" section, add the custom domain (if relevant).
+9. Activate automatic SSL management.
+
+#### 3. Configuring the CI/CD pipeline
+1. In the GitHub repository, go to Settings -> Secrets and variables -> Actions.
+2. Add a new repository secret called `HEROKU_API_KEY`. Set the value to your Heroku API key obtained earlier.
+3. Edit the file in `.github/workflows/auto-deploy.yml`, changing the `heroku_email` value to the email you registered Heroku using.
+4. Upon saving, the application should auto-deploy to Heroku.
+
+
+Finally, to ensure Google OAuth works correctly, update the URL in `server/main.js`:
 
 ```javascript
 if (Meteor.isProduction){
-    Meteor.absoluteUrl.defaultOptions.rootUrl = "https://www.thewatchlist.xyz/";
-} else if(Meteor.isDevelopment){
+    Meteor.absoluteUrl.defaultOptions.rootUrl = "https://www.thewatchlist.xyz/"; // update this URL
+} else if (Meteor.isDevelopment){
     Meteor.absoluteUrl.defaultOptions.rootUrl = "http://localhost:3000/";
 }
 ```
-
-You can deploy to your preferred hosting service by following the deployment steps for a Meteor application. Ensure that your production environment includes the necessary API keys and secrets.
 
 ## Common Issues and Notes
 
