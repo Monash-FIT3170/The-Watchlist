@@ -17,7 +17,7 @@ const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
     return { lists, loading: !listsHandle.ready() };
   });
 
-  const popcornUrl = "./ExampleResources/popcorn.png";
+  const popcornUrl = "./images/popcorn.png";
 
   useEffect(() => {
     const handleClickOutside = (event) => {

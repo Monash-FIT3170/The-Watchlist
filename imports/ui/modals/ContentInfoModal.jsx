@@ -3,7 +3,7 @@ import ClickableRatingStar from '../components/ratings/ClickableRatingStar';
 import Modal from './Modal';
 import Scrollbar from '../components/scrollbar/ScrollBar';
 
-const popcornUrl = "./ExampleResources/popcorn-banner.png"; // Default image URL
+const popcornUrl = "./images/popcorn-banner.png"; // Default image URL
 
 const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRatingUpdate }, ref) => {
 

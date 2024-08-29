@@ -5,7 +5,7 @@ import RatingStar from "../ratings/RatingStar";
 import { FaGlobe, FaUser } from "react-icons/fa";
 import { RatingCollection } from '../../../db/Rating';
 
-const popcornUrl = "./ExampleResources/popcorn.png"; // Default image URL
+const popcornUrl = "./images/popcorn.png"; // Default image URL
 
 const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating, setGlobalRatings }) => {
     const [isOpen, setOpen] = useState(false);

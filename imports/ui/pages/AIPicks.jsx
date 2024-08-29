@@ -298,7 +298,7 @@ export default function AIPicks() {
 
     //TODO: condense fetchMovies and fetchTvs into one function
     const fetchMovies = async (movieTitles) => {
-        const movieResponse = await fetch('/similar_movies_titles.json');
+        const movieResponse = await fetch('/ml_matrices/similar_movies_titles.json');
         const movieRecommendationsJson = await movieResponse.json();
         
         const recommendedMoviePromises = movieTitles.map(title => {
@@ -322,7 +322,7 @@ export default function AIPicks() {
 
     const fetchTvs = async (tvTitles) => {
         
-        const tvResponse = await fetch('/similar_tvs_title.json');
+        const tvResponse = await fetch('/ml_matrices/similar_tvs_title.json');
         const tvRecommendationsJson = await tvResponse.json();
         
         const recommendedTvPromises = tvTitles.map(title => {
