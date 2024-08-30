@@ -45,17 +45,6 @@ const UserProfilePage = () => {
     };
   }, [userId]);
 
-  useEffect(() => {
-    // Fetch global ratings using the Meteor method
-    Meteor.call('ratings.getGlobalAverages', (error, result) => {
-      if (!error) {
-        setGlobalRatings(result);
-      } else {
-        console.error("Error fetching global ratings:", error);
-      }
-    });
-  }, []);
-
   const isFollowing = (userId) => {
     const currentUser = Meteor.user();
     return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
@@ -103,29 +92,33 @@ const UserProfilePage = () => {
   }, [userId]);
 
   useEffect(() => {
-    if (userId) {
+    if (userProfile) {
+      console.log('Fetching user lists for userId:', userId);
       Meteor.call('list.read', { userId }, (error, result) => {
         if (error) {
           console.error('Error fetching user lists:', error);
         } else {
+          console.log('User lists fetched:', result);
           setUserLists(result);
         }
       });
     }
-  }, [userId]);
+  }, [userId, userProfile]);
 
   const favouritesList = userLists.find((list) => list.listType === 'Favourite');
   const toWatchList = userLists.find((list) => list.listType === 'To Watch');
   const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
 
+  console.log(userProfile)
+
   return (
     <Fragment>
-      {currentUser ? (
+      {userProfile ? (
         <div className="flex flex-col min-h-screen bg-darker">
           <div className="flex flex-col gap-0 flex-grow">
             <ProfileCard
               currentUser={currentUser}
-              user={userId}
+              user={userProfile}
               showFollowButton={Meteor.userId() !== userId}
             />
             <div className="p-6">
@@ -147,8 +140,6 @@ const UserProfilePage = () => {
 
                 </div>
               )}
-              {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} globalRatings={globalRatings} />}
-              {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} globalRatings={globalRatings} />}
               {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} globalRatings={globalRatings} />}
               {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} globalRatings={globalRatings} />}
               <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />
