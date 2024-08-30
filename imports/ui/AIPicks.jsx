@@ -15,7 +15,7 @@ export default function AIPicks() {
     // the number of recommendations collected for each movie/show. The onscreen display will be a selection from this pool
     const NUM_RECOMMENDATIONS = 35;
     // the number of slots to fill on the screen
-    const NUM_LIST_SLOTS = 8;
+    const NUM_LIST_SLOTS = 5;
     const [display, setDisplay] = useState(DISPLAY_MOVIES);
     const [globalRatings, setGlobalRatings] = useState({});
     const [loading, setLoading] = useState(false);
@@ -154,8 +154,6 @@ export default function AIPicks() {
                 // Fetch recommendations for movies
                 if (movieTitles.length > 0) {
                     const recommendedMov = await fetchMovies(movieTitles);
-                    console.log(recommendedMov);
-                    
                     setRecommendedMovies(recommendedMov);
 
                 }
@@ -376,7 +374,7 @@ export default function AIPicks() {
 return (
     <div className="flex flex-col min-h-screen bg-darker">
         <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
-        <button className="px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
+        <button className="mx-4 px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
          focus:outline-none focus:ring-4 focus:ring-purple-300 transform active:scale-95 transition-transform duration-200" 
         onClick={() => toggleRefresh()}>Refresh AI Recommendations</button>
         <Scrollbar className="w-full overflow-y-auto">
@@ -398,7 +396,7 @@ return (
             {display === DISPLAY_SHOWS && (
                 contentTVNone ? (
                     <div className="px-8 py-2 mt-10 text-white text-3xl">
-                        Not enough TV Shows yet. Add some to your favourites or watchlist to get started!
+                        Not enough Shows yet. Add some to your favourites or watchlist to get started!
                     </div>
                 ) : (
                     tvDisplayRef.current.map(list => (

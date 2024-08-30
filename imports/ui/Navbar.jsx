@@ -32,6 +32,11 @@ export default function Navbar({ staticNavData, currentUser }) {
     return { lists, subscribedLists, loading };
   }, []);
 
+  const sortedLists = lists.concat(subscribedLists).sort((a, b) => {
+    const order = { 'Favourite': 1, 'To Watch': 2, 'Custom': 3 };
+    return order[a.listType] - order[b.listType];
+  });
+
   const handleAddList = () => {
     setIsAddListModalOpen(true);
   };
@@ -45,7 +50,6 @@ export default function Navbar({ staticNavData, currentUser }) {
               <div className="px-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    {/* Hamburger menu, shown only when collapsed */}
                     {isCollapsed && (
                       <button onClick={() => setIsCollapsed(!isCollapsed)} className="text-grey hover:text-white p-2 transition-all duration-300 ease-in-out hover:bg-gray-600 rounded-full">
                         <RxHamburgerMenu size="24px" />
@@ -53,7 +57,6 @@ export default function Navbar({ staticNavData, currentUser }) {
                     )}
                     {!isCollapsed && <span className="text-lg font-bold text-white ml-2">The Watchlist</span>}
                   </div>
-                  {/* Toggle button for collapsing the navbar */}
                   {!isCollapsed && (
                     <button onClick={() => setIsCollapsed(!isCollapsed)} className="text-grey hover:text-white p-2 ml-0 transition-all duration-300 ease-in-out hover:bg-gray-600 rounded-full">
                       <FaAngleDoubleLeft size="24px" />
@@ -89,7 +92,7 @@ export default function Navbar({ staticNavData, currentUser }) {
               </h2>
               <Scrollbar className="h-[calc(100vh_-_21rem)] overflow-y-hidden">
                 <ul className="h-full">
-                  {lists.concat(subscribedLists).map((list) => (
+                  {sortedLists.map((list) => (
                     <li key={list._id} className={`flex items-center text-sm text-white font-semibold ${isCollapsed ? '' : 'p-2'} rounded-lg hover:bg-dark`}>
                       <button
                         onClick={() => handleItemClick(list)}

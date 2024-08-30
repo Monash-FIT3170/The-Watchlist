@@ -91,6 +91,10 @@ Meteor.methods({
       $set: { avatarUrl: avatarUrl }
     });
   },
+
+  // add method here
+
+
 });
 
 const createDefaultLists = (userId) => {
@@ -314,3 +318,108 @@ Meteor.methods({
     return ratingMap;
   }
 });
+Meteor.methods({
+  'users.getSimilarUsers'() {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to find similar users.');
+    }
+
+    const currentUser = Meteor.users.findOne(this.userId);
+    if (!currentUser) {
+      throw new Meteor.Error('user-not-found', 'User not found.');
+    }
+
+    const currentUserFavourites = ListCollection.findOne({
+      userId: this.userId,
+      listType: 'Favourite'
+    });
+
+    if (!currentUserFavourites || currentUserFavourites.content.length === 0) {
+      throw new Meteor.Error('no-favourites', 'You do not have any favourites.');
+    }
+
+    const currentUserFavouritesSet = new Set(currentUserFavourites.content);
+
+    const randomUsers = Meteor.users.rawCollection().aggregate([
+      { $sample: { size: 100 } }
+    ]).toArray();
+
+    const randomUsersPromise = Meteor.wrapAsync((cb) => randomUsers.then((res) => cb(null, res)).catch(cb));
+
+    const users = randomUsersPromise();
+
+    const userScores = users.map(user => {
+      if (user._id === this.userId) {
+        return null; 
+      }
+
+      const userFavourites = ListCollection.findOne({
+        userId: user._id,
+        listType: 'Favourite'
+      });
+
+      if (!userFavourites || !userFavourites.content) {
+        return null;
+      }
+
+      const userFavouritesSet = new Set(userFavourites.content);
+      
+      const userFavouritesArray = Array.from(userFavouritesSet);
+      const currentUserFavouritesArray = Array.from(currentUserFavouritesSet);
+
+      const commonFavourites = userFavouritesArray.filter(favourite =>
+        currentUserFavouritesArray.some(currentFavourite => currentFavourite.contentId === favourite.contentId)
+      );
+
+      if (commonFavourites.size === 0) {
+        return null;
+      } 
+
+      const avgListLength = (userFavouritesArray.length + currentUserFavouritesArray.length) / 2;
+
+      matchScore = commonFavourites.length/avgListLength * 100 * 1.5;
+
+      if (matchScore > 100) {
+        matchScore = 100;
+      }
+
+      return {
+        user: user,
+        matchScore: matchScore
+      };
+    });
+
+    // Filter out null values and sort by matchScore in descending order
+    const sortedUserScores = userScores.filter(Boolean).sort((a, b) => b.matchScore - a.matchScore);
+
+    // set top user as 100 match, etc
+    sortedUserScores.forEach((user, index) => {
+      user.matchScore = Math.floor(user.matchScore);
+    });
+
+    // Return the top 10 users with the highest match score
+    return sortedUserScores.slice(0, 10);
+  }
+});
+Meteor.methods({
+  'list.getById': function (listId) {
+    console.log(`list.getById method called with listId: ${listId}`); // Log method call
+
+    check(listId, String);
+
+    if (!this.userId) {
+      console.log('User not authorized to view lists'); // Log unauthorized access
+      throw new Meteor.Error('not-authorized', 'You must be logged in to view lists.');
+    }
+
+    const list = ListCollection.findOne({ _id: listId });
+
+    if (!list) {
+      console.log(`List not found for listId: ${listId}`); // Log if list is not found
+      throw new Meteor.Error('not-found', 'List not found.');
+    }
+
+    return list;
+  },
+});
+
