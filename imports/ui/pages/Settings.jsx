@@ -14,6 +14,8 @@ const Settings = () => {
     const [oldPassword, setOldPassword] = useState(''); // State for old password
     const [newPassword, setNewPassword] = useState(''); // State for new password
     const [errorMessage, setErrorMessage] = useState('');
+    const [showConfirmation, setShowConfirmation] = useState(false); // State to toggle delete confirmation
+
 
     useEffect(() => {
         if (currentUser) {
@@ -49,6 +51,16 @@ const Settings = () => {
                 setErrorMessage(error.reason);
             } else {
                 setErrorMessage('Password changed successfully!');
+            }
+        });
+    };
+
+    const handleDeleteUser = () => {
+        Meteor.call('users.deleteUser', { username }, (error, result) => {
+            if (error) {
+                setErrorMessage(error.reason);
+            } else {
+                setErrorMessage('Profile updated successfully!');
             }
         });
     };
@@ -101,6 +113,35 @@ const Settings = () => {
                     Change Password
                 </button>
             </div>
+
+            <div className="mt-8">
+                {!showConfirmation ? (
+                    <button
+                        onClick={() => setShowConfirmation(true)}
+                        className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                    >
+                        Delete Account
+                    </button>
+                ) : (
+                    <div className="mt-4">
+                        
+                        <span className="text-xl font-bold">Are you sure?</span>
+                        <button
+                            onClick={handleDeleteUser}
+                            className="bg-red-600 text-white px-4 py-2 rounded-md mx-2 hover:bg-red-700 transition-colors"
+                        >
+                            Yes
+                        </button>
+                        <button
+                            onClick={() => setShowConfirmation(false)}
+                            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+                        >
+                            No
+                        </button>
+                    </div>
+                )}
+            </div>
+
         </div>
     );
 };

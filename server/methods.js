@@ -108,6 +108,14 @@ Meteor.methods({
     } catch (error) {
       throw new Meteor.Error('update-failed', error.message);
     }
+  },
+
+  'users.deleteUser'(username) {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to delete your account.');
+    }
+    // Remove the user from the collection
+    Meteor.users.remove(this.userId);
   }
   // add method here
 
