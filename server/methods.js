@@ -92,8 +92,24 @@ Meteor.methods({
     });
   },
 
-  // add method here
+  'users.updateProfile'(username) {
+    // Ensure the user is logged in
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to update your profile.');
+    }
 
+    // Update user profile
+    try {
+      // Update the user's username
+      if (username.username) {
+        Accounts.setUsername(this.userId, username.username);
+      }
+      return 'Profile updated successfully';
+    } catch (error) {
+      throw new Meteor.Error('update-failed', error.message);
+    }
+  }
+  // add method here
 
 });
 
@@ -350,7 +366,7 @@ Meteor.methods({
 
     const userScores = users.map(user => {
       if (user._id === this.userId) {
-        return null; 
+        return null;
       }
 
       const userFavourites = ListCollection.findOne({
@@ -363,7 +379,7 @@ Meteor.methods({
       }
 
       const userFavouritesSet = new Set(userFavourites.content);
-      
+
       const userFavouritesArray = Array.from(userFavouritesSet);
       const currentUserFavouritesArray = Array.from(currentUserFavouritesSet);
 
@@ -373,11 +389,11 @@ Meteor.methods({
 
       if (commonFavourites.size === 0) {
         return null;
-      } 
+      }
 
       const avgListLength = (userFavouritesArray.length + currentUserFavouritesArray.length) / 2;
 
-      matchScore = commonFavourites.length/avgListLength * 100 * 1.5;
+      matchScore = commonFavourites.length / avgListLength * 100 * 1.5;
 
       if (matchScore > 100) {
         matchScore = 100;
