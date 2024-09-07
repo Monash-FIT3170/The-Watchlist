@@ -110,7 +110,7 @@ Meteor.methods({
     }
   },
 
-  'users.deleteUser'(username) {
+  'users.deleteUser'() {
     if (!this.userId) {
       throw new Meteor.Error('not-authorized', 'You must be logged in to delete your account.');
     }
