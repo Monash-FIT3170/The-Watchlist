@@ -131,6 +131,17 @@ const List = Class.create({
             default: function() {
                 return [];
             }
+        },
+        visibility: {
+            type: String,
+            validators: [{
+                type: 'choice',
+                param: ['PUBLIC','FOLLOWERS','ONLY_ME']
+            }],
+            default: function() {
+                return 'PUBLIC';
+            }
+
         }
     },
     behaviors: {

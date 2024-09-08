@@ -254,6 +254,38 @@ Meteor.methods({
 });
 
 Meteor.methods({
+  'list.setVisibility'(listId, visibleType) {
+    check(listId, String);
+    check(visibleType, String);
+
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to set list visibility.');
+    }
+
+    const list = ListCollection.findOne({ _id: listId });
+
+    if (!list) {
+      throw new Meteor.Error('not-found', 'List not found.');
+    }
+
+    if (list.userId !== this.userId) {
+      throw new Meteor.Error('invalid-action', "You cannot change visibility settings of other user's lists.");
+    }
+
+    const result = ListCollection.update(
+      { _id: listId },
+      { $set: { visibility: visibleType } }
+    );
+
+    if (result) {
+      return `Successfully changed list visibility to ${visibleType}`;
+    } else {
+      throw new Meteor.Error('failed', 'Failed to change visibility of list.');
+    }
+  }
+});
+
+Meteor.methods({
   'ratings.getAverage'({ contentId, contentType }) {
     check(contentId, Number);
     check(contentType, String);
