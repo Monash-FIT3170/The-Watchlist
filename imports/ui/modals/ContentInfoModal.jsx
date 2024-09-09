@@ -4,6 +4,7 @@ import Modal from './Modal';
 import Scrollbar from '../components/scrollbar/ScrollBar';
 import { useTracker } from 'meteor/react-meteor-data';
 import { RatingCollection } from '../../db/Rating';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import the icons
 
 const popcornUrl = "./images/popcorn-banner.png"; // Default image URL
 
@@ -24,6 +25,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
   const [seasonRating, setSeasonRating] = useState({});
   const [seasonAverageRating, setSeasonAverageRating] = useState(0);
   const [seasonTotalRatings, setSeasonTotalRatings] = useState(0);
+  const [isEpisodeListVisible, setIsEpisodeListVisible] = useState(false);
 
   // Use Meteor's reactive data system to fetch season ratings
   useTracker(() => {
@@ -51,8 +53,13 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
     }
   };
 
+  const toggleEpisodeListVisibility = () => {
+    setIsEpisodeListVisible(!isEpisodeListVisible); // Toggle the visibility
+  };
+
   const handleBackClick = () => {
-    setShowEpisodes(false);
+    setIsEpisodeListVisible(false);
+    setSelectedSeason(null); // Reset the selected season when going back
   };
 
   useEffect(() => {
@@ -194,7 +201,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
       console.error("No selected season to rate.");
       return;
     }
-  
+
     Meteor.call('ratings.addOrUpdateSeasonRating', {
       userId: Meteor.userId(),
       contentId: contentId,
@@ -205,7 +212,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
         console.error('Failed to update/add season rating:', error);
       } else {
         console.log("Season rating updated successfully");
-  
+
         // Fetch the updated season average rating and total ratings count
         Meteor.call('ratings.getSeasonAverage', {
           contentId: contentId,
@@ -222,7 +229,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
       }
     });
   };
-  
+
 
 
   const handleScroll = (direction) => {
@@ -310,28 +317,33 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
               )}
               <div>{content.genres?.join(', ')}</div>
             </div>
+
             <p className="text-white mb-4">{content.overview}</p>
             {content.contentType === 'TV Show' && content.seasons && !showEpisodes ? (
               <div>
                 <h3 className="text-xl mb-2">Seasons</h3>
                 <div className="relative flex items-center">
                   <Scrollbar className="whitespace-nowrap" horizontal>
-                    {content.seasons.map((season, index) => (
-                      <button
-                        key={index}
-                        className={`px-6 py-2 mb-2 rounded ${selectedSeason === season.season_number ? 'bg-gray-700' : 'bg-gray-500'}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedSeason(season.season_number);
-                          loadEpisodes(season.season_number);
-                        }}
-                      >
-                        Season {season.season_number}
-                      </button>
-                    ))}
+                    <div className="flex space-x-4">
+                      {content.seasons.map((season, index) => (
+                        <button
+                          key={index}
+                          className={`px-6 py-2 mb-2 rounded ${selectedSeason === season.season_number ? 'bg-gray-700' : 'bg-gray-500'
+                            }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedSeason(season.season_number);
+                            loadEpisodes(season.season_number);
+                          }}
+                        >
+                          Season {season.season_number}
+                        </button>
+                      ))}
+                    </div>
                   </Scrollbar>
                 </div>
               </div>
+
             ) : showEpisodes ? (
               <div>
                 <button
@@ -340,21 +352,33 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
                     setSelectedSeason(null); // Reset the selected season to show the overall show rating
                     setShowEpisodes(false); // Hide the episode list when going back to seasons
                   }}
-                  className="mb-4 text-gray-400 hover:text-white"
+                  className="mb-4 mr-2 text-gray-400 hover:text-white"
                 >
                   &larr; Back to seasons
                 </button>
-                <h3 className="text-xl mb-2">Episodes</h3>
-                <Scrollbar className="max-h-28" backgroundColor="#FFFFFF">
-                  <ul>
-                    {selectedSeasonEpisodes.map((episode, index) => (
-                      <li key={index} className="mb-2">
-                        <div className="text-lg">{`Episode ${episode.episode_number}: ${episode.title}`}</div>
-                        <div className="text-sm text-gray-400">Runtime: {episode.runtime} minutes</div>
-                      </li>
-                    ))}
-                  </ul>
-                </Scrollbar>
+                <h3 className="text-xl mb-2 flex items-center">
+                  Episodes
+                  <button
+                    className="ml-2 text-blue-500 hover:text-blue-300"
+                    onClick={toggleEpisodeListVisibility}
+                  >
+                    {isEpisodeListVisible ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                  </button>
+                </h3>
+
+                {/* Conditionally render the episode list */}
+                {isEpisodeListVisible && (
+                  <Scrollbar className="max-h-28" backgroundColor="#FFFFFF">
+                    <ul>
+                      {selectedSeasonEpisodes.map((episode, index) => (
+                        <li key={index} className="mb-2">
+                          <div className="text-lg">{`Episode ${episode.episode_number}: ${episode.title}`}</div>
+                          <div className="text-sm text-gray-400">Runtime: {episode.runtime} minutes</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </Scrollbar>
+                )}
                 <div className="mt-4">
                   <h4 className="text-lg mb-2">Rate this Season</h4>
                   <ClickableRatingStar
