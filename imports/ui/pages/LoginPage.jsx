@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { useNavigate } from 'react-router-dom';
+import { passwordStrength } from 'check-password-strength';
 import LoginWithGithub from '../components/login/LoginWithGithub'
 import LoginWithGoogle from '../components/login/LoginWithGoogle';
 
@@ -9,16 +10,22 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [strength, setStrength] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const handlePasswordChange = (e) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setStrength(passwordStrength(newPassword).value);
+  };
 
   const createDefaultLists = (userId) => {
     const defaultLists = [
       { title: 'Favourite', listType: 'Favourite' },
       { title: 'To Watch', listType: 'To Watch' },
     ];
-
     defaultLists.forEach((list) => {
       Meteor.call('list.create', { userId, title: list.title, listType: list.listType, content: [] }, (error) => {
         if (error) {
@@ -91,10 +98,14 @@ const LoginPage = () => {
           type="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 pl-4 mb-7 bg-dark text-white rounded-full"
+          onChange={handlePasswordChange}
+          minLength={6}
+          className="w-full p-2 pl-4 bg-dark text-white rounded-full"
           required
         />
+        <p className={`p-2 ${strength === 'Too weak' ? 'text-red-600' : strength === 'Weak' ? 'text-yellow-500' : strength === 'Medium' ? 'text-blue-500' : 'text-green-500'}`}>
+          {strength} Password
+        </p>
         {error && <p className="text-red-600 p-2 ">{error}</p>}
         <button type="submit" className="w-2/3 p-1.5 mb-3 bg-magenta font-bold text-white rounded-full hover:bg-pink-700">
           {isRegistering ? 'Sign Up' : 'Log In'}
@@ -125,7 +136,7 @@ const LoginPage = () => {
         </div>
 
       </form>
-      
+
     </div>
   );
 };

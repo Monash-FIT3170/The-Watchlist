@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
+import { passwordStrength } from 'check-password-strength';
+
 
 const Settings = () => {
     const currentUser = useTracker(() => {
@@ -15,7 +17,7 @@ const Settings = () => {
     const [newPassword, setNewPassword] = useState(''); // State for new password
     const [errorMessage, setErrorMessage] = useState('');
     const [showConfirmation, setShowConfirmation] = useState(false); // State to toggle delete confirmation
-    const [passwordStrength, setPasswordStrength] = useState('');
+    const [strength, setStrength] = useState('');
 
     useEffect(() => {
         if (currentUser) {
@@ -37,6 +39,10 @@ const Settings = () => {
                 setErrorMessage('Profile updated successfully!');
             }
         });
+    };
+
+    const handlePasswordStrength = (password) => {
+        setStrength(passwordStrength(password).value);
     };
 
     const handlePasswordChange = () => {
@@ -87,7 +93,7 @@ const Settings = () => {
             </div>
 
             {/* Only show Change Password section if the user has a password */}
-            {showChangePassword  && (
+            {showChangePassword && (
                 <div className="space-y-4 mt-8">
                     <h2 className="mb-6 text-2xl font-bold">Change Password</h2>
                     <label className="text-xl font-bold">Old Password</label>
@@ -100,15 +106,24 @@ const Settings = () => {
                     />
                     <label className="text-xl font-bold">New Password</label>
                     <input
-                        type={"password"}
+                        type="password"
                         value={newPassword}
                         placeholder="New Password"
+                        minLength={6}
+                        onChange={(e) => {
+                            const newPass = e.target.value;
+                            setNewPassword(newPass); // Update the input field's value
+                            handlePasswordStrength(newPass); // Check the password strength
+                        }}
                         className="text-black mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                     />
+                    <p className={`p-2 ${strength === 'Too weak' ? 'text-red-600' : strength === 'Weak' ? 'text-yellow-500' : strength === 'Medium' ? 'text-blue-500' : 'text-green-500'}`}>
+                        {strength} Password
+                    </p>
                     <button
                         onClick={handlePasswordChange}
                         className="bg-red-600 text-white w-full px-7 py-2 rounded-md hover:bg-red-700 transition-colors"
-                        >
+                    >
                         Change Password
                     </button>
                 </div>
@@ -119,7 +134,7 @@ const Settings = () => {
                     <button
                         onClick={() => setShowConfirmation(true)}
                         className="bg-red-600 text-white w-full px-7 py-2 rounded-md hover:bg-red-700 transition-colors"
-                        >
+                    >
                         Delete Account
                     </button>
                 ) : (
@@ -131,7 +146,7 @@ const Settings = () => {
                                 <button
                                     onClick={handleDeleteUser}
                                     className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-                                    >
+                                >
                                     Yes, Delete
                                 </button>
                                 <button
