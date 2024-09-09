@@ -2,6 +2,8 @@ import React, { useEffect, useState, forwardRef, useRef } from 'react';
 import ClickableRatingStar from '../components/ratings/ClickableRatingStar';
 import Modal from './Modal';
 import Scrollbar from '../components/scrollbar/ScrollBar';
+import { useTracker } from 'meteor/react-meteor-data';
+import { RatingCollection } from '../../db/Rating';
 
 const popcornUrl = "./images/popcorn-banner.png"; // Default image URL
 
@@ -19,11 +21,32 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
   const [rating, setRating] = useState(0);
   const [userRating, setUserRating] = useState(null);
   const [totalRatings, setTotalRatings] = useState(0);
+  const [seasonRating, setSeasonRating] = useState({});
+  const [seasonAverageRating, setSeasonAverageRating] = useState(0);
+  const [seasonTotalRatings, setSeasonTotalRatings] = useState(0);
+
+  // Use Meteor's reactive data system to fetch season ratings
+  useTracker(() => {
+    if (selectedSeason && contentId) {
+      const handle = Meteor.subscribe('seasonRatings', contentId, selectedSeason);
+      if (handle.ready()) {
+        const ratingDoc = RatingCollection.findOne({ contentId, seasonId: selectedSeason });
+        setSeasonRating(ratingDoc ? ratingDoc.rating : 0); // Update UI when the data is ready
+      }
+    }
+  }, [selectedSeason, contentId]);
 
   const loadEpisodes = (seasonNumber) => {
+    console.log("Loading episodes for season:", seasonNumber);
+    if (!seasonNumber) {
+      console.warn("Attempted to load episodes without a valid season number");
+      return;
+    }
     const selectedSeason = content.seasons.find(season => season.season_number === seasonNumber);
     if (selectedSeason) {
+      setSelectedSeason(selectedSeason.season_number);
       setSelectedSeasonEpisodes(selectedSeason.episodes);
+      setSeasonRating(null); // Reset season rating when switching seasons
       setShowEpisodes(true);
     }
   };
@@ -117,40 +140,89 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
 
   console.log("Rendered ContentInfoModal with rating:", rating, "userRating:", userRating, "totalRatings:", totalRatings);
 
+  // Fetch the average rating and total ratings for the selected season
+  useEffect(() => {
+    if (selectedSeason) {
+      Meteor.call('ratings.getSeasonAverage', {
+        contentId: content.contentId,
+        seasonId: selectedSeason,
+      }, (error, result) => {
+        if (!error && result) {
+          setSeasonAverageRating(result.averageRating);
+          setSeasonTotalRatings(result.totalRatings);
+        } else {
+          console.error('Error fetching season average rating:', error);
+        }
+      });
+    }
+  }, [selectedSeason, content.contentId]);
 
   const addRating = (userId, contentId, contentType, rating) => {
     Meteor.call('ratings.addOrUpdate', { userId, contentId, contentType, rating }, (error) => {
-        if (error) {
-            console.error('Failed to update/add rating:', error);
-        } else {
-            // Fetch the updated average rating
-            Meteor.call('ratings.getAverage', { contentId, contentType }, (error, result) => {
-                if (error) {
-                    console.error('Failed to get updated global average rating:', error);
-                } else {
-                    console.log("Updated global average rating for contentId:", contentId, "Result:", result);
-                    setRating(result);
-                    if (typeof onRatingUpdate === 'function') {
-                        onRatingUpdate(); // Trigger the callback to update ratings in SearchBar
-                    }
-                }
-            });
+      if (error) {
+        console.error('Failed to update/add rating:', error);
+      } else {
+        // Fetch the updated average rating
+        Meteor.call('ratings.getAverage', { contentId, contentType }, (error, result) => {
+          if (error) {
+            console.error('Failed to get updated global average rating:', error);
+          } else {
+            console.log("Updated global average rating for contentId:", contentId, "Result:", result);
+            setRating(result);
+            if (typeof onRatingUpdate === 'function') {
+              onRatingUpdate(); // Trigger the callback to update ratings in SearchBar
+            }
+          }
+        });
 
-            // Fetch the updated total ratings count
-            Meteor.call('ratings.getGlobalAverages', (error, result) => {
-                if (error) {
-                    console.error('Failed to get updated total ratings count:', error);
-                } else if (result[contentId]) {
-                    console.log("Updated total ratings count for contentId:", contentId, "Count:", result[contentId].count);
-                    setTotalRatings(result[contentId].count);
-                } else {
-                    console.log("No ratings found for contentId after update:", contentId);
-                }
-            });
-        }
+        // Fetch the updated total ratings count
+        Meteor.call('ratings.getGlobalAverages', (error, result) => {
+          if (error) {
+            console.error('Failed to get updated total ratings count:', error);
+          } else if (result[contentId]) {
+            console.log("Updated total ratings count for contentId:", contentId, "Count:", result[contentId].count);
+            setTotalRatings(result[contentId].count);
+          } else {
+            console.log("No ratings found for contentId after update:", contentId);
+          }
+        });
+      }
     });
-};
-
+  };
+  const handleSeasonRatingChange = (newRating) => {
+    if (!selectedSeason) {
+      console.error("No selected season to rate.");
+      return;
+    }
+  
+    Meteor.call('ratings.addOrUpdateSeasonRating', {
+      userId: Meteor.userId(),
+      contentId: contentId,
+      seasonId: selectedSeason,
+      rating: newRating
+    }, (error) => {
+      if (error) {
+        console.error('Failed to update/add season rating:', error);
+      } else {
+        console.log("Season rating updated successfully");
+  
+        // Fetch the updated season average rating and total ratings count
+        Meteor.call('ratings.getSeasonAverage', {
+          contentId: contentId,
+          seasonId: selectedSeason,
+        }, (error, result) => {
+          if (error) {
+            console.error('Failed to get updated season average rating:', error);
+          } else if (result) {
+            console.log("Updated season average rating for contentId:", contentId, "Season:", selectedSeason, "Result:", result);
+            setSeasonAverageRating(result.averageRating);
+            setSeasonTotalRatings(result.totalRatings);
+          }
+        });
+      }
+    });
+  };
+  
 
 
   const handleScroll = (direction) => {
@@ -247,9 +319,10 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
                     {content.seasons.map((season, index) => (
                       <button
                         key={index}
-                        className={`px-6 py-2 mb-2 mr-2 rounded ${selectedSeason === season.season_number ? 'bg-gray-700' : 'bg-gray-500'}`}
+                        className={`px-6 py-2 mb-2 rounded ${selectedSeason === season.season_number ? 'bg-gray-700' : 'bg-gray-500'}`}
                         onClick={(e) => {
                           e.stopPropagation();
+                          setSelectedSeason(season.season_number);
                           loadEpisodes(season.season_number);
                         }}
                       >
@@ -261,7 +334,14 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
               </div>
             ) : showEpisodes ? (
               <div>
-                <button onClick={handleBackClick} className="mb-4 text-gray-400 hover:text-white">
+                <button
+                  onClick={() => {
+                    handleBackClick();
+                    setSelectedSeason(null); // Reset the selected season to show the overall show rating
+                    setShowEpisodes(false); // Hide the episode list when going back to seasons
+                  }}
+                  className="mb-4 text-gray-400 hover:text-white"
+                >
                   &larr; Back to seasons
                 </button>
                 <h3 className="text-xl mb-2">Episodes</h3>
@@ -275,27 +355,45 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
                     ))}
                   </ul>
                 </Scrollbar>
-
+                <div className="mt-4">
+                  <h4 className="text-lg mb-2">Rate this Season</h4>
+                  <ClickableRatingStar
+                    totalStars={5}
+                    rating={seasonRating || 0}
+                    onChange={handleSeasonRatingChange}
+                  />
+                  <p className="mt-2 mb-2 text-sm">
+                    <span className="text-gray-400">Average Season Rating: </span>
+                    <span className="text-white">
+                      {seasonAverageRating ?
+                        `${parseFloat(seasonAverageRating) % 1 === 0 ? parseInt(seasonAverageRating) : parseFloat(seasonAverageRating).toFixed(1)}/5 
+      (${seasonTotalRatings} ${seasonTotalRatings === 1 ? 'review' : 'reviews'})`
+                        : "Not Yet Rated"}
+                    </span>
+                  </p>
+                </div>
               </div>
-
             ) : null}
             <div className="flex flex-col items-start mt-2">
-              <ClickableRatingStar
-                totalStars={5}
-                rating={userRating || 0} // This will show 0 if userRating is null
-                onChange={(newValue) => {
-                  console.log("New rating value:", newValue);
-                  addRating(Meteor.userId(), contentId, content.contentType, newValue);
-                  setUserRating(newValue); // Update the user rating immediately after user interaction
-                }}
-              />
-
-              <p className="mt-2 mb-2 text-sm">
-                <span className="text-gray-400">Average Rating: </span>
-                <span className="text-white">
-                  {rating ? `${parseFloat(rating) % 1 === 0 ? parseInt(rating) : parseFloat(rating).toFixed(1)}/5 (${totalRatings} ${totalRatings === 1 ? 'review' : 'reviews'})` : "Not Yet Rated"}
-                </span>
-              </p>
+              {!selectedSeason && (
+                <>
+                  <ClickableRatingStar
+                    totalStars={5}
+                    rating={userRating || 0}
+                    onChange={(newValue) => {
+                      console.log("New rating value:", newValue);
+                      addRating(Meteor.userId(), contentId, content.contentType, newValue);
+                      setUserRating(newValue);
+                    }}
+                  />
+                  <p className="mt-2 mb-2 text-sm">
+                    <span className="text-gray-400">Average Rating: </span>
+                    <span className="text-white">
+                      {rating ? `${parseFloat(rating) % 1 === 0 ? parseInt(rating) : parseFloat(rating).toFixed(1)}/5 (${totalRatings} ${totalRatings === 1 ? 'review' : 'reviews'})` : "Not Yet Rated"}
+                    </span>
+                  </p>
+                </>
+              )}
 
               {/* Directors */}
               {content.directors && content.directors.length > 0 && (
@@ -323,6 +421,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
                 </div>
               )}
             </div>
+
           </div>
         </div>
       </Scrollbar>
