@@ -74,7 +74,50 @@ Meteor.methods({
       });
     }
   },
+  'ratings.addOrUpdateSeasonRating'({ userId, contentId, seasonId, rating }) {
+    console.log("Received parameters for addOrUpdateSeasonRating", { userId, contentId, seasonId, rating });
+    check(userId, String);
+    check(contentId, Number);
+    check(seasonId, Number);
+    check(rating, Number);
 
+    const existingRating = Rating.findOne({ userId, contentId, seasonId });
+    if (existingRating) {
+      Rating.update({ _id: existingRating._id }, {
+        $set: { rating }
+      });
+    } else {
+      Rating.insert({
+        userId: userId,
+        contentId: contentId,
+        seasonId: seasonId,
+        contentType: "Season",
+        rating: rating
+      });
+    }
+  },
+  'ratings.getSeasonAverage'({ contentId, seasonId }) {
+    check(contentId, Number);
+    check(seasonId, Number);
+
+    // Fetch all ratings for the given content and season
+    const seasonRatings = RatingCollection.find({ contentId, seasonId, contentType: "Season" }).fetch();
+
+    const totalRatings = seasonRatings.length;
+
+    if (totalRatings === 0) {
+      return { averageRating: 0, totalRatings: 0 }; // Return 0 if no ratings exist
+    }
+
+    // Calculate the average rating for the season
+    const totalRatingsValue = seasonRatings.reduce((sum, rating) => sum + rating.rating, 0);
+    const averageRating = totalRatingsValue / totalRatings;
+
+    return {
+      averageRating: averageRating.toFixed(1), // Return average rating to one decimal place
+      totalRatings
+    };
+  },
   updateAvatar(userId, avatarUrl) {
     check(userId, String);
     check(avatarUrl, String);
@@ -350,7 +393,7 @@ Meteor.methods({
 
     const userScores = users.map(user => {
       if (user._id === this.userId) {
-        return null; 
+        return null;
       }
 
       const userFavourites = ListCollection.findOne({
@@ -363,7 +406,7 @@ Meteor.methods({
       }
 
       const userFavouritesSet = new Set(userFavourites.content);
-      
+
       const userFavouritesArray = Array.from(userFavouritesSet);
       const currentUserFavouritesArray = Array.from(currentUserFavouritesSet);
 
@@ -373,11 +416,11 @@ Meteor.methods({
 
       if (commonFavourites.size === 0) {
         return null;
-      } 
+      }
 
       const avgListLength = (userFavouritesArray.length + currentUserFavouritesArray.length) / 2;
 
-      matchScore = commonFavourites.length/avgListLength * 100 * 1.5;
+      matchScore = commonFavourites.length / avgListLength * 100 * 1.5;
 
       if (matchScore > 100) {
         matchScore = 100;
