@@ -12,12 +12,16 @@ export const Rating = Class.create({
             type: String,
             validators: [{
                 type: 'choice',
-                param: ["Movie", "TV Show"]
+                param: ["Movie", "TV Show", "Season"]  // Updated to include "Season"
             }]
         },
         contentId: {
             type: Number,
             index: 1
+        },
+        seasonId: {
+            type: Number,
+            optional: true  // Only applicable for TV Show Seasons
         },
         rating: {
             type: Number,
@@ -28,5 +32,6 @@ export const Rating = Class.create({
         }
     }
 });
+
 
 
