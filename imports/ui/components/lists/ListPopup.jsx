@@ -111,13 +111,21 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const sortContent = (content) => {
         return content.sort((a, b) => {
             if (sortOrder === 'ascending') {
-                return sortCriterion === 'title'
-                    ? a.title.localeCompare(b.title)
-                    : a.release_year - b.release_year;
+                if (sortCriterion === 'title') {
+                    return a.title.localeCompare(b.title);
+                } else if (sortCriterion === 'release_year') {
+                    return a.release_year - b.release_year;
+                } else if (sortCriterion === 'popularity') {
+                    return a.popularity - b.popularity; // Sorting by popularity
+                }
             } else {
-                return sortCriterion === 'title'
-                    ? b.title.localeCompare(a.title)
-                    : b.release_year - a.release_year;
+                if (sortCriterion === 'title') {
+                    return b.title.localeCompare(a.title);
+                } else if (sortCriterion === 'release_year') {
+                    return b.release_year - a.release_year;
+                } else if (sortCriterion === 'popularity') {
+                    return b.popularity - a.popularity; // Sorting by popularity
+                }
             }
         });
     };
@@ -332,6 +340,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                             >
                                 <option value="title">Sort by Title</option>
                                 <option value="release_year">Sort by Release Year</option>
+                                <option value="popularity">Sort by Popularity</option>
                             </select>
 
                             <button

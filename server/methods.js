@@ -462,7 +462,24 @@ Meteor.methods({
       throw new Meteor.Error('not-found', 'List not found.');
     }
 
-    return list;
+    // Fetch content details including popularity
+    const contentWithPopularity = list.content.map(item => {
+      let contentItem;
+      if (item.contentType === 'Movie') {
+        contentItem = MovieCollection.findOne({ contentId: item.contentId }, { fields: { popularity: 1 } });
+      } else if (item.contentType === 'TV Show') {
+        contentItem = TVCollection.findOne({ contentId: item.contentId }, { fields: { popularity: 1 } });
+      }
+      return {
+        ...item,
+        popularity: contentItem ? contentItem.popularity : null
+      };
+    });
+
+    return {
+      ...list,
+      content: contentWithPopularity
+    };
   },
 });
 
