@@ -3,7 +3,7 @@
  */
 
 import { Handler, HandlerFunc } from './Handler';
-import List, {ListCollection, ContentSummary} from "../../db/List";
+import List, { ListCollection, ContentSummary } from "../../db/List";
 
 type CreateListOptions = {
     userId: string,
@@ -52,10 +52,10 @@ type AddContentToListOptions = {
         episode_details?: {
             season_number: number,
             episode_number: number
-        }
+        },
+        popularity?: number // Add popularity field
     }
 };
-
 
 interface List {
     _id: string;
@@ -66,9 +66,9 @@ interface List {
     listType: "Favourite" | "To Watch" | "Custom";
     content: typeof ContentSummary[];
     subscribers?: string[];
-  }
+}
 
-  const addContentToList: HandlerFunc = {
+const addContentToList: HandlerFunc = {
     validate: null,
     run: function(this: any, { listId, userId, content }: AddContentToListOptions) {
         if (!this.userId) {
@@ -91,11 +91,12 @@ interface List {
             language: content.language,
             origin_country: content.origin_country,
             first_aired: content.first_aired,
-            last_aired: content.last_aired, 
+            last_aired: content.last_aired,
             seasons: content.seasons,
             genres: content.genres,
             directors: content.directors,
-            actors: content.actors
+            actors: content.actors,
+            popularity: content.popularity // Add popularity field
         };
 
         ListCollection.update(
@@ -104,7 +105,6 @@ interface List {
         );
     }
 };
-
 
 /**
  * Defines two functions:
@@ -119,7 +119,7 @@ const createList: HandlerFunc = {
         }
 
         // Retrieve user information from the database
-        const user = Meteor.users.findOne({_id: this.userId});
+        const user = Meteor.users.findOne({ _id: this.userId });
 
         if (!user) {
             throw new Meteor.Error('not-found', 'User not found');
@@ -145,9 +145,6 @@ const createList: HandlerFunc = {
     }
 };
 
-
-
-
 const readList: HandlerFunc = {
     validate: null,
     run: function(this: any, { userId }: GetListOptions) {
@@ -159,11 +156,10 @@ const readList: HandlerFunc = {
     }
 }
 
-
 const updateList: HandlerFunc = {
     validate: null,
     run: function(this: any, { listId, updateFields }: { listId: string, updateFields: Partial<List> }) {
-        
+
         if (!this.userId) {
             console.error('Error: User not logged in.');
             throw new Meteor.Error('not-authorized', 'You must be logged in to update a list');
@@ -194,8 +190,6 @@ const updateList: HandlerFunc = {
     }
 };
 
-
-
 const deleteList: HandlerFunc = {
     validate: null,
     run: function(this: any, { listId }: { listId: string }) {
@@ -220,8 +214,6 @@ const deleteList: HandlerFunc = {
     }
 };
 
-
-
 const removeContent: HandlerFunc = {
     validate: null,
     run: function(this: any, { listId, contentId }: { listId: string, contentId: number }) {
@@ -243,7 +235,6 @@ const removeContent: HandlerFunc = {
         );
     }
 };
-
 
 // Instantiate the handler and add all handler functions
 const ListHandler = new Handler("list")
