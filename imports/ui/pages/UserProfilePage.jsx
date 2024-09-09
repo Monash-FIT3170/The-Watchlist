@@ -105,9 +105,18 @@ const UserProfilePage = () => {
     }
   }, [userId, userProfile]);
 
+  const isVisible = (list) => {
+    if (list.listType !== "Custom") {  return false }
+
+    if (list.visibility == "PUBLIC") { return true }
+    else if (list.visibility == "FOLLOWERS"){ return isFollowing(userId) }
+    else { return false } // else visibility = ONLY_ME
+
+  };
+  
   const favouritesList = userLists.find((list) => list.listType === 'Favourite');
   const toWatchList = userLists.find((list) => list.listType === 'To Watch');
-  const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
+  const customWatchlists = userLists.filter(isVisible);
 
   console.log(userProfile)
 
