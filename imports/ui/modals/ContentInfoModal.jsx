@@ -5,6 +5,7 @@ import Scrollbar from '../components/scrollbar/ScrollBar';
 import { useTracker } from 'meteor/react-meteor-data';
 import { RatingCollection } from '../../db/Rating';
 import { FaEye, FaEyeSlash } from 'react-icons/fa'; // Import the icons
+import SingleStarRating from '../components/ratings/SingleStarRating';
 
 const popcornUrl = "./images/popcorn-banner.png"; // Default image URL
 
@@ -26,6 +27,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
   const [seasonAverageRating, setSeasonAverageRating] = useState(0);
   const [seasonTotalRatings, setSeasonTotalRatings] = useState(0);
   const [isEpisodeListVisible, setIsEpisodeListVisible] = useState(false);
+  const [seasonRatings, setSeasonRatings] = useState({}); // Store ratings for each season
 
   // Use Meteor's reactive data system to fetch season ratings
   useTracker(() => {
@@ -147,22 +149,33 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
 
   console.log("Rendered ContentInfoModal with rating:", rating, "userRating:", userRating, "totalRatings:", totalRatings);
 
-  // Fetch the average rating and total ratings for the selected season
   useEffect(() => {
-    if (selectedSeason) {
-      Meteor.call('ratings.getSeasonAverage', {
-        contentId: content.contentId,
-        seasonId: selectedSeason,
-      }, (error, result) => {
-        if (!error && result) {
-          setSeasonAverageRating(result.averageRating);
-          setSeasonTotalRatings(result.totalRatings);
-        } else {
-          console.error('Error fetching season average rating:', error);
-        }
+    if (content.seasons && contentId) {
+      content.seasons.forEach((season) => {
+        Meteor.call('ratings.getSeasonAverage', {
+          contentId,
+          seasonId: season.season_number,
+        }, (error, result) => {
+          if (!error && result) {
+            // Update the ratings for each season
+            setSeasonRatings((prevRatings) => ({
+              ...prevRatings,
+              [season.season_number]: result.averageRating,
+            }));
+
+            // If the season is selected, update its specific rating and total ratings
+            if (selectedSeason === season.season_number) {
+              setSeasonAverageRating(result.averageRating);
+              setSeasonTotalRatings(result.totalRatings);
+            }
+          } else {
+            console.error('Error fetching season average rating:', error);
+          }
+        });
       });
     }
-  }, [selectedSeason, content.contentId]);
+  }, [content.seasons, contentId, selectedSeason]);
+
 
   const addRating = (userId, contentId, contentType, rating) => {
     Meteor.call('ratings.addOrUpdate', { userId, contentId, contentType, rating }, (error) => {
@@ -336,7 +349,16 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
                             loadEpisodes(season.season_number);
                           }}
                         >
-                          Season {season.season_number}
+                          <span className="inline-flex items-center">
+                            Season {season.season_number}
+                            {/* Conditionally show the star icon if the season has been rated */}
+                            {seasonRatings[season.season_number] ? (
+                              <div className="ml-2 inline-flex">
+                                <SingleStarRating totalStars={1} rating={seasonRatings[season.season_number] / 5} />
+                              </div>
+                            ) : null}
+                          </span>
+
                         </button>
                       ))}
                     </div>
