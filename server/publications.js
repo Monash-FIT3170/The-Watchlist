@@ -121,3 +121,12 @@ Meteor.publish('searchContent', function(searchParams) {
     sort: { popularity: -1 }
   });
 });
+
+Meteor.publish('seasonRatings', function (contentId, seasonId) {
+
+  return RatingCollection.find({
+    contentId,
+    seasonId,
+    contentType: "Season"
+  });
+});
