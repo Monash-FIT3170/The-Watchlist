@@ -6,6 +6,8 @@ import ContentList from '../components/lists/ContentList';
 import { ListCollection } from '../../db/List';
 import ListDisplay from '../components/lists/ListDisplay';
 import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
+import { Select } from '@headlessui/react'
+import clsx from 'clsx'
 
 
 const UserSettingsPage= () => {
@@ -29,14 +31,42 @@ const UserSettingsPage= () => {
         <ProfileDropdown user={currentUser} />
       </div>
       <h1 className="text-7xl text-white font-bold mb-2">User Settings</h1>
+
+      
       <div className="flex gap-4 mb-4">
       </div>
     </div>
     <div classname = "flex flex-col items-center">
         <h1 className = "ml-4 text-4xl text-white font-bold mb-2">Profile Visibility</h1>
-        <h1 className = "ml-4 mt-10 text-4xl text-white font-bold mb-2">Profile Photo</h1>
-        <button className="mt-5 ml-10 text-blue-700 hover:text-white border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500 dark:focus:ring-blue-800">Change Photo</button>
-        <h1 className = "ml-4 text-4xl text-white font-bold mb-2">Change Username</h1>
+        <div className = "ml-4 mt-2">
+        <Select name="status"className={clsx(
+              'mt-5 block w-1/3 appearance-none rounded-lg border-none bg-white/5 py-1.5 px-3 text-md text-white',
+              'focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25'
+            )} aria-label="Project status">
+      <option value="active">Public</option>
+      <option value="paused">Private</option>
+    </Select>
+    </div>
+    <button
+          className="mt-4 ml-72 text-md text-white py-2 px-6 rounded-full shadow bg-less-dark hover:bg-darker"
+        >
+          Save
+        </button>
+
+   
+        <h1 className = "ml-4 mt-3 text-4xl text-white font-bold mb-4">Profile Photo</h1>
+        <div className = "flex flex-row">
+        <img
+            src={ currentUser?.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"}
+            alt="avatar"
+            className="ml-5 aspect-square w-32 h-32 object-cover rounded-full shadow-2xl transition-opacity duration-300 ease-in-out"
+
+            style={{ zIndex: 10 }} // Ensures the image is always clickable
+          />
+        <button className="h-12  mt-10 ml-10 text-white bg-less-dark  hover:bg-darker rounded-full py-2 px-6">Change Photo</button>
+        </div>
+        <h1 className = "mt-5 ml-4 text-4xl text-white font-bold mb-2">Change Username</h1>
+        
         </div>
     </>
   );
