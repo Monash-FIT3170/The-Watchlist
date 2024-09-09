@@ -20,6 +20,7 @@ import FollowersFollowingPage from "./pages/FollowersFollowingPage.jsx";
 import AllUsersPage from "./pages/AllUsersPage.jsx";
 import AllRatedContentPage from "./pages/AllRatedContentPage.jsx";
 import Loading from "./pages/Loading.jsx";
+import UserSettingsPage from "./pages/UserSettingsPage.jsx";
 import { ListCollection } from '../db/List.tsx';
 
 export const App = () => {
@@ -77,6 +78,7 @@ export const App = () => {
               <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
               <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
               <Route path="/profile" element={<UserProfile currentUser={currentUser} />} />
+              <Route path="/user-settings" element={<UserSettingsPage currentUser={currentUser} />} />
               <Route path="/ai-picks" element={<AIPicks currentUser={currentUser} />} />
               <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
               <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
