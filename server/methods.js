@@ -254,9 +254,10 @@ Meteor.methods({
 });
 
 Meteor.methods({
-  'list.setVisibility'(listId, visibleType) {
+  'list.setVisibility'({listId, visibleType}) {
     check(listId, String);
     check(visibleType, String);
+
 
     if (!this.userId) {
       throw new Meteor.Error('not-authorized', 'You must be logged in to set list visibility.');
