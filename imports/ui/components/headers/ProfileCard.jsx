@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaUserPlus, FaPencilAlt } from 'react-icons/fa';
 import { Meteor } from 'meteor/meteor';
 import ProfileDropdown from '../profileDropdown/ProfileDropdown';
+import AvatarModal from '../../modals/AvatarModal';
 
 const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   const [isFollowing, setIsFollowing] = useState(false);
@@ -31,8 +32,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
     setShowAvatarModal(true);
   };
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
+  const handleAvatarChange = (file) => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -45,9 +45,10 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
           }
         });
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); 
     }
   };
+  
 
   const handlePresetAvatarSelect = (avatarUrl) => {
     Meteor.call('updateAvatar', user._id, avatarUrl, (error) => {
@@ -59,12 +60,6 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       }
     });
   };
-
-  const presetAvatars = [
-    "https://randomuser.me/api/portraits/lego/1.jpg",
-    "https://randomuser.me/api/portraits/lego/2.jpg",
-    "https://randomuser.me/api/portraits/lego/3.jpg",
-  ];
 
   return (
     <div className="relative flex items-center h-72 p-4 bg-gradient-to-tl from-zinc-900 via-zinc-700 to-zinc-600 rounded-t-lg shadow-md">
@@ -121,36 +116,11 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       </div>
 
       {showAvatarModal && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4 text-center">Change Profile Picture</h3>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className="mb-4 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
-            />
-            <div className="flex gap-4 justify-center mb-4">
-              {presetAvatars.map((avatarUrl, index) => (
-                <img
-                  key={index}
-                  src={avatarUrl}
-                  alt="preset avatar"
-                  className="w-16 h-16 object-cover rounded-full cursor-pointer transition-transform transform hover:scale-110"
-                  onClick={() => handlePresetAvatarSelect(avatarUrl)}
-                />
-              ))}
-            </div>
-            <div className="flex justify-end">
-              <button
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                onClick={() => setShowAvatarModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+        <AvatarModal
+          handleAvatarChange={handleAvatarChange}
+          handlePresetAvatarSelect={handlePresetAvatarSelect}
+          setShowAvatarModal={setShowAvatarModal}
+        />
       )}
     </div>
   );
