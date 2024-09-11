@@ -3,7 +3,7 @@ import { Meteor } from 'meteor/meteor';
 import { Accounts } from 'meteor/accounts-base';
 import { useNavigate } from 'react-router-dom';
 import { passwordStrength } from 'check-password-strength';
-import LoginWithGithub from '../components/login/LoginWithGithub'
+import LoginWithGithub from '../components/login/LoginWithGithub';
 import LoginWithGoogle from '../components/login/LoginWithGoogle';
 
 const LoginPage = () => {
@@ -103,11 +103,60 @@ const LoginPage = () => {
           className="w-full p-2 pl-4 bg-dark text-white rounded-full"
           required
         />
-        <p className={`p-2 ${strength === 'Too weak' ? 'text-red-600' : strength === 'Weak' ? 'text-yellow-500' : strength === 'Medium' ? 'text-blue-500' : 'text-green-500'}`}>
-          {strength} Password
-        </p>
+
+        {/* Password Strength Indicator */}
+        {password && (
+          <div className="w-full mt-2 space-y-2">
+            {/* Progress Bar */}
+            <div className="relative pt-1">
+              <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
+                <div
+                  style={{
+                    width:
+                      strength === 'Too weak'
+                        ? '25%'
+                        : strength === 'Weak'
+                          ? '50%'
+                          : strength === 'Medium'
+                            ? '75%'
+                            : '100%',
+                  }}
+                  className={`flex flex-col text-center whitespace-nowrap text-white justify-center ${strength === 'Too weak'
+                      ? 'bg-red-600'
+                      : strength === 'Weak'
+                        ? 'bg-yellow-500'
+                        : strength === 'Medium'
+                          ? 'bg-blue-500'
+                          : 'bg-green-500'
+                    }`}
+                ></div>
+              </div>
+            </div>
+
+            {/* Strength Label */}
+            <p
+              className={`text-center text-xs font-semibold ${strength === 'Too weak'
+                  ? 'text-red-600'
+                  : strength === 'Weak'
+                    ? 'text-yellow-500'
+                    : strength === 'Medium'
+                      ? 'text-blue-500'
+                      : 'text-green-500'
+                }`}
+            >
+              {strength === 'Too weak'
+                ? 'Password is too weak. Consider adding numbers, symbols, and more characters.'
+                : strength === 'Weak'
+                  ? 'Password is weak. Add a mix of uppercase, lowercase, and special characters.'
+                  : strength === 'Medium'
+                    ? 'Password is decent but could be stronger.'
+                    : 'Strong password!'}
+            </p>
+          </div>
+        )}
+
         {error && <p className="text-red-600 p-2 ">{error}</p>}
-        <button type="submit" className="w-2/3 p-1.5 mb-3 bg-magenta font-bold text-white rounded-full hover:bg-pink-700">
+        <button type="submit" className="w-2/3 p-1.5 mt-3 mb-3 bg-magenta font-bold text-white rounded-full hover:bg-pink-700">
           {isRegistering ? 'Sign Up' : 'Log In'}
         </button>
 
