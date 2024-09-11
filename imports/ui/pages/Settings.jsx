@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { passwordStrength } from 'check-password-strength';
 
-
 const Settings = () => {
     const currentUser = useTracker(() => {
         const handler = Meteor.subscribe('userData', Meteor.userId());
@@ -13,10 +12,10 @@ const Settings = () => {
     }, []);
 
     const [username, setUsername] = useState('');
-    const [oldPassword, setOldPassword] = useState(''); // State for old password
-    const [newPassword, setNewPassword] = useState(''); // State for new password
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [showConfirmation, setShowConfirmation] = useState(false); // State to toggle delete confirmation
+    const [showConfirmation, setShowConfirmation] = useState(false);
     const [strength, setStrength] = useState('');
 
     useEffect(() => {
@@ -31,7 +30,6 @@ const Settings = () => {
             return;
         }
 
-        // Call method to update user profile
         Meteor.call('users.updateProfile', { username }, (error, result) => {
             if (error) {
                 setErrorMessage(error.reason);
@@ -51,7 +49,6 @@ const Settings = () => {
             return;
         }
 
-        // Change user password
         Accounts.changePassword(oldPassword, newPassword, (error) => {
             if (error) {
                 setErrorMessage(error.reason);
@@ -70,88 +67,168 @@ const Settings = () => {
     };
 
     const showChangePassword = currentUser && currentUser.emails;
+
     return (
-        <div className="flex flex-col min-h-screen bg-darker p-6">
-            <h1 className="text-4xl font-bold mb-6">Account Settings</h1>
+        <div className="flex flex-col min-h-screen bg-darker p-6 text-white">
+            <h1 className="text-3xl font-bold mb-1">Account Settings</h1>
+            <h4 className="mb-6 text-gray-400">Settings and options for The Watchlist</h4>
 
             {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
-            <div className="mb-6 space-y-4">
-                <label className="text-2xl font-bold text-white">Change Username</label>
-                <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="text-black mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                />
-                <button
-                    onClick={handleUpdate}
-                    className="bg-indigo-600 text-white w-full px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
-                >
-                    Update Profile
-                </button>
-            </div>
+            {/* Change Username Section */}
+            <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                <div>
+                    <label className="block text-lg font-semibold text-white">Name</label>
+                    <p className="text-gray-400">Changes will update your username.</p>
+                </div>
 
-            {/* Only show Change Password section if the user has a password */}
-            {showChangePassword && (
-                <div className="space-y-4 mt-8">
-                    <h2 className="mb-6 text-2xl font-bold">Change Password</h2>
-                    <label className="text-xl font-bold">Old Password</label>
+                <div className="flex items-center space-x-4">
                     <input
-                        type="password"
-                        value={oldPassword}
-                        placeholder="Current Password"
-                        onChange={(e) => setOldPassword(e.target.value)}
-                        className="text-black mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className="bg-darker text-white mt-1 p-3 block w-full shadow-sm sm:text-sm border border-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
                     />
-                    <label className="text-xl font-bold">New Password</label>
-                    <input
-                        type="password"
-                        value={newPassword}
-                        placeholder="New Password"
-                        minLength={6}
-                        onChange={(e) => {
-                            const newPass = e.target.value;
-                            setNewPassword(newPass); // Update the input field's value
-                            handlePasswordStrength(newPass); // Check the password strength
-                        }}
-                        className="text-black mt-1 p-2 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                    />
-                    <p className={`p-2 ${strength === 'Too weak' ? 'text-red-600' : strength === 'Weak' ? 'text-yellow-500' : strength === 'Medium' ? 'text-blue-500' : 'text-green-500'}`}>
-                        {strength} Password
-                    </p>
                     <button
-                        onClick={handlePasswordChange}
-                        className="bg-red-600 text-white w-full px-7 py-2 rounded-md hover:bg-red-700 transition-colors"
+                        onClick={handleUpdate}
+                        className="bg-[#7B1450] text-white px-4 py-2 rounded-md hover:bg-pink-700 transition-colors w-auto"
                     >
-                        Change Password
+                        Update
                     </button>
                 </div>
+            </div>
+
+            <hr className="border-t border-gray-700 my-4" />
+
+            {/* Change Password Section */}
+            {/* Change Password Section */}
+            {showChangePassword && (
+                <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+    {/* Left Column - Label and Description */}
+    <div>
+        <label className="block text-lg font-semibold text-white">Password</label>
+        <p className="text-gray-400">Update your password to secure your account.</p>
+    </div>
+
+    {/* Right Column - Inputs and Button */}
+    <div className="space-y-4">
+        {/* Old Password Field */}
+        <div className="flex items-center space-x-4">
+            <input
+                type="password"
+                value={oldPassword}
+                placeholder="Current Password"
+                onChange={(e) => setOldPassword(e.target.value)}
+                className="bg-darker text-white mt-1 p-3 block w-full shadow-sm sm:text-sm border border-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            />
+        </div>
+
+        {/* New Password Field with Button */}
+        <div className="flex items-center space-x-4">
+            <input
+                type="password"
+                value={newPassword}
+                placeholder="New Password"
+                minLength={6}
+                onChange={(e) => {
+                    const newPass = e.target.value;
+                    setNewPassword(newPass);
+                    handlePasswordStrength(newPass);
+                }}
+                className="bg-darker text-white mt-1 p-3 block w-3/4 shadow-sm sm:text-sm border border-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+                onClick={handlePasswordChange}
+                className="bg-[#7B1450] text-white px-4 py-2 rounded-md hover:bg-pink-700 transition-colors w-auto whitespace-nowrap"
+            >
+                Change Password
+            </button>
+        </div>
+
+        {/* Password Strength Indicator */}
+        {newPassword && (
+            <div className="space-y-2">
+                {/* Progress Bar */}
+                <div className="relative pt-1">
+                    <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
+                        <div
+                            style={{
+                                width:
+                                    strength === 'Too weak'
+                                        ? '25%'
+                                        : strength === 'Weak'
+                                        ? '50%'
+                                        : strength === 'Medium'
+                                        ? '75%'
+                                        : '100%',
+                            }}
+                            className={`flex flex-col text-center whitespace-nowrap text-white justify-center ${
+                                strength === 'Too weak'
+                                    ? 'bg-red-600'
+                                    : strength === 'Weak'
+                                    ? 'bg-yellow-500'
+                                    : strength === 'Medium'
+                                    ? 'bg-blue-500'
+                                    : 'bg-green-500'
+                            }`}
+                        ></div>
+                    </div>
+                </div>
+
+                {/* Strength Label */}
+                <p
+                    className={`font-semibold ${
+                        strength === 'Too weak'
+                            ? 'text-red-600'
+                            : strength === 'Weak'
+                            ? 'text-yellow-500'
+                            : strength === 'Medium'
+                            ? 'text-blue-500'
+                            : 'text-green-500'
+                    }`}
+                >
+                    {strength === 'Too weak'
+                        ? 'Password is too weak. Consider adding numbers, symbols, and more characters.'
+                        : strength === 'Weak'
+                        ? 'Password is weak. Add a mix of uppercase, lowercase, and special characters.'
+                        : strength === 'Medium'
+                        ? 'Password is decent but could be stronger.'
+                        : 'Strong password!'}
+                </p>
+            </div>
+        )}
+    </div>
+</div>
+
             )}
+
+
+
+            <hr className="border-t border-gray-700 my-4" />
 
             <div className="mt-8">
                 {!showConfirmation ? (
                     <button
                         onClick={() => setShowConfirmation(true)}
-                        className="bg-red-600 text-white w-full px-7 py-2 rounded-md hover:bg-red-700 transition-colors"
+                        className="bg-red-600 text-white px-7 py-2 rounded-md hover:bg-red-700 transition-colors w-auto"
                     >
                         Delete Account
                     </button>
                 ) : (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-                        <div className="bg-neutral-800 p-6 rounded-md">
-                            <h2 className="text-xl font-bold">Are you sure?</h2>
-                            <h2 className="text-xl font-bold">This action cannot be undone.</h2>
-                            <div className="mt-4 flex justify-between">
+                        <div className="bg-gray-800 p-6 rounded-md">
+                            <h2 className="text-lg font-semibold">Are you sure?</h2>
+                            <p>This action cannot be undone.</p>
+                            <div className="mt-4 flex justify-between space-x-4">
                                 <button
                                     onClick={handleDeleteUser}
-                                    className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                                    className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors w-auto"
                                 >
                                     Yes, Delete
                                 </button>
                                 <button
                                     onClick={() => setShowConfirmation(false)}
-                                    className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+                                    className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors w-auto"
                                 >
                                     Cancel
                                 </button>
@@ -161,8 +238,8 @@ const Settings = () => {
                 )}
             </div>
         </div>
-    );
 
+    );
 };
 
 export default Settings;
