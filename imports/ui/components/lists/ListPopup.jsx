@@ -13,6 +13,7 @@ import ContentInfoModal from "../../modals/ContentInfoModal";  // Import the mod
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import { EmailShareButton, FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailIcon, FacebookIcon, TwitterIcon, WhatsappIcon } from "react-share";
+import { EmailShareButton, FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailIcon, FacebookIcon, TwitterIcon, WhatsappIcon } from "react-share";
 
 const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [list, setList] = useState(null);
@@ -39,6 +40,9 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [shareUrl, setShareUrl] = useState();
     const shareQuote = "Check out this watchlist!";
     const iconSize = 44;
+    const [shareUrl, setShareUrl] = useState();
+    const shareQuote = "Check out this watchlist!";
+    const iconSize = 44;
 
     useEffect(() => {
         if (listId) {
@@ -49,6 +53,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     setList(null);
                 } else {
                     setList(result);
+                    setShareUrl(`http://localhost:3000/watchlist/${result._id}`);
                     setShareUrl(`http://localhost:3000/watchlist/${result._id}`);
                 }
             });
@@ -214,9 +219,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     toast.success("Content removed successfully!");
                     const updatedContent = list.content.filter(item => item.contentId !== contentId);
                     setList({ ...list, content: updatedContent });
+                    setList({ ...list, content: updatedContent });
                 }
             });
         }
+    };
     };
 
     const confirmDeleteList = (listId) => {
@@ -235,10 +242,12 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     };
 
 
+
     const resetConfirmationState = () => {
         setShowConfirmDialog(false);
         setContentToDelete(null);
         setListToDelete(null);
+    };
     };
 
     const handleDeleteConfirmed = () => {
@@ -289,34 +298,20 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                         {/* <FacebookShareButton url={shareUrl} quote={shareQuote}>
                             <FacebookIcon size={iconSize} round />
                         </FacebookShareButton> */}
-                        <button
-                            onClick={() => handleCopy(shareUrl)}
-                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
-                            title="Copy Link"
-                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                        >
-                            <FiLink size="24" />
-                        </button>
-                        <button title="Share to Twitter">
-                            <TwitterShareButton url={shareUrl} title={shareQuote}>
-                                <TwitterIcon size={iconSize} round />
-                            </TwitterShareButton>
-                        </button>
-                        <button title="Share to Whatsapp">
-                            <WhatsappShareButton url={shareUrl} title={shareQuote}>
-                                <WhatsappIcon size={iconSize} round />
-                            </WhatsappShareButton>
-                        </button>
-                        <button title="Send in Email">
-                            <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
-                                <EmailIcon size={iconSize} round />
-                            </EmailShareButton>
-                        </button>
-
+                        <TwitterShareButton url={shareUrl} title={shareQuote}>
+                            <TwitterIcon size={iconSize} round />
+                        </TwitterShareButton>
+                        <WhatsappShareButton url={shareUrl} title={shareQuote}>
+                            <WhatsappIcon size={iconSize} round />
+                        </WhatsappShareButton>
+                        <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
+                            <EmailIcon size={iconSize} round />
+                        </EmailShareButton>
                         <button
                             onClick={handleRenameListClick}
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full flex items-center justify-center"
                             title="Rename List"
+                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
                             style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
                         >
                             <FiEdit size="24" />
@@ -326,6 +321,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                             className="bg-red-500 hover:bg-red-700 text-white font-bold rounded-full flex items-center justify-center"
                             title="Delete List"
                             style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
                         >
                             <FiTrash2 size="24" />
                         </button>
@@ -333,6 +329,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                             onClick={() => setIsGridView(!isGridView)}
                             className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
                             title={isGridView ? "Switch to List View" : "Switch to Grid View"}
+                            style={{ width: iconSize, height: iconSize }}
                             style={{ width: iconSize, height: iconSize }}
                         >
                             {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
