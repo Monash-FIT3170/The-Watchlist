@@ -85,7 +85,7 @@ export const App = () => {
               <Route path="/" element={currentUser ? <Navigate to="/home" /> : <Navigate to="/login" />} />
               <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />
               <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
-              <Route path="/watchlist/:listId" element={<SharedWatchlistPage/>} />
+              <Route path="/watchlist/:listId" element={<SharedWatchlistPage currentUser={currentUser} />} />
             </Routes>
           </Scrollbar>
         ) : (

@@ -5,7 +5,7 @@ import SharedWatchlistHeader from '../components/headers/SharedWatchlistHeader';
 import Scrollbar from '../components/scrollbar/ScrollBar';
 import ContentItem from '../components/contentItems/ContentItem';
 
-const SharedWatchlistPage = () => {
+const SharedWatchlistPage = ({currentUser}) => {
     const { listId } = useParams();
     const [list, setList] = useState([]);
     const [filteredContent, setFilteredContent] = useState([]);
@@ -50,7 +50,7 @@ const SharedWatchlistPage = () => {
 
     return (
         <div className="flex flex-col min-h-screen bg-darker">
-            <SharedWatchlistHeader username={list.userName} listName={list.title} tabMapping={tabMapping} selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+            <SharedWatchlistHeader username={list.userName} listName={list.title} tabMapping={tabMapping} selectedTab={selectedTab} setSelectedTab={setSelectedTab} currentUser={currentUser} />
             <Scrollbar className="search-results-container flex-grow overflow-auto">
                 <div className="grid-responsive">
                     {filteredContent.length > 0 ? filteredContent.map((content, index) => (
