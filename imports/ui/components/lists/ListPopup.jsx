@@ -12,8 +12,6 @@ import ContentItem from "../contentItems/ContentItem";
 import ContentInfoModal from "../../modals/ContentInfoModal";  // Import the modal component
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import { EmailShareButton, FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailIcon, FacebookIcon, TwitterIcon, WhatsappIcon } from "react-share";
 import { EmailShareButton, FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailIcon, FacebookIcon, TwitterIcon, WhatsappIcon } from "react-share";
 
 const ListPopup = ({ listId, onClose, onRenameList }) => {
@@ -231,12 +229,10 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     toast.success("Content removed successfully!");
                     const updatedContent = list.content.filter(item => item.contentId !== contentId);
                     setList({ ...list, content: updatedContent });
-                    setList({ ...list, content: updatedContent });
                 }
             });
         }
     };
-};
 
 const confirmDeleteList = (listId) => {
     if (list.userId !== Meteor.userId()) {
@@ -249,17 +245,16 @@ const confirmDeleteList = (listId) => {
         return;
     }
 
-    setListToDelete(listId);
-    setShowConfirmDialog(true);
-};
+        setListToDelete(listId);
+        setShowConfirmDialog(true);
+    };
 
 
-
-const resetConfirmationState = () => {
-    setShowConfirmDialog(false);
-    setContentToDelete(null);
-    setListToDelete(null);
-};
+    const resetConfirmationState = () => {
+        setShowConfirmDialog(false);
+        setContentToDelete(null);
+        setListToDelete(null);
+    };
 
 const handleDeleteConfirmed = () => {
     if (contentToDelete !== null) {
@@ -308,6 +303,18 @@ if (!list) return <div>No list found.</div>;
                         {list.title.length > 30 ? `${list.title.slice(0, 30)}...` : list.title}
                     </h2>
                     <div className="flex space-x-2">
+                        {/* <FacebookShareButton url={shareUrl} quote={shareQuote}>
+                            <FacebookIcon size={iconSize} round />
+                        </FacebookShareButton> */}
+                        <TwitterShareButton url={shareUrl} title={shareQuote}>
+                            <TwitterIcon size={iconSize} round />
+                        </TwitterShareButton>
+                        <WhatsappShareButton url={shareUrl} title={shareQuote}>
+                            <WhatsappIcon size={iconSize} round />
+                        </WhatsappShareButton>
+                        <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
+                            <EmailIcon size={iconSize} round />
+                        </EmailShareButton>
                         <button
                             onClick={() => handleCopy(shareUrl)}
                             className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
@@ -343,7 +350,6 @@ if (!list) return <div>No list found.</div>;
                             className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
                             title="Rename List"
                             style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
                         >
                             <FiEdit size="24" />
                         </button>
@@ -353,7 +359,6 @@ if (!list) return <div>No list found.</div>;
                             className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-red-500 hover:bg-red-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
                             title="Delete List"
                             style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
                         >
                             <FiTrash2 size="24" />
                         </button>
@@ -361,7 +366,6 @@ if (!list) return <div>No list found.</div>;
                             onClick={() => setIsGridView(!isGridView)}
                             className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
                             title={isGridView ? "Switch to List View" : "Switch to Grid View"}
-                            style={{ width: iconSize, height: iconSize }}
                             style={{ width: iconSize, height: iconSize }}
                         >
                             {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
