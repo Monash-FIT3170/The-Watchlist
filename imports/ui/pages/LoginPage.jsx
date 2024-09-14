@@ -108,40 +108,42 @@ const LoginPage = () => {
         {password && (
           <div className="w-full mt-2 space-y-2">
             {/* Progress Bar */}
-            <div className="relative pt-1">
-              <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
-                <div
-                  style={{
-                    width:
-                      strength === 'Too weak'
-                        ? '25%'
-                        : strength === 'Weak'
-                          ? '50%'
-                          : strength === 'Medium'
-                            ? '75%'
-                            : '100%',
-                  }}
-                  className={`flex flex-col text-center whitespace-nowrap text-white justify-center ${strength === 'Too weak'
+            {isRegistering && (
+              <div className="relative pt-1">
+                <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
+                  <div
+                    style={{
+                      width:
+                        strength === 'Too weak'
+                          ? '25%'
+                          : strength === 'Weak'
+                            ? '50%'
+                            : strength === 'Medium'
+                              ? '75%'
+                              : '100%',
+                    }}
+                    className={`flex flex-col text-center whitespace-nowrap text-white justify-center ${strength === 'Too weak'
                       ? 'bg-red-600'
                       : strength === 'Weak'
                         ? 'bg-yellow-500'
                         : strength === 'Medium'
                           ? 'bg-blue-500'
                           : 'bg-green-500'
-                    }`}
-                ></div>
+                      }`}
+                  ></div>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Strength Label */}
-            <p
+            {isRegistering && (<p
               className={`text-center text-xs font-semibold ${strength === 'Too weak'
-                  ? 'text-red-600'
-                  : strength === 'Weak'
-                    ? 'text-yellow-500'
-                    : strength === 'Medium'
-                      ? 'text-blue-500'
-                      : 'text-green-500'
+                ? 'text-red-600'
+                : strength === 'Weak'
+                  ? 'text-yellow-500'
+                  : strength === 'Medium'
+                    ? 'text-blue-500'
+                    : 'text-green-500'
                 }`}
             >
               {strength === 'Too weak'
@@ -152,6 +154,8 @@ const LoginPage = () => {
                     ? 'Password is decent but could be stronger.'
                     : 'Strong password!'}
             </p>
+            )}
+
           </div>
         )}
 
