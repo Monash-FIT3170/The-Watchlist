@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTracker } from 'meteor/react-meteor-data';
 import RatingStar from "../ratings/RatingStar";
-import { FiEdit, FiTrash2, FiGrid, FiList } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiGrid, FiList, FiLink } from "react-icons/fi";
 import RenameListModal from "../../modals/RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import Scrollbar from '../scrollbar/ScrollBar';
@@ -248,6 +248,16 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         resetConfirmationState();
     };
 
+    const handleCopy = async (text) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            console.log('Copied to clipboard: ', text);
+            toast.success('Link copied to clipboard');
+        } catch (error) {
+            console.error('Unable to copy to clipboard:', error);
+        }
+    };
+
     const filteredContent = list?.content?.filter(item =>
         selectedTab === 'all' ||
         (selectedTab === 'movies' && item.contentType === 'Movie') ||
@@ -271,6 +281,14 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                         {/* <FacebookShareButton url={shareUrl} quote={shareQuote}>
                             <FacebookIcon size={iconSize} round />
                         </FacebookShareButton> */}
+                        <button
+                            onClick={() => handleCopy(shareUrl)}
+                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                            title="Copy Link"
+                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                        >
+                            <FiLink size="24" />
+                        </button>
                         <button title="Share to Twitter">
                             <TwitterShareButton url={shareUrl} title={shareQuote}>
                                 <TwitterIcon size={iconSize} round />
