@@ -256,30 +256,30 @@ const confirmDeleteList = (listId) => {
         setListToDelete(null);
     };
 
-const handleDeleteConfirmed = () => {
-    if (contentToDelete !== null) {
-        handleRemoveContentClick(contentToDelete);
-    } else if (listToDelete !== null) {
-        Meteor.call('list.delete', { listId: listToDelete }, (error) => {
-            if (error) {
-                console.error("Error deleting list:", error);
-            } else {
-                onClose();
-            }
-        });
-    }
-    resetConfirmationState();
-};
+    const handleDeleteConfirmed = () => {
+        if (contentToDelete !== null) {
+            handleRemoveContentClick(contentToDelete);
+        } else if (listToDelete !== null) {
+            Meteor.call('list.delete', { listId: listToDelete }, (error) => {
+                if (error) {
+                    console.error("Error deleting list:", error);
+                } else {
+                    onClose();
+                }
+            });
+        }
+        resetConfirmationState();
+    };
 
-const handleCopy = async (text) => {
-    try {
-        await navigator.clipboard.writeText(text);
-        console.log('Copied to clipboard: ', text);
-        toast.success('Link copied to clipboard');
-    } catch (error) {
-        console.error('Unable to copy to clipboard:', error);
-    }
-};
+    const handleCopy = async (text) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            console.log('Copied to clipboard: ', text);
+            toast.success('Link copied to clipboard');
+        } catch (error) {
+            console.error('Unable to copy to clipboard:', error);
+        }
+    };
 
 const filteredContent = list?.content?.filter(item =>
     selectedTab === 'all' ||
@@ -306,6 +306,14 @@ if (!list) return <div>No list found.</div>;
                         {/* <FacebookShareButton url={shareUrl} quote={shareQuote}>
                             <FacebookIcon size={iconSize} round />
                         </FacebookShareButton> */}
+                        <button
+                            onClick={() => handleCopy(shareUrl)}
+                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                            title="Copy Link"
+                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                        >
+                            <FiLink size="24" />
+                        </button>
                         <button title="Share to Twitter">
                             <TwitterShareButton url={shareUrl} title={shareQuote}>
                                 <TwitterIcon size={iconSize} round />
