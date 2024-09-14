@@ -22,6 +22,7 @@ import AllRatedContentPage from "./pages/AllRatedContentPage.jsx";
 import Loading from "./pages/Loading.jsx";
 import Settings from "./pages/Settings.jsx";
 import { ListCollection } from '../db/List.tsx';
+import SharedWatchlistPage from "./pages/SharedWatchlistPage.jsx";
 
 export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,6 +87,7 @@ export const App = () => {
               <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />
               <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
               <Route path="/settings" element={<Settings currentUser={currentUser} />} />
+              <Route path="/watchlist/:listId" element={<SharedWatchlistPage/>} />
             </Routes>
           </Scrollbar>
         ) : (
