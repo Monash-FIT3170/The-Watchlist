@@ -82,6 +82,12 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
     });
   };
 
+  const presetAvatars = [
+    "https://randomuser.me/api/portraits/lego/1.jpg",
+    "https://randomuser.me/api/portraits/lego/2.jpg",
+    "https://randomuser.me/api/portraits/lego/3.jpg",
+  ];
+
   return (
     <div className="relative flex items-center h-72 p-4 bg-gradient-to-tl from-zinc-900 via-zinc-700 to-zinc-600 rounded-t-lg shadow-md">
       <div className="absolute top-4 right-4">
