@@ -313,15 +313,22 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                         {/* <FacebookShareButton url={shareUrl} quote={shareQuote}>
                             <FacebookIcon size={iconSize} round />
                         </FacebookShareButton> */}
-                        <TwitterShareButton url={shareUrl} title={shareQuote}>
-                            <TwitterIcon size={iconSize} round />
-                        </TwitterShareButton>
-                        <WhatsappShareButton url={shareUrl} title={shareQuote}>
-                            <WhatsappIcon size={iconSize} round />
-                        </WhatsappShareButton>
-                        <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
-                            <EmailIcon size={iconSize} round />
-                        </EmailShareButton>
+                        <button title="Share to Twitter">
+                            <TwitterShareButton url={shareUrl} title={shareQuote}>
+                                <TwitterIcon size={iconSize} round />
+                            </TwitterShareButton>
+                        </button>
+                        <button title="Share to Whatsapp">
+                            <WhatsappShareButton url={shareUrl} title={shareQuote}>
+                                <WhatsappIcon size={iconSize} round />
+                            </WhatsappShareButton>
+                        </button>
+                        <button title="Send in Email">
+                            <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
+                                <EmailIcon size={iconSize} round />
+                            </EmailShareButton>
+                        </button>
+
                         <button
                             onClick={isCurrentUserList ? handleRenameListClick : null}
                             disabled={!isCurrentUserList}
