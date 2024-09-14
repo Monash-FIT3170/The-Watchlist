@@ -13,6 +13,7 @@ import ContentInfoModal from "../../modals/ContentInfoModal";  // Import the mod
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { EmailShareButton, FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailIcon, FacebookIcon, TwitterIcon, WhatsappIcon } from "react-share";
 
 const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [list, setList] = useState(null);
@@ -37,6 +38,9 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const renameListRef = useRef(null); // Ref for RenameListModal
     const [contentToDelete, setContentToDelete] = useState(null);
     const navigate = useNavigate();
+    const [shareUrl, setShareUrl] = useState();
+    const shareQuote = "Check out this watchlist!";
+    const iconSize = 44;
 
     useEffect(() => {
         if (listId) {
@@ -47,6 +51,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     setList(null);
                 } else {
                     setList(result);
+                    setShareUrl(`http://localhost:3000/watchlist/${result._id}`);
                 }
             });
         }
@@ -286,12 +291,24 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                         {list.title.length > 30 ? `${list.title.slice(0, 30)}...` : list.title}
                     </h2>
                     <div className="flex space-x-2">
+                        {/* <FacebookShareButton url={shareUrl} quote={shareQuote}>
+                            <FacebookIcon size={iconSize} round />
+                        </FacebookShareButton> */}
+                        <TwitterShareButton url={shareUrl} title={shareQuote}>
+                            <TwitterIcon size={iconSize} round />
+                        </TwitterShareButton>
+                        <WhatsappShareButton url={shareUrl} title={shareQuote}>
+                            <WhatsappIcon size={iconSize} round />
+                        </WhatsappShareButton>
+                        <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
+                            <EmailIcon size={iconSize} round />
+                        </EmailShareButton>
                         <button
                             onClick={isCurrentUserList ? handleRenameListClick : null}
                             disabled={!isCurrentUserList}
                             className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
                             title="Rename List"
-                            style={{ width: 44, height: 44 }}
+                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
                         >
                             <FiEdit size="24" />
                         </button>
@@ -300,7 +317,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                             disabled={!isCurrentUserList}
                             className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-red-500 hover:bg-red-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
                             title="Delete List"
-                            style={{ width: 44, height: 44 }}
+                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
                         >
                             <FiTrash2 size="24" />
                         </button>
@@ -308,7 +325,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                             onClick={() => setIsGridView(!isGridView)}
                             className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
                             title={isGridView ? "Switch to List View" : "Switch to Grid View"}
-                            style={{ width: 44, height: 44 }}
+                            style={{ width: iconSize, height: iconSize }}
                         >
                             {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
                         </button>
