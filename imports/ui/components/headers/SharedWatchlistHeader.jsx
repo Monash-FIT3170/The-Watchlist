@@ -1,9 +1,13 @@
 import React from 'react';
+import ProfileDropdown from '../profileDropdown/ProfileDropdown';
 
-const SharedWatchlistHeader = ({ username, listName, tabMapping, selectedTab, setSelectedTab }) => {
+const SharedWatchlistHeader = ({ username, listName, tabMapping, selectedTab, setSelectedTab, currentUser }) => {
 
     return (
         <div className="flex flex-col justify-end items-start w-full h-72 p-4 bg-gradient-to-tl from-zinc-900 via-zinc-700 to-zinc-600 rounded-t-lg shadow-md mb-4">
+            <div className="absolute top-4 right-4">
+                <ProfileDropdown user={currentUser} />
+            </div>
             <h1 className="text-7xl text-white font-bold mb-2">{`${username} Watchlist: ${listName}`}</h1>
             <div className="flex gap-4 mb-4">
                 <div>
