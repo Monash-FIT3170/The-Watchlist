@@ -45,30 +45,7 @@ const UserProfilePage = () => {
     };
   }, [userId]);
 
-  const isFollowing = (userId) => {
-    const currentUser = Meteor.user();
-    return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
-  };
 
-  const handleFollow = (userId) => {
-    Meteor.call('followUser', userId, (error, result) => {
-      if (error) {
-        console.error('Error following user:', error);
-      } else {
-        console.log('Followed user successfully');
-      }
-    });
-  };
-
-  const handleUnfollow = (userId) => {
-    Meteor.call('unfollowUser', userId, (error, result) => {
-      if (error) {
-        console.error('Error unfollowing user:', error);
-      } else {
-        console.log('Unfollowed user successfully');
-      }
-    });
-  };
 
   // Use useTracker to subscribe to userData and fetch user details
   const userProfile = useTracker(() => {
@@ -109,8 +86,6 @@ const UserProfilePage = () => {
   const toWatchList = userLists.find((list) => list.listType === 'To Watch');
   const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
 
-  console.log(userProfile)
-
   return (
     <Fragment>
       {userProfile ? (
@@ -122,24 +97,6 @@ const UserProfilePage = () => {
               showFollowButton={Meteor.userId() !== userId}
             />
             <div className="p-6">
-              {Meteor.userId() !== userId && (
-                <div className="p-2 mb-4 flex justify-left">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isFollowing(userId)) {
-                        handleUnfollow(userId);
-                      } else {
-                        handleFollow(userId);
-                      }
-                    }}
-                    className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450] rounded-full transition-all duration-300 ease-in-out transform hover:scale-110 hover:shadow-lg`}
-                  >
-                    {isFollowing(userId) ? 'Unfollow' : 'Follow'}
-                  </button>
-
-                </div>
-              )}
               {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} globalRatings={globalRatings} />}
               {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} globalRatings={globalRatings} />}
               <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />

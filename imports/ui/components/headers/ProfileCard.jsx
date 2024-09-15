@@ -60,6 +60,28 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
     });
   };
 
+  const handleFollow = () => {
+    Meteor.call('followUser', user._id, (error, result) => {
+      if (error) {
+        console.error('Error following user:', error);
+      } else {
+        setIsFollowing(true);
+        console.log('Followed user successfully');
+      }
+    });
+  };
+
+  const handleUnfollow = () => {
+    Meteor.call('unfollowUser', user._id, (error, result) => {
+      if (error) {
+        console.error('Error unfollowing user:', error);
+      } else {
+        setIsFollowing(false);
+        console.log('Unfollowed user successfully');
+      }
+    });
+  };
+
   const presetAvatars = [
     "https://randomuser.me/api/portraits/lego/1.jpg",
     "https://randomuser.me/api/portraits/lego/2.jpg",
@@ -111,11 +133,23 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
                 {ratingsCount} Ratings
               </button>
             </div>
-            <Link to="/user-discovery">
-              <button className="mt-2 ml-1 p-3 text-xl bg-transparent border-2 border-white rounded-full hover:bg-white hover:text-zinc-900 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-zinc-700 focus:ring-opacity-50">
-                <FaUserPlus />
-              </button>
-            </Link>
+            <div>
+              {showFollowButton ? (
+                <button
+                  onClick={() => (isFollowing ? handleUnfollow() : handleFollow())}
+                  className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450]`}
+                >
+                  {isFollowing ? 'Unfollow' : 'Follow'}
+                </button>
+              ) : (
+                <Link to="/user-discovery">
+                  <button className="mt-2 ml-1 p-3 text-xl bg-transparent border-2 border-white rounded-full hover:bg-white hover:text-zinc-900 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-zinc-700 focus:ring-opacity-50">
+                    <FaUserPlus />
+                  </button>
+                </Link>
+              )
+              }
+            </div>
           </div>
         </div>
       </div>
