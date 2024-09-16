@@ -271,7 +271,9 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                 className="list-popup bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
             >
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold">{list.title}</h2>
+                    <h2 className="text-2xl font-bold truncate max-w-full" title={list.title}>
+                        {list.title.length > 30 ? `${list.title.slice(0, 30)}...` : list.title}
+                    </h2>
                     <div className="flex space-x-2">
                         <button
                             onClick={isCurrentUserList ? handleRenameListClick : null}

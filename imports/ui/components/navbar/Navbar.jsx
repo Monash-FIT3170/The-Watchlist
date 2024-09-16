@@ -44,7 +44,7 @@ export default function Navbar({ staticNavData, currentUser }) {
     <div className="flex flex-col h-screen">
       <IconContext.Provider value={{ size: "20px" }}>
         <div className={`flex flex-col ${isCollapsed ? 'w-16' : 'w-66'} p-0 mx-2 my-4 h-custom transition-all duration-300 ease-in-out`}>
-          <div className="bg-darker rounded-lg shadow-lg pt-4 px-1 mb-4 flex-none"> 
+          <div className="bg-darker rounded-lg shadow-lg pt-4 px-1 mb-4 flex-none">
             <nav>
               <div className="px-2">
                 <div className="flex items-center justify-between">
@@ -100,7 +100,9 @@ export default function Navbar({ staticNavData, currentUser }) {
                         <img src={list.content[0]?.image_url || popcornUrl} alt={list.title} className={`${isCollapsed ? 'my-2.5 ml-2 w-14 h-10 ' : 'w-10 h-10 '} rounded-lg`} />
                         {!isCollapsed && (
                           <div className="flex flex-col justify-center">
-                            <span className="font-bold">{list.title}</span>
+                            <span className="truncate max-w-40" title={list.title}>
+                              {list.title.length > 20 ? `${list.title.slice(0, 20)}...` : list.title}
+                            </span>
                             <span className="text-xs text-gray-400">{list.userName}</span>
                           </div>
                         )}
