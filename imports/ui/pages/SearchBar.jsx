@@ -19,6 +19,9 @@ const SearchBar = ({ currentUser }) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+    const escapeRegExp = (string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    };
 
     const limit = 50; // Number of items per page
 
@@ -45,7 +48,7 @@ const SearchBar = ({ currentUser }) => {
     const fetchUsers = useCallback(() => {
         Meteor.subscribe('allUsers');
         return Meteor.users.find({
-            username: { $regex: searchTerm, $options: 'i' }
+            username: { $regex: escapeRegExp(searchTerm), $options: 'i' }
         }).fetch();
     }, [searchTerm]);
 
