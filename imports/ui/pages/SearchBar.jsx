@@ -10,17 +10,18 @@ import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 import debounce from 'lodash.debounce';
 
 const SearchBar = ({ currentUser }) => {
-  const [selectedTab, setSelectedTab] = useState('Movies');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [globalRatings, setGlobalRatings] = useState({});
-  const [filteredMovies, setFilteredMovies] = useState([]);
-  const [filteredTVShows, setFilteredTVShows] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [filteredLists, setFilteredLists] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(false);
+
+    const [selectedTab, setSelectedTab] = useState('Movies');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [globalRatings, setGlobalRatings] = useState({});
+    const [filteredMovies, setFilteredMovies] = useState([]);
+    const [filteredTVShows, setFilteredTVShows] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+    const escapeRegExp = (string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    };
 
   const limit = 50; // Number of items per page
 
@@ -74,17 +75,10 @@ const SearchBar = ({ currentUser }) => {
     });
   }, [debouncedSearchTerm, currentPage]);
 
-  const fetchUsers = useCallback(() => {
-    if (!debouncedSearchTerm) {
-      setUsers([]);
-      return;
-    }
-    setLoading(true);
-    Meteor.subscribe('allUsers', {
-      onReady: () => {
-        setLoading(false);
-        const fetchedUsers = Meteor.users.find({
-          username: { $regex: debouncedSearchTerm, $options: 'i' }
+    const fetchUsers = useCallback(() => {
+        Meteor.subscribe('allUsers');
+        return Meteor.users.find({
+            username: { $regex: escapeRegExp(searchTerm), $options: 'i' }
         }).fetch();
         setUsers(fetchedUsers);
       },
