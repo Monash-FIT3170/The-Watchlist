@@ -139,45 +139,48 @@ const SearchBar = ({ currentUser }) => {
             if (!error) {
                 const totalItems = result.total;
                 setTotalPages(Math.ceil(totalItems / limit));
-    
+            
                 let movies = result.movie?.map(movie => ({ ...movie, contentType: 'Movie' })) || [];
                 let tvShows = result.tv?.map(tv => ({ ...tv, contentType: 'TV Show' })) || [];
-    
+            
                 // Apply sorting here if a sort option is selected
                 if (filters["sort by"].selected === "Title") {
-                    movies = movies.sort((a, b) => a.title.localeCompare(b.title));
-                    tvShows = tvShows.sort((a, b) => a.title.localeCompare(b.title));
+                    movies = movies.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+                    tvShows = tvShows.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
                 } else if (filters["sort by"].selected === "Year") {
-                    movies = movies.sort((a, b) => b.release_year - a.release_year); 
-                    tvShows = tvShows.sort((a, b) => b.first_aired - a.first_aired);
+                    movies = movies.sort((a, b) => (b.release_year || 0) - (a.release_year || 0)); 
+                    tvShows = tvShows.sort((a, b) => (b.first_aired || 0) - (a.first_aired || 0));
                 } else if (filters["sort by"].selected === "Popularity") {
-                    movies = movies.sort((a, b) => b.popularity - a.popularity); 
-                    tvShows = tvShows.sort((a, b) => b.popularity - a.popularity); 
+                    movies = movies.sort((a, b) => (b.popularity || 0) - (a.popularity || 0)); 
+                    tvShows = tvShows.sort((a, b) => (b.popularity || 0) - (a.popularity || 0)); 
                 } 
-
+            
+                // Filtering by genres
                 if (filters.genres.selected.length > 0) {
-                    movies = movies.filter(movie => movie.genres.some(genre => filters.genres.selected.includes(genre)));
-                    tvShows = tvShows.filter(tv => tv.genres.some(genre => filters.genres.selected.includes(genre)));
+                    movies = movies.filter(movie => movie.genres?.some(genre => filters.genres.selected.includes(genre)));
+                    tvShows = tvShows.filter(tv => tv.genres?.some(genre => filters.genres.selected.includes(genre)));
                 }
-
+            
+                // Filtering by year
                 if (filters.year.selected.length > 0) {
-                    movies = movies.filter(movie => filters.year.selected.includes(movie.release_year));
-                    tvShows = tvShows.filter(tv => filters.year.selected.includes(tv.first_aired));
+                    movies = movies.filter(movie => movie.release_year && filters.year.selected.includes(movie.release_year));
+                    tvShows = tvShows.filter(tv => tv.first_aired && filters.year.selected.includes(tv.first_aired));
                 }
-                
-                if (filters.continents.selected.length > 0){
-                    if(filters.continents.selected.includes('North America')){
-                        movies = movies.filter(movie =>  america.includes(movie.origin_country[0]));
-                        tvShows = tvShows.filter(tv =>  america.includes(tv.origin_country[0]));
-                    } else if(filters.continents.selected.includes('Asia')){
-                        movies = movies.filter(movie =>  asia.includes(movie.origin_country[0]));
-                        tvShows = tvShows.filter(tv =>  asia.includes(tv.origin_country[0]));
-                    }else if(filters.continents.selected.includes('Europe')){
-                        movies = movies.filter(movie =>  europe.includes(movie.origin_country[0]));
-                        tvShows = tvShows.filter(tv =>  europe.includes(tv.origin_country[0]));
+            
+                // Filtering by continents
+                if (filters.continents.selected.length > 0) {
+                    if (filters.continents.selected.includes('North America')) {
+                        movies = movies.filter(movie => america.includes(movie.origin_country?.[0] || ''));
+                        tvShows = tvShows.filter(tv => america.includes(tv.origin_country?.[0] || ''));
+                    } else if (filters.continents.selected.includes('Asia')) {
+                        movies = movies.filter(movie => asia.includes(movie.origin_country?.[0] || ''));
+                        tvShows = tvShows.filter(tv => asia.includes(tv.origin_country?.[0] || ''));
+                    } else if (filters.continents.selected.includes('Europe')) {
+                        movies = movies.filter(movie => europe.includes(movie.origin_country?.[0] || ''));
+                        tvShows = tvShows.filter(tv => europe.includes(tv.origin_country?.[0] || ''));
                     }
                 }
-    
+            
                 setFilteredMovies(movies);
                 setFilteredTVShows(tvShows);
             } else {
@@ -185,6 +188,7 @@ const SearchBar = ({ currentUser }) => {
                 setFilteredMovies([]);
                 setFilteredTVShows([]);
             }
+    
         });
     }, [searchTerm, currentPage, filters]);
     
