@@ -109,26 +109,34 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     };
 
     const sortContent = (content) => {
-        return content.sort((a, b) => {
-            if (sortOrder === 'ascending') {
-                if (sortCriterion === 'title') {
-                    return a.title.localeCompare(b.title);
-                } else if (sortCriterion === 'release_year') {
-                    return a.release_year - b.release_year;
-                } else if (sortCriterion === 'popularity') {
-                    return a.popularity - b.popularity; // Sorting by popularity
+        return [...content].sort((a, b) => {
+            let aYear, bYear;
+
+            if (sortCriterion === 'release_year') {
+                aYear = a.contentType === 'Movie'
+                    ? a.release_year
+                    : (a.first_aired ? new Date(a.first_aired).getFullYear() : 0);
+                bYear = b.contentType === 'Movie'
+                    ? b.release_year
+                    : (b.first_aired ? new Date(b.first_aired).getFullYear() : 0);
+
+                if (sortOrder === 'ascending') {
+                    return aYear - bYear;
+                } else {
+                    return bYear - aYear;
                 }
-            } else {
-                if (sortCriterion === 'title') {
-                    return b.title.localeCompare(a.title);
-                } else if (sortCriterion === 'release_year') {
-                    return b.release_year - a.release_year;
-                } else if (sortCriterion === 'popularity') {
-                    return b.popularity - a.popularity; // Sorting by popularity
-                }
+            } else if (sortCriterion === 'title') {
+                return sortOrder === 'ascending'
+                    ? a.title.localeCompare(b.title)
+                    : b.title.localeCompare(a.title);
+            } else if (sortCriterion === 'popularity') {
+                return sortOrder === 'ascending'
+                    ? a.popularity - b.popularity
+                    : b.popularity - a.popularity;
             }
         });
     };
+
 
     const getRatingForContent = (contentId) => {
         const userRating = ratings.find(r => r.contentId === contentId);
@@ -208,11 +216,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     console.log("Content removed successfully");
                     toast.success("Content removed successfully!");
                     const updatedContent = list.content.filter(item => item.contentId !== contentId);
-                    setList({...list, content: updatedContent});
+                    setList({ ...list, content: updatedContent });
                 }
             });
         }
-    };    
+    };
 
     const confirmDeleteList = (listId) => {
         if (list.userId !== Meteor.userId()) {
@@ -228,13 +236,13 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         setListToDelete(listId);
         setShowConfirmDialog(true);
     };
-    
+
 
     const resetConfirmationState = () => {
         setShowConfirmDialog(false);
         setContentToDelete(null);
         setListToDelete(null);
-      };
+    };
 
     const handleDeleteConfirmed = () => {
         if (contentToDelete !== null) {
