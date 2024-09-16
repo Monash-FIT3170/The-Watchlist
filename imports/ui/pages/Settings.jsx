@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { passwordStrength } from 'check-password-strength';
 import { Checkbox, FormControlLabel, FormGroup } from '@mui/material';
+import { Meteor } from 'meteor/meteor';
+
 
 const Settings = () => {
     const currentUser = useTracker(() => {
@@ -23,13 +25,20 @@ const Settings = () => {
     useEffect(() => {
         if (currentUser) {
             setUsername(currentUser.username || '');
+            setSelectedPrivacy(currentUser.profile.privacy || 'Public');
         }
     }, [currentUser]);
 
     const handlePrivacyChange = (event) => {
         const value = event.target.name;
-        
-        setSelectedPrivacy(selectedPrivacy === value ? null : value);
+        setSelectedPrivacy(value);
+        Meteor.call('users.updatePrivacy',value, (error) => {
+            if (error) {
+                console.error('Error updating privacy setting:', error.reason);
+            } else {
+                console.log('Privacy setting updated to:', value);
+            }
+        });
       };
 
     const handleUpdate = () => {
@@ -219,8 +228,8 @@ const Settings = () => {
 
              {/* Right Column - Privacy settings*/}
              <div className="flex justify-center">
-            <div className="space-y-4 ml-64">
-            <FormGroup className="flex flex-row space-x-4 text-4xl">
+            <div className="space-y-4 ml-32">
+            <FormGroup className="flex text-4xl">
                 <FormControlLabel
                     control={
                     <Checkbox

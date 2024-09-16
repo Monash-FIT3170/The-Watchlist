@@ -200,9 +200,10 @@ Accounts.onCreateUser((options, user) => {
   user.following = [];
   user.followers = [];
 
-  if (options.profile) {
-    user.profile = options.profile;
-  }
+  user.profile = {
+    ...options.profile,  
+    privacy: 'Public'    
+  };
 
   return user;
 });
@@ -230,6 +231,27 @@ Meteor.methods({
     check(userId, String);
     return RatingCollection.find({ userId }).count();
   },
+});
+
+Meteor.methods({
+  'users.updatePrivacy'(privacySetting) {
+    check(privacySetting, String);
+
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorised', 'You must be logged in to update your privacy setting.');
+    }
+
+    
+    if (!['Public', 'Private'].includes(privacySetting)) {
+      throw new Meteor.Error('invalid-argument', 'Invalid privacy setting.');
+    }
+
+    Meteor.users.update(this.userId, {
+      $set: {
+        'profile.privacy': privacySetting
+      }
+    });
+  }
 });
 
 Meteor.methods({
