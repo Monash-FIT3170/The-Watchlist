@@ -12,6 +12,7 @@ import ContentItem from "../contentItems/ContentItem";
 import ContentInfoModal from "../../modals/ContentInfoModal";  // Import the modal component
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [list, setList] = useState(null);
@@ -35,6 +36,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const confirmDialogRef = useRef(null);
     const renameListRef = useRef(null); // Ref for RenameListModal
     const [contentToDelete, setContentToDelete] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (listId) {
@@ -57,6 +59,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
             }
         });
     }, [listId]);
+
+    const isCurrentUserList = list && list.userId === Meteor.userId();
 
     useEffect(() => {
         if (list?.subscribers && Array.isArray(list.subscribers)) {
@@ -109,26 +113,34 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     };
 
     const sortContent = (content) => {
-        return content.sort((a, b) => {
-            if (sortOrder === 'ascending') {
-                if (sortCriterion === 'title') {
-                    return a.title.localeCompare(b.title);
-                } else if (sortCriterion === 'release_year') {
-                    return a.release_year - b.release_year;
-                } else if (sortCriterion === 'popularity') {
-                    return a.popularity - b.popularity; // Sorting by popularity
+        return [...content].sort((a, b) => {
+            let aYear, bYear;
+
+            if (sortCriterion === 'release_year') {
+                aYear = a.contentType === 'Movie'
+                    ? a.release_year
+                    : (a.first_aired ? new Date(a.first_aired).getFullYear() : 0);
+                bYear = b.contentType === 'Movie'
+                    ? b.release_year
+                    : (b.first_aired ? new Date(b.first_aired).getFullYear() : 0);
+
+                if (sortOrder === 'ascending') {
+                    return aYear - bYear;
+                } else {
+                    return bYear - aYear;
                 }
-            } else {
-                if (sortCriterion === 'title') {
-                    return b.title.localeCompare(a.title);
-                } else if (sortCriterion === 'release_year') {
-                    return b.release_year - a.release_year;
-                } else if (sortCriterion === 'popularity') {
-                    return b.popularity - a.popularity; // Sorting by popularity
-                }
+            } else if (sortCriterion === 'title') {
+                return sortOrder === 'ascending'
+                    ? a.title.localeCompare(b.title)
+                    : b.title.localeCompare(a.title);
+            } else if (sortCriterion === 'popularity') {
+                return sortOrder === 'ascending'
+                    ? a.popularity - b.popularity
+                    : b.popularity - a.popularity;
             }
         });
     };
+
 
     const getRatingForContent = (contentId) => {
         const userRating = ratings.find(r => r.contentId === contentId);
@@ -144,10 +156,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         setModalOpen(true); // Open ContentInfoModal
     };
 
-    const closeModal = () => {
+    const goToSearch = () => {
         setModalOpen(false);
-        setSelectedContent(null);
-    };
+        onClose();
+        navigate("/search");
+    }
 
     // Separate close handlers for each modal
     const closeContentInfoModal = () => {
@@ -208,11 +221,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     console.log("Content removed successfully");
                     toast.success("Content removed successfully!");
                     const updatedContent = list.content.filter(item => item.contentId !== contentId);
-                    setList({...list, content: updatedContent});
+                    setList({ ...list, content: updatedContent });
                 }
             });
         }
-    };    
+    };
 
     const confirmDeleteList = (listId) => {
         if (list.userId !== Meteor.userId()) {
@@ -228,13 +241,13 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         setListToDelete(listId);
         setShowConfirmDialog(true);
     };
-    
+
 
     const resetConfirmationState = () => {
         setShowConfirmDialog(false);
         setContentToDelete(null);
         setListToDelete(null);
-      };
+    };
 
     const handleDeleteConfirmed = () => {
         if (contentToDelete !== null) {
@@ -269,21 +282,25 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                 className="list-popup bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
             >
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold">{list.title}</h2>
+                    <h2 className="text-2xl font-bold truncate max-w-full" title={list.title}>
+                        {list.title.length > 30 ? `${list.title.slice(0, 30)}...` : list.title}
+                    </h2>
                     <div className="flex space-x-2">
                         <button
-                            onClick={handleRenameListClick}
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full flex items-center justify-center"
+                            onClick={isCurrentUserList ? handleRenameListClick : null}
+                            disabled={!isCurrentUserList}
+                            className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
                             title="Rename List"
-                            style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
+                            style={{ width: 44, height: 44 }}
                         >
                             <FiEdit size="24" />
                         </button>
                         <button
-                            onClick={() => confirmDeleteList(list._id)}
-                            className="bg-red-500 hover:bg-red-700 text-white font-bold rounded-full flex items-center justify-center"
+                            onClick={() => isCurrentUserList && confirmDeleteList(list._id)}
+                            disabled={!isCurrentUserList}
+                            className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-red-500 hover:bg-red-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
                             title="Delete List"
-                            style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
+                            style={{ width: 44, height: 44 }}
                         >
                             <FiTrash2 size="24" />
                         </button>
@@ -357,7 +374,21 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
 
                 </div>
                 <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
-                    {sortedContent.map((item) => {
+                    {sortedContent.length === 0 ? (<div className="flex flex-col items-center justify-center py-8">
+                        <p className="text-lg font-semibold text-gray-600 mb-4">
+                            Your list is currently empty.
+                        </p>
+                        <p className="text-md text-gray-500 mb-6">
+                            Start adding some great movies and shows to enjoy later!
+                        </p>
+                        <button
+                            className="px-6 py-2 bg-magenta text-white rounded hover:bg-pink-700 transition-colors"
+                            onClick={() => goToSearch()}
+                        >
+                            Browse Movies and Shows
+                        </button>
+                    </div>
+                    ) : (sortedContent.map((item) => {
                         const { rating = 0, isUserSpecificRating = false } = getRatingForContent(item.contentId);
                         return (
                             <div key={item.contentId} className={isGridView ? '' : 'block relative'}>
@@ -391,23 +422,26 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                                         <RatingStar totalStars={5} rating={rating} />
                                                     </div>
                                                 </div>
-                                                <button
-                                                    className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        confirmRemoveContent(item.contentId);
-                                                    }}
-                                                    title="Remove from List"
-                                                >
-                                                    <FiTrash2 />
-                                                </button>
+                                                    <button
+                                                        className={`absolute top-4 right-4 rounded-full p-2 ${isCurrentUserList ? 'text-white bg-red-500 hover:bg-red-700' : 'text-gray-500 bg-gray-300 cursor-not-allowed'}`}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (isCurrentUserList) {
+                                                                confirmRemoveContent(item.contentId);
+                                                            }
+                                                        }}
+                                                        title="Remove from List"
+                                                        disabled={!isCurrentUserList}
+                                                    >
+                                                        <FiTrash2 />
+                                                    </button>
                                             </div>
                                         </div>
                                     </div>
                                 )}
                             </div>
                         );
-                    })}
+                    }))}
                 </Scrollbar>
             </div>
 
