@@ -13,6 +13,7 @@ Meteor.publish('userData', function (userId) {
     { _id: userId },
     {
       fields: {
+        'profile.privacy': 1,
         username: 1,
         avatarUrl: 1,
         followers: 1,
@@ -27,6 +28,7 @@ Meteor.publish('userData', function (userId) {
 Meteor.publish('allUsers', function () {
   return Meteor.users.find({}, {
     fields: {
+      'profile.privacy': 1,
       username: 1,
       followers: 1,
       following: 1,

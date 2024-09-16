@@ -239,7 +239,7 @@ const Settings = () => {
                         sx={{ transform: 'scale(1.1)' }}
                     />
                     }
-                    label={<span className="text-xl">Public</span>}
+                    label={<span className="text-xl font-bold">Public</span>}
                 />
                 <FormControlLabel
                     control={
@@ -250,7 +250,7 @@ const Settings = () => {
                         sx={{ transform: 'scale(1.1)' }}
                     />
                     }
-                    label={<span className="text-xl">Private</span>}
+                    label={<span className="text-xl font-bold">Private</span>}
                 />
                 </FormGroup>
             </div>

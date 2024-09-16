@@ -6,6 +6,7 @@ import ProfileCard from '../components/headers/ProfileCard';
 import ContentList from '../components/lists/ContentList';
 import { ListCollection } from '../../db/List';
 import ListDisplay from '../components/lists/ListDisplay';
+import { FaLock } from "react-icons/fa";
 
 const UserProfilePage = () => {
   const { userId } = useParams();
@@ -61,6 +62,7 @@ const UserProfilePage = () => {
           following: user.following?.length || '0',
           userRealName: user.realName || 'No Name Provided',
           userDescription: user.description || 'No description provided.',
+          userPrivacy: user.profile?.privacy,
           _id: userId,
         };
       }
@@ -86,6 +88,8 @@ const UserProfilePage = () => {
   const toWatchList = userLists.find((list) => list.listType === 'To Watch');
   const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
 
+
+
   return (
     <Fragment>
       {userProfile ? (
@@ -97,10 +101,21 @@ const UserProfilePage = () => {
               showFollowButton={Meteor.userId() !== userId}
             />
             <div className="p-6">
-              {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} globalRatings={globalRatings} />}
-              {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} globalRatings={globalRatings} />}
-              <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />
-              <ListDisplay heading="Subscribed Watchlists" listData={subscribedLists} />
+              {/* Conditional rendering based on privacy setting */}
+            {userProfile.userPrivacy === 'Private' ? (
+              <div className="flex flex-col items-center mt-40 min-h-screen">
+              <p className="mb-5 font-bold text-center">This user's profile is private.</p>
+              <FaLock size={200} />
+            </div>
+              ) : (
+              <div>
+                {/* If the profile is public, display the user lists */}
+                {favouritesList && <ContentList key={favouritesList._id} list={favouritesList} globalRatings={globalRatings} />}
+                {toWatchList && <ContentList key={toWatchList._id} list={toWatchList} globalRatings={globalRatings} />}
+                <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />
+                <ListDisplay heading="Subscribed Watchlists" listData={subscribedLists} />
+              </div>
+            )}
             </div>
           </div>
         </div>
