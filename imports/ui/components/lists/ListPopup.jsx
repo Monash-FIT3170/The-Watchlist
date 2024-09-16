@@ -12,6 +12,7 @@ import ContentItem from "../contentItems/ContentItem";
 import ContentInfoModal from "../../modals/ContentInfoModal";  // Import the modal component
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [list, setList] = useState(null);
@@ -35,6 +36,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const confirmDialogRef = useRef(null);
     const renameListRef = useRef(null); // Ref for RenameListModal
     const [contentToDelete, setContentToDelete] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (listId) {
@@ -144,10 +146,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         setModalOpen(true); // Open ContentInfoModal
     };
 
-    const closeModal = () => {
+    const goToSearch = () => {
         setModalOpen(false);
-        setSelectedContent(null);
-    };
+        onClose();
+        navigate("/search");
+    }
 
     // Separate close handlers for each modal
     const closeContentInfoModal = () => {
@@ -208,11 +211,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     console.log("Content removed successfully");
                     toast.success("Content removed successfully!");
                     const updatedContent = list.content.filter(item => item.contentId !== contentId);
-                    setList({...list, content: updatedContent});
+                    setList({ ...list, content: updatedContent });
                 }
             });
         }
-    };    
+    };
 
     const confirmDeleteList = (listId) => {
         if (list.userId !== Meteor.userId()) {
@@ -228,13 +231,13 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         setListToDelete(listId);
         setShowConfirmDialog(true);
     };
-    
+
 
     const resetConfirmationState = () => {
         setShowConfirmDialog(false);
         setContentToDelete(null);
         setListToDelete(null);
-      };
+    };
 
     const handleDeleteConfirmed = () => {
         if (contentToDelete !== null) {
@@ -357,7 +360,21 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
 
                 </div>
                 <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
-                    {sortedContent.map((item) => {
+                    {sortedContent.length === 0 ? (<div className="flex flex-col items-center justify-center py-8">
+                        <p className="text-lg font-semibold text-gray-600 mb-4">
+                            Your list is currently empty.
+                        </p>
+                        <p className="text-md text-gray-500 mb-6">
+                            Start adding some great movies and shows to enjoy later!
+                        </p>
+                        <button
+                            className="px-6 py-2 bg-magenta text-white rounded hover:bg-pink-700 transition-colors"
+                            onClick={() => goToSearch()}
+                        >
+                            Browse Movies and Shows
+                        </button>
+                    </div>
+                    ) : (sortedContent.map((item) => {
                         const { rating = 0, isUserSpecificRating = false } = getRatingForContent(item.contentId);
                         return (
                             <div key={item.contentId} className={isGridView ? '' : 'block relative'}>
@@ -407,7 +424,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                 )}
                             </div>
                         );
-                    })}
+                    }))}
                 </Scrollbar>
             </div>
 
