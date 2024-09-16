@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { IconContext } from "react-icons";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { MdMovieFilter, MdChevronRight, MdChevronLeft } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useTracker } from 'meteor/react-meteor-data';
@@ -18,6 +18,8 @@ export default function Navbar({ staticNavData, currentUser }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
   const [isAddListModalOpen, setIsAddListModalOpen] = useState(false);
+
+  const location = useLocation(); // Get current path
 
   const { lists, subscribedLists, loading } = useTracker(() => {
     const userId = Meteor.userId();
@@ -64,17 +66,22 @@ export default function Navbar({ staticNavData, currentUser }) {
                 </div>
               </div>
               <ul className="flex flex-col w-full">
-                {staticNavData.map((item, index) => (
-                  <li key={index} className={item.cName}>
-                    <Link
-                      to={item.path}
-                      className="flex items-center space-x-5 ml-0.5 w-full px-4 py-2 mb-2 font-bold text-grey text-lg hover:text-white"
-                    >
-                      {item.icon}
-                      {!isCollapsed && <span>{item.title}</span>}
-                    </Link>
-                  </li>
-                ))}
+                {staticNavData.map((item, index) => {
+                  const isActive = location.pathname === item.path; // Check if active
+                  return (
+                    <li key={index} className={item.cName}>
+                      <Link
+                        to={item.path}
+                        className={`flex items-center space-x-5 ml-0.5 w-full px-4 py-2 mb-2 font-bold text-lg transition-colors duration-300 ${
+                          isActive ? "text-white" : "text-grey hover:text-white"
+                        }`}
+                      >
+                        {item.icon}
+                        {!isCollapsed && <span>{item.title}</span>}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
           </div>
