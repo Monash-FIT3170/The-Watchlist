@@ -58,6 +58,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         });
     }, [listId]);
 
+    const isCurrentUserList = list && list.userId === Meteor.userId();
+
     useEffect(() => {
         if (list?.subscribers && Array.isArray(list.subscribers)) {
             const isSubscribed = list.subscribers.includes(Meteor.userId());
@@ -272,18 +274,20 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     <h2 className="text-2xl font-bold">{list.title}</h2>
                     <div className="flex space-x-2">
                         <button
-                            onClick={handleRenameListClick}
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full flex items-center justify-center"
+                            onClick={isCurrentUserList ? handleRenameListClick : null}
+                            disabled={!isCurrentUserList}
+                            className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
                             title="Rename List"
-                            style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
+                            style={{ width: 44, height: 44 }}
                         >
                             <FiEdit size="24" />
                         </button>
                         <button
-                            onClick={() => confirmDeleteList(list._id)}
-                            className="bg-red-500 hover:bg-red-700 text-white font-bold rounded-full flex items-center justify-center"
+                            onClick={() => isCurrentUserList && confirmDeleteList(list._id)}
+                            disabled={!isCurrentUserList}
+                            className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-red-500 hover:bg-red-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
                             title="Delete List"
-                            style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
+                            style={{ width: 44, height: 44 }}
                         >
                             <FiTrash2 size="24" />
                         </button>
@@ -391,16 +395,19 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                                         <RatingStar totalStars={5} rating={rating} />
                                                     </div>
                                                 </div>
-                                                <button
-                                                    className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        confirmRemoveContent(item.contentId);
-                                                    }}
-                                                    title="Remove from List"
-                                                >
-                                                    <FiTrash2 />
-                                                </button>
+                                                    <button
+                                                        className={`absolute top-4 right-4 rounded-full p-2 ${isCurrentUserList ? 'text-white bg-red-500 hover:bg-red-700' : 'text-gray-500 bg-gray-300 cursor-not-allowed'}`}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (isCurrentUserList) {
+                                                                confirmRemoveContent(item.contentId);
+                                                            }
+                                                        }}
+                                                        title="Remove from List"
+                                                        disabled={!isCurrentUserList}
+                                                    >
+                                                        <FiTrash2 />
+                                                    </button>
                                             </div>
                                         </div>
                                     </div>
