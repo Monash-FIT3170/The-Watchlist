@@ -12,7 +12,7 @@ import Scrollbar from '../scrollbar/ScrollBar';
 import { FaAngleDoubleLeft } from "react-icons/fa";
 import { RxHamburgerMenu } from "react-icons/rx";
 
-const popcornUrl = "./images/popcorn.png";
+const popcornUrl = "/images/popcorn.png";
 
 export default function Navbar({ staticNavData, currentUser }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
