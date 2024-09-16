@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { passwordStrength } from 'check-password-strength';
+import { Checkbox, FormControlLabel, FormGroup } from '@mui/material';
 
 const Settings = () => {
     const currentUser = useTracker(() => {
@@ -17,12 +18,19 @@ const Settings = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [strength, setStrength] = useState('');
+    const [selectedPrivacy, setSelectedPrivacy] = useState(null);
 
     useEffect(() => {
         if (currentUser) {
             setUsername(currentUser.username || '');
         }
     }, [currentUser]);
+
+    const handlePrivacyChange = (event) => {
+        const value = event.target.name;
+        
+        setSelectedPrivacy(selectedPrivacy === value ? null : value);
+      };
 
     const handleUpdate = () => {
         if (!username) {
@@ -201,10 +209,50 @@ const Settings = () => {
 </div>
 
             )}
+            <hr className="border-t border-gray-700 my-4" />
 
+            {/* Left Column - Privacy settings*/}
+            <div>
+            <label className="block text-lg font-semibold text-white">Privacy Settings</label>
+            <p className="text-gray-400">Choose the privacy settings for your account.</p>
+            </div>
+
+             {/* Right Column - Privacy settings*/}
+             <div className="flex justify-center">
+            <div className="space-y-4 ml-64">
+            <FormGroup className="flex flex-row space-x-4 text-4xl">
+                <FormControlLabel
+                    control={
+                    <Checkbox
+                        checked={selectedPrivacy === 'Public'}
+                        onChange={handlePrivacyChange}
+                        name="Public"
+                        sx={{ transform: 'scale(1.1)' }}
+                    />
+                    }
+                    label={<span className="text-xl">Public</span>}
+                />
+                <FormControlLabel
+                    control={
+                    <Checkbox
+                        checked={selectedPrivacy === 'Private'}
+                        onChange={handlePrivacyChange}
+                        name="Private"
+                        sx={{ transform: 'scale(1.1)' }}
+                    />
+                    }
+                    label={<span className="text-xl">Private</span>}
+                />
+                </FormGroup>
+            </div>
+            </div>
 
 
             <hr className="border-t border-gray-700 my-4" />
+
+
+
+            
 
             <div className="mt-8">
                 {!showConfirmation ? (
