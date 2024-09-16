@@ -286,9 +286,6 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold">{list.title}</h2>
                     <div className="flex space-x-2">
-                        {/* <FacebookShareButton url={shareUrl} quote={shareQuote}>
-                            <FacebookIcon size={iconSize} round />
-                        </FacebookShareButton> */}
                         <button
                             onClick={() => handleCopy(shareUrl)}
                             className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
@@ -296,6 +293,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                             style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
                         >
                             <FiLink size="24" />
+                        </button>
+                        <button title="Share to Facebook">
+                            <FacebookShareButton url={shareUrl} quote={shareQuote}>
+                                <FacebookIcon size={iconSize} round />
+                            </FacebookShareButton>
                         </button>
                         <button title="Share to Twitter">
                             <TwitterShareButton url={shareUrl} title={shareQuote}>
