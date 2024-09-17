@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FaUserPlus, FaPencilAlt } from 'react-icons/fa';
-import { Meteor } from 'meteor/meteor';
-import ProfileDropdown from '../profileDropdown/ProfileDropdown';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FaUserPlus, FaPencilAlt } from "react-icons/fa";
+import { Meteor } from "meteor/meteor";
+import ProfileDropdown from "../profileDropdown/ProfileDropdown";
 
 const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   const [isFollowing, setIsFollowing] = useState(false);
@@ -14,13 +14,17 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   useEffect(() => {
     if (!user || !user._id) return;
     const currentUser = Meteor.user();
-    if (currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(user._id)) {
+    if (
+      currentUser &&
+      Array.isArray(currentUser.following) &&
+      currentUser.following.includes(user._id)
+    ) {
       setIsFollowing(true);
     }
 
-    Meteor.call('users.ratingsCount', { userId: user._id }, (error, result) => {
+    Meteor.call("users.ratingsCount", { userId: user._id }, (error, result) => {
       if (error) {
-        console.error('Error fetching ratings count:', error);
+        console.error("Error fetching ratings count:", error);
       } else {
         setRatingsCount(result);
       }
@@ -39,9 +43,9 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setNewAvatar(reader.result);
-        Meteor.call('updateAvatar', user._id, reader.result, (error) => {
+        Meteor.call("updateAvatar", user._id, reader.result, (error) => {
           if (error) {
-            console.error('Error updating avatar:', error);
+            console.error("Error updating avatar:", error);
           } else {
             setShowAvatarModal(false);
           }
@@ -52,9 +56,9 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   };
 
   const handlePresetAvatarSelect = (avatarUrl) => {
-    Meteor.call('updateAvatar', user._id, avatarUrl, (error) => {
+    Meteor.call("updateAvatar", user._id, avatarUrl, (error) => {
       if (error) {
-        console.error('Error updating avatar:', error);
+        console.error("Error updating avatar:", error);
       } else {
         setNewAvatar(avatarUrl);
         setShowAvatarModal(false);
@@ -63,23 +67,23 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   };
 
   const handleFollow = () => {
-    Meteor.call('followUser', user._id, (error, result) => {
+    Meteor.call("followUser", user._id, (error, result) => {
       if (error) {
-        console.error('Error following user:', error);
+        console.error("Error following user:", error);
       } else {
         setIsFollowing(true);
-        console.log('Followed user successfully');
+        console.log("Followed user successfully");
       }
     });
   };
 
   const handleUnfollow = () => {
-    Meteor.call('unfollowUser', user._id, (error, result) => {
+    Meteor.call("unfollowUser", user._id, (error, result) => {
       if (error) {
-        console.error('Error unfollowing user:', error);
+        console.error("Error unfollowing user:", error);
       } else {
         setIsFollowing(false);
-        console.log('Unfollowed user successfully');
+        console.log("Unfollowed user successfully");
       }
     });
   };
@@ -88,6 +92,12 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
     "https://randomuser.me/api/portraits/lego/1.jpg",
     "https://randomuser.me/api/portraits/lego/2.jpg",
     "https://randomuser.me/api/portraits/lego/3.jpg",
+    "https://randomuser.me/api/portraits/lego/4.jpg",
+    "https://randomuser.me/api/portraits/lego/5.jpg",
+    "https://randomuser.me/api/portraits/lego/6.jpg",
+    "https://randomuser.me/api/portraits/lego/7.jpg",
+    "https://randomuser.me/api/portraits/lego/8.jpg",
+    "https://randomuser.me/api/portraits/lego/9.jpg",
   ];
 
   return (
@@ -98,7 +108,11 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       <div className="flex items-center gap-4">
         <div className="relative group w-56 h-56 rounded-full overflow-hidden">
           <img
-            src={newAvatar || user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"}
+            src={
+              newAvatar ||
+              user.avatarUrl ||
+              "https://randomuser.me/api/portraits/lego/1.jpg"
+            }
             alt="avatar"
             className="w-full h-full object-cover"
           />
@@ -113,14 +127,26 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <h2 className="pl-1 text-8xl font-bold truncate">{user.userName || 'Loading...'}</h2>
+          <h2 className="pl-1 text-8xl font-bold truncate">
+            {user.userName || "Loading..."}
+          </h2>
           <div className="flex flex-col gap-2 pl-2">
             <div className="flex gap-2 items-center">
-              <button className="p-1 text-lg flex-initial hover:underline" onClick={() => navigate(`/followers-following/${user._id}/followers`)}>
+              <button
+                className="p-1 text-lg flex-initial hover:underline"
+                onClick={() =>
+                  navigate(`/followers-following/${user._id}/followers`)
+                }
+              >
                 {user.followers} Followers
               </button>
               <span className="text-lg">•</span>
-              <button className="p-1 text-lg flex-initial hover:underline" onClick={() => navigate(`/followers-following/${user._id}/following`)}>
+              <button
+                className="p-1 text-lg flex-initial hover:underline"
+                onClick={() =>
+                  navigate(`/followers-following/${user._id}/following`)
+                }
+              >
                 {user.following} Following
               </button>
               <span className="text-lg">•</span>
@@ -132,17 +158,20 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
                   } else {
                     navigate(`/user/${user._id}/ratings`);
                   }
-                }}>
+                }}
+              >
                 {ratingsCount} Ratings
               </button>
             </div>
             <div>
               {showFollowButton ? (
                 <button
-                  onClick={() => (isFollowing ? handleUnfollow() : handleFollow())}
+                  onClick={() =>
+                    isFollowing ? handleUnfollow() : handleFollow()
+                  }
                   className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450]`}
                 >
-                  {isFollowing ? 'Unfollow' : 'Follow'}
+                  {isFollowing ? "Unfollow" : "Follow"}
                 </button>
               ) : (
                 <Link to="/user-discovery">
@@ -150,8 +179,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
                     <FaUserPlus />
                   </button>
                 </Link>
-              )
-              }
+              )}
             </div>
           </div>
         </div>
@@ -159,16 +187,18 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
 
       {showAvatarModal && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4 text-center">Change Profile Picture</h3>
+          <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full mt-40">
+            <h3 className="text-lg font-bold mb-4 text-center">
+              Change Profile Picture
+            </h3>
             <input
               type="file"
               accept="image/*"
               onChange={handleAvatarChange}
               className="mb-4 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
             />
-            <div className="flex gap-4 justify-center mb-4">
-              {presetAvatars.map((avatarUrl, index) => (
+            <div className="grid grid-cols-5 gap-4 mb-4">
+              {presetAvatars.slice(0, 5).map((avatarUrl, index) => (
                 <img
                   key={index}
                   src={avatarUrl}
@@ -177,6 +207,22 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
                   onClick={() => handlePresetAvatarSelect(avatarUrl)}
                 />
               ))}
+            </div>
+            <div className="flex justify-center">
+              <div
+                className="grid grid-cols-4 gap-4 mb-4"
+                style={{ marginLeft: "0%" }}
+              >
+                {presetAvatars.slice(5).map((avatarUrl, index) => (
+                  <img
+                    key={index}
+                    src={avatarUrl}
+                    alt="preset avatar"
+                    className="w-16 h-16 object-cover rounded-full cursor-pointer transition-transform transform hover:scale-110"
+                    onClick={() => handlePresetAvatarSelect(avatarUrl)}
+                  />
+                ))}
+              </div>
             </div>
             <div className="flex justify-end">
               <button
