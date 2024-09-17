@@ -91,10 +91,12 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       } else {
         if (!privateAccount){
         setIsFollowing(true);
+        console.log('Followed user successfully');
         }else{
           setIsRequested(true);
+          console.log('Requested user successfully');
         }
-        console.log('Followed user successfully');
+        
       }
     });
   };

@@ -289,22 +289,45 @@ Meteor.methods({
     if (!['Public', 'Private'].includes(privacySetting)) {
       throw new Meteor.Error('invalid-argument', 'Invalid privacy setting.');
     }
+
     if (privacySetting === 'Public') {
+    const currentUser = Meteor.users.findOne(this.userId);
+
+      if (currentUser && currentUser.followerRequests && currentUser.followerRequests.length > 0) {
+        // Add all users from followerRequests to followers
+        Meteor.users.update(this.userId, {
+          $addToSet: { followers: { $each: currentUser.followerRequests } }, 
+          $set: {
+            'profile.privacy': 'Public',
+            followerRequests: [],           
+            followingRequests: []          
+          }
+        });
+
+        // Update the followers for each user in followerRequests
+        currentUser.followerRequests.forEach(followerId => {
+          Meteor.users.update(followerId, {
+            $addToSet: { following: this.userId }
+          });
+        });
+      } else {
+        // If no follower requests, just update the privacy setting
+        Meteor.users.update(this.userId, {
+          $set: {
+            'profile.privacy': 'Public',
+            followerRequests: [],           
+            followingRequests: []         
+          }
+        });
+      }
+    } else {
+
       Meteor.users.update(this.userId, {
         $set: {
-          'profile.privacy': 'Public',
-          followerRequests: [],           // Clear follow requests
-          followingRequests: []         // Clear following requests
+          'profile.privacy': privacySetting
         }
       });
-    } else{
-
-    Meteor.users.update(this.userId, {
-      $set: {
-        'profile.privacy': privacySetting
-      }
-    });
-  }
+    }
   }
 });
 
