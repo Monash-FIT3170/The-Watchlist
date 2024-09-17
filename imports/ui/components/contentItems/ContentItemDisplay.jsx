@@ -4,14 +4,13 @@ import React from 'react';
 import ContentItem from './ContentItem';
 
 const ContentItemDisplay = ({ contentItems, contentType, globalRatings, setGlobalRatings }) => {
-    console.log(contentItems);
     return (
         <div className="flex justify-center py-4">
             <div className="w-full px-4">
                 <div
                     className="grid gap-6"
                     style={{
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
                     }}
                 >
                     {contentItems.length > 0 ? (

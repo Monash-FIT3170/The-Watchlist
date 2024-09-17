@@ -62,14 +62,14 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
 
     return (
         <div className="flex flex-col items-start">
-            <button onClick={toggleModal} className="overflow-hidden rounded-md">
+            <button onClick={toggleModal} className="overflow-hidden rounded-md w-full">
                 {/* Image container with aspect ratio */}
-                <div className="aspect-[2/3] relative overflow-hidden">
+                <div className="relative w-full" style={{ paddingBottom: '150%' }}>
                     <img
                         src={content.image_url || popcornUrl}
                         alt={content.title}
                         onError={handleImageError}
-                        className="w-full h-full object-cover transition-transform duration-200 ease-in-out transform hover:scale-110 cursor-pointer"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-200 ease-in-out transform hover:scale-110 cursor-pointer"
                     />
                 </div>
             </button>
@@ -90,7 +90,7 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
                     }}
                 />
             )}
-            <div className="text-white mt-2 text-left" style={{
+            <div className="text-white mt-2 text-left w-full" style={{
                 fontWeight: 'normal',
                 height: '48px',
                 overflow: 'hidden',
