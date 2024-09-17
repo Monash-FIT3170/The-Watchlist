@@ -19,6 +19,7 @@ const SearchBar = ({ currentUser }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [filteredLists, setFilteredLists] = useState([]);
   const escapeRegExp = (string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   };
