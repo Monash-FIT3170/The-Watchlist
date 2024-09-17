@@ -74,7 +74,50 @@ Meteor.methods({
       });
     }
   },
+  'ratings.addOrUpdateSeasonRating'({ userId, contentId, seasonId, rating }) {
+    console.log("Received parameters for addOrUpdateSeasonRating", { userId, contentId, seasonId, rating });
+    check(userId, String);
+    check(contentId, Number);
+    check(seasonId, Number);
+    check(rating, Number);
 
+    const existingRating = Rating.findOne({ userId, contentId, seasonId });
+    if (existingRating) {
+      Rating.update({ _id: existingRating._id }, {
+        $set: { rating }
+      });
+    } else {
+      Rating.insert({
+        userId: userId,
+        contentId: contentId,
+        seasonId: seasonId,
+        contentType: "Season",
+        rating: rating
+      });
+    }
+  },
+  'ratings.getSeasonAverage'({ contentId, seasonId }) {
+    check(contentId, Number);
+    check(seasonId, Number);
+
+    // Fetch all ratings for the given content and season
+    const seasonRatings = RatingCollection.find({ contentId, seasonId, contentType: "Season" }).fetch();
+
+    const totalRatings = seasonRatings.length;
+
+    if (totalRatings === 0) {
+      return { averageRating: 0, totalRatings: 0 }; // Return 0 if no ratings exist
+    }
+
+    // Calculate the average rating for the season
+    const totalRatingsValue = seasonRatings.reduce((sum, rating) => sum + rating.rating, 0);
+    const averageRating = totalRatingsValue / totalRatings;
+
+    return {
+      averageRating: averageRating.toFixed(1), // Return average rating to one decimal place
+      totalRatings
+    };
+  },
   updateAvatar(userId, avatarUrl) {
     check(userId, String);
     check(avatarUrl, String);
@@ -92,9 +135,53 @@ Meteor.methods({
     });
   },
 
-  // add method here
+  'users.updateProfile'(username) {
+    // Ensure the user is logged in
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to update your profile.');
+    }
 
+    // Update user profile
+    try {
+      // Update the user's username
+      if (username.username) {
+        Accounts.setUsername(this.userId, username.username);
+      }
+      return 'Profile updated successfully';
+    } catch (error) {
+      throw new Meteor.Error('update-failed', error.message);
+    }
+  },
 
+  'users.deleteUser'() {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to delete your account.');
+    }
+
+    const userId = this.userId;
+
+    // Remove the user from other users' following and followers lists
+    Meteor.users.update(
+      { following: userId },
+      { $pull: { following: userId } },
+      { multi: true }
+    );
+
+    Meteor.users.update(
+      { followers: userId },
+      { $pull: { followers: userId } },
+      { multi: true }
+    );
+
+    // Remove user's ratings
+    RatingCollection.remove({ userId });
+
+    // Remove user's lists
+    ListCollection.remove({ userId });
+
+    // Finally, remove the user
+    Meteor.users.remove(userId);
+  }
 });
 
 const createDefaultLists = (userId) => {
@@ -383,7 +470,7 @@ Meteor.methods({
 
     const userScores = users.map(user => {
       if (user._id === this.userId) {
-        return null; 
+        return null;
       }
 
       const userFavourites = ListCollection.findOne({
@@ -396,7 +483,7 @@ Meteor.methods({
       }
 
       const userFavouritesSet = new Set(userFavourites.content);
-      
+
       const userFavouritesArray = Array.from(userFavouritesSet);
       const currentUserFavouritesArray = Array.from(currentUserFavouritesSet);
 
@@ -406,11 +493,11 @@ Meteor.methods({
 
       if (commonFavourites.size === 0) {
         return null;
-      } 
+      }
 
       const avgListLength = (userFavouritesArray.length + currentUserFavouritesArray.length) / 2;
 
-      matchScore = commonFavourites.length/avgListLength * 100 * 1.5;
+      matchScore = commonFavourites.length / avgListLength * 100 * 1.5;
 
       if (matchScore > 100) {
         matchScore = 100;
@@ -452,7 +539,24 @@ Meteor.methods({
       throw new Meteor.Error('not-found', 'List not found.');
     }
 
-    return list;
+    // Fetch content details including popularity
+    const contentWithPopularity = list.content.map(item => {
+      let contentItem;
+      if (item.contentType === 'Movie') {
+        contentItem = MovieCollection.findOne({ contentId: item.contentId }, { fields: { popularity: 1 } });
+      } else if (item.contentType === 'TV Show') {
+        contentItem = TVCollection.findOne({ contentId: item.contentId }, { fields: { popularity: 1 } });
+      }
+      return {
+        ...item,
+        popularity: contentItem ? contentItem.popularity : null
+      };
+    });
+
+    return {
+      ...list,
+      content: contentWithPopularity
+    };
   },
 });
 

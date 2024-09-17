@@ -18,7 +18,7 @@ export default function ListDisplay({ listData, heading }) { // Added heading as
         rows.push(listData.slice(i, i + itemsPerRow));
     }
 
-    const popcornUrl = "./ExampleResources/popcorn.png";
+    const popcornUrl = "./images/popcorn.png";
 
     return (
         <div className="w-full bg-darker px-2 py-5 rounded-lg">

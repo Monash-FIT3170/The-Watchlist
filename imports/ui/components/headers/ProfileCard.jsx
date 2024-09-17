@@ -27,6 +27,8 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
     });
   }, [user._id]);
 
+  const isOwnProfile = currentUser && user && currentUser._id === user._id;
+
   const handleAvatarClick = () => {
     setShowAvatarModal(true);
   };
@@ -60,6 +62,28 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
     });
   };
 
+  const handleFollow = () => {
+    Meteor.call('followUser', user._id, (error, result) => {
+      if (error) {
+        console.error('Error following user:', error);
+      } else {
+        setIsFollowing(true);
+        console.log('Followed user successfully');
+      }
+    });
+  };
+
+  const handleUnfollow = () => {
+    Meteor.call('unfollowUser', user._id, (error, result) => {
+      if (error) {
+        console.error('Error unfollowing user:', error);
+      } else {
+        setIsFollowing(false);
+        console.log('Unfollowed user successfully');
+      }
+    });
+  };
+
   const presetAvatars = [
     "https://randomuser.me/api/portraits/lego/1.jpg",
     "https://randomuser.me/api/portraits/lego/2.jpg",
@@ -72,19 +96,20 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
         <ProfileDropdown user={currentUser} />
       </div>
       <div className="flex items-center gap-4">
-        <div className="relative cursor-pointer">
+        <div className="relative group w-56 h-56 rounded-full overflow-hidden">
           <img
             src={newAvatar || user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"}
             alt="avatar"
-            className="aspect-square w-56 h-56 object-cover rounded-full shadow-2xl transition-opacity duration-300 ease-in-out"
-            onClick={handleAvatarClick}
-            style={{ zIndex: 10 }} // Ensures the image is always clickable
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 opacity-0 hover:bg-opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
-            style={{ pointerEvents: 'none' }} // Disables pointer events when not hovering
-          >
-            <FaPencilAlt className="text-white text-3xl" style={{ pointerEvents: 'auto' }} />
-          </div>
+          {isOwnProfile && (
+            <div
+              className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity duration-300 ease-in-out cursor-pointer"
+              onClick={handleAvatarClick}
+            >
+              <FaPencilAlt className="text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -111,11 +136,23 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
                 {ratingsCount} Ratings
               </button>
             </div>
-            <Link to="/user-discovery">
-              <button className="mt-2 ml-1 p-3 text-xl bg-transparent border-2 border-white rounded-full hover:bg-white hover:text-zinc-900 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-zinc-700 focus:ring-opacity-50">
-                <FaUserPlus />
-              </button>
-            </Link>
+            <div>
+              {showFollowButton ? (
+                <button
+                  onClick={() => (isFollowing ? handleUnfollow() : handleFollow())}
+                  className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450]`}
+                >
+                  {isFollowing ? 'Unfollow' : 'Follow'}
+                </button>
+              ) : (
+                <Link to="/user-discovery">
+                  <button className="mt-2 ml-1 p-3 text-xl bg-transparent border-2 border-white rounded-full hover:bg-white hover:text-zinc-900 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-zinc-700 focus:ring-opacity-50">
+                    <FaUserPlus />
+                  </button>
+                </Link>
+              )
+              }
+            </div>
           </div>
         </div>
       </div>
