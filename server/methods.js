@@ -12,15 +12,36 @@ Meteor.methods({
   followUser(targetUserId) {
     check(targetUserId, String);
     if (!this.userId) {
-      throw new Meteor.Error('not-authorized');
+      throw new Meteor.Error('not-authorised');
     }
+    // grab the target user so we can check their privacy settings
+    const targetUser = Meteor.users.findOne({ _id: targetUserId }, { fields: { 'profile.privacy': 1, followers: 1, following: 1 } });
+
+    // check if the target user has a private profile, and if so add the current user to their requests
+    if (targetUser.profile && targetUser.profile.privacy === 'Private') {
+      Meteor.users.update(targetUserId, { $addToSet: { followerRequests: this.userId } });
+      Meteor.users.update(this.userId, { $addToSet: { followingRequests: targetUserId } });
+    }else{ //else add the current user to the target user's followers and the target user to the current user's following
     Meteor.users.update(this.userId, { $addToSet: { following: targetUserId } });
     Meteor.users.update(targetUserId, { $addToSet: { followers: this.userId } });
+    }
+  },
+  accceptRequest(targetUserId) {
+    check(targetUserId, String);
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorised');
+    }
+    // add the user to the follow list
+    Meteor.users.update(this.userId, { $addToSet: { following: targetUserId } });
+    Meteor.users.update(targetUserId, { $addToSet: { followers: this.userId } });
+    //remove the user from the requests list
+    Meteor.users.update(this.userId, { $pull: { followingRequests: targetUserId } });
+    Meteor.users.update(targetUserId, { $pull: { followerRequests: this.userId } });
   },
   unfollowUser(targetUserId) {
     check(targetUserId, String);
     if (!this.userId) {
-      throw new Meteor.Error('not-authorized');
+      throw new Meteor.Error('not-authorised');
     }
     Meteor.users.update(this.userId, { $pull: { following: targetUserId } });
     Meteor.users.update(targetUserId, { $pull: { followers: this.userId } });
@@ -198,6 +219,8 @@ Accounts.onCreateUser((options, user) => {
     user.avatarUrl = defaultAvatarUrl;
   }
   user.following = [];
+  user.followerRequests = [];
+  user.followingRequests = [];
   user.followers = [];
 
   user.profile = {
@@ -245,12 +268,22 @@ Meteor.methods({
     if (!['Public', 'Private'].includes(privacySetting)) {
       throw new Meteor.Error('invalid-argument', 'Invalid privacy setting.');
     }
+    if (privacySetting === 'Public') {
+      Meteor.users.update(this.userId, {
+        $set: {
+          'profile.privacy': 'Public',
+          followerRequests: [],           // Clear follow requests
+          followingRequests: []         // Clear following requests
+        }
+      });
+    } else{
 
     Meteor.users.update(this.userId, {
       $set: {
         'profile.privacy': privacySetting
       }
     });
+  }
   }
 });
 

@@ -16,6 +16,8 @@ Meteor.publish('userData', function (userId) {
         'profile.privacy': 1,
         username: 1,
         avatarUrl: 1,
+        followerRequests: 1,
+        followingRequests: 1,
         followers: 1,
         following: 1,
         realName: 1,
@@ -30,6 +32,8 @@ Meteor.publish('allUsers', function () {
     fields: {
       'profile.privacy': 1,
       username: 1,
+      followerRequests: 1,
+      followingRequests: 1,
       followers: 1,
       following: 1,
       avatarUrl: 1,
