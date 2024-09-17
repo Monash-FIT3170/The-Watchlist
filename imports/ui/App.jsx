@@ -68,7 +68,7 @@ export const App = () => {
 
   return (
     <div className="app flex h-screen overflow-hidden bg-darkest text-white">
-      <div>
+      <div className="flex-none">
         <Navbar staticNavData={staticNavbarData} currentUser={currentUser}/>
       </div>
       <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
