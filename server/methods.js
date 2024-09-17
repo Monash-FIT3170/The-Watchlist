@@ -43,6 +43,10 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error('not-authorised');
     }
+    //remove from request if they are in there
+    Meteor.users.update(this.userId, { $pull: { followingRequests: targetUserId } });
+    Meteor.users.update(targetUserId, { $pull: { followerRequests: this.userId } });
+    //and remove from the following list
     Meteor.users.update(this.userId, { $pull: { following: targetUserId } });
     Meteor.users.update(targetUserId, { $pull: { followers: this.userId } });
   },

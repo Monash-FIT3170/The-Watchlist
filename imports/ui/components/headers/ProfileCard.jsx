@@ -91,6 +91,8 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       } else {
         if (!privateAccount){
         setIsFollowing(true);
+        }else{
+          setIsRequested(true);
         }
         console.log('Followed user successfully');
       }
@@ -104,6 +106,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
         console.error('Error unfollowing user:', error);
       } else {
         setIsFollowing(false);
+        setIsRequested(false);
         console.log('Unfollowed user successfully');
       }
     });
@@ -175,10 +178,16 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
             <div>
               {showFollowButton ? (
                 <button
-                  onClick={() => (isFollowing ? handleUnfollow() : handleFollow())}
+                onClick={() => {
+                  if (isFollowing || isRequested) {
+                    handleUnfollow();
+                  } else {
+                    handleFollow();
+                  }
+                }}
                   className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450]`}
                 >
-                  {isFollowing ? 'Unfollow' : 'Follow'}
+                    {isFollowing ? 'Unfollow' : isRequested ? 'Requested' : 'Follow'}
                 </button>
               ) : (
                 <Link to="/user-discovery">

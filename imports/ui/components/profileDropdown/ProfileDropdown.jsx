@@ -44,12 +44,24 @@ const ProfileDropdown = ({ user }) => {
 
   return (
     <div className="relative" ref={dropdownRef}>
+      <div className="relative">
       <img
         src={user.avatarUrl || 'https://randomuser.me/api/portraits/lego/1.jpg'}
         alt="avatar"
         className="w-10 h-10 rounded-full cursor-pointer"
         onClick={toggleDropdown}
       />
+
+
+      {/* Notification Badge */}
+      {user.followerRequests && user.followerRequests.length > 0 && (
+          <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full">
+            {user.followerRequests.length}
+          </span>
+        )}
+      </div>
+
+
       {dropdownOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-50">
           <ul className="py-2">
