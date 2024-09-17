@@ -199,11 +199,31 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error('not-authorized', 'You must be logged in to delete your account.');
     }
-    // Remove the user from the collection
-    Meteor.users.remove(this.userId);
-  }
-  // add method here
 
+    const userId = this.userId;
+
+    // Remove the user from other users' following and followers lists
+    Meteor.users.update(
+      { following: userId },
+      { $pull: { following: userId } },
+      { multi: true }
+    );
+
+    Meteor.users.update(
+      { followers: userId },
+      { $pull: { followers: userId } },
+      { multi: true }
+    );
+
+    // Remove user's ratings
+    RatingCollection.remove({ userId });
+
+    // Remove user's lists
+    ListCollection.remove({ userId });
+
+    // Finally, remove the user
+    Meteor.users.remove(userId);
+  }
 });
 
 const createDefaultLists = (userId) => {

@@ -45,11 +45,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       }
     });
   }, [user._id]);
-
-
-
-
-
+  const isOwnProfile = currentUser && user && currentUser._id === user._id;
 
   const handleAvatarClick = () => {
     setShowAvatarModal(true);
@@ -126,19 +122,20 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
         <ProfileDropdown user={currentUser} />
       </div>
       <div className="flex items-center gap-4">
-        <div className="relative cursor-pointer">
+        <div className="relative group w-56 h-56 rounded-full overflow-hidden">
           <img
             src={newAvatar || user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"}
             alt="avatar"
-            className="aspect-square w-56 h-56 object-cover rounded-full shadow-2xl transition-opacity duration-300 ease-in-out"
-            onClick={handleAvatarClick}
-            style={{ zIndex: 10 }} // Ensures the image is always clickable
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 opacity-0 hover:bg-opacity-50 hover:opacity-100 transition-opacity duration-300 ease-in-out"
-            style={{ pointerEvents: 'none' }} // Disables pointer events when not hovering
-          >
-            <FaPencilAlt className="text-white text-3xl" style={{ pointerEvents: 'auto' }} />
-          </div>
+          {isOwnProfile && (
+            <div
+              className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity duration-300 ease-in-out cursor-pointer"
+              onClick={handleAvatarClick}
+            >
+              <FaPencilAlt className="text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">
