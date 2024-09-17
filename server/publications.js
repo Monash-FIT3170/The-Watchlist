@@ -130,3 +130,23 @@ Meteor.publish('seasonRatings', function (contentId, seasonId) {
     contentType: "Season"
   });
 });
+Meteor.publish('allLists', function () {
+  if (!this.userId) {
+    return this.ready();
+  }
+
+  // Publish all lists for now; later this will be restricted to only visible lists.
+  return ListCollection.find({}, {
+    fields: {
+      userId: 1,
+      userName: 1,
+      title: 1,
+      description: 1,
+      listType: 1,
+      content: 1,
+      createdAt: 1,
+      updatedAt: 1,
+      subscribers: 1 // Include subscribers field to later restrict based on visibility.
+    }
+  });
+});
