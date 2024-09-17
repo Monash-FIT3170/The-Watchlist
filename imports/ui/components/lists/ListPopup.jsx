@@ -183,7 +183,6 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     };
 
     const handleVisibilityChange = () => {
-        console.log('change logged --------')
         choices = ["PUBLIC", "FOLLOWERS", "ONLY_ME"]
         index = choices.indexOf(getVisibility)
 
