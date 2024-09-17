@@ -1,39 +1,38 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { AiOutlineSearch } from 'react-icons/ai';
-import ContentItem from '../components/contentItems/ContentItem';
-import ListDisplay from '../components/lists/ListDisplay';
-import { useTracker } from 'meteor/react-meteor-data';
-import { ListCollection } from '../../db/List';
-import Scrollbar from '../components/scrollbar/ScrollBar';
-import UserList from '../components/lists/UserList';
-import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
-import debounce from 'lodash.debounce';
+import React, { useState, useEffect, useCallback } from "react";
+import { AiOutlineSearch } from "react-icons/ai";
+import ContentItem from "../components/contentItems/ContentItem";
+import ListDisplay from "../components/lists/ListDisplay";
+import { useTracker } from "meteor/react-meteor-data";
+import { ListCollection } from "../../db/List";
+import Scrollbar from "../components/scrollbar/ScrollBar";
+import UserList from "../components/lists/UserList";
+import ProfileDropdown from "../components/profileDropdown/ProfileDropdown";
+import debounce from "lodash.debounce";
 
 const SearchBar = ({ currentUser }) => {
-
-    const [selectedTab, setSelectedTab] = useState('Movies');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [globalRatings, setGlobalRatings] = useState({});
-    const [filteredMovies, setFilteredMovies] = useState([]);
-    const [filteredTVShows, setFilteredTVShows] = useState([]);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [totalPages, setTotalPages] = useState(0);
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-    const escapeRegExp = (string) => {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    };
+  const [selectedTab, setSelectedTab] = useState("Movies");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [globalRatings, setGlobalRatings] = useState({});
+  const [filteredMovies, setFilteredMovies] = useState([]);
+  const [filteredTVShows, setFilteredTVShows] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const escapeRegExp = (string) => {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  };
 
   const limit = 50; // Number of items per page
 
   const lists = useTracker(() => {
     const userId = Meteor.userId();
-    Meteor.subscribe('userLists', userId);
+    Meteor.subscribe("userLists", userId);
     return ListCollection.find({ userId }).fetch();
   }, []);
 
   useEffect(() => {
     // Fetch global ratings using the Meteor method
-    Meteor.call('ratings.getGlobalAverages', (error, result) => {
+    Meteor.call("ratings.getGlobalAverages", (error, result) => {
       if (!error) {
         setGlobalRatings(result);
       } else {
@@ -58,15 +57,24 @@ const SearchBar = ({ currentUser }) => {
 
   const fetchContent = useCallback(() => {
     setLoading(true);
-    const options = { searchString: debouncedSearchTerm, limit, page: currentPage };
+    const options = {
+      searchString: debouncedSearchTerm,
+      limit,
+      page: currentPage,
+    };
 
-    Meteor.call('content.read', options, (error, result) => {
+    Meteor.call("content.read", options, (error, result) => {
       setLoading(false);
       if (!error) {
         const totalItems = result.total;
         setTotalPages(Math.ceil(totalItems / limit));
-        setFilteredMovies(result.movie?.map(movie => ({ ...movie, contentType: 'Movie' })) || []);
-        setFilteredTVShows(result.tv?.map(tv => ({ ...tv, contentType: 'TV Show' })) || []);
+        setFilteredMovies(
+          result.movie?.map((movie) => ({ ...movie, contentType: "Movie" })) ||
+            []
+        );
+        setFilteredTVShows(
+          result.tv?.map((tv) => ({ ...tv, contentType: "TV Show" })) || []
+        );
       } else {
         console.error("Error fetching content:", error);
         setFilteredMovies([]);
@@ -75,17 +83,14 @@ const SearchBar = ({ currentUser }) => {
     });
   }, [debouncedSearchTerm, currentPage]);
 
-    const fetchUsers = useCallback(() => {
-        Meteor.subscribe('allUsers');
-        return Meteor.users.find({
-            username: { $regex: escapeRegExp(searchTerm), $options: 'i' }
-        }).fetch();
-        setUsers(fetchedUsers);
-      },
-      onStop: () => {
-        setLoading(false);
-      }
-    });
+  const fetchUsers = useCallback(() => {
+    Meteor.subscribe("allUsers");
+    const fetchedUsers = Meteor.users
+      .find({
+        username: { $regex: escapeRegExp(searchTerm), $options: "i" },
+      })
+      .fetch();
+    setUsers(fetchedUsers);
   }, [debouncedSearchTerm]);
 
   const fetchLists = useCallback(() => {
@@ -93,32 +98,46 @@ const SearchBar = ({ currentUser }) => {
       setFilteredLists(lists);
       return;
     }
-    const filtered = lists.filter(list =>
-      (list.title && list.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) ||
-      (list.description && list.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+    const filtered = lists.filter(
+      (list) =>
+        (list.title &&
+          list.title
+            .toLowerCase()
+            .includes(debouncedSearchTerm.toLowerCase())) ||
+        (list.description &&
+          list.description
+            .toLowerCase()
+            .includes(debouncedSearchTerm.toLowerCase()))
     );
     setFilteredLists(filtered);
   }, [lists, debouncedSearchTerm]);
 
   useEffect(() => {
-    if (selectedTab === 'Movies' || selectedTab === 'TV Shows') {
+    if (selectedTab === "Movies" || selectedTab === "TV Shows") {
       fetchContent();
-    } else if (selectedTab === 'Users') {
+    } else if (selectedTab === "Users") {
       fetchUsers();
-    } else if (selectedTab === 'Lists') {
+    } else if (selectedTab === "Lists") {
       fetchLists();
     }
-  }, [fetchContent, fetchUsers, fetchLists, debouncedSearchTerm, selectedTab, currentPage]);
+  }, [
+    fetchContent,
+    fetchUsers,
+    fetchLists,
+    debouncedSearchTerm,
+    selectedTab,
+    currentPage,
+  ]);
 
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
-      setCurrentPage(prevPage => prevPage + 1);
+      setCurrentPage((prevPage) => prevPage + 1);
     }
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 0) {
-      setCurrentPage(prevPage => prevPage - 1);
+      setCurrentPage((prevPage) => prevPage - 1);
     }
   };
 
@@ -127,7 +146,10 @@ const SearchBar = ({ currentUser }) => {
       <div className="absolute top-4 right-4">
         <ProfileDropdown user={currentUser} />
       </div>
-      <form className="flex flex-col items-start w-full pl-1" onSubmit={(e) => e.preventDefault()}>
+      <form
+        className="flex flex-col items-start w-full pl-1"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <div className="flex justify-between items-center w-full max-w-xl">
           <div className="relative flex-grow">
             <input
@@ -143,11 +165,14 @@ const SearchBar = ({ currentUser }) => {
           </div>
         </div>
         <div className="bubbles-container flex justify-end mt-2">
-          {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
+          {["Movies", "TV Shows", "Lists", "Users"].map((tab) => (
             <div
               key={tab}
-              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-                } border-transparent border`}
+              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${
+                selectedTab === tab
+                  ? "bg-[#7B1450] text-white border-[#7B1450]"
+                  : "bg-[#282525]"
+              } border-transparent border`}
               onClick={() => {
                 setSelectedTab(tab);
                 setCurrentPage(0); // Reset to first page when tab changes
@@ -165,54 +190,90 @@ const SearchBar = ({ currentUser }) => {
           </div>
         ) : (
           <>
-            {selectedTab === 'Movies' && (
+            {selectedTab === "Movies" && (
               <div className="grid-responsive">
-                {filteredMovies.length > 0 ? filteredMovies.map(movie => (
-                  <ContentItem content={movie} contentType="Movie" key={movie.contentId} globalRating={globalRatings[movie.contentId]?.average || 0} setGlobalRatings={setGlobalRatings} />
-                )) : debouncedSearchTerm === '' ? (
+                {filteredMovies.length > 0 ? (
+                  filteredMovies.map((movie) => (
+                    <ContentItem
+                      content={movie}
+                      contentType="Movie"
+                      key={movie.contentId}
+                      globalRating={
+                        globalRatings[movie.contentId]?.average || 0
+                      }
+                      setGlobalRatings={setGlobalRatings}
+                    />
+                  ))
+                ) : debouncedSearchTerm === "" ? (
                   <div className="flex justify-center items-center w-full h-full">
-                    <img src="/images/popcorn.png" alt="No Movies" className="w-32 h-32" />
+                    <img
+                      src="/images/popcorn.png"
+                      alt="No Movies"
+                      className="w-32 h-32"
+                    />
                   </div>
                 ) : (
                   <div>No movies found.</div>
                 )}
               </div>
             )}
-            {selectedTab === 'TV Shows' && (
+            {selectedTab === "TV Shows" && (
               <div className="grid-responsive">
-                {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
-                  <ContentItem content={tv} contentType="TV Show" key={tv.contentId} globalRating={globalRatings[tv.contentId]?.average || 0} setGlobalRatings={setGlobalRatings} />
-                )) : debouncedSearchTerm === '' ? (
+                {filteredTVShows.length > 0 ? (
+                  filteredTVShows.map((tv) => (
+                    <ContentItem
+                      content={tv}
+                      contentType="TV Show"
+                      key={tv.contentId}
+                      globalRating={globalRatings[tv.contentId]?.average || 0}
+                      setGlobalRatings={setGlobalRatings}
+                    />
+                  ))
+                ) : debouncedSearchTerm === "" ? (
                   <div className="flex justify-center items-center w-full h-full">
-                    <img src="/images/popcorn.png" alt="No TV Shows" className="w-32 h-32" />
+                    <img
+                      src="/images/popcorn.png"
+                      alt="No TV Shows"
+                      className="w-32 h-32"
+                    />
                   </div>
                 ) : (
                   <div>No TV shows found.</div>
                 )}
               </div>
             )}
-            {selectedTab === 'Lists' && (
-              filteredLists.length > 0 ? (
+            {selectedTab === "Lists" &&
+              (filteredLists.length > 0 ? (
                 <ListDisplay listData={filteredLists} />
-              ) : debouncedSearchTerm === '' ? (
+              ) : debouncedSearchTerm === "" ? (
                 <div className="flex justify-center items-center w-full h-full">
-                  <img src="/images/popcorn.png" alt="No Lists" className="w-32 h-32" />
+                  <img
+                    src="/images/popcorn.png"
+                    alt="No Lists"
+                    className="w-32 h-32"
+                  />
                 </div>
               ) : (
                 <div>No lists found.</div>
-              )
-            )}
-            {selectedTab === 'Users' && (
-              users.length > 0 ? (
-                <UserList users={users} searchTerm={debouncedSearchTerm} currentUser={currentUser} />
-              ) : debouncedSearchTerm === '' ? (
+              ))}
+            {selectedTab === "Users" &&
+              (users.length > 0 ? (
+                <UserList
+                  users={users}
+                  searchTerm={debouncedSearchTerm}
+                  currentUser={currentUser}
+                />
+              ) : debouncedSearchTerm === "" ? (
                 <div className="flex justify-center items-center w-full h-full">
-                  <img src="/images/popcorn.png" alt="No Users" className="w-32 h-32" />
+                  <img
+                    src="/images/popcorn.png"
+                    alt="No Users"
+                    className="w-32 h-32"
+                  />
                 </div>
               ) : (
                 <div>No users found.</div>
-              )
-            )}
+              ))}
           </>
         )}
       </Scrollbar>
@@ -223,14 +284,20 @@ const SearchBar = ({ currentUser }) => {
           <button
             onClick={handlePreviousPage}
             disabled={currentPage === 0}
-            className={`py-2 px-4 rounded-lg ${currentPage === 0 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'}`}
+            className={`py-2 px-4 rounded-lg ${
+              currentPage === 0 ? "bg-gray-300" : "bg-[#7B1450] text-white"
+            }`}
           >
             Previous
           </button>
           <button
             onClick={handleNextPage}
             disabled={currentPage >= totalPages - 1}
-            className={`py-2 px-4 rounded-lg ${currentPage >= totalPages - 1 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'}`}
+            className={`py-2 px-4 rounded-lg ${
+              currentPage >= totalPages - 1
+                ? "bg-gray-300"
+                : "bg-[#7B1450] text-white"
+            }`}
           >
             Next
           </button>
