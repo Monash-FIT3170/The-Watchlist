@@ -73,6 +73,14 @@ Meteor.methods({
     }
     return Meteor.users.find({ _id: { $in: user.following } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
   },
+  'users.followerRequests'({ userId }) {
+    check(userId, String);
+    const user = Meteor.users.findOne(userId);
+    if (!user) {
+      throw new Meteor.Error('not-found', 'User not found');
+    }
+    return Meteor.users.find({ _id: { $in: user.followerRequests } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
+  },
   'ratings.addOrUpdate'({ userId, contentId, contentType, rating }) {
     console.log('addOrUpdate method called with:', { userId, contentId, contentType, rating });
 

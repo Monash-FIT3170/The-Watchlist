@@ -75,6 +75,19 @@ const ProfileDropdown = ({ user }) => {
                 Account Settings
               </Link>
             </li>
+            <li className="relative flex items-center justify-between">
+            <Link to="/follow-requests" className=" px-4 py-2 text-sm hover:bg-gray-700 flex items-center">
+
+              <span>Follow Requests</span>
+
+
+              {user.followerRequests && user.followerRequests.length > 0 && (
+                <span className="ml-9 mb-1 w-5 h-5 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full">
+                  {user.followerRequests.length}
+                </span>
+              )}
+            </Link>
+          </li>
             <li className="border-t border-gray-700 mt-2">
               <button
                 onClick={handleLogout}
