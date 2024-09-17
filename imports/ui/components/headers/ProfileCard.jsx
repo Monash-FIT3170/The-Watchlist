@@ -144,25 +144,25 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
           <div className="flex flex-col gap-2 pl-2">
             <div className="flex gap-2 items-center">
             <button
-                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser  ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
-                onClick={user.userPrivacy === 'Public'  || isCurrentUser ? () => navigate(`/followers-following/${user._id}/followers`) : null}
-                disabled={user.userPrivacy !== 'Public' && !isCurrentUser}
+                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing  ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
+                onClick={user.userPrivacy === 'Public'  || isCurrentUser || isFollowing ? () => navigate(`/followers-following/${user._id}/followers`) : null}
+                disabled={user.userPrivacy !== 'Public' && !isCurrentUser && !isFollowing}
               >
                 {user.followers} Followers
               </button>
               <span className="text-lg">•</span>
               <button
-              className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
-              onClick={user.userPrivacy === 'Public' || isCurrentUser   ? () => navigate(`/followers-following/${user._id}/following`) : null}
-              disabled={user.userPrivacy !== 'Public' && !isCurrentUser}
+              className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
+              onClick={user.userPrivacy === 'Public' || isCurrentUser || isFollowing   ? () => navigate(`/followers-following/${user._id}/following`) : null}
+              disabled={user.userPrivacy !== 'Public' && !isCurrentUser && !isFollowing}
             >
                 {user.following} Following
               </button>
               <span className="text-lg">•</span>
               <button
-                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
+                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
                 onClick={() => {
-                  if (user.userPrivacy === 'Public' || isCurrentUser){
+                  if (user.userPrivacy === 'Public' || isCurrentUser || isFollowing){
                   if (user._id === currentUser._id) {
                     navigate(`/user/${user._id}/ratings?userSpecific=true`);
                   } else {
@@ -170,7 +170,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
                   }
                 }
                 }}
-                disabled={user.userPrivacy !== 'Public' && !isCurrentUser}
+                disabled={user.userPrivacy !== 'Public' && !isCurrentUser  && !isFollowing}
                 >
                 {ratingsCount} Ratings
               </button>

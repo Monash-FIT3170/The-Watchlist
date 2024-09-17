@@ -12,6 +12,10 @@ const UserProfilePage = () => {
   const { userId } = useParams();
   const [userLists, setUserLists] = useState([]);
   const [globalRatings, setGlobalRatings] = useState({});
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
+
+  
 
   const currentUser = useTracker(() => {
     const handler = Meteor.subscribe('userData', Meteor.userId());
@@ -84,6 +88,16 @@ const UserProfilePage = () => {
     }
   }, [userId, userProfile]);
 
+  useEffect(() => {
+    const currentUser = Meteor.user();
+    if (currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId)) {
+      setIsFollowing(true);
+    }
+    if (currentUser && currentUser._id === userId) {
+      setIsOwnProfile(true);
+    }
+  } , []);
+
   const favouritesList = userLists.find((list) => list.listType === 'Favourite');
   const toWatchList = userLists.find((list) => list.listType === 'To Watch');
   const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
@@ -102,7 +116,7 @@ const UserProfilePage = () => {
             />
             <div className="p-6">
               {/* Conditional rendering based on privacy setting */}
-            {userProfile.userPrivacy === 'Private' ? (
+            {userProfile.userPrivacy === 'Private' && !isFollowing && !isOwnProfile ? (
               <div className="flex flex-col items-center mt-40 min-h-screen">
               <p className="mb-5 font-bold text-center">This user's profile is private.</p>
               <FaLock size={200} />
