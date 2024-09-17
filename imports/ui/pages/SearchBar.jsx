@@ -10,6 +10,7 @@ import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 import debounce from 'lodash.debounce';
 import ListCard from '../components/lists/ListCard';
 import ListCardDisplay from '../components/lists/ListCardDisplay';
+import ContentItemDisplay from '../components/contentItems/ContentItemDisplay';
 
 const SearchBar = ({ currentUser }) => {
 
@@ -178,30 +179,20 @@ const SearchBar = ({ currentUser }) => {
         ) : (
           <>
             {selectedTab === 'Movies' && (
-              <div className="grid-responsive">
-                {filteredMovies.length > 0 ? filteredMovies.map(movie => (
-                  <ContentItem content={movie} contentType="Movie" key={movie.contentId} globalRating={globalRatings[movie.contentId]?.average || 0} setGlobalRatings={setGlobalRatings} />
-                )) : debouncedSearchTerm === '' ? (
-                  <div className="flex justify-center items-center w-full h-full">
-                    <img src="/images/popcorn.png" alt="No Movies" className="w-32 h-32" />
-                  </div>
-                ) : (
-                  <div>No movies found.</div>
-                )}
-              </div>
+              <ContentItemDisplay
+                contentItems={filteredMovies}
+                contentType="Movie"
+                globalRatings={globalRatings}
+                setGlobalRatings={setGlobalRatings}
+              />
             )}
             {selectedTab === 'TV Shows' && (
-              <div className="grid-responsive">
-                {filteredTVShows.length > 0 ? filteredTVShows.map(tv => (
-                  <ContentItem content={tv} contentType="TV Show" key={tv.contentId} globalRating={globalRatings[tv.contentId]?.average || 0} setGlobalRatings={setGlobalRatings} />
-                )) : debouncedSearchTerm === '' ? (
-                  <div className="flex justify-center items-center w-full h-full">
-                    <img src="/images/popcorn.png" alt="No TV Shows" className="w-32 h-32" />
-                  </div>
-                ) : (
-                  <div>No TV shows found.</div>
-                )}
-              </div>
+              <ContentItemDisplay
+                contentItems={filteredTVShows}
+                contentType="TV Show"
+                globalRatings={globalRatings}
+                setGlobalRatings={setGlobalRatings}
+              />
             )}
             {selectedTab === 'Lists' && (
               filteredLists.length > 0 ? (

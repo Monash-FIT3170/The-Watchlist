@@ -1,3 +1,5 @@
+// src/components/ContentItem.jsx
+
 import React, { useState } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import ContentInfoModal from '../../modals/ContentInfoModal';
@@ -5,7 +7,7 @@ import RatingStar from "../ratings/RatingStar";
 import { FaGlobe, FaUser } from "react-icons/fa";
 import { RatingCollection } from '../../../db/Rating';
 
-const popcornUrl = "./images/popcorn.png"; // Default image URL
+const popcornUrl = "/images/popcorn.png"; // Ensure correct path
 
 const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating, setGlobalRatings }) => {
     const [isOpen, setOpen] = useState(false);
@@ -59,14 +61,17 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
     };
 
     return (
-        <div className="flex flex-col items-start mr-4 w-40">
-            <button onClick={toggleModal}>
-                <img
-                    src={content.image_url || popcornUrl}
-                    alt={content.title}
-                    onError={handleImageError}
-                    className="w-40 h-60 object-cover rounded-md transition-transform duration-200 ease-in-out transform hover:scale-110 cursor-pointer m-2"
-                />
+        <div className="flex flex-col items-start">
+            <button onClick={toggleModal} className="overflow-hidden rounded-md">
+                {/* Image container with aspect ratio */}
+                <div className="aspect-[2/3] relative overflow-hidden">
+                    <img
+                        src={content.image_url || popcornUrl}
+                        alt={content.title}
+                        onError={handleImageError}
+                        className="w-full h-full object-cover transition-transform duration-200 ease-in-out transform hover:scale-110 cursor-pointer"
+                    />
+                </div>
             </button>
             {isOpen && fullContent && (
                 <ContentInfoModal
@@ -84,9 +89,8 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
                         });
                     }}
                 />
-
             )}
-            <div className="text-white mt-0 ml-2 text-left" style={{
+            <div className="text-white mt-2 text-left" style={{
                 fontWeight: 'normal',
                 height: '48px',
                 overflow: 'hidden',
@@ -94,9 +98,14 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
                 WebkitLineClamp: '2',
                 WebkitBoxOrient: 'vertical',
                 textOverflow: 'ellipsis'
-            }}>{content.title}</div>
-            <div className="flex items-center ml-2 mt-1">
-                {isUserSpecificRating ? <FaUser className="mr-1 text-blue-500" title="User rating" /> : <FaGlobe className="mr-1 text-green-500" title="Global average rating" />}
+            }}>
+                {content.title}
+            </div>
+            <div className="flex items-center mt-1">
+                {isUserSpecificRating ? 
+                    <FaUser className="mr-1 text-blue-500" title="User rating" /> : 
+                    <FaGlobe className="mr-1 text-green-500" title="Global average rating" 
+                />}
                 <RatingStar totalStars={5} rating={rating} isLoading={isRatingLoading} />
             </div>
         </div>
