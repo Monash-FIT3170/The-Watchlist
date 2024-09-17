@@ -55,7 +55,7 @@ const ProfileDropdown = ({ user }) => {
 
       {/* Notification Badge */}
       {user.followerRequests && user.followerRequests.length > 0 && (
-          <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full">
+          <span className="absolute top-0 right-0 w-5 h-5 bg-red-700 text-white text-xs font-bold flex items-center justify-center rounded-full">
             {user.followerRequests.length}
           </span>
         )}
@@ -76,15 +76,17 @@ const ProfileDropdown = ({ user }) => {
               </Link>
             </li>
             <li className="relative flex items-center justify-between">
-            <Link to="/follow-requests" className=" px-4 py-2 text-sm hover:bg-gray-700 flex items-center">
-
+            <Link to="/follow-requests" className="px-4 py-2 text-sm hover:bg-gray-700 flex items-center w-full">
               <span>Follow Requests</span>
 
-
-              {user.followerRequests && user.followerRequests.length > 0 && (
-                <span className="ml-9 mb-1 w-5 h-5 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full">
+              {user.followerRequests && user.followerRequests.length > 0 ? (
+                // Show notification badge if there are follower requests
+                <span className="ml-9 mb-1 w-5 h-5 bg-red-700 text-white text-xs font-bold flex items-center justify-center rounded-full">
                   {user.followerRequests.length}
                 </span>
+              ) : (
+                // Placeholder to maintain space when there are no follower requests
+                <span className="ml-9 mb-1 w-5 h-5" />
               )}
             </Link>
           </li>

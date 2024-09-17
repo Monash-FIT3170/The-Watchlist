@@ -26,17 +26,26 @@ Meteor.methods({
     Meteor.users.update(targetUserId, { $addToSet: { followers: this.userId } });
     }
   },
-  accceptRequest(targetUserId) {
-    check(targetUserId, String);
+  acceptRequest(followerUserID) {
+    check(followerUserID, String);
     if (!this.userId) {
       throw new Meteor.Error('not-authorised');
     }
     // add the user to the follow list
-    Meteor.users.update(this.userId, { $addToSet: { following: targetUserId } });
-    Meteor.users.update(targetUserId, { $addToSet: { followers: this.userId } });
+    Meteor.users.update(followerUserID, { $addToSet: { following: this.userId } });
+    Meteor.users.update(this.userId, { $addToSet: { followers: followerUserID } });
     //remove the user from the requests list
-    Meteor.users.update(this.userId, { $pull: { followingRequests: targetUserId } });
-    Meteor.users.update(targetUserId, { $pull: { followerRequests: this.userId } });
+    Meteor.users.update(followerUserID, { $pull: { followingRequests: this.userId } });
+    Meteor.users.update(this.userId, { $pull: { followerRequests: followerUserID } });
+  },
+  declineRequest(followerUserID) {
+    check(followerUserID, String);
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorised');
+    }
+    //remove the user from the requests list
+    Meteor.users.update(followerUserID, { $pull: { followingRequests: this.userId } });
+    Meteor.users.update(this.userId, { $pull: { followerRequests: followerUserID } });
   },
   unfollowUser(targetUserId) {
     check(targetUserId, String);
