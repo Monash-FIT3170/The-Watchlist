@@ -215,6 +215,19 @@ Meteor.methods({
       { multi: true }
     );
 
+    // Remove the user from other users' followerRequests  and followingRequests lists
+    Meteor.users.update(
+      { followingRequests: userId },
+      { $pull: { followingRequests: userId } },
+      { multi: true }
+    );
+
+    Meteor.users.update(
+      { followerRequests: userId },
+      { $pull: { followerRequests: userId } },
+      { multi: true }
+    );
+
     // Remove user's ratings
     RatingCollection.remove({ userId });
 
@@ -297,6 +310,7 @@ Meteor.methods({
   },
 });
 
+
 Meteor.methods({
   'users.updatePrivacy'(privacySetting) {
     check(privacySetting, String);
@@ -305,27 +319,33 @@ Meteor.methods({
       throw new Meteor.Error('not-authorised', 'You must be logged in to update your privacy setting.');
     }
 
-    
     if (!['Public', 'Private'].includes(privacySetting)) {
       throw new Meteor.Error('invalid-argument', 'Invalid privacy setting.');
     }
 
-    if (privacySetting === 'Public') {
     const currentUser = Meteor.users.findOne(this.userId);
 
-      if (currentUser && currentUser.followerRequests && currentUser.followerRequests.length > 0) {
+    // Ensure followerRequests exists or treat it as an empty array
+    const followerRequests = currentUser?.followerRequests || [];
+
+
+    if (!currentUser.followingRequests) {
+      Meteor.users.update(this.userId, { $set: { followingRequests: [] } });
+    }
+
+    if (privacySetting === 'Public') {
+      if (followerRequests.length > 0) {
         // Add all users from followerRequests to followers
         Meteor.users.update(this.userId, {
-          $addToSet: { followers: { $each: currentUser.followerRequests } }, 
+          $addToSet: { followers: { $each: followerRequests } },
           $set: {
             'profile.privacy': 'Public',
-            followerRequests: [],           
-            followingRequests: []          
+            followerRequests: [] // Clear follower requests since they are accepted
           }
         });
 
         // Update the followers for each user in followerRequests
-        currentUser.followerRequests.forEach(followerId => {
+        followerRequests.forEach(followerId => {
           Meteor.users.update(followerId, {
             $addToSet: { following: this.userId }
           });
@@ -335,13 +355,12 @@ Meteor.methods({
         Meteor.users.update(this.userId, {
           $set: {
             'profile.privacy': 'Public',
-            followerRequests: [],           
-            followingRequests: []         
+            followerRequests: [] // Clear follower requests
           }
         });
       }
     } else {
-
+      // For Private setting, just update the privacy setting
       Meteor.users.update(this.userId, {
         $set: {
           'profile.privacy': privacySetting

@@ -23,7 +23,7 @@ const UserList = React.memo(({ heading, users, searchTerm, onUnfollow }) => {
 
   const isRequested = (userId) => {
     const currentUser = Meteor.user();
-    return (currentUser.followingRequests && currentUser.followingRequests.includes(userId)) 
+    return (currentUser?.followingRequests && currentUser?.followingRequests.includes(userId)) 
   };
 
   // Adjusting how many users to show based on the container width

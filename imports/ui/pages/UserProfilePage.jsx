@@ -26,6 +26,21 @@ const UserProfilePage = () => {
   }, []);
 
   useEffect(() => {
+    if (currentUser) {      
+        //for existing users, if they do not yet have a privacy setting, set it to public
+        if (currentUser.profile?.privacy === undefined) {
+            Meteor.call('users.updatePrivacy','Public', (error) => {
+                if (error) {
+                    console.error('Error updating privacy setting:', error.reason);
+                } else {
+                    console.log('Privacy setting updated to:', 'Public');
+                }
+            });
+        }
+    }
+}, [currentUser]);
+
+  useEffect(() => {
     // Fetch global ratings using the Meteor method
     Meteor.call('ratings.getGlobalAverages', (error, result) => {
       if (!error) {
@@ -66,7 +81,7 @@ const UserProfilePage = () => {
           following: user.following?.length || '0',
           userRealName: user.realName || 'No Name Provided',
           userDescription: user.description || 'No description provided.',
-          userPrivacy: user.profile?.privacy,
+          userPrivacy: user.profile?.privacy || 'Public',
           _id: userId,
         };
       }

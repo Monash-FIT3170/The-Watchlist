@@ -29,7 +29,18 @@ const Settings = () => {
     useEffect(() => {
         if (currentUser) {
             setUsername(currentUser.username || '');
-            setSelectedPrivacy(currentUser.profile.privacy || 'Public');
+            setSelectedPrivacy(currentUser.profile?.privacy || 'Public');
+            
+            //for existing users, if they do not yet have a privacy setting, set it to public
+            if (currentUser.profile?.privacy === undefined) {
+                Meteor.call('users.updatePrivacy','Public', (error) => {
+                    if (error) {
+                        console.error('Error updating privacy setting:', error.reason);
+                    } else {
+                        console.log('Privacy setting updated to:', 'Public');
+                    }
+                });
+            }
         }
     }, [currentUser]);
 
