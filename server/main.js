@@ -11,6 +11,7 @@ import dotenv from 'dotenv';
 import './methods.js'; 
 import './publications.js'; 
 import { ServiceConfiguration } from 'meteor/service-configuration';
+import '../imports/startup/server/indexes'; 
 
 dotenv.config();
 
