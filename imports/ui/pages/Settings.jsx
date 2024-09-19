@@ -29,12 +29,21 @@ const Settings = () => {
     }, [currentUser]);
 
     const handleUpdate = () => {
+        // Check if the username is within the allowed length
         if (!username) {
             setUsernameErrorMessage('Username cannot be empty.');
             setUsernameSuccessMessage('');
             return;
         }
-
+        
+        // Ensure username is between 3 and 15 characters
+        if (username.length < 3 || username.length > 15) {
+            setUsernameErrorMessage('Username must be between 3 and 15 characters.');
+            setUsernameSuccessMessage('');
+            return;
+        }
+    
+        // Proceed with updating the profile if validations pass
         Meteor.call('users.updateProfile', { username }, (error, result) => {
             if (error) {
                 setUsernameErrorMessage(error.reason);
@@ -45,6 +54,7 @@ const Settings = () => {
             }
         });
     };
+    
 
     const handlePasswordStrength = (password) => {
         setStrength(passwordStrength(password).value);
