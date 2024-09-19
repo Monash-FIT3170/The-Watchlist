@@ -12,16 +12,50 @@ Meteor.methods({
   followUser(targetUserId) {
     check(targetUserId, String);
     if (!this.userId) {
-      throw new Meteor.Error('not-authorized');
+      throw new Meteor.Error('not-authorised');
     }
+    // grab the target user so we can check their privacy settings
+    const targetUser = Meteor.users.findOne({ _id: targetUserId }, { fields: { 'profile.privacy': 1, followers: 1, following: 1 } });
+
+    // check if the target user has a private profile, and if so add the current user to their requests
+    if (targetUser.profile && targetUser.profile.privacy === 'Private') {
+      Meteor.users.update(targetUserId, { $addToSet: { followerRequests: this.userId } });
+      Meteor.users.update(this.userId, { $addToSet: { followingRequests: targetUserId } });
+    }else{ //else add the current user to the target user's followers and the target user to the current user's following
     Meteor.users.update(this.userId, { $addToSet: { following: targetUserId } });
     Meteor.users.update(targetUserId, { $addToSet: { followers: this.userId } });
+    }
+  },
+  acceptRequest(followerUserID) {
+    check(followerUserID, String);
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorised');
+    }
+    // add the user to the follow list
+    Meteor.users.update(followerUserID, { $addToSet: { following: this.userId } });
+    Meteor.users.update(this.userId, { $addToSet: { followers: followerUserID } });
+    //remove the user from the requests list
+    Meteor.users.update(followerUserID, { $pull: { followingRequests: this.userId } });
+    Meteor.users.update(this.userId, { $pull: { followerRequests: followerUserID } });
+  },
+  declineRequest(followerUserID) {
+    check(followerUserID, String);
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorised');
+    }
+    //remove the user from the requests list
+    Meteor.users.update(followerUserID, { $pull: { followingRequests: this.userId } });
+    Meteor.users.update(this.userId, { $pull: { followerRequests: followerUserID } });
   },
   unfollowUser(targetUserId) {
     check(targetUserId, String);
     if (!this.userId) {
-      throw new Meteor.Error('not-authorized');
+      throw new Meteor.Error('not-authorised');
     }
+    //remove from request if they are in there
+    Meteor.users.update(this.userId, { $pull: { followingRequests: targetUserId } });
+    Meteor.users.update(targetUserId, { $pull: { followerRequests: this.userId } });
+    //and remove from the following list
     Meteor.users.update(this.userId, { $pull: { following: targetUserId } });
     Meteor.users.update(targetUserId, { $pull: { followers: this.userId } });
   },
@@ -47,6 +81,14 @@ Meteor.methods({
       throw new Meteor.Error('not-found', 'User not found');
     }
     return Meteor.users.find({ _id: { $in: user.following } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
+  },
+  'users.followerRequests'({ userId }) {
+    check(userId, String);
+    const user = Meteor.users.findOne(userId);
+    if (!user) {
+      throw new Meteor.Error('not-found', 'User not found');
+    }
+    return Meteor.users.find({ _id: { $in: user.followerRequests } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
   },
   'ratings.addOrUpdate'({ userId, contentId, contentType, rating }) {
     console.log('addOrUpdate method called with:', { userId, contentId, contentType, rating });
@@ -173,6 +215,19 @@ Meteor.methods({
       { multi: true }
     );
 
+    // Remove the user from other users' followerRequests  and followingRequests lists
+    Meteor.users.update(
+      { followingRequests: userId },
+      { $pull: { followingRequests: userId } },
+      { multi: true }
+    );
+
+    Meteor.users.update(
+      { followerRequests: userId },
+      { $pull: { followerRequests: userId } },
+      { multi: true }
+    );
+
     // Remove user's ratings
     RatingCollection.remove({ userId });
 
@@ -218,11 +273,14 @@ Accounts.onCreateUser((options, user) => {
     user.avatarUrl = defaultAvatarUrl;
   }
   user.following = [];
+  user.followerRequests = [];
+  user.followingRequests = [];
   user.followers = [];
 
-  if (options.profile) {
-    user.profile = options.profile;
-  }
+  user.profile = {
+    ...options.profile,  
+    privacy: 'Public'    
+  };
 
   return user;
 });
@@ -250,6 +308,66 @@ Meteor.methods({
     check(userId, String);
     return RatingCollection.find({ userId }).count();
   },
+});
+
+
+Meteor.methods({
+  'users.updatePrivacy'(privacySetting) {
+    check(privacySetting, String);
+
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorised', 'You must be logged in to update your privacy setting.');
+    }
+
+    if (!['Public', 'Private'].includes(privacySetting)) {
+      throw new Meteor.Error('invalid-argument', 'Invalid privacy setting.');
+    }
+
+    const currentUser = Meteor.users.findOne(this.userId);
+
+    // Ensure followerRequests exists or treat it as an empty array
+    const followerRequests = currentUser?.followerRequests || [];
+
+
+    if (!currentUser.followingRequests) {
+      Meteor.users.update(this.userId, { $set: { followingRequests: [] } });
+    }
+
+    if (privacySetting === 'Public') {
+      if (followerRequests.length > 0) {
+        // Add all users from followerRequests to followers
+        Meteor.users.update(this.userId, {
+          $addToSet: { followers: { $each: followerRequests } },
+          $set: {
+            'profile.privacy': 'Public',
+            followerRequests: [] // Clear follower requests since they are accepted
+          }
+        });
+
+        // Update the followers for each user in followerRequests
+        followerRequests.forEach(followerId => {
+          Meteor.users.update(followerId, {
+            $addToSet: { following: this.userId }
+          });
+        });
+      } else {
+        // If no follower requests, just update the privacy setting
+        Meteor.users.update(this.userId, {
+          $set: {
+            'profile.privacy': 'Public',
+            followerRequests: [] // Clear follower requests
+          }
+        });
+      }
+    } else {
+      // For Private setting, just update the privacy setting
+      Meteor.users.update(this.userId, {
+        $set: {
+          'profile.privacy': privacySetting
+        }
+      });
+    }
+  }
 });
 
 Meteor.methods({

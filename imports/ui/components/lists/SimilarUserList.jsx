@@ -39,6 +39,11 @@ const SimilarUserList = () => {
     return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
   };
 
+  const isRequested = (userId) => {
+    const currentUser = Meteor.user();
+    return (currentUser?.followingRequests && currentUser?.followingRequests.includes(userId)) 
+  };
+
   useEffect(() => {
     const updateContainerWidth = () => {
       const width = document.querySelector('.user-list-container')?.offsetWidth;
@@ -90,14 +95,14 @@ const SimilarUserList = () => {
                       className={`mt-2 px-4 py-1 ${isFollowing(match.user._id) ? 'bg-blue-600' : 'bg-fuchsia-600'} text-white rounded-full`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (isFollowing(match.user._id)) {
-                          handleUnfollow(match.user._id);
-                        } else {
-                          handleFollow(match.user._id);
-                        }
-                      }}
-                    >
-                      {isFollowing(match.user._id) ? 'Unfollow' : 'Follow'}
+                      if (isFollowing(match.user._id) || isRequested(match.user._id)) {
+                    handleUnfollow(match.user._id);
+                  } else {
+                    handleFollow(match.user._id);
+                  }
+                }}
+              >
+                {isFollowing(match.user._id) ? 'Unfollow'  : isRequested(match.user._id) ? 'Requested' : 'Follow'}
                     </button>
                   )}
                 </div>

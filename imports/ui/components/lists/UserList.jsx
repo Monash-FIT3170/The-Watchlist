@@ -6,6 +6,7 @@ import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
 const UserList = React.memo(({ heading, users, searchTerm, onUnfollow }) => {
   const [containerWidth, setContainerWidth] = useState(0);
   const [displayedUsers, setDisplayedUsers] = useState([]);
+
   const defaultAvatarUrl = './default-avatar.png';
   const navigate = useNavigate();
   const currentUserId = Meteor.userId();
@@ -18,6 +19,11 @@ const UserList = React.memo(({ heading, users, searchTerm, onUnfollow }) => {
   const isFollowing = (userId) => {
     const currentUser = Meteor.user();
     return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
+  };
+
+  const isRequested = (userId) => {
+    const currentUser = Meteor.user();
+    return (currentUser?.followingRequests && currentUser?.followingRequests.includes(userId)) 
   };
 
   // Adjusting how many users to show based on the container width
@@ -75,14 +81,14 @@ const UserList = React.memo(({ heading, users, searchTerm, onUnfollow }) => {
                 className={`mt-2 px-4 py-1 ${isFollowing(user._id) ? 'bg-blue-600' : 'bg-fuchsia-600'} text-white rounded-full`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (isFollowing(user._id)) {
+                  if (isFollowing(user._id) || isRequested(user._id)) {
                     handleUnfollow(user._id);
                   } else {
                     handleFollow(user._id);
                   }
                 }}
               >
-                {isFollowing(user._id) ? 'Unfollow' : 'Follow'}
+                {isFollowing(user._id) ? 'Unfollow'  : isRequested(user._id) ? 'Requested' : 'Follow'}
               </button>
             )}
           </div>
