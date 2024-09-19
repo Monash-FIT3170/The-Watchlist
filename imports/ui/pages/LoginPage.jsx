@@ -21,6 +21,17 @@ const LoginPage = () => {
     setStrength(passwordStrength(newPassword).value);
   };
 
+  const handleUsernameChange = (e) => {
+    const newUsername = e.target.value;
+    setUsername(newUsername);
+
+    if (newUsername.length > 25 || newUsername.length < 3) {
+      setError("Username must be between 3 and 25 characters");
+    } else {
+      setError(''); // Clear error if valid
+    }
+  };
+
   const createDefaultLists = (userId) => {
     const defaultLists = [
       { title: 'Favourite', listType: 'Favourite' },
@@ -37,6 +48,13 @@ const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (isRegistering && (username.length < 3 || username.length > 25)) {
+      setError("Username must be between 3 and 25 characters");
+      return;
+    }
+
+
     if (isRegistering) {
       Accounts.createUser({ email, username, password }, (err) => {
         if (err) {
@@ -88,7 +106,7 @@ const LoginPage = () => {
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={handleUsernameChange}
             className="w-full p-2 pl-4 mb-5 bg-dark text-white rounded-full"
             required
           />
@@ -159,7 +177,7 @@ const LoginPage = () => {
           </div>
         )}
 
-        {error && <p className="text-red-600 p-2 ">{error}</p>}
+        {error && <p className="text-red-600 p-2 font-semibold ">{error}</p>}
         <button type="submit" className="w-2/3 p-1.5 mt-3 mb-3 bg-magenta font-bold text-white rounded-full hover:bg-pink-700">
           {isRegistering ? 'Sign Up' : 'Log In'}
         </button>
