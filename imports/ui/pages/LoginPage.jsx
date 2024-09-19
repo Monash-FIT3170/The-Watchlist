@@ -25,8 +25,8 @@ const LoginPage = () => {
     const newUsername = e.target.value;
     setUsername(newUsername);
 
-    if (newUsername.length > 25 || newUsername.length < 3) {
-      setError("Username must be between 3 and 25 characters");
+    if (newUsername.length > 15 || newUsername.length < 3) {
+      setError("Username must be between 3 and 15 characters");
     } else {
       setError(''); // Clear error if valid
     }
@@ -49,8 +49,8 @@ const LoginPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (isRegistering && (username.length < 3 || username.length > 25)) {
-      setError("Username must be between 3 and 25 characters");
+    if (isRegistering && (username.length < 3 || username.length > 15)) {
+      setError("Username must be between 3 and 15 characters");
       return;
     }
 
