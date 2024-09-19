@@ -11,6 +11,7 @@ import debounce from 'lodash.debounce';
 import ListCard from '../components/lists/ListCard';
 import ListCardDisplay from '../components/lists/ListCardDisplay';
 import ContentItemDisplay from '../components/contentItems/ContentItemDisplay';
+import Loading from './Loading';
 
 const SearchBar = ({ currentUser }) => {
 
@@ -134,6 +135,10 @@ const SearchBar = ({ currentUser }) => {
       setCurrentPage(prevPage => prevPage - 1);
     }
   };
+
+  if (loading) {
+    return <Loading></Loading>;
+  }
 
   return (
     <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
