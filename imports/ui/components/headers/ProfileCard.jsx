@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUserPlus, FaPencilAlt } from 'react-icons/fa';
-import { Meteor } from 'meteor/meteor';
 import ProfileDropdown from '../profileDropdown/ProfileDropdown';
 
 const ProfileCard = ({ user, showFollowButton, currentUser }) => {
@@ -15,26 +14,28 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user || !user._id) return;
-    const currentUser = Meteor.user();
-    if (currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(user._id)) {
+    if (!user || !user._id || !currentUser) return;
+
+    if (
+      Array.isArray(currentUser.following) &&
+      currentUser.following.includes(user._id)
+    ) {
       setIsFollowing(true);
     }
 
-    if (user.userPrivacy === 'Private'){
+    if (user.userPrivacy === 'Private') {
       setPrivateAccount(true);
-    }else{
+    } else {
       setPrivateAccount(false);
     }
 
-    if (currentUser._id === user._id) {
-      setIsCurrentUser(true);
-    }else{
-      setIsCurrentUser(false);
-    }
+    setIsCurrentUser(currentUser._id === user._id);
 
-    if (currentUser.followingRequests && currentUser.followingRequests.includes(user._id)) {
-      setIsRequested(true); 
+    if (
+      currentUser.followingRequests &&
+      currentUser.followingRequests.includes(user._id)
+    ) {
+      setIsRequested(true);
     }
 
     Meteor.call('users.ratingsCount', { userId: user._id }, (error, result) => {
@@ -44,7 +45,8 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
         setRatingsCount(result);
       }
     });
-  }, [user._id]);
+  }, [user._id, currentUser]);
+
   const isOwnProfile = currentUser && user && currentUser._id === user._id;
 
   const handleAvatarClick = () => {
@@ -124,7 +126,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       <div className="flex items-center gap-4">
         <div className="relative group w-56 h-56 rounded-full overflow-hidden">
           <img
-            src={newAvatar || user.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"}
+            src={newAvatar || user.avatarUrl || 'https://randomuser.me/api/portraits/lego/1.jpg'}
             alt="avatar"
             className="w-full h-full object-cover"
           />

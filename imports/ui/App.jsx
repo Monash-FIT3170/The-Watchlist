@@ -23,8 +23,11 @@ import Loading from "./pages/Loading.jsx";
 import Settings from "./pages/Settings.jsx";
 import FollowRequests from "./pages/FollowRequests.jsx";
 import { ListCollection } from '../db/List.tsx';
+import { useEffect } from "react";
 
 export const App = () => {
+  const [cachedUserData, setCachedUserData] = useState(null);
+  const [cachedUserLists, setCachedUserLists] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const location = useLocation(); // Use to check the current route
@@ -37,26 +40,35 @@ export const App = () => {
     { title: "AI Picks", path: "/ai-picks", icon: <BsStars />, cName: "flex" },
   ], []);
 
-  const {
-    currentUser,
-    userLoading,
-    userListsLoading,
-    userLists,
-  } = useTracker(() => {
-    const userHandler = Meteor.subscribe('userData', Meteor.userId());
-    const listHandler = Meteor.subscribe('userLists', Meteor.userId());
-
-    return {
-      currentUser: Meteor.user(),
-      userLoading: !userHandler.ready(),
-      userListsLoading: !listHandler.ready(),
-      userLists: ListCollection.find({ userId: Meteor.userId() }).fetch(),
-    };
+  // Subscribe once at the top level
+  useEffect(() => {
+    Meteor.subscribe('userData', Meteor.userId());
+    Meteor.subscribe('userLists', Meteor.userId());
   }, []);
 
-  if (userLoading || userListsLoading) {
-    return <Loading />;
-  }
+  const currentUser = useTracker(() => {
+    if (cachedUserData) {
+      return cachedUserData;
+    } else {
+      const user = Meteor.user();
+      if (user) {
+        setCachedUserData(user);
+      }
+      return user;
+    }
+  }, []);
+
+  const userLists = useTracker(() => {
+    if (cachedUserLists) {
+      return cachedUserLists;
+    } else {
+      const lists = ListCollection.find({ userId: Meteor.userId() }).fetch();
+      if (lists.length > 0) {
+        setCachedUserLists(lists);
+      }
+      return lists;
+    }
+  }, []);
 
   if (!currentUser) {
     return (
