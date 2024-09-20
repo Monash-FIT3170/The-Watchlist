@@ -89,12 +89,6 @@ export default function UserProfile() {
   const toWatchList = userLists.find((list) => list.listType === 'To Watch');
   const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
 
-  // **Function to get user rating for content**
-  const getUserRatingForContent = (contentId) => {
-    const rating = ratings.find((r) => r.contentId === contentId);
-    return rating ? rating.rating : 0;
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-darker">
       <ProfileCard
@@ -110,7 +104,6 @@ export default function UserProfile() {
               ...favouritesList,
               content: favouritesList.content.map((item) => ({
                 ...item,
-                rating: getUserRatingForContent(item.contentId),
                 isUserSpecificRating: true,
               })),
             }}
@@ -123,7 +116,6 @@ export default function UserProfile() {
               ...toWatchList,
               content: toWatchList.content.map((item) => ({
                 ...item,
-                rating: getUserRatingForContent(item.contentId),
                 isUserSpecificRating: true,
               })),
             }}
