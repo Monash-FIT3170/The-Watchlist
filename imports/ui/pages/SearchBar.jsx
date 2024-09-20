@@ -1,39 +1,41 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// SearchBar.jsx
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
-import ContentItem from '../components/contentItems/ContentItem';
-import ListDisplay from '../components/lists/ListDisplay';
 import { useTracker } from 'meteor/react-meteor-data';
 import { ListCollection } from '../../db/List';
 import Scrollbar from '../components/scrollbar/ScrollBar';
 import UserList from '../components/lists/UserList';
 import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 import debounce from 'lodash.debounce';
-import ListCard from '../components/lists/ListCard';
 import ListCardDisplay from '../components/lists/ListCardDisplay';
 import ContentItemDisplay from '../components/contentItems/ContentItemDisplay';
 import Loading from './Loading';
+import { SearchContext } from '../contexts/SearchContext';
 
 const SearchBar = ({ currentUser }) => {
+  const { searchState, setSearchState } = useContext(SearchContext);
+  const {
+    selectedTab,
+    searchTerm,
+    debouncedSearchTerm,
+    currentPage,
+    totalPages,
+    filteredMovies,
+    filteredTVShows,
+    filteredLists,
+    users,
+    globalRatings,
+    loading,
+  } = searchState;
 
-  const [selectedTab, setSelectedTab] = useState('Movies');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [globalRatings, setGlobalRatings] = useState({});
-  const [filteredMovies, setFilteredMovies] = useState([]);
-  const [filteredTVShows, setFilteredTVShows] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-  const [filteredLists, setFilteredLists] = useState([]);
   const escapeRegExp = (string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   };
-  const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState([]);
 
   const limit = 50; // Number of items per page
 
   const lists = useTracker(() => {
-    // Subscribe to all lists for now; this will be restricted to visible lists once list visibility is implemented.
+    // Subscribe to all lists; this will be restricted to visible lists once list visibility is implemented.
     Meteor.subscribe('allLists');
     return ListCollection.find().fetch(); // Fetch all lists, not just the user's lists
   }, []);
@@ -42,9 +44,12 @@ const SearchBar = ({ currentUser }) => {
     // Fetch global ratings using the Meteor method
     Meteor.call('ratings.getGlobalAverages', (error, result) => {
       if (!error) {
-        setGlobalRatings(result);
+        setSearchState((prevState) => ({
+          ...prevState,
+          globalRatings: result,
+        }));
       } else {
-        console.error("Error fetching global ratings:", error);
+        console.error('Error fetching global ratings:', error);
       }
     });
   }, []);
@@ -52,67 +57,114 @@ const SearchBar = ({ currentUser }) => {
   // Debounce the searchTerm input
   const debouncedChangeHandler = useCallback(
     debounce((value) => {
-      setDebouncedSearchTerm(value);
-      setCurrentPage(0); // Reset to first page on new search
+      setSearchState((prevState) => ({
+        ...prevState,
+        debouncedSearchTerm: value,
+        currentPage: 0, // Reset to first page on new search
+      }));
     }, 500),
     []
   );
 
   const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-    debouncedChangeHandler(e.target.value);
+    const value = e.target.value;
+    setSearchState((prevState) => ({
+      ...prevState,
+      searchTerm: value,
+    }));
+    debouncedChangeHandler(value);
   };
 
   const fetchContent = useCallback(() => {
-    setLoading(true);
+    setSearchState((prevState) => ({
+      ...prevState,
+      loading: true,
+    }));
+
     const options = { searchString: debouncedSearchTerm, limit, page: currentPage };
 
     Meteor.call('content.read', options, (error, result) => {
-      setLoading(false);
       if (!error) {
         const totalItems = result.total;
-        setTotalPages(Math.ceil(totalItems / limit));
-        setFilteredMovies(result.movie?.map(movie => ({ ...movie, contentType: 'Movie' })) || []);
-        setFilteredTVShows(result.tv?.map(tv => ({ ...tv, contentType: 'TV Show' })) || []);
+        setSearchState((prevState) => ({
+          ...prevState,
+          loading: false,
+          totalPages: Math.ceil(totalItems / limit),
+          filteredMovies: result.movie?.map((movie) => ({ ...movie, contentType: 'Movie' })) || [],
+          filteredTVShows: result.tv?.map((tv) => ({ ...tv, contentType: 'TV Show' })) || [],
+        }));
       } else {
-        console.error("Error fetching content:", error);
-        setFilteredMovies([]);
-        setFilteredTVShows([]);
+        console.error('Error fetching content:', error);
+        setSearchState((prevState) => ({
+          ...prevState,
+          loading: false,
+          filteredMovies: [],
+          filteredTVShows: [],
+        }));
       }
     });
   }, [debouncedSearchTerm, currentPage]);
 
   const fetchUsers = useCallback(() => {
+    setSearchState((prevState) => ({
+      ...prevState,
+      loading: true,
+    }));
+
     const handle = Meteor.subscribe('allUsers', {
+      onReady: () => {
+        const fetchedUsers = Meteor.users
+          .find({
+            username: { $regex: escapeRegExp(debouncedSearchTerm), $options: 'i' },
+          })
+          .fetch();
+
+        setSearchState((prevState) => ({
+          ...prevState,
+          loading: false,
+          users: fetchedUsers,
+        }));
+      },
       onStop: () => {
-        setLoading(false);
-      }
+        setSearchState((prevState) => ({
+          ...prevState,
+          loading: false,
+        }));
+      },
     });
-
-    const fetchedUsers = Meteor.users.find({
-      username: { $regex: escapeRegExp(searchTerm), $options: 'i' }
-    }).fetch();
-
-    setUsers(fetchedUsers);
 
     return () => {
       handle.stop();
     };
   }, [debouncedSearchTerm]);
 
-
   const fetchLists = useCallback(() => {
+    setSearchState((prevState) => ({
+      ...prevState,
+      loading: true,
+    }));
+
     if (!debouncedSearchTerm) {
-      setFilteredLists(lists); // Display all lists if no search term is provided
+      setSearchState((prevState) => ({
+        ...prevState,
+        loading: false,
+        filteredLists: lists,
+      }));
       return;
     }
-    const filtered = lists.filter(list =>
-      (list.title && list.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) ||
-      (list.description && list.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
-    );
-    setFilteredLists(filtered);
-  }, [lists, debouncedSearchTerm]);
 
+    const filtered = lists.filter(
+      (list) =>
+        (list.title && list.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) ||
+        (list.description && list.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+    );
+
+    setSearchState((prevState) => ({
+      ...prevState,
+      loading: false,
+      filteredLists: filtered,
+    }));
+  }, [lists, debouncedSearchTerm]);
 
   useEffect(() => {
     if (selectedTab === 'Movies' || selectedTab === 'TV Shows') {
@@ -126,19 +178,32 @@ const SearchBar = ({ currentUser }) => {
 
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
-      setCurrentPage(prevPage => prevPage + 1);
+      setSearchState((prevState) => ({
+        ...prevState,
+        currentPage: prevState.currentPage + 1,
+      }));
     }
   };
 
   const handlePreviousPage = () => {
     if (currentPage > 0) {
-      setCurrentPage(prevPage => prevPage - 1);
+      setSearchState((prevState) => ({
+        ...prevState,
+        currentPage: prevState.currentPage - 1,
+      }));
     }
   };
 
-  if (loading) {
-    return <Loading></Loading>;
-  }
+  const setGlobalRatings = (newRatings) => {
+    setSearchState((prevState) => ({
+      ...prevState,
+      globalRatings: newRatings,
+    }));
+  };
+
+  // if (loading) {
+  //   return <Loading />;
+  // }
 
   return (
     <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
@@ -164,11 +229,15 @@ const SearchBar = ({ currentUser }) => {
           {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
             <div
               key={tab}
-              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-                } border-transparent border`}
+              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${
+                selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
+              } border-transparent border`}
               onClick={() => {
-                setSelectedTab(tab);
-                setCurrentPage(0); // Reset to first page when tab changes
+                setSearchState((prevState) => ({
+                  ...prevState,
+                  selectedTab: tab,
+                  currentPage: 0, // Reset to first page when tab changes
+                }));
               }}
             >
               {tab}
@@ -177,11 +246,6 @@ const SearchBar = ({ currentUser }) => {
         </div>
       </form>
       <Scrollbar className="search-results-container flex-grow overflow-auto">
-        {loading ? (
-          <div className="flex justify-center items-center h-full">
-            <p>Loading...</p>
-          </div>
-        ) : (
           <>
             {selectedTab === 'Movies' && (
               <ContentItemDisplay
@@ -199,24 +263,19 @@ const SearchBar = ({ currentUser }) => {
                 setGlobalRatings={setGlobalRatings}
               />
             )}
-            {selectedTab === 'Lists' && (
-              filteredLists.length > 0 ? (
+            {selectedTab === 'Lists' &&
+              (filteredLists.length > 0 ? (
                 <ListCardDisplay lists={filteredLists} />
               ) : debouncedSearchTerm === '' ? (
                 <div className="flex justify-center items-center w-full h-full">
-                  <img
-                    src="/images/popcorn.png"
-                    alt="No Lists"
-                    className="w-32 h-32"
-                  />
+                  <img src="/images/popcorn.png" alt="No Lists" className="w-32 h-32" />
                 </div>
               ) : (
                 <div className="text-center text-gray-400">No lists found.</div>
-              )
-            )}
+              ))}
 
-            {selectedTab === 'Users' && (
-              users.length > 0 ? (
+            {selectedTab === 'Users' &&
+              (users.length > 0 ? (
                 <UserList users={users} searchTerm={debouncedSearchTerm} currentUser={currentUser} />
               ) : debouncedSearchTerm === '' ? (
                 <div className="flex justify-center items-center w-full h-full">
@@ -224,10 +283,8 @@ const SearchBar = ({ currentUser }) => {
                 </div>
               ) : (
                 <div>No users found.</div>
-              )
-            )}
+              ))}
           </>
-        )}
       </Scrollbar>
 
       {/* Pagination buttons */}
@@ -243,7 +300,9 @@ const SearchBar = ({ currentUser }) => {
           <button
             onClick={handleNextPage}
             disabled={currentPage >= totalPages - 1}
-            className={`py-2 px-4 rounded-lg ${currentPage >= totalPages - 1 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'}`}
+            className={`py-2 px-4 rounded-lg ${
+              currentPage >= totalPages - 1 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'
+            }`}
           >
             Next
           </button>

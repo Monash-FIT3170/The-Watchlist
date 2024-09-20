@@ -27,6 +27,7 @@ import Loading from "./pages/Loading.jsx";
 import Settings from "./pages/Settings.jsx";
 import FollowRequests from "./pages/FollowRequests.jsx";
 import { useEffect } from "react";
+import { SearchProvider } from "./contexts/SearchContext.js";
 
 // Create a Context for User Data (if needed)
 export const UserContext = React.createContext();
@@ -71,6 +72,7 @@ export const App = () => {
   }
 
   return (
+    <SearchProvider>
     <div className="app flex h-screen overflow-hidden bg-darkest text-white">
       <div className="flex-none">
         <Navbar staticNavData={staticNavbarData} currentUser={currentUser}/>
@@ -101,6 +103,7 @@ export const App = () => {
       </div>
       {currentUser && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
     </div>
+    </SearchProvider>
   );
 };
 
