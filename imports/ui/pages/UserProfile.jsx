@@ -9,9 +9,9 @@ import ListDisplay from '../components/lists/ListDisplay';
 
 export default function UserProfile({ currentUser, ratingsCount, loading }) {
   // Early Return for Loading State
-  // if (loading || !currentUser) {
-  //   return <div>Loading...</div>;
-  // }
+  if (loading || !currentUser) {
+    return <div>Loading...</div>;
+  }
 
   // Hook: useState for isFollowing
   const [isFollowing, setIsFollowing] = useState(false);

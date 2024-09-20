@@ -2,7 +2,7 @@ import React from 'react';
 import ListPopup from './ListPopup';
 import usePopup from '../../modals/usePopup';
 
-export default function ListDisplay({ listData, heading }) { // Added heading as a prop
+const ListDisplay = ({ listData, heading }) => {
     const { 
         isPopupOpen, 
         selectedList, 
@@ -55,3 +55,5 @@ export default function ListDisplay({ listData, heading }) { // Added heading as
         </div>
     );
 }
+
+export default ListDisplay;

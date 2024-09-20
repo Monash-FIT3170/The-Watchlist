@@ -6,7 +6,7 @@ import ContentItem from '../contentItems/ContentItem';
 import usePopup from '../../modals/usePopup';
 import ListPopup from './ListPopup';
 
-const ContentList = ({ list, isUserOwned, globalRatings = {} }) => {
+const ContentList = React.memo(({ list, isUserOwned, globalRatings = {} }) => {
   const navigate = useNavigate();
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
 
@@ -52,6 +52,6 @@ const ContentList = ({ list, isUserOwned, globalRatings = {} }) => {
       )}
     </div>
   );
-};
+});
 
 export default ContentList;
