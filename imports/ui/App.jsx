@@ -1,10 +1,14 @@
+// imports/ui/App.jsx
+
 import React, { useState, useMemo } from "react";
 import { Meteor } from "meteor/meteor";
-import { Route, Routes, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { FaRegUserCircle } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { AiOutlineHome, AiOutlineSearch } from "react-icons/ai";
 import { useTracker } from 'meteor/react-meteor-data';
+import { ListCollection } from '../db/List';
+import { Counts } from 'meteor/tmeasday:publish-counts';
 
 import Navbar from "./components/navbar/Navbar.jsx";
 import SearchBar from "./pages/SearchBar.jsx";
@@ -22,53 +26,40 @@ import AllRatedContentPage from "./pages/AllRatedContentPage.jsx";
 import Loading from "./pages/Loading.jsx";
 import Settings from "./pages/Settings.jsx";
 import FollowRequests from "./pages/FollowRequests.jsx";
-import { ListCollection } from '../db/List.tsx';
 import { useEffect } from "react";
 
-export const App = () => {
-  const [cachedUserData, setCachedUserData] = useState(null);
-  const [cachedUserLists, setCachedUserLists] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+// Create a Context for User Data (if needed)
+export const UserContext = React.createContext();
 
+export const App = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation(); // Use to check the current route
 
-  // Move useMemo inside the App component
-  const staticNavbarData = React.useMemo(() => [
+  // Define static navbar data
+  const staticNavbarData = useMemo(() => [
     { title: "Home", path: "/home", icon: <AiOutlineHome />, cName: "flex text-light hover-text-magenta" },
     { title: "Search", path: "/search", icon: <AiOutlineSearch />, cName: "flex text-light hover-text-magenta" },
     { title: "Profile", path: "/profile", icon: <FaRegUserCircle />, cName: "flex" },
     { title: "AI Picks", path: "/ai-picks", icon: <BsStars />, cName: "flex" },
   ], []);
 
-  // Subscribe once at the top level
-  useEffect(() => {
-    Meteor.subscribe('userData', Meteor.userId());
-    Meteor.subscribe('userLists', Meteor.userId());
-  }, []);
+  // Subscribe to userProfileData at the top level
+  const userProfileHandle = useTracker(() => Meteor.subscribe('userProfileData', Meteor.userId()), []);
 
-  const currentUser = useTracker(() => {
-    if (cachedUserData) {
-      return cachedUserData;
-    } else {
-      const user = Meteor.user();
-      if (user) {
-        setCachedUserData(user);
-      }
-      return user;
-    }
-  }, []);
+  // Subscribe to userLists
+  const userListsHandle = useTracker(() => Meteor.subscribe('userLists', Meteor.userId()), []);
 
-  const userLists = useTracker(() => {
-    if (cachedUserLists) {
-      return cachedUserLists;
-    } else {
-      const lists = ListCollection.find({ userId: Meteor.userId() }).fetch();
-      if (lists.length > 0) {
-        setCachedUserLists(lists);
-      }
-      return lists;
-    }
-  }, []);
+  // Track currentUser reactively
+  const currentUser = useTracker(() => Meteor.user(), []);
+
+  // Track userLists reactively
+  const userLists = useTracker(() => ListCollection.find({ userId: Meteor.userId() }).fetch(), [Meteor.userId()]);
+
+  // Get ratingsCount using publish-counts
+  const ratingsCount = useTracker(() => Counts.get('userRatingsCount'), []);
+
+  // Determine loading state
+  const loading = !userProfileHandle.ready() || !userListsHandle.ready();
 
   if (!currentUser) {
     return (
@@ -90,7 +81,7 @@ export const App = () => {
             <Routes>
               <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
               <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
-              <Route path="/profile" element={<UserProfile currentUser={currentUser} />} />
+              <Route path="/profile" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount} loading={loading} />} />
               <Route path="/ai-picks" element={<AIPicks currentUser={currentUser} />} />
               <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
               <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
@@ -112,3 +103,5 @@ export const App = () => {
     </div>
   );
 };
+
+export default App;

@@ -1,3 +1,5 @@
+// imports/ui/components/headers/ProfileCard.jsx
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUserPlus, FaPencilAlt } from 'react-icons/fa';
@@ -12,34 +14,43 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser }) => {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const navigate = useNavigate();
 
+  console.log('ProfileCard User Data:', user); // For debugging
+
   useEffect(() => {
     if (!user || !user._id || !currentUser) return;
 
+    // Set following state based on currentUser's following list
     if (
       Array.isArray(currentUser.following) &&
       currentUser.following.includes(user._id)
     ) {
       setIsFollowing(true);
+    } else {
+      setIsFollowing(false);
     }
 
+    // Set privacy state
     if (user.userPrivacy === 'Private') {
       setPrivateAccount(true);
     } else {
       setPrivateAccount(false);
     }
 
+    // Check if viewing own profile
     setIsCurrentUser(currentUser._id === user._id);
 
+    // Check if a follow request has been made
     if (
       currentUser.followingRequests &&
       currentUser.followingRequests.includes(user._id)
     ) {
       setIsRequested(true);
+    } else {
+      setIsRequested(false);
     }
 
-    // Removed Meteor.call for ratingsCount
-    // ratingsCount is derived from props
-  }, [user._id, currentUser]);
+    // No need to handle ratingsCount here as it's already part of 'user'
+  }, [user, currentUser]);
 
   const isOwnProfile = currentUser && user && currentUser._id === user._id;
 
@@ -139,10 +150,11 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser }) => {
           <div className="flex flex-col gap-2 pl-2">
             <div className="flex gap-2 items-center">
               <button
-                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                className={`p-1 text-lg flex-initial ${
+                  user.userPrivacy === 'Public' || isCurrentUser || isFollowing
                     ? 'hover:underline'
-                    : 'text-white-500 cursor-not-allowed'
-                  }`}
+                    : 'text-gray-500 cursor-not-allowed'
+                }`}
                 onClick={
                   user.userPrivacy === 'Public' || isCurrentUser || isFollowing
                     ? () => navigate(`/followers-following/${user._id}/followers`)
@@ -158,16 +170,14 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser }) => {
               </button>
               <span className="text-lg">•</span>
               <button
-                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                className={`p-1 text-lg flex-initial ${
+                  user.userPrivacy === 'Public' || isCurrentUser || isFollowing
                     ? 'hover:underline'
-                    : 'text-white-500 cursor-not-allowed'
-                  }`}
+                    : 'text-gray-500 cursor-not-allowed'
+                }`}
                 onClick={
                   user.userPrivacy === 'Public' || isCurrentUser || isFollowing
-                    ? () =>
-                      navigate(
-                        `/followers-following/${user._id}/following`
-                      )
+                    ? () => navigate(`/followers-following/${user._id}/following`)
                     : null
                 }
                 disabled={
@@ -180,10 +190,11 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser }) => {
               </button>
               <span className="text-lg">•</span>
               <button
-                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                className={`p-1 text-lg flex-initial ${
+                  user.userPrivacy === 'Public' || isCurrentUser || isFollowing
                     ? 'hover:underline'
-                    : 'text-white-500 cursor-not-allowed'
-                  }`}
+                    : 'text-gray-500 cursor-not-allowed'
+                }`}
                 onClick={() => {
                   if (
                     user.userPrivacy === 'Public' ||
