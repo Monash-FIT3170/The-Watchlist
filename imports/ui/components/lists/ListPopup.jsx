@@ -38,10 +38,6 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const confirmDialogRef = useRef(null);
     const renameListRef = useRef(null); // Ref for RenameListModal
     const [contentToDelete, setContentToDelete] = useState(null);
-    const navigate = useNavigate();
-    const [shareUrl, setShareUrl] = useState();
-    const shareQuote = "Check out this watchlist!";
-    const iconSize = 44;
     const [shareUrl, setShareUrl] = useState();
     const shareQuote = "Check out this watchlist!";
     const iconSize = 44;
@@ -55,8 +51,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     setList(null);
                 } else {
                     setList(result);
-                    setShareUrl(`http://localhost:3000/watchlist/${result._id}`);
-                    setShareUrl(`http://localhost:3000/watchlist/${result._id}`);
+                    // const localhost = "localhost:3000";
+                    // const domain = "thewatchlist.xyz" 
+                    // Change between domain and localhost when testing
+                    // setShareUrl(`https://${localhost}/watchlist/${result._id}`);
+                    setShareUrl(`${Meteor.absoluteUrl.defaultOptions.rootUrl}watchlist/${result._id}`);
                 }
             });
         }
@@ -237,67 +236,66 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
             });
         }
     };
-    };
+};
 
-    const confirmDeleteList = (listId) => {
-        if (list.userId !== Meteor.userId()) {
-            toast.error("You cannot delete another user's list!");
-            return;
-        }
+const confirmDeleteList = (listId) => {
+    if (list.userId !== Meteor.userId()) {
+        toast.error("You cannot delete another user's list!");
+        return;
+    }
 
-        if (list.title === 'Favourite' || list.title === 'To Watch') {
-            toast.error('This list cannot be deleted.');
-            return;
-        }
+    if (list.title === 'Favourite' || list.title === 'To Watch') {
+        toast.error('This list cannot be deleted.');
+        return;
+    }
 
-        setListToDelete(listId);
-        setShowConfirmDialog(true);
-    };
+    setListToDelete(listId);
+    setShowConfirmDialog(true);
+};
 
 
 
-    const resetConfirmationState = () => {
-        setShowConfirmDialog(false);
-        setContentToDelete(null);
-        setListToDelete(null);
-    };
-    };
+const resetConfirmationState = () => {
+    setShowConfirmDialog(false);
+    setContentToDelete(null);
+    setListToDelete(null);
+};
 
-    const handleDeleteConfirmed = () => {
-        if (contentToDelete !== null) {
-            handleRemoveContentClick(contentToDelete);
-        } else if (listToDelete !== null) {
-            Meteor.call('list.delete', { listId: listToDelete }, (error) => {
-                if (error) {
-                    console.error("Error deleting list:", error);
-                } else {
-                    onClose();
-                }
-            });
-        }
-        resetConfirmationState();
-    };
+const handleDeleteConfirmed = () => {
+    if (contentToDelete !== null) {
+        handleRemoveContentClick(contentToDelete);
+    } else if (listToDelete !== null) {
+        Meteor.call('list.delete', { listId: listToDelete }, (error) => {
+            if (error) {
+                console.error("Error deleting list:", error);
+            } else {
+                onClose();
+            }
+        });
+    }
+    resetConfirmationState();
+};
 
-    const handleCopy = async (text) => {
-        try {
-            await navigator.clipboard.writeText(text);
-            console.log('Copied to clipboard: ', text);
-            toast.success('Link copied to clipboard');
-        } catch (error) {
-            console.error('Unable to copy to clipboard:', error);
-        }
-    };
+const handleCopy = async (text) => {
+    try {
+        await navigator.clipboard.writeText(text);
+        console.log('Copied to clipboard: ', text);
+        toast.success('Link copied to clipboard');
+    } catch (error) {
+        console.error('Unable to copy to clipboard:', error);
+    }
+};
 
-    const filteredContent = list?.content?.filter(item =>
-        selectedTab === 'all' ||
-        (selectedTab === 'movies' && item.contentType === 'Movie') ||
-        (selectedTab === 'tv shows' && item.contentType === 'TV Show')
-    ) || [];
+const filteredContent = list?.content?.filter(item =>
+    selectedTab === 'all' ||
+    (selectedTab === 'movies' && item.contentType === 'Movie') ||
+    (selectedTab === 'tv shows' && item.contentType === 'TV Show')
+) || [];
 
-    const sortedContent = sortContent(filteredContent);
+const sortedContent = sortContent(filteredContent);
 
-    if (loading) return <div>Loading...</div>;
-    if (!list) return <div>No list found.</div>;
+if (loading) return <div>Loading...</div>;
+if (!list) return <div>No list found.</div>;
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -416,17 +414,17 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                 <option value="popularity">Sort by Popularity</option>
                             </select>
 
-                            <button
-                                onClick={toggleSortOrder}
-                                className={`flex items-center justify-center px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
+                        <button
+                            onClick={toggleSortOrder}
+                            className={`flex items-center justify-center px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
             ${sortOrder === 'ascending' ? 'bg-[#7B1450] text-white' : 'bg-[#7B1450] text-white'} 
             border-transparent border`}
-                            >
-                                {sortOrder === 'ascending' ? <FaSortAmountUp className="mr-1" /> : <FaSortAmountDown className="mr-1" />}
-                                Sort Order
-                            </button>
-                        </div>
+                        >
+                            {sortOrder === 'ascending' ? <FaSortAmountUp className="mr-1" /> : <FaSortAmountDown className="mr-1" />}
+                            Sort Order
+                        </button>
                     </div>
+                </div>
 
                 </div>
                 <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
@@ -501,64 +499,64 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                 </Scrollbar>
             </div>
 
-            {isRenameModalOpen && (
-                <RenameListModal
-                    isOpen={isRenameModalOpen}
-                    onClose={() => setIsRenameModalOpen(false)}
-                    onRename={(newName) => {
-                        onRenameList(newName);
-                        list.title = newName; // Update the list title locally
-                    }}
-                    currentName={list.title}
-                    ref={renameListRef}
-                />
-            )}
+        {isRenameModalOpen && (
+            <RenameListModal
+                isOpen={isRenameModalOpen}
+                onClose={() => setIsRenameModalOpen(false)}
+                onRename={(newName) => {
+                    onRenameList(newName);
+                    list.title = newName; // Update the list title locally
+                }}
+                currentName={list.title}
+                ref={renameListRef}
+            />
+        )}
 
-            {isModalOpen && selectedContent && (
-                <ContentInfoModal
-                    ref={contentInfoModalRef}  // Ref for the ContentInfoModal
-                    isOpen={isModalOpen}
-                    onClose={() => setModalOpen(false)}
-                    content={selectedContent}
-                    modalRef={modalRef}
-                />
-            )}
+        {isModalOpen && selectedContent && (
+            <ContentInfoModal
+                ref={contentInfoModalRef}  // Ref for the ContentInfoModal
+                isOpen={isModalOpen}
+                onClose={() => setModalOpen(false)}
+                content={selectedContent}
+                modalRef={modalRef}
+            />
+        )}
 
-            {showConfirmDialog && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50" ref={confirmDialogRef}>
-                    <div
-                        className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <p className="text-gray-300">
-                            Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
-                        </p>
-                        <div className="flex justify-end space-x-4">
-                            <button
-                                className="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    resetConfirmationState();
-                                }}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                                onClick={(e) => {
-                                    e.stopPropagation();  // Stop propagation when confirming deletion
-                                    handleDeleteConfirmed();
-                                }}
-                            >
-                                Confirm
-                            </button>
-                        </div>
+        {showConfirmDialog && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50" ref={confirmDialogRef}>
+                <div
+                    className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <p className="text-gray-300">
+                        Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
+                    </p>
+                    <div className="flex justify-end space-x-4">
+                        <button
+                            className="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                resetConfirmationState();
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                            onClick={(e) => {
+                                e.stopPropagation();  // Stop propagation when confirming deletion
+                                handleDeleteConfirmed();
+                            }}
+                        >
+                            Confirm
+                        </button>
                     </div>
                 </div>
-            )}
-            <ToastContainer />
-        </div>
-    );
-};
+            </div>
+        )}
+        <ToastContainer />
+    </div>
+);
+
 
 export default ListPopup;
