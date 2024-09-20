@@ -40,9 +40,6 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [shareUrl, setShareUrl] = useState();
     const shareQuote = "Check out this watchlist!";
     const iconSize = 44;
-    const [shareUrl, setShareUrl] = useState();
-    const shareQuote = "Check out this watchlist!";
-    const iconSize = 44;
 
     useEffect(() => {
         if (listId) {
@@ -53,8 +50,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     setList(null);
                 } else {
                     setList(result);
-                    setShareUrl(`http://localhost:3000/watchlist/${result._id}`);
-                    setShareUrl(`http://localhost:3000/watchlist/${result._id}`);
+                    // const localhost = "localhost:3000";
+                    // const domain = "thewatchlist.xyz" 
+                    // Change between domain and localhost when testing
+                    // setShareUrl(`https://${localhost}/watchlist/${result._id}`);
+                    setShareUrl(`${Meteor.absoluteUrl.defaultOptions.rootUrl}watchlist/${result._id}`);
                 }
             });
         }
@@ -224,307 +224,306 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
             });
         }
     };
-    };
+};
 
-    const confirmDeleteList = (listId) => {
-        if (list.userId !== Meteor.userId()) {
-            toast.error("You cannot delete another user's list!");
-            return;
-        }
+const confirmDeleteList = (listId) => {
+    if (list.userId !== Meteor.userId()) {
+        toast.error("You cannot delete another user's list!");
+        return;
+    }
 
-        if (list.title === 'Favourite' || list.title === 'To Watch') {
-            toast.error('This list cannot be deleted.');
-            return;
-        }
+    if (list.title === 'Favourite' || list.title === 'To Watch') {
+        toast.error('This list cannot be deleted.');
+        return;
+    }
 
-        setListToDelete(listId);
-        setShowConfirmDialog(true);
-    };
+    setListToDelete(listId);
+    setShowConfirmDialog(true);
+};
 
 
 
-    const resetConfirmationState = () => {
-        setShowConfirmDialog(false);
-        setContentToDelete(null);
-        setListToDelete(null);
-    };
-    };
+const resetConfirmationState = () => {
+    setShowConfirmDialog(false);
+    setContentToDelete(null);
+    setListToDelete(null);
+};
 
-    const handleDeleteConfirmed = () => {
-        if (contentToDelete !== null) {
-            handleRemoveContentClick(contentToDelete);
-        } else if (listToDelete !== null) {
-            Meteor.call('list.delete', { listId: listToDelete }, (error) => {
-                if (error) {
-                    console.error("Error deleting list:", error);
-                } else {
-                    onClose();
-                }
-            });
-        }
-        resetConfirmationState();
-    };
+const handleDeleteConfirmed = () => {
+    if (contentToDelete !== null) {
+        handleRemoveContentClick(contentToDelete);
+    } else if (listToDelete !== null) {
+        Meteor.call('list.delete', { listId: listToDelete }, (error) => {
+            if (error) {
+                console.error("Error deleting list:", error);
+            } else {
+                onClose();
+            }
+        });
+    }
+    resetConfirmationState();
+};
 
-    const handleCopy = async (text) => {
-        try {
-            await navigator.clipboard.writeText(text);
-            console.log('Copied to clipboard: ', text);
-            toast.success('Link copied to clipboard');
-        } catch (error) {
-            console.error('Unable to copy to clipboard:', error);
-        }
-    };
+const handleCopy = async (text) => {
+    try {
+        await navigator.clipboard.writeText(text);
+        console.log('Copied to clipboard: ', text);
+        toast.success('Link copied to clipboard');
+    } catch (error) {
+        console.error('Unable to copy to clipboard:', error);
+    }
+};
 
-    const filteredContent = list?.content?.filter(item =>
-        selectedTab === 'all' ||
-        (selectedTab === 'movies' && item.contentType === 'Movie') ||
-        (selectedTab === 'tv shows' && item.contentType === 'TV Show')
-    ) || [];
+const filteredContent = list?.content?.filter(item =>
+    selectedTab === 'all' ||
+    (selectedTab === 'movies' && item.contentType === 'Movie') ||
+    (selectedTab === 'tv shows' && item.contentType === 'TV Show')
+) || [];
 
-    const sortedContent = sortContent(filteredContent);
+const sortedContent = sortContent(filteredContent);
 
-    if (loading) return <div>Loading...</div>;
-    if (!list) return <div>No list found.</div>;
+if (loading) return <div>Loading...</div>;
+if (!list) return <div>No list found.</div>;
 
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-            <div
-                ref={popupRef}  // Ref for the ListPopup
-                className="list-popup bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
-            >
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold">{list.title}</h2>
-                    <div className="flex space-x-2">
+return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+        <div
+            ref={popupRef}  // Ref for the ListPopup
+            className="list-popup bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
+        >
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">{list.title}</h2>
+                <div className="flex space-x-2">
+                    <button
+                        onClick={() => handleCopy(shareUrl)}
+                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                        title="Copy Link"
+                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                    >
+                        <FiLink size="24" />
+                    </button>
+                    <button title="Share to Facebook">
+                        <FacebookShareButton url={shareUrl} quote={shareQuote}>
+                            <FacebookIcon size={iconSize} round />
+                        </FacebookShareButton>
+                    </button>
+                    <button title="Share to Twitter">
+                        <TwitterShareButton url={shareUrl} title={shareQuote}>
+                            <TwitterIcon size={iconSize} round />
+                        </TwitterShareButton>
+                    </button>
+                    <button title="Share to Whatsapp">
+                        <WhatsappShareButton url={shareUrl} title={shareQuote}>
+                            <WhatsappIcon size={iconSize} round />
+                        </WhatsappShareButton>
+                    </button>
+                    <button title="Send in Email">
+                        <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
+                            <EmailIcon size={iconSize} round />
+                        </EmailShareButton>
+                    </button>
+
+                    <button
+                        onClick={handleRenameListClick}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full flex items-center justify-center"
+                        title="Rename List"
+                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                    >
+                        <FiEdit size="24" />
+                    </button>
+                    <button
+                        onClick={() => confirmDeleteList(list._id)}
+                        className="bg-red-500 hover:bg-red-700 text-white font-bold rounded-full flex items-center justify-center"
+                        title="Delete List"
+                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                    >
+                        <FiTrash2 size="24" />
+                    </button>
+                    <button
+                        onClick={() => setIsGridView(!isGridView)}
+                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                        title={isGridView ? "Switch to List View" : "Switch to Grid View"}
+                        style={{ width: iconSize, height: iconSize }}
+                        style={{ width: iconSize, height: iconSize }}
+                    >
+                        {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
+                    </button>
+                    {/* Conditionally render subscribe/unsubscribe button */}
+                    {list.userId !== Meteor.userId() && (
                         <button
-                            onClick={() => handleCopy(shareUrl)}
-                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
-                            title="Copy Link"
-                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                            onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
+                            className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
                         >
-                            <FiLink size="24" />
+                            {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
                         </button>
-                        <button title="Share to Facebook">
-                            <FacebookShareButton url={shareUrl} quote={shareQuote}>
-                                <FacebookIcon size={iconSize} round />
-                            </FacebookShareButton>
-                        </button>
-                        <button title="Share to Twitter">
-                            <TwitterShareButton url={shareUrl} title={shareQuote}>
-                                <TwitterIcon size={iconSize} round />
-                            </TwitterShareButton>
-                        </button>
-                        <button title="Share to Whatsapp">
-                            <WhatsappShareButton url={shareUrl} title={shareQuote}>
-                                <WhatsappIcon size={iconSize} round />
-                            </WhatsappShareButton>
-                        </button>
-                        <button title="Send in Email">
-                            <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
-                                <EmailIcon size={iconSize} round />
-                            </EmailShareButton>
-                        </button>
-
-                        <button
-                            onClick={handleRenameListClick}
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full flex items-center justify-center"
-                            title="Rename List"
-                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                        >
-                            <FiEdit size="24" />
-                        </button>
-                        <button
-                            onClick={() => confirmDeleteList(list._id)}
-                            className="bg-red-500 hover:bg-red-700 text-white font-bold rounded-full flex items-center justify-center"
-                            title="Delete List"
-                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                        >
-                            <FiTrash2 size="24" />
-                        </button>
-                        <button
-                            onClick={() => setIsGridView(!isGridView)}
-                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
-                            title={isGridView ? "Switch to List View" : "Switch to Grid View"}
-                            style={{ width: iconSize, height: iconSize }}
-                            style={{ width: iconSize, height: iconSize }}
-                        >
-                            {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
-                        </button>
-                        {/* Conditionally render subscribe/unsubscribe button */}
-                        {list.userId !== Meteor.userId() && (
-                            <button
-                                onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
-                                className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
-                            >
-                                {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-                            </button>
-                        )}
-                        <button
-                            className="text-2xl font-bold text-gray-500 hover:text-gray-800"
-                            onClick={onClose}
-                        >
-                            &times;
-                        </button>
-                    </div>
+                    )}
+                    <button
+                        className="text-2xl font-bold text-gray-500 hover:text-gray-800"
+                        onClick={onClose}
+                    >
+                        &times;
+                    </button>
                 </div>
-                <div className="flex justify-between items-center mb-4">
-                    <div className="flex flex-wrap">
-                        {['all', 'movies', 'tv shows'].map((tab) => (
-                            <div
-                                key={tab}
-                                className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-                                    } border-transparent border`}
-                                onClick={() => setSelectedTab(tab)}
-                            >
-                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                            </div>
-                        ))}
-                    </div>
-                    <div className="flex-shrink-0">
-                        <div className="flex space-x-2">
-                            <select
-                                value={sortCriterion}
-                                onChange={(e) => changeSortCriterion(e.target.value)}
-                                className="inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out bg-[#282525] text-white border-transparent border appearance-none pr-8 w-auto" // Changed pr-8 and added w-auto
-                                style={{
-                                    backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="white" d="M7 7l3-3 3 3m-6 4l3 3 3-3" /%3E%3C/svg%3E')`,
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'right 0.75rem center',
-                                    backgroundSize: '1rem 1rem',
-                                }}
-                            >
-                                <option value="title">Sort by Title</option>
-                                <option value="release_year">Sort by Release Year</option>
-                                <option value="popularity">Sort by Popularity</option>
-                            </select>
+            </div>
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-wrap">
+                    {['all', 'movies', 'tv shows'].map((tab) => (
+                        <div
+                            key={tab}
+                            className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
+                                } border-transparent border`}
+                            onClick={() => setSelectedTab(tab)}
+                        >
+                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        </div>
+                    ))}
+                </div>
+                <div className="flex-shrink-0">
+                    <div className="flex space-x-2">
+                        <select
+                            value={sortCriterion}
+                            onChange={(e) => changeSortCriterion(e.target.value)}
+                            className="inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out bg-[#282525] text-white border-transparent border appearance-none pr-8 w-auto" // Changed pr-8 and added w-auto
+                            style={{
+                                backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="white" d="M7 7l3-3 3 3m-6 4l3 3 3-3" /%3E%3C/svg%3E')`,
+                                backgroundRepeat: 'no-repeat',
+                                backgroundPosition: 'right 0.75rem center',
+                                backgroundSize: '1rem 1rem',
+                            }}
+                        >
+                            <option value="title">Sort by Title</option>
+                            <option value="release_year">Sort by Release Year</option>
+                            <option value="popularity">Sort by Popularity</option>
+                        </select>
 
-                            <button
-                                onClick={toggleSortOrder}
-                                className={`flex items-center justify-center px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
+                        <button
+                            onClick={toggleSortOrder}
+                            className={`flex items-center justify-center px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
             ${sortOrder === 'ascending' ? 'bg-[#7B1450] text-white' : 'bg-[#7B1450] text-white'} 
             border-transparent border`}
-                            >
-                                {sortOrder === 'ascending' ? <FaSortAmountUp className="mr-1" /> : <FaSortAmountDown className="mr-1" />}
-                                Sort Order
-                            </button>
-                        </div>
+                        >
+                            {sortOrder === 'ascending' ? <FaSortAmountUp className="mr-1" /> : <FaSortAmountDown className="mr-1" />}
+                            Sort Order
+                        </button>
                     </div>
-
                 </div>
-                <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
-                    {sortedContent.map((item) => {
-                        const { rating = 0, isUserSpecificRating = false } = getRatingForContent(item.contentId);
-                        return (
-                            <div key={item.contentId} className={isGridView ? '' : 'block relative'}>
-                                {isGridView ? (
-                                    <ContentItem
-                                        content={item}
-                                        isUserSpecificRating={isUserSpecificRating}
-                                        popularity={item.popularity}
-                                        onClick={() => handleContentClick(item)}  // Open modal on click
-                                        contentType={item.contentType}
-                                    />
-                                ) : (
-                                    <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101" onClick={(e) => handleContentClick(item, e)}>
-                                        <div className="relative">
-                                            <img
-                                                src={item.background_url}
-                                                alt={item.title}
-                                                className="cursor-pointer w-full h-48 object-cover rounded-t-lg"
-                                                style={imageStyles[item.contentId] || {}}
-                                                onLoad={(e) => handleImageLoad(e, item.contentId)}
-                                            />
-                                            <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60">
-                                                <div className="absolute bottom-4 left-4 text-white">
-                                                    <h3 className="text-xl font-bold">{item.title}</h3>
-                                                    <div className="flex items-center">
-                                                        {isUserSpecificRating ? (
-                                                            <FaUser className="mr-1 text-blue-500" title="User rating" />
-                                                        ) : (
-                                                            <FaGlobe className="mr-1 text-green-500" title="Global average rating" />
-                                                        )}
-                                                        <RatingStar totalStars={5} rating={rating} />
-                                                    </div>
+
+            </div>
+            <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
+                {sortedContent.map((item) => {
+                    const { rating = 0, isUserSpecificRating = false } = getRatingForContent(item.contentId);
+                    return (
+                        <div key={item.contentId} className={isGridView ? '' : 'block relative'}>
+                            {isGridView ? (
+                                <ContentItem
+                                    content={item}
+                                    isUserSpecificRating={isUserSpecificRating}
+                                    popularity={item.popularity}
+                                    onClick={() => handleContentClick(item)}  // Open modal on click
+                                    contentType={item.contentType}
+                                />
+                            ) : (
+                                <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101" onClick={(e) => handleContentClick(item, e)}>
+                                    <div className="relative">
+                                        <img
+                                            src={item.background_url}
+                                            alt={item.title}
+                                            className="cursor-pointer w-full h-48 object-cover rounded-t-lg"
+                                            style={imageStyles[item.contentId] || {}}
+                                            onLoad={(e) => handleImageLoad(e, item.contentId)}
+                                        />
+                                        <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60">
+                                            <div className="absolute bottom-4 left-4 text-white">
+                                                <h3 className="text-xl font-bold">{item.title}</h3>
+                                                <div className="flex items-center">
+                                                    {isUserSpecificRating ? (
+                                                        <FaUser className="mr-1 text-blue-500" title="User rating" />
+                                                    ) : (
+                                                        <FaGlobe className="mr-1 text-green-500" title="Global average rating" />
+                                                    )}
+                                                    <RatingStar totalStars={5} rating={rating} />
                                                 </div>
-                                                <button
-                                                    className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        confirmRemoveContent(item.contentId);
-                                                    }}
-                                                    title="Remove from List"
-                                                >
-                                                    <FiTrash2 />
-                                                </button>
                                             </div>
+                                            <button
+                                                className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    confirmRemoveContent(item.contentId);
+                                                }}
+                                                title="Remove from List"
+                                            >
+                                                <FiTrash2 />
+                                            </button>
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </Scrollbar>
-            </div>
-
-            {isRenameModalOpen && (
-                <RenameListModal
-                    isOpen={isRenameModalOpen}
-                    onClose={() => setIsRenameModalOpen(false)}
-                    onRename={(newName) => {
-                        onRenameList(newName);
-                        list.title = newName; // Update the list title locally
-                    }}
-                    currentName={list.title}
-                    ref={renameListRef}
-                />
-            )}
-
-            {isModalOpen && selectedContent && (
-                <ContentInfoModal
-                    ref={contentInfoModalRef}  // Ref for the ContentInfoModal
-                    isOpen={isModalOpen}
-                    onClose={() => setModalOpen(false)}
-                    content={selectedContent}
-                    modalRef={modalRef}
-                />
-            )}
-
-            {showConfirmDialog && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50" ref={confirmDialogRef}>
-                    <div
-                        className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <p className="text-gray-300">
-                            Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
-                        </p>
-                        <div className="flex justify-end space-x-4">
-                            <button
-                                className="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    resetConfirmationState();
-                                }}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                                onClick={(e) => {
-                                    e.stopPropagation();  // Stop propagation when confirming deletion
-                                    handleDeleteConfirmed();
-                                }}
-                            >
-                                Confirm
-                            </button>
+                                </div>
+                            )}
                         </div>
+                    );
+                })}
+            </Scrollbar>
+        </div>
+
+        {isRenameModalOpen && (
+            <RenameListModal
+                isOpen={isRenameModalOpen}
+                onClose={() => setIsRenameModalOpen(false)}
+                onRename={(newName) => {
+                    onRenameList(newName);
+                    list.title = newName; // Update the list title locally
+                }}
+                currentName={list.title}
+                ref={renameListRef}
+            />
+        )}
+
+        {isModalOpen && selectedContent && (
+            <ContentInfoModal
+                ref={contentInfoModalRef}  // Ref for the ContentInfoModal
+                isOpen={isModalOpen}
+                onClose={() => setModalOpen(false)}
+                content={selectedContent}
+                modalRef={modalRef}
+            />
+        )}
+
+        {showConfirmDialog && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50" ref={confirmDialogRef}>
+                <div
+                    className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <p className="text-gray-300">
+                        Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
+                    </p>
+                    <div className="flex justify-end space-x-4">
+                        <button
+                            className="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                resetConfirmationState();
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                            onClick={(e) => {
+                                e.stopPropagation();  // Stop propagation when confirming deletion
+                                handleDeleteConfirmed();
+                            }}
+                        >
+                            Confirm
+                        </button>
                     </div>
                 </div>
-            )}
-            <ToastContainer />
-        </div>
-    );
-};
+            </div>
+        )}
+        <ToastContainer />
+    </div>
+);
+
 
 export default ListPopup;
