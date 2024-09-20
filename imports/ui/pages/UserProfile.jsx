@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Meteor } from 'meteor/meteor';
 import ContentList from '../components/lists/ContentList';
 import ProfileCard from '../components/headers/ProfileCard';
@@ -8,11 +8,10 @@ import { RatingCollection } from '../../db/Rating';
 import ListDisplay from '../components/lists/ListDisplay';
 
 export default function UserProfile() {
-  // **Define all hooks at the top level**
-
-  // 1. useTracker hooks
+  // 1. Hook: useTracker for currentUser
   const currentUser = useTracker(() => Meteor.user(), []);
 
+  // 2. Hook: useTracker for lists, subscribedLists, ratings
   const { lists, subscribedLists, ratings, loading } = useTracker(() => {
     const listsHandler = Meteor.subscribe('userLists', Meteor.userId());
     const subscribedHandler = Meteor.subscribe('subscribedLists', Meteor.userId());
@@ -35,10 +34,10 @@ export default function UserProfile() {
     };
   }, []);
 
-  // 2. useState hooks
+  // 3. Hook: useState for isFollowing
   const [isFollowing, setIsFollowing] = useState(false);
 
-  // 3. useEffect hooks
+  // 4. Hook: useEffect for checking if the current user is following
   useEffect(() => {
     if (currentUser) {
       Meteor.call('isFollowing', currentUser._id, (error, result) => {
@@ -49,6 +48,7 @@ export default function UserProfile() {
     }
   }, [currentUser]);
 
+  // 5. Hook: useEffect for updating privacy settings
   useEffect(() => {
     if (currentUser && currentUser.profile?.privacy === undefined) {
       Meteor.call('users.updatePrivacy', 'Public', (error) => {
@@ -61,34 +61,38 @@ export default function UserProfile() {
     }
   }, [currentUser]);
 
-  // **After all hooks, handle conditional rendering**
-
-  // Ensure currentUser is ready before proceeding
+  // **Early Return for Loading State**
   // if (!currentUser || loading) {
   //   return <div>Loading...</div>;
   // }
 
-  const userLists = lists || [];
-  const favouritesList = userLists.find((list) => list.listType === 'Favourite');
-  const toWatchList = userLists.find((list) => list.listType === 'To Watch');
-  const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
+  // **Compute ratingsCount**
+  const ratingsCount = ratings.length;
 
-  const getUserRatingForContent = (contentId) => {
-    const rating = ratings.find((r) => r.contentId === contentId);
-    return rating ? rating.rating : 0;
-  };
-
-  const userProfile = {
+  // **Memoize userProfile to prevent unnecessary recalculations**
+  const userProfile = useMemo(() => ({
     avatarUrl:
       currentUser.avatarUrl || 'https://randomuser.me/api/portraits/lego/1.jpg',
     userName: currentUser.username || 'Default User',
-    ratings: currentUser.ratings || '0',
+    ratings: ratingsCount, // Use computed ratingsCount
     followers: currentUser.followers?.length || '0',
     following: currentUser.following?.length || '0',
     userRealName: currentUser.realName || 'No Name Provided',
     userDescription: currentUser.description || 'No description provided.',
     _id: currentUser._id,
     userPrivacy: currentUser.profile?.privacy || 'Public',
+  }), [currentUser, ratingsCount]);
+
+  // **Find specific lists**
+  const userLists = lists || [];
+  const favouritesList = userLists.find((list) => list.listType === 'Favourite');
+  const toWatchList = userLists.find((list) => list.listType === 'To Watch');
+  const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
+
+  // **Function to get user rating for content**
+  const getUserRatingForContent = (contentId) => {
+    const rating = ratings.find((r) => r.contentId === contentId);
+    return rating ? rating.rating : 0;
   };
 
   return (

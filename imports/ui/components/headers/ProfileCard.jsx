@@ -3,12 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaUserPlus, FaPencilAlt } from 'react-icons/fa';
 import ProfileDropdown from '../profileDropdown/ProfileDropdown';
 
-const ProfileCard = ({ user, showFollowButton, currentUser }) => {
+const ProfileCard = React.memo(({ user, showFollowButton, currentUser }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isRequested, setIsRequested] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [newAvatar, setNewAvatar] = useState(null);
-  const [ratingsCount, setRatingsCount] = useState(0);
   const [privateAccount, setPrivateAccount] = useState(false);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const navigate = useNavigate();
@@ -38,13 +37,8 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       setIsRequested(true);
     }
 
-    Meteor.call('users.ratingsCount', { userId: user._id }, (error, result) => {
-      if (error) {
-        console.error('Error fetching ratings count:', error);
-      } else {
-        setRatingsCount(result);
-      }
-    });
+    // Removed Meteor.call for ratingsCount
+    // ratingsCount is derived from props
   }, [user._id, currentUser]);
 
   const isOwnProfile = currentUser && user && currentUser._id === user._id;
@@ -87,18 +81,16 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       if (error) {
         console.error('Error following user:', error);
       } else {
-        if (!privateAccount){
-        setIsFollowing(true);
-        console.log('Followed user successfully');
-        }else{
+        if (!privateAccount) {
+          setIsFollowing(true);
+          console.log('Followed user successfully');
+        } else {
           setIsRequested(true);
           console.log('Requested user successfully');
         }
-        
       }
     });
   };
-
 
   const handleUnfollow = () => {
     Meteor.call('unfollowUser', user._id, (error, result) => {
@@ -113,9 +105,9 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   };
 
   const presetAvatars = [
-    "https://randomuser.me/api/portraits/lego/1.jpg",
-    "https://randomuser.me/api/portraits/lego/2.jpg",
-    "https://randomuser.me/api/portraits/lego/3.jpg",
+    'https://randomuser.me/api/portraits/lego/1.jpg',
+    'https://randomuser.me/api/portraits/lego/2.jpg',
+    'https://randomuser.me/api/portraits/lego/3.jpg',
   ];
 
   return (
@@ -141,54 +133,96 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
         </div>
 
         <div className="flex flex-col gap-2">
-          <h2 className="pl-1 text-8xl font-bold truncate">{user.userName || 'Loading...'}</h2>
+          <h2 className="pl-1 text-8xl font-bold truncate">
+            {user.userName || 'Loading...'}
+          </h2>
           <div className="flex flex-col gap-2 pl-2">
             <div className="flex gap-2 items-center">
-            <button
-                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing  ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
-                onClick={user.userPrivacy === 'Public'  || isCurrentUser || isFollowing ? () => navigate(`/followers-following/${user._id}/followers`) : null}
-                disabled={user.userPrivacy !== 'Public' && !isCurrentUser && !isFollowing}
+              <button
+                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                    ? 'hover:underline'
+                    : 'text-white-500 cursor-not-allowed'
+                  }`}
+                onClick={
+                  user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                    ? () => navigate(`/followers-following/${user._id}/followers`)
+                    : null
+                }
+                disabled={
+                  user.userPrivacy !== 'Public' &&
+                  !isCurrentUser &&
+                  !isFollowing
+                }
               >
                 {user.followers} Followers
               </button>
               <span className="text-lg">•</span>
               <button
-              className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
-              onClick={user.userPrivacy === 'Public' || isCurrentUser || isFollowing   ? () => navigate(`/followers-following/${user._id}/following`) : null}
-              disabled={user.userPrivacy !== 'Public' && !isCurrentUser && !isFollowing}
-            >
+                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                    ? 'hover:underline'
+                    : 'text-white-500 cursor-not-allowed'
+                  }`}
+                onClick={
+                  user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                    ? () =>
+                      navigate(
+                        `/followers-following/${user._id}/following`
+                      )
+                    : null
+                }
+                disabled={
+                  user.userPrivacy !== 'Public' &&
+                  !isCurrentUser &&
+                  !isFollowing
+                }
+              >
                 {user.following} Following
               </button>
               <span className="text-lg">•</span>
               <button
-                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
+                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                    ? 'hover:underline'
+                    : 'text-white-500 cursor-not-allowed'
+                  }`}
                 onClick={() => {
-                  if (user.userPrivacy === 'Public' || isCurrentUser || isFollowing){
-                  if (user._id === currentUser._id) {
-                    navigate(`/user/${user._id}/ratings?userSpecific=true`);
-                  } else {
-                    navigate(`/user/${user._id}/ratings`);
+                  if (
+                    user.userPrivacy === 'Public' ||
+                    isCurrentUser ||
+                    isFollowing
+                  ) {
+                    if (user._id === currentUser._id) {
+                      navigate(`/user/${user._id}/ratings?userSpecific=true`);
+                    } else {
+                      navigate(`/user/${user._id}/ratings`);
+                    }
                   }
-                }
                 }}
-                disabled={user.userPrivacy !== 'Public' && !isCurrentUser  && !isFollowing}
-                >
-                {ratingsCount} Ratings
+                disabled={
+                  user.userPrivacy !== 'Public' &&
+                  !isCurrentUser &&
+                  !isFollowing
+                }
+              >
+                {user.ratings} Ratings
               </button>
             </div>
             <div>
               {showFollowButton ? (
                 <button
-                onClick={() => {
-                  if (isFollowing || isRequested) {
-                    handleUnfollow();
-                  } else {
-                    handleFollow();
-                  }
-                }}
+                  onClick={() => {
+                    if (isFollowing || isRequested) {
+                      handleUnfollow();
+                    } else {
+                      handleFollow();
+                    }
+                  }}
                   className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450]`}
                 >
-                    {isFollowing ? 'Unfollow' : isRequested ? 'Requested' : 'Follow'}
+                  {isFollowing
+                    ? 'Unfollow'
+                    : isRequested
+                      ? 'Requested'
+                      : 'Follow'}
                 </button>
               ) : (
                 <Link to="/user-discovery">
@@ -196,17 +230,19 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
                     <FaUserPlus />
                   </button>
                 </Link>
-              )
-              }
+              )}
             </div>
           </div>
         </div>
       </div>
 
+      {/* Avatar Modal */}
       {showAvatarModal && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-bold mb-4 text-center">Change Profile Picture</h3>
+            <h3 className="text-lg font-bold mb-4 text-center">
+              Change Profile Picture
+            </h3>
             <input
               type="file"
               accept="image/*"
@@ -237,6 +273,6 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       )}
     </div>
   );
-};
+});
 
 export default ProfileCard;
