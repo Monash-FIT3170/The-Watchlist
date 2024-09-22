@@ -245,9 +245,10 @@ const confirmDeleteList = (listId) => {
         return;
     }
 
-        setListToDelete(listId);
-        setShowConfirmDialog(true);
-    };
+    setListToDelete(listId);
+    setShowConfirmDialog(true);
+};
+
 
 
     const resetConfirmationState = () => {
@@ -256,30 +257,30 @@ const confirmDeleteList = (listId) => {
         setListToDelete(null);
     };
 
-    const handleDeleteConfirmed = () => {
-        if (contentToDelete !== null) {
-            handleRemoveContentClick(contentToDelete);
-        } else if (listToDelete !== null) {
-            Meteor.call('list.delete', { listId: listToDelete }, (error) => {
-                if (error) {
-                    console.error("Error deleting list:", error);
-                } else {
-                    onClose();
-                }
-            });
-        }
-        resetConfirmationState();
-    };
+const handleDeleteConfirmed = () => {
+    if (contentToDelete !== null) {
+        handleRemoveContentClick(contentToDelete);
+    } else if (listToDelete !== null) {
+        Meteor.call('list.delete', { listId: listToDelete }, (error) => {
+            if (error) {
+                console.error("Error deleting list:", error);
+            } else {
+                onClose();
+            }
+        });
+    }
+    resetConfirmationState();
+};
 
-    const handleCopy = async (text) => {
-        try {
-            await navigator.clipboard.writeText(text);
-            console.log('Copied to clipboard: ', text);
-            toast.success('Link copied to clipboard');
-        } catch (error) {
-            console.error('Unable to copy to clipboard:', error);
-        }
-    };
+const handleCopy = async (text) => {
+    try {
+        await navigator.clipboard.writeText(text);
+        console.log('Copied to clipboard: ', text);
+        toast.success('Link copied to clipboard');
+    } catch (error) {
+        console.error('Unable to copy to clipboard:', error);
+    }
+};
 
 const filteredContent = list?.content?.filter(item =>
     selectedTab === 'all' ||
@@ -303,35 +304,6 @@ if (!list) return <div>No list found.</div>;
                         {list.title.length > 30 ? `${list.title.slice(0, 30)}...` : list.title}
                     </h2>
                     <div className="flex space-x-2">
-                        <button
-                            onClick={() => handleCopy(shareUrl)}
-                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
-                            title="Copy Link"
-                            style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                        >
-                            <FiLink size="24" />
-                        </button>
-                        <button title="Share to Facebook">
-                            <FacebookShareButton url={shareUrl} quote={shareQuote}>
-                                <FacebookIcon size={iconSize} round />
-                            </FacebookShareButton>
-                        </button>
-                        <button title="Share to Twitter">
-                            <TwitterShareButton url={shareUrl} title={shareQuote}>
-                                <TwitterIcon size={iconSize} round />
-                            </TwitterShareButton>
-                        </button>
-                        <button title="Share to Whatsapp">
-                            <WhatsappShareButton url={shareUrl} title={shareQuote}>
-                                <WhatsappIcon size={iconSize} round />
-                            </WhatsappShareButton>
-                        </button>
-                        <button title="Send in Email">
-                            <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
-                                <EmailIcon size={iconSize} round />
-                            </EmailShareButton>
-                        </button>
-
                         <button
                             onClick={() => handleCopy(shareUrl)}
                             className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
