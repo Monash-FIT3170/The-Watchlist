@@ -234,20 +234,20 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         }
     };
 
-const confirmDeleteList = (listId) => {
-    if (list.userId !== Meteor.userId()) {
-        toast.error("You cannot delete another user's list!");
-        return;
-    }
+    const confirmDeleteList = (listId) => {
+        if (list.userId !== Meteor.userId()) {
+            toast.error("You cannot delete another user's list!");
+            return;
+        }
 
-    if (list.title === 'Favourite' || list.title === 'To Watch') {
-        toast.error('This list cannot be deleted.');
-        return;
-    }
+        if (list.title === 'Favourite' || list.title === 'To Watch') {
+            toast.error('This list cannot be deleted.');
+            return;
+        }
 
-    setListToDelete(listId);
-    setShowConfirmDialog(true);
-};
+        setListToDelete(listId);
+        setShowConfirmDialog(true);
+    };
 
 
 
@@ -257,41 +257,41 @@ const confirmDeleteList = (listId) => {
         setListToDelete(null);
     };
 
-const handleDeleteConfirmed = () => {
-    if (contentToDelete !== null) {
-        handleRemoveContentClick(contentToDelete);
-    } else if (listToDelete !== null) {
-        Meteor.call('list.delete', { listId: listToDelete }, (error) => {
-            if (error) {
-                console.error("Error deleting list:", error);
-            } else {
-                onClose();
-            }
-        });
-    }
-    resetConfirmationState();
-};
+    const handleDeleteConfirmed = () => {
+        if (contentToDelete !== null) {
+            handleRemoveContentClick(contentToDelete);
+        } else if (listToDelete !== null) {
+            Meteor.call('list.delete', { listId: listToDelete }, (error) => {
+                if (error) {
+                    console.error("Error deleting list:", error);
+                } else {
+                    onClose();
+                }
+            });
+        }
+        resetConfirmationState();
+    };
 
-const handleCopy = async (text) => {
-    try {
-        await navigator.clipboard.writeText(text);
-        console.log('Copied to clipboard: ', text);
-        toast.success('Link copied to clipboard');
-    } catch (error) {
-        console.error('Unable to copy to clipboard:', error);
-    }
-};
+    const handleCopy = async (text) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            console.log('Copied to clipboard: ', text);
+            toast.success('Link copied to clipboard');
+        } catch (error) {
+            console.error('Unable to copy to clipboard:', error);
+        }
+    };
 
-const filteredContent = list?.content?.filter(item =>
-    selectedTab === 'all' ||
-    (selectedTab === 'movies' && item.contentType === 'Movie') ||
-    (selectedTab === 'tv shows' && item.contentType === 'TV Show')
-) || [];
+    const filteredContent = list?.content?.filter(item =>
+        selectedTab === 'all' ||
+        (selectedTab === 'movies' && item.contentType === 'Movie') ||
+        (selectedTab === 'tv shows' && item.contentType === 'TV Show')
+    ) || [];
 
-const sortedContent = sortContent(filteredContent);
+    const sortedContent = sortContent(filteredContent);
 
-if (loading) return <div>Loading...</div>;
-if (!list) return <div>No list found.</div>;
+    if (loading) return <div>Loading...</div>;
+    if (!list) return <div>No list found.</div>;
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -407,17 +407,17 @@ if (!list) return <div>No list found.</div>;
                                 <option value="popularity">Sort by Popularity</option>
                             </select>
 
-                        <button
-                            onClick={toggleSortOrder}
-                            className={`flex items-center justify-center px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
+                            <button
+                                onClick={toggleSortOrder}
+                                className={`flex items-center justify-center px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
             ${sortOrder === 'ascending' ? 'bg-[#7B1450] text-white' : 'bg-[#7B1450] text-white'} 
             border-transparent border`}
-                        >
-                            {sortOrder === 'ascending' ? <FaSortAmountUp className="mr-1" /> : <FaSortAmountDown className="mr-1" />}
-                            Sort Order
-                        </button>
+                            >
+                                {sortOrder === 'ascending' ? <FaSortAmountUp className="mr-1" /> : <FaSortAmountDown className="mr-1" />}
+                                Sort Order
+                            </button>
+                        </div>
                     </div>
-                </div>
 
                 </div>
                 <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
@@ -469,19 +469,19 @@ if (!list) return <div>No list found.</div>;
                                                         <RatingStar totalStars={5} rating={rating} />
                                                     </div>
                                                 </div>
-                                                    <button
-                                                        className={`absolute top-4 right-4 rounded-full p-2 ${isCurrentUserList ? 'text-white bg-red-500 hover:bg-red-700' : 'text-gray-500 bg-gray-300 cursor-not-allowed'}`}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (isCurrentUserList) {
-                                                                confirmRemoveContent(item.contentId);
-                                                            }
-                                                        }}
-                                                        title="Remove from List"
-                                                        disabled={!isCurrentUserList}
-                                                    >
-                                                        <FiTrash2 />
-                                                    </button>
+                                                <button
+                                                    className={`absolute top-4 right-4 rounded-full p-2 ${isCurrentUserList ? 'text-white bg-red-500 hover:bg-red-700' : 'text-gray-500 bg-gray-300 cursor-not-allowed'}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (isCurrentUserList) {
+                                                            confirmRemoveContent(item.contentId);
+                                                        }
+                                                    }}
+                                                    title="Remove from List"
+                                                    disabled={!isCurrentUserList}
+                                                >
+                                                    <FiTrash2 />
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -492,64 +492,64 @@ if (!list) return <div>No list found.</div>;
                 </Scrollbar>
             </div>
 
-        {isRenameModalOpen && (
-            <RenameListModal
-                isOpen={isRenameModalOpen}
-                onClose={() => setIsRenameModalOpen(false)}
-                onRename={(newName) => {
-                    onRenameList(newName);
-                    list.title = newName; // Update the list title locally
-                }}
-                currentName={list.title}
-                ref={renameListRef}
-            />
-        )}
+            {isRenameModalOpen && (
+                <RenameListModal
+                    isOpen={isRenameModalOpen}
+                    onClose={() => setIsRenameModalOpen(false)}
+                    onRename={(newName) => {
+                        onRenameList(newName);
+                        list.title = newName; // Update the list title locally
+                    }}
+                    currentName={list.title}
+                    ref={renameListRef}
+                />
+            )}
 
-        {isModalOpen && selectedContent && (
-            <ContentInfoModal
-                ref={contentInfoModalRef}  // Ref for the ContentInfoModal
-                isOpen={isModalOpen}
-                onClose={() => setModalOpen(false)}
-                content={selectedContent}
-                modalRef={modalRef}
-            />
-        )}
+            {isModalOpen && selectedContent && (
+                <ContentInfoModal
+                    ref={contentInfoModalRef}  // Ref for the ContentInfoModal
+                    isOpen={isModalOpen}
+                    onClose={() => setModalOpen(false)}
+                    content={selectedContent}
+                    modalRef={modalRef}
+                />
+            )}
 
-        {showConfirmDialog && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50" ref={confirmDialogRef}>
-                <div
-                    className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <p className="text-gray-300">
-                        Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
-                    </p>
-                    <div className="flex justify-end space-x-4">
-                        <button
-                            className="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                resetConfirmationState();
-                            }}
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                            onClick={(e) => {
-                                e.stopPropagation();  // Stop propagation when confirming deletion
-                                handleDeleteConfirmed();
-                            }}
-                        >
-                            Confirm
-                        </button>
+            {showConfirmDialog && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50" ref={confirmDialogRef}>
+                    <div
+                        className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <p className="text-gray-300">
+                            Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
+                        </p>
+                        <div className="flex justify-end space-x-4">
+                            <button
+                                className="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    resetConfirmationState();
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                                onClick={(e) => {
+                                    e.stopPropagation();  // Stop propagation when confirming deletion
+                                    handleDeleteConfirmed();
+                                }}
+                            >
+                                Confirm
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        )}
-        <ToastContainer />
-    </div>
-);
-
+            )}
+            <ToastContainer />
+        </div>
+    );
+}
 
 export default ListPopup;
