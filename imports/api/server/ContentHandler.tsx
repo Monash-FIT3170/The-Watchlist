@@ -40,7 +40,7 @@ const readContent: HandlerFunc = {
     check(sortOption, Match.Maybe(String));
     check(contentType, Match.Maybe(String));
   },
-  run: ({
+  run: function ({
     id,
     searchString,
     limit,
@@ -49,12 +49,7 @@ const readContent: HandlerFunc = {
     language,
     sortOption,
     contentType,
-  }: GetContentOptions) => {
-    const searchOptions: any = {
-      limit: limit ?? 50,
-      skip: limit && page ? limit * page : 0,
-    };
-
+  }: GetContentOptions) {
     const searchCriteria: any = {};
     let fullDetails = false;
 
@@ -75,64 +70,165 @@ const readContent: HandlerFunc = {
       }
     }
 
-    // Define default sort options
-    let sortOptions: any = {};
+    const skip = limit && page ? limit * page : 0;
+    const limitValue = limit ?? 50;
 
-    if (sortOption === 'title_asc') {
-      sortOptions.title = 1;
-    } else if (sortOption === 'title_desc') {
-      sortOptions.title = -1;
-    } else if (sortOption === 'release_date_asc') {
-      sortOptions.release_year = 1; // For movies
-    } else if (sortOption === 'release_date_desc') {
-      sortOptions.release_year = -1; // For movies
-    } else {
-      sortOptions.popularity = -1;
-    }
-
-    // Define projection based on whether full details are needed
-    let projection: any = null;
-
+    const projection: any = {};
     if (!fullDetails) {
-      projection = {
-        contentId: 1,
-        title: 1,
-        image_url: 1,
-        release_year: 1,
-        first_aired: 1,
-        genres: 1,
-        popularity: 1,
-        origin_country: 1,
-      };
-    }
-
-    // Build query options, including fields only if projection is defined
-    const queryOptions: any = {
-      ...searchOptions,
-      sort: sortOptions,
-    };
-
-    if (projection) {
-      queryOptions.fields = projection;
+      projection.contentId = 1;
+      projection.title = 1;
+      projection.image_url = 1;
+      projection.release_year = 1;
+      projection.first_aired = 1;
+      projection.genres = 1;
+      projection.popularity = 1;
+      projection.origin_country = 1;
+      projection.contentType = 1;
     }
 
     let results: GetContentResults = { content: [], total: 0 };
+    const CURRENT_YEAR = new Date().getFullYear();
+    const MIN_YEAR = 1800;
 
     if (contentType === 'Movie') {
-      const moviesCursor = MovieCollection.find(searchCriteria, queryOptions);
-      results.content = moviesCursor.fetch();
-      results.total = MovieCollection.find(searchCriteria).count();
-    } else if (contentType === 'TV Show') {
-      // Adjust sort options for TV shows
+      const MovieCollectionRaw = MovieCollection.rawCollection();
+
+      const pipeline: any[] = [{ $match: searchCriteria }];
+
       if (sortOption === 'release_date_asc' || sortOption === 'release_date_desc') {
-        sortOptions = {
-          first_aired: sortOption === 'release_date_asc' ? 1 : -1,
-        };
+        const sortOrder = sortOption === 'release_date_asc' ? 1 : -1;
+
+        pipeline.push({
+          $addFields: {
+            isValidReleaseYear: {
+              $and: [
+                { $gte: ['$release_year', MIN_YEAR] },
+                { $lte: ['$release_year', CURRENT_YEAR] },
+                { $ne: ['$release_year', null] },
+              ],
+            },
+          },
+        });
+
+        pipeline.push({
+          $sort: {
+            isValidReleaseYear: -1, // Valid years first
+            release_year: sortOrder,
+            _id: 1,
+          },
+        });
+      } else if (sortOption === 'title_asc' || sortOption === 'title_desc') {
+        const titleSortOrder = sortOption === 'title_asc' ? 1 : -1;
+        pipeline.push({
+          $sort: {
+            title: titleSortOrder,
+            _id: 1,
+          },
+        });
+      } else {
+        pipeline.push({
+          $sort: {
+            popularity: -1,
+            _id: 1,
+          },
+        });
       }
 
-      const tvCursor = TVCollection.find(searchCriteria, queryOptions);
-      results.content = tvCursor.fetch();
-      results.total = TVCollection.find(searchCriteria).count();
+      pipeline.push({ $skip: skip });
+      pipeline.push({ $limit: limitValue });
+
+      if (!fullDetails) {
+        pipeline.push({ $project: projection });
+      }
+
+      // Execute the aggregation pipeline
+      const moviesCursor = MovieCollectionRaw.aggregate(pipeline, { allowDiskUse: true });
+      const movies = Meteor.wrapAsync(moviesCursor.toArray, moviesCursor)();
+
+      // Get the total count
+      const total = Meteor.wrapAsync(MovieCollectionRaw.countDocuments, MovieCollectionRaw)(searchCriteria);
+
+      results.content = movies.map((item) => ({ ...item, contentType }));
+      results.total = total;
+    } else if (contentType === 'TV Show') {
+      const TVCollectionRaw = TVCollection.rawCollection();
+
+      const pipeline: any[] = [{ $match: searchCriteria }];
+
+      if (sortOption === 'release_date_asc' || sortOption === 'release_date_desc') {
+        const sortOrder = sortOption === 'release_date_asc' ? 1 : -1;
+
+        pipeline.push({
+          $addFields: {
+            firstAiredYear: {
+              $switch: {
+                branches: [
+                  {
+                    case: { $eq: [{ $type: '$first_aired' }, 'date'] },
+                    then: { $year: '$first_aired' },
+                  },
+                  {
+                    case: {
+                      $in: [{ $type: '$first_aired' }, ['double', 'int', 'long']],
+                    },
+                    then: '$first_aired',
+                  },
+                ],
+                default: null,
+              },
+            },
+            isValidFirstAiredYear: {
+              $and: [
+                { $gte: ['$firstAiredYear', MIN_YEAR] },
+                { $lte: ['$firstAiredYear', CURRENT_YEAR] },
+                { $ne: ['$firstAiredYear', null] },
+              ],
+            },
+          },
+        });
+
+        pipeline.push({
+          $sort: {
+            isValidFirstAiredYear: -1, // Valid years first
+            firstAiredYear: sortOrder,
+            _id: 1,
+          },
+        });
+      } else if (sortOption === 'title_asc' || sortOption === 'title_desc') {
+        const titleSortOrder = sortOption === 'title_asc' ? 1 : -1;
+        pipeline.push({
+          $sort: {
+            title: titleSortOrder,
+            _id: 1,
+          },
+        });
+      } else {
+        pipeline.push({
+          $sort: {
+            popularity: -1,
+            _id: 1,
+          },
+        });
+      }
+
+      pipeline.push({ $skip: skip });
+      pipeline.push({ $limit: limitValue });
+
+      if (!fullDetails) {
+        pipeline.push({ $project: projection });
+      }
+
+      // Execute the aggregation pipeline
+      const tvCursor = TVCollectionRaw.aggregate(pipeline, { allowDiskUse: true });
+      const tvShows = Meteor.wrapAsync(tvCursor.toArray, tvCursor)();
+
+      // Get the total count
+      const total = Meteor.wrapAsync(TVCollectionRaw.countDocuments, TVCollectionRaw)(
+        searchCriteria
+      );
+
+      results.content = tvShows.map((item) => ({ ...item, contentType }));
+      results.total = total;
     } else {
       throw new Meteor.Error(
         'Invalid content type',
@@ -140,15 +236,7 @@ const readContent: HandlerFunc = {
       );
     }
 
-    const contentWithType = results.content.map((item) => ({
-      ...item,
-      contentType,
-    }));
-
-    return {
-      content: contentWithType,
-      total: results.total,
-    };
+    return results;
   },
 };
 
