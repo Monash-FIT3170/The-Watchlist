@@ -156,3 +156,44 @@ Meteor.publish('allLists', function () {
     }
   });
 });
+Meteor.publish('userProfileData', function (userId) {
+  if (!userId) {
+    return this.ready();
+  }
+
+  // Consolidate user lists and subscribed lists into a single cursor
+  const listCursor = ListCollection.find(
+    {
+      $or: [
+        { userId }, // User's own lists
+        { subscribers: { $in: [userId] } }, // Lists the user is subscribed to
+      ],
+    },
+    {
+      fields: { listType: 1, content: 1, title: 1 },
+    }
+  );
+
+  // Publish user data
+  const userCursor = Meteor.users.find(
+    { _id: userId },
+    {
+      fields: {
+        'profile.privacy': 1,
+        username: 1,
+        avatarUrl: 1,
+        followerRequests: 1,
+        followingRequests: 1,
+        followers: 1,
+        following: 1,
+        realName: 1,
+        description: 1,
+      },
+    }
+  );
+
+  // Publish ratings count using publish-counts
+  Counts.publish(this, 'userRatingsCount', RatingCollection.find({ userId }), { noReady: true });
+
+  return [listCursor, userCursor];
+});

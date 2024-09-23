@@ -1,68 +1,22 @@
-import React, { useEffect, useState } from 'react';
+// imports/ui/pages/UserProfile.jsx
+
+import React, { useState, useEffect, useMemo } from 'react';
 import { Meteor } from 'meteor/meteor';
 import ContentList from '../components/lists/ContentList';
 import ProfileCard from '../components/headers/ProfileCard';
-import { useTracker } from 'meteor/react-meteor-data';
 import { ListCollection } from '../../db/List';
-import { RatingCollection } from '../../db/Rating';
 import ListDisplay from '../components/lists/ListDisplay';
 
-export default function UserProfile() {
-  const currentUser = useTracker(() => {
-    const handler = Meteor.subscribe('userData', Meteor.userId());
-    if (handler.ready()) {
-      return Meteor.user();
-    }
-    return null;
-  }, []);
+export default function UserProfile({ currentUser, ratingsCount, loading }) {
+  // Early Return for Loading State
+  if (loading || !currentUser) {
+    return <div>Loading...</div>;
+  }
 
-
-  useEffect(() => {
-    if (currentUser) {      
-        //for existing users, if they do not yet have a privacy setting, set it to public
-        if (currentUser.profile?.privacy === undefined) {
-            Meteor.call('users.updatePrivacy','Public', (error) => {
-                if (error) {
-                    console.error('Error updating privacy setting:', error.reason);
-                } else {
-                    console.log('Privacy setting updated to:', 'Public');
-                }
-            });
-        }
-    }
-}, [currentUser]);
-
-  const { lists, subscribedLists, followUser, unfollowUser, ratings, loading } = useTracker(() => {
-    const listsHandler = Meteor.subscribe('userLists', Meteor.userId());
-    const subscribedHandler = Meteor.subscribe('subscribedLists', Meteor.userId());
-    const ratingsHandler = Meteor.subscribe('userRatings', Meteor.userId());
-
-    const lists = ListCollection.find({ userId: Meteor.userId() }).fetch();
-    const subscribedLists = ListCollection.find({
-      subscribers: { $in: [Meteor.userId()] }
-    }).fetch();
-    const ratings = RatingCollection.find({ userId: Meteor.userId() }).fetch();
-
-    return {
-      lists,
-      subscribedLists,
-      ratings,
-      loading: !listsHandler.ready() || !subscribedHandler.ready() || !ratingsHandler.ready(),
-    };
-  }, []);
-
+  // Hook: useState for isFollowing
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const userLists = lists || [];
-  const favouritesList = userLists.find((list) => list.listType === 'Favourite');
-  const toWatchList = userLists.find((list) => list.listType === 'To Watch');
-  const customWatchlists = userLists.filter((list) => list.listType === 'Custom');
-
-  const getUserRatingForContent = (contentId) => {
-    const rating = ratings.find(r => r.contentId === contentId);
-    return rating ? rating.rating : 0;
-  };
-
+  // Hook: useEffect for checking if the current user is following
   useEffect(() => {
     if (currentUser) {
       Meteor.call('isFollowing', currentUser._id, (error, result) => {
@@ -73,18 +27,51 @@ export default function UserProfile() {
     }
   }, [currentUser]);
 
-  const userProfile = currentUser
-    ? {
-      avatarUrl: currentUser.avatarUrl || 'https://randomuser.me/api/portraits/lego/1.jpg',
-      userName: currentUser.username || 'Default User',
-      ratings: currentUser.ratings || '0',
-      followers: currentUser.followers?.length || '0',
-      following: currentUser.following?.length || '0',
-      userRealName: currentUser.realName || 'No Name Provided',
-      userDescription: currentUser.description || 'No description provided.',
-      _id: currentUser._id,
+  // Hook: useEffect for updating privacy settings
+  useEffect(() => {
+    if (currentUser && currentUser.profile?.privacy === undefined) {
+      Meteor.call('users.updatePrivacy', 'Public', (error) => {
+        if (error) {
+          console.error('Error updating privacy setting:', error.reason);
+        } else {
+          console.log('Privacy setting updated to:', 'Public');
+        }
+      });
     }
-    : {};
+  }, [currentUser]);
+
+  // Compute userProfile using useMemo
+  const userProfile = useMemo(() => ({
+    avatarUrl:
+      currentUser.avatarUrl || 'https://randomuser.me/api/portraits/lego/1.jpg',
+    userName: currentUser.username || 'Default User',
+    ratings: ratingsCount, // Use ratingsCount from App.jsx
+    followers: currentUser.followers?.length || '0',
+    following: currentUser.following?.length || '0',
+    userRealName: currentUser.realName || 'No Name Provided',
+    userDescription: currentUser.description || 'No description provided.',
+    _id: currentUser._id,
+    userPrivacy: currentUser.profile?.privacy || 'Public',
+  }), [currentUser, ratingsCount]);
+
+  // Find all lists (both owned and subscribed)
+  const userLists = useMemo(() => (
+    ListCollection.find({ userId: currentUser._id }).fetch()
+  ), [currentUser._id]);
+
+  // Separate owned lists and subscribed lists
+  const ownedLists = useMemo(() => (
+    userLists.filter(list => list.userId === currentUser._id)
+  ), [userLists, currentUser._id]);
+
+  const subscribedLists = useMemo(() => (
+    userLists.filter(list => list.userId !== currentUser._id)
+  ), [userLists, currentUser._id]);
+
+  // Further categorize owned lists by listType
+  const favouritesList = ownedLists.find((list) => list.listType === 'Favourite');
+  const toWatchList = ownedLists.find((list) => list.listType === 'To Watch');
+  const customWatchlists = ownedLists.filter((list) => list.listType === 'Custom');
 
   return (
     <div className="flex flex-col min-h-screen bg-darker">
@@ -99,11 +86,11 @@ export default function UserProfile() {
             key={favouritesList._id}
             list={{
               ...favouritesList,
-              content: favouritesList.content.map(item => ({
+              content: favouritesList.content.map((item) => ({
                 ...item,
-                rating: getUserRatingForContent(item.contentId),
-                isUserSpecificRating: true
-              }))
+                // Removed individual ratings
+                isUserSpecificRating: true,
+              })),
             }}
           />
         )}
@@ -112,16 +99,19 @@ export default function UserProfile() {
             key={toWatchList._id}
             list={{
               ...toWatchList,
-              content: toWatchList.content.map(item => ({
+              content: toWatchList.content.map((item) => ({
                 ...item,
-                rating: getUserRatingForContent(item.contentId),
-                isUserSpecificRating: true
-              }))
+                // Removed individual ratings
+                isUserSpecificRating: true,
+              })),
             }}
           />
         )}
         <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />
-        <ListDisplay heading="Subscribed Watchlists" listData={subscribedLists} />
+        <ListDisplay
+          heading="Subscribed Watchlists"
+          listData={subscribedLists}
+        />
       </div>
     </div>
   );
