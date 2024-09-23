@@ -12,6 +12,7 @@ import ListCardDisplay from '../components/lists/ListCardDisplay';
 import ContentItemDisplay from '../components/contentItems/ContentItemDisplay';
 import Loading from './Loading';
 import { SearchContext } from '../contexts/SearchContext';
+import { FaTimesCircle } from 'react-icons/fa';
 
 const SearchBar = ({ currentUser }) => {
   const { searchState, setSearchState } = useContext(SearchContext);
@@ -145,7 +146,7 @@ const SearchBar = ({ currentUser }) => {
       ...prevState,
       loading: true,
     }));
-  
+
     // Map selectedTab to contentType
     let contentType;
     if (selectedTab === 'Movies') {
@@ -153,7 +154,7 @@ const SearchBar = ({ currentUser }) => {
     } else if (selectedTab === 'TV Shows') {
       contentType = 'TV Show';
     }
-  
+
     const options = {
       searchString: debouncedSearchTerm,
       limit,
@@ -163,7 +164,7 @@ const SearchBar = ({ currentUser }) => {
       sortOption: selectedSortOption,
       contentType, // Now correctly set to 'Movie' or 'TV Show'
     };
-  
+
     Meteor.call('content.read', options, (error, result) => {
       if (!error) {
         const totalItems = result.total;
@@ -314,145 +315,144 @@ const SearchBar = ({ currentUser }) => {
             </span>
           </div>
         </div>
-
-        {/* Filters and sorting dropdowns */}
-        {(selectedTab === 'Movies' || selectedTab === 'TV Shows') && (
-          <div className="flex flex-wrap mt-2">
-            {/* Genres dropdown */}
-            <div className="mr-4 mb-2">
-              <label htmlFor="genre-select" className="block text-sm font-medium text-gray-700">
-                Genre
-              </label>
-              <select
-                id="genre-select"
-                name="genre"
-                value={selectedGenre}
-                onChange={handleGenreChange}
-                className="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#7B1450] focus:border-[#7B1450] sm:text-sm rounded-md"
+        {/* Tabs and Filters */}
+        <div className="flex items-center justify-between w-full mt-2">
+          {/* Tabs */}
+          <div className="flex">
+            {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
+              <div
+                key={tab}
+                className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab
+                    ? 'bg-[#7B1450] text-white border-[#7B1450]'
+                    : 'bg-[#282525] text-white border-transparent'
+                  } border`}
+                onClick={() => {
+                  setSearchState((prevState) => ({
+                    ...prevState,
+                    selectedTab: tab,
+                    currentPage: 0, // Reset to first page when tab changes
+                  }));
+                }}
               >
-                <option value="">All Genres</option>
-                {genresList.map((genre) => (
-                  <option key={genre} value={genre}>
-                    {genre}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Language dropdown */}
-            <div className="mr-4 mb-2">
-              <label htmlFor="language-select" className="block text-sm font-medium text-gray-700">
-                Language
-              </label>
-              <select
-                id="language-select"
-                name="language"
-                value={selectedLanguage}
-                onChange={handleLanguageChange}
-                className="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#7B1450] focus:border-[#7B1450] sm:text-sm rounded-md"
-              >
-                <option value="">All Languages</option>
-                {languagesList.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sorting dropdown */}
-            <div className="mr-4 mb-2">
-              <label htmlFor="sort-select" className="block text-sm font-medium text-gray-700">
-                Sort By
-              </label>
-              <select
-                id="sort-select"
-                name="sort"
-                value={selectedSortOption}
-                onChange={handleSortOptionChange}
-                className="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#7B1450] focus:border-[#7B1450] sm:text-sm rounded-md"
-              >
-                <option value="">Default</option>
-                {sortingOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Clear Filters button */}
-            <div className="flex items-end mb-2">
-              <button
-                type="button"
-                onClick={handleClearFilters}
-                className="mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md"
-              >
-                Clear Filters
-              </button>
-            </div>
+                {tab}
+              </div>
+            ))}
           </div>
-        )}
 
-        <div className="bubbles-container flex justify-end mt-2">
-          {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
-            <div
-              key={tab}
-              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-                } border-transparent border`}
-              onClick={() => {
-                setSearchState((prevState) => ({
-                  ...prevState,
-                  selectedTab: tab,
-                  currentPage: 0, // Reset to first page when tab changes
-                }));
-              }}
-            >
-              {tab}
+          {/* Filters and Sorting Dropdowns */}
+          {(selectedTab === 'Movies' || selectedTab === 'TV Shows') && (
+            <div className="flex items-center">
+              {/* Genres Dropdown */}
+              <div className="mr-4 mb-2">
+                <select
+                  id="genre-select"
+                  name="genre"
+                  value={selectedGenre}
+                  onChange={handleGenreChange}
+                  className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
+                >
+                  <option value="">All Genres</option>
+                  {genresList.map((genre) => (
+                    <option key={genre} value={genre}>
+                      {genre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Language Dropdown */}
+              <div className="mr-4 mb-2">
+                <select
+                  id="language-select"
+                  name="language"
+                  value={selectedLanguage}
+                  onChange={handleLanguageChange}
+                  className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
+                >
+                  <option value="">All Languages</option>
+                  {languagesList.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sorting Dropdown */}
+              <div className="mr-4 mb-2">
+                <select
+                  id="sort-select"
+                  name="sort"
+                  value={selectedSortOption}
+                  onChange={handleSortOptionChange}
+                  className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
+                >
+                  <option value="">Default</option>
+                  {sortingOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Clear Filters Icon */}
+              <div className="mb-2">
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="bg-dark text-white p-2 rounded-full hover:bg-[#5a0e3c] focus:outline-none focus:ring-2 focus:ring-[#5a0e3c]"
+                  title="Clear Filters"
+                >
+                  <FaTimesCircle className="text-gray-400" size={20} />
+                </button>
+              </div>
             </div>
-          ))}
+          )}
         </div>
+
+
       </form>
       <Scrollbar className="search-results-container flex-grow overflow-auto">
-          <>
-            {selectedTab === 'Movies' && (
-              <ContentItemDisplay
-                contentItems={filteredMovies}
-                contentType="Movie"
-                globalRatings={globalRatings}
-                setGlobalRatings={setGlobalRatings}
-              />
-            )}
-            {selectedTab === 'TV Shows' && (
-              <ContentItemDisplay
-                contentItems={filteredTVShows}
-                contentType="TV Show"
-                globalRatings={globalRatings}
-                setGlobalRatings={setGlobalRatings}
-              />
-            )}
-            {selectedTab === 'Lists' &&
-              (filteredLists.length > 0 ? (
-                <ListCardDisplay lists={filteredLists} />
-              ) : debouncedSearchTerm === '' ? (
-                <div className="flex justify-center items-center w-full h-full">
-                  <img src="/images/popcorn.png" alt="No Lists" className="w-32 h-32" />
-                </div>
-              ) : (
-                <div className="text-center text-gray-400">No lists found.</div>
-              ))}
+        <>
+          {selectedTab === 'Movies' && (
+            <ContentItemDisplay
+              contentItems={filteredMovies}
+              contentType="Movie"
+              globalRatings={globalRatings}
+              setGlobalRatings={setGlobalRatings}
+            />
+          )}
+          {selectedTab === 'TV Shows' && (
+            <ContentItemDisplay
+              contentItems={filteredTVShows}
+              contentType="TV Show"
+              globalRatings={globalRatings}
+              setGlobalRatings={setGlobalRatings}
+            />
+          )}
+          {selectedTab === 'Lists' &&
+            (filteredLists.length > 0 ? (
+              <ListCardDisplay lists={filteredLists} />
+            ) : debouncedSearchTerm === '' ? (
+              <div className="flex justify-center items-center w-full h-full">
+                <img src="/images/popcorn.png" alt="No Lists" className="w-32 h-32" />
+              </div>
+            ) : (
+              <div className="text-center text-gray-400">No lists found.</div>
+            ))}
 
-            {selectedTab === 'Users' &&
-              (users.length > 0 ? (
-                <UserList users={users} searchTerm={debouncedSearchTerm} currentUser={currentUser} />
-              ) : debouncedSearchTerm === '' ? (
-                <div className="flex justify-center items-center w-full h-full">
-                  <img src="/images/popcorn.png" alt="No Users" className="w-32 h-32" />
-                </div>
-              ) : (
-                <div>No users found.</div>
-              ))}
-          </>
+          {selectedTab === 'Users' &&
+            (users.length > 0 ? (
+              <UserList users={users} searchTerm={debouncedSearchTerm} currentUser={currentUser} />
+            ) : debouncedSearchTerm === '' ? (
+              <div className="flex justify-center items-center w-full h-full">
+                <img src="/images/popcorn.png" alt="No Users" className="w-32 h-32" />
+              </div>
+            ) : (
+              <div>No users found.</div>
+            ))}
+        </>
       </Scrollbar>
 
       {/* Pagination buttons */}
