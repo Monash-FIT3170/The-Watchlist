@@ -1,4 +1,5 @@
-// SearchBar.jsx
+// imports/ui/pages/SearchBar.jsx
+
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { useTracker } from 'meteor/react-meteor-data';
@@ -26,7 +27,31 @@ const SearchBar = ({ currentUser }) => {
     users,
     globalRatings,
     loading,
+    selectedGenre,
+    selectedLanguage,
+    selectedSortOption,
   } = searchState;
+
+  // Define genres, languages, and sorting options
+  const genresList = [
+    'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama',
+    'Family', 'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance',
+    'Science Fiction', 'TV Movie', 'Thriller', 'War', 'Western',
+  ];
+
+  const languagesList = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    // Add more languages as needed
+  ];
+
+  const sortingOptions = [
+    { value: 'title_asc', label: 'Title A-Z' },
+    { value: 'title_desc', label: 'Title Z-A' },
+    { value: 'release_date_desc', label: 'Release Date (Newest First)' },
+    { value: 'release_date_asc', label: 'Release Date (Oldest First)' },
+  ];
 
   const escapeRegExp = (string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -75,14 +100,70 @@ const SearchBar = ({ currentUser }) => {
     debouncedChangeHandler(value);
   };
 
+  // Event handlers for the new dropdowns
+  const handleGenreChange = (e) => {
+    const value = e.target.value;
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedGenre: value,
+      currentPage: 0, // Reset to first page when filter changes
+    }));
+  };
+
+  const handleLanguageChange = (e) => {
+    const value = e.target.value;
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedLanguage: value,
+      currentPage: 0, // Reset to first page when filter changes
+    }));
+  };
+
+  const handleSortOptionChange = (e) => {
+    const value = e.target.value;
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedSortOption: value,
+      currentPage: 0, // Reset to first page when sort changes
+    }));
+  };
+
+  const handleClearFilters = () => {
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedGenre: '',
+      selectedLanguage: '',
+      selectedSortOption: '',
+      searchTerm: '',
+      debouncedSearchTerm: '',
+      currentPage: 0,
+    }));
+  };
+
   const fetchContent = useCallback(() => {
     setSearchState((prevState) => ({
       ...prevState,
       loading: true,
     }));
-
-    const options = { searchString: debouncedSearchTerm, limit, page: currentPage };
-
+  
+    // Map selectedTab to contentType
+    let contentType;
+    if (selectedTab === 'Movies') {
+      contentType = 'Movie';
+    } else if (selectedTab === 'TV Shows') {
+      contentType = 'TV Show';
+    }
+  
+    const options = {
+      searchString: debouncedSearchTerm,
+      limit,
+      page: currentPage,
+      genre: selectedGenre,
+      language: selectedLanguage,
+      sortOption: selectedSortOption,
+      contentType, // Now correctly set to 'Movie' or 'TV Show'
+    };
+  
     Meteor.call('content.read', options, (error, result) => {
       if (!error) {
         const totalItems = result.total;
@@ -90,8 +171,8 @@ const SearchBar = ({ currentUser }) => {
           ...prevState,
           loading: false,
           totalPages: Math.ceil(totalItems / limit),
-          filteredMovies: result.movie?.map((movie) => ({ ...movie, contentType: 'Movie' })) || [],
-          filteredTVShows: result.tv?.map((tv) => ({ ...tv, contentType: 'TV Show' })) || [],
+          filteredMovies: selectedTab === 'Movies' ? result.content : [],
+          filteredTVShows: selectedTab === 'TV Shows' ? result.content : [],
         }));
       } else {
         console.error('Error fetching content:', error);
@@ -103,7 +184,15 @@ const SearchBar = ({ currentUser }) => {
         }));
       }
     });
-  }, [debouncedSearchTerm, currentPage]);
+  }, [
+    debouncedSearchTerm,
+    currentPage,
+    selectedGenre,
+    selectedLanguage,
+    selectedSortOption,
+    selectedTab,
+  ]);
+
 
   const fetchUsers = useCallback(() => {
     setSearchState((prevState) => ({
@@ -225,13 +314,92 @@ const SearchBar = ({ currentUser }) => {
             </span>
           </div>
         </div>
+
+        {/* Filters and sorting dropdowns */}
+        {(selectedTab === 'Movies' || selectedTab === 'TV Shows') && (
+          <div className="flex flex-wrap mt-2">
+            {/* Genres dropdown */}
+            <div className="mr-4 mb-2">
+              <label htmlFor="genre-select" className="block text-sm font-medium text-gray-700">
+                Genre
+              </label>
+              <select
+                id="genre-select"
+                name="genre"
+                value={selectedGenre}
+                onChange={handleGenreChange}
+                className="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#7B1450] focus:border-[#7B1450] sm:text-sm rounded-md"
+              >
+                <option value="">All Genres</option>
+                {genresList.map((genre) => (
+                  <option key={genre} value={genre}>
+                    {genre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Language dropdown */}
+            <div className="mr-4 mb-2">
+              <label htmlFor="language-select" className="block text-sm font-medium text-gray-700">
+                Language
+              </label>
+              <select
+                id="language-select"
+                name="language"
+                value={selectedLanguage}
+                onChange={handleLanguageChange}
+                className="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#7B1450] focus:border-[#7B1450] sm:text-sm rounded-md"
+              >
+                <option value="">All Languages</option>
+                {languagesList.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sorting dropdown */}
+            <div className="mr-4 mb-2">
+              <label htmlFor="sort-select" className="block text-sm font-medium text-gray-700">
+                Sort By
+              </label>
+              <select
+                id="sort-select"
+                name="sort"
+                value={selectedSortOption}
+                onChange={handleSortOptionChange}
+                className="mt-1 block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#7B1450] focus:border-[#7B1450] sm:text-sm rounded-md"
+              >
+                <option value="">Default</option>
+                {sortingOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Clear Filters button */}
+            <div className="flex items-end mb-2">
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-md"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="bubbles-container flex justify-end mt-2">
           {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
             <div
               key={tab}
-              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${
-                selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-              } border-transparent border`}
+              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
+                } border-transparent border`}
               onClick={() => {
                 setSearchState((prevState) => ({
                   ...prevState,
@@ -300,9 +468,8 @@ const SearchBar = ({ currentUser }) => {
           <button
             onClick={handleNextPage}
             disabled={currentPage >= totalPages - 1}
-            className={`py-2 px-4 rounded-lg ${
-              currentPage >= totalPages - 1 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'
-            }`}
+            className={`py-2 px-4 rounded-lg ${currentPage >= totalPages - 1 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'
+              }`}
           >
             Next
           </button>

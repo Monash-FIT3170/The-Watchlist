@@ -5,8 +5,15 @@ import { MovieCollection, TVCollection } from '/imports/db/Content';
 
 Meteor.startup(() => {
   // Ensure indexes are created
-  MovieCollection._ensureIndex({ contentId: 1 });
-  MovieCollection._ensureIndex({ title: 'text' }); // For text search
-  TVCollection._ensureIndex({ contentId: 1 });
-  TVCollection._ensureIndex({ title: 'text' }); // For text search
+  MovieCollection._ensureIndex({ title: 1 });
+  MovieCollection._ensureIndex({ genres: 1 });
+  MovieCollection._ensureIndex({ language: 1 });
+  MovieCollection._ensureIndex({ release_year: 1 });
+  MovieCollection._ensureIndex({ popularity: -1 });
+  
+  TVCollection._ensureIndex({ title: 1 });
+  TVCollection._ensureIndex({ genres: 1 });
+  TVCollection._ensureIndex({ language: 1 });
+  TVCollection._ensureIndex({ first_aired: 1 });
+  TVCollection._ensureIndex({ popularity: -1 });
 });
