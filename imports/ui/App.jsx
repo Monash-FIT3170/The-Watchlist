@@ -21,6 +21,7 @@ import AllUsersPage from "./pages/AllUsersPage.jsx";
 import AllRatedContentPage from "./pages/AllRatedContentPage.jsx";
 import Loading from "./pages/Loading.jsx";
 import Settings from "./pages/Settings.jsx";
+import FollowRequests from "./pages/FollowRequests.jsx";
 import { ListCollection } from '../db/List.tsx';
 
 export const App = () => {
@@ -68,7 +69,7 @@ export const App = () => {
 
   return (
     <div className="app flex h-screen overflow-hidden bg-darkest text-white">
-      <div>
+      <div className="flex-none">
         <Navbar staticNavData={staticNavbarData} currentUser={currentUser}/>
       </div>
       <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
@@ -86,6 +87,7 @@ export const App = () => {
               <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />
               <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
               <Route path="/settings" element={<Settings currentUser={currentUser} />} />
+              <Route path="/follow-requests" element={<FollowRequests currentUser={currentUser} />} />
             </Routes>
           </Scrollbar>
         ) : (

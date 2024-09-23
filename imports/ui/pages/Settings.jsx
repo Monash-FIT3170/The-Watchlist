@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { passwordStrength } from "check-password-strength";
 import ProfileDropdown from "../components/profileDropdown/ProfileDropdown";
+import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
+import { Meteor } from "meteor/meteor";
 
 const Settings = () => {
   const currentUser = useTracker(() => {
@@ -22,10 +24,23 @@ const Settings = () => {
   const [passwordSuccessMessage, setPasswordSuccessMessage] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [strength, setStrength] = useState("");
+  const [selectedPrivacy, setSelectedPrivacy] = useState(null);
 
   useEffect(() => {
     if (currentUser) {
       setUsername(currentUser.username || "");
+      setSelectedPrivacy(currentUser.profile?.privacy || "Public");
+
+      // If existing users do not have a privacy setting, set it to public
+      if (currentUser.profile?.privacy === undefined) {
+        Meteor.call("users.updatePrivacy", "Public", (error) => {
+          if (error) {
+            console.error("Error updating privacy setting:", error.reason);
+          } else {
+            console.log("Privacy setting updated to:", "Public");
+          }
+        });
+      }
     }
   }, [currentUser]);
 
@@ -43,6 +58,18 @@ const Settings = () => {
       } else {
         setUsernameSuccessMessage("Profile updated successfully!");
         setUsernameErrorMessage("");
+      }
+    });
+  };
+
+  const handlePrivacyChange = (event) => {
+    const value = event.target.name;
+    setSelectedPrivacy(value);
+    Meteor.call("users.updatePrivacy", value, (error) => {
+      if (error) {
+        console.error("Error updating privacy setting:", error.reason);
+      } else {
+        console.log("Privacy setting updated to:", value);
       }
     });
   };
@@ -195,50 +222,31 @@ const Settings = () => {
             {newPassword && (
               <div className="space-y-2">
                 <div className="relative pt-1">
-                  <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
+                  <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-pink-200">
                     <div
                       style={{
                         width:
-                          strength === "Too weak"
+                          strength === "Weak"
                             ? "25%"
-                            : strength === "Weak"
-                            ? "50%"
                             : strength === "Medium"
-                            ? "75%"
-                            : "100%",
+                            ? "50%"
+                            : strength === "Strong"
+                            ? "100%"
+                            : "0%",
                       }}
-                      className={`flex flex-col text-center whitespace-nowrap text-white justify-center ${
-                        strength === "Too weak"
+                      className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center ${
+                        strength === "Weak"
                           ? "bg-red-600"
-                          : strength === "Weak"
-                          ? "bg-yellow-500"
                           : strength === "Medium"
-                          ? "bg-blue-500"
-                          : "bg-green-500"
+                          ? "bg-yellow-400"
+                          : strength === "Strong"
+                          ? "bg-green-500"
+                          : "bg-gray-300"
                       }`}
                     ></div>
                   </div>
+                  <p className="text-xs text-white">Strength: {strength}</p>
                 </div>
-
-                <p
-                  className={`font-semibold ${
-                    strength === "Too weak"
-                      ? "text-red-600"
-                      : strength === "Weak"
-                      ? "text-yellow-500"
-                      : strength === "Medium"
-                      ? "text-blue-500"
-                      : "text-green-500"
-                  }`}
-                >
-                  {strength === "Too weak"
-                    ? "Password is too weak. Consider adding numbers, symbols, and more characters."
-                    : strength === "Weak"
-                    ? "Password is weak. Add a mix of uppercase, lowercase, and special characters."
-                    : strength === "Medium"
-                    ? "Password is decent but could be stronger."
-                    : "Strong password!"}
-                </p>
               </div>
             )}
           </div>
@@ -247,42 +255,54 @@ const Settings = () => {
 
       <hr className="border-t border-gray-700 my-4" />
 
-      <div className="mt-8 flex space-x-4">
+      {/* Privacy Settings Section */}
+      <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+        <div>
+          <label className="block text-lg font-semibold text-white">
+            Privacy Settings
+          </label>
+          <p className="text-gray-400">
+            Manage who can view your activity and profile.
+          </p>
+        </div>
+
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectedPrivacy === "Public"}
+                onChange={handlePrivacyChange}
+                name="Public"
+              />
+            }
+            label="Public"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectedPrivacy === "Private"}
+                onChange={handlePrivacyChange}
+                name="Private"
+              />
+            }
+            label="Private"
+          />
+        </FormGroup>
+      </div>
+
+      <hr className="border-t border-gray-700 my-4" />
+
+      <div className="mb-6">
+        <label className="block text-lg font-semibold text-white">
+          Danger Zone
+        </label>
+        <p className="text-gray-400">Delete your account permanently.</p>
         <button
-          onClick={() => Meteor.logout()}
-          className="bg-gray-600 text-white px-7 py-2 rounded-md hover:bg-gray-700 transition-colors w-auto"
+          onClick={() => setShowConfirmation(true)}
+          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors w-auto"
         >
-          Log Out
+          Delete Account
         </button>
-        {!showConfirmation ? (
-          <button
-            onClick={() => setShowConfirmation(true)}
-            className="bg-red-600 text-white px-7 py-2 rounded-md hover:bg-red-700 transition-colors w-auto"
-          >
-            Delete Account
-          </button>
-        ) : (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-gray-800 p-6 rounded-md">
-              <h2 className="text-lg font-semibold">Are you sure?</h2>
-              <p>This action cannot be undone.</p>
-              <div className="mt-4 flex justify-between space-x-4">
-                <button
-                  onClick={handleDeleteUser}
-                  className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors w-auto"
-                >
-                  Yes, Delete
-                </button>
-                <button
-                  onClick={() => setShowConfirmation(false)}
-                  className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors w-auto"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
