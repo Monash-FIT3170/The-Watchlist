@@ -51,8 +51,11 @@ export const App = () => {
   // Subscribe to userLists
   const userListsHandle = useTracker(() => Meteor.subscribe('userLists', Meteor.userId()), []);
 
-  // Track currentUser reactively
-  const currentUser = useTracker(() => Meteor.user(), []);
+  // Track currentUser reactively from Meteor.users collection
+  const currentUser = useTracker(() => {
+    const userId = Meteor.userId();
+    return Meteor.users.findOne({ _id: userId });
+  }, []);
 
   // Track userLists reactively
   const userLists = useTracker(() => ListCollection.find({ userId: Meteor.userId() }).fetch(), [Meteor.userId()]);
@@ -61,7 +64,11 @@ export const App = () => {
   const ratingsCount = useTracker(() => Counts.get('userRatingsCount'), []);
 
   // Determine loading state
-  const loading = !userProfileHandle.ready() || !userListsHandle.ready();
+  const loading = !userProfileHandle.ready() || !userListsHandle.ready() || !currentUser;
+
+  // if (loading) {
+  //   return <Loading />;
+  // }
 
   if (!currentUser) {
     return (
@@ -76,7 +83,7 @@ export const App = () => {
     <SearchProvider>
       <div className="app flex h-screen overflow-hidden bg-darkest text-white">
         <div className="flex-none">
-          <Navbar staticNavData={staticNavbarData} currentUser={currentUser} />
+          <Navbar staticNavData={staticNavbarData} currentUser={currentUser}/>
         </div>
         <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
           {location.pathname !== '/home' ? (
@@ -94,7 +101,7 @@ export const App = () => {
                 <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
                 <Route path="/settings" element={<Settings currentUser={currentUser} />} />
                 <Route path="/follow-requests" element={<FollowRequests currentUser={currentUser} />} />
-                <Route path="/watchlist/:listId" element={<SharedWatchlistPage />} />
+                <Route path="/watchlist/:listId" element={<SharedWatchlistPage/>} />
               </Routes>
             </Scrollbar>
           ) : (

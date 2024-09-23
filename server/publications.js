@@ -179,14 +179,15 @@ Meteor.publish('userProfileData', function (userId) {
     { _id: userId },
     {
       fields: {
+        'profile.privacy': 1,
         username: 1,
         avatarUrl: 1,
-        realName: 1,
-        description: 1,
+        followerRequests: 1,
+        followingRequests: 1,
         followers: 1,
         following: 1,
-        'profile.privacy': 1,
-        followingRequests: 1,
+        realName: 1,
+        description: 1,
       },
     }
   );
