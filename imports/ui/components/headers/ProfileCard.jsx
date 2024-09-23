@@ -25,36 +25,42 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       setIsFollowing(true);
     }
 
-    if (user.userPrivacy === 'Private'){
+    if (user.userPrivacy === "Private") {
       setPrivateAccount(true);
-    }else{
+    } else {
       setPrivateAccount(false);
     }
 
     if (currentUser._id === user._id) {
       setIsCurrentUser(true);
-    }else{
+    } else {
       setIsCurrentUser(false);
     }
 
-    if (currentUser.followingRequests && currentUser.followingRequests.includes(user._id)) {
-      setIsRequested(true); 
+    if (
+      currentUser.followingRequests &&
+      currentUser.followingRequests.includes(user._id)
+    ) {
+      setIsRequested(true);
     }
 
-    if (user.userPrivacy === 'Private'){
+    if (user.userPrivacy === "Private") {
       setPrivateAccount(true);
-    }else{
+    } else {
       setPrivateAccount(false);
     }
 
     if (currentUser._id === user._id) {
       setIsCurrentUser(true);
-    }else{
+    } else {
       setIsCurrentUser(false);
     }
 
-    if (currentUser.followingRequests && currentUser.followingRequests.includes(user._id)) {
-      setIsRequested(true); 
+    if (
+      currentUser.followingRequests &&
+      currentUser.followingRequests.includes(user._id)
+    ) {
+      setIsRequested(true);
     }
 
     Meteor.call("users.ratingsCount", { userId: user._id }, (error, result) => {
@@ -105,18 +111,16 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       if (error) {
         console.error("Error following user:", error);
       } else {
-        if (!privateAccount){
-        setIsFollowing(true);
-        console.log('Followed user successfully');
-        }else{
+        if (!privateAccount) {
+          setIsFollowing(true);
+          console.log("Followed user successfully");
+        } else {
           setIsRequested(true);
-          console.log('Requested user successfully');
+          console.log("Requested user successfully");
         }
-        
       }
     });
   };
-
 
   const handleUnfollow = () => {
     Meteor.call("unfollowUser", user._id, (error, result) => {
@@ -125,7 +129,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       } else {
         setIsFollowing(false);
         setIsRequested(false);
-        console.log('Unfollowed user successfully');
+        console.log("Unfollowed user successfully");
       }
     });
   };
@@ -174,51 +178,93 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
           </h2>
           <div className="flex flex-col gap-2 pl-2">
             <div className="flex gap-2 items-center">
-            <button
-                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing  ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
-                onClick={user.userPrivacy === 'Public'  || isCurrentUser || isFollowing ? () => navigate(`/followers-following/${user._id}/followers`) : null}
-                disabled={user.userPrivacy !== 'Public' && !isCurrentUser && !isFollowing}
+              <button
+                className={`p-1 text-lg flex-initial ${
+                  user.userPrivacy === "Public" || isCurrentUser || isFollowing
+                    ? "hover:underline"
+                    : "text-white-500 cursor-not-allowed"
+                }`}
+                onClick={
+                  user.userPrivacy === "Public" || isCurrentUser || isFollowing
+                    ? () =>
+                        navigate(`/followers-following/${user._id}/followers`)
+                    : null
+                }
+                disabled={
+                  user.userPrivacy !== "Public" &&
+                  !isCurrentUser &&
+                  !isFollowing
+                }
               >
                 {user.followers} Followers
               </button>
               <span className="text-lg">•</span>
               <button
-              className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
-              onClick={user.userPrivacy === 'Public' || isCurrentUser || isFollowing   ? () => navigate(`/followers-following/${user._id}/following`) : null}
-              disabled={user.userPrivacy !== 'Public' && !isCurrentUser && !isFollowing}
-            >
+                className={`p-1 text-lg flex-initial ${
+                  user.userPrivacy === "Public" || isCurrentUser || isFollowing
+                    ? "hover:underline"
+                    : "text-white-500 cursor-not-allowed"
+                }`}
+                onClick={
+                  user.userPrivacy === "Public" || isCurrentUser || isFollowing
+                    ? () =>
+                        navigate(`/followers-following/${user._id}/following`)
+                    : null
+                }
+                disabled={
+                  user.userPrivacy !== "Public" &&
+                  !isCurrentUser &&
+                  !isFollowing
+                }
+              >
                 {user.following} Following
               </button>
               <span className="text-lg">•</span>
               <button
-                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing ? 'hover:underline' : 'text-white-500 cursor-not-allowed'}`}
+                className={`p-1 text-lg flex-initial ${
+                  user.userPrivacy === "Public" || isCurrentUser || isFollowing
+                    ? "hover:underline"
+                    : "text-white-500 cursor-not-allowed"
+                }`}
                 onClick={() => {
-                  if (user.userPrivacy === 'Public' || isCurrentUser || isFollowing){
-                  if (user._id === currentUser._id) {
-                    navigate(`/user/${user._id}/ratings?userSpecific=true`);
-                  } else {
-                    navigate(`/user/${user._id}/ratings`);
+                  if (
+                    user.userPrivacy === "Public" ||
+                    isCurrentUser ||
+                    isFollowing
+                  ) {
+                    if (user._id === currentUser._id) {
+                      navigate(`/user/${user._id}/ratings?userSpecific=true`);
+                    } else {
+                      navigate(`/user/${user._id}/ratings`);
+                    }
                   }
-                }
                 }}
-                disabled={user.userPrivacy !== 'Public' && !isCurrentUser  && !isFollowing}
-                >
+                disabled={
+                  user.userPrivacy !== "Public" &&
+                  !isCurrentUser &&
+                  !isFollowing
+                }
+              >
                 {ratingsCount} Ratings
               </button>
             </div>
             <div>
               {showFollowButton ? (
                 <button
-                onClick={() => {
-                  if (isFollowing || isRequested) {
-                    handleUnfollow();
-                  } else {
-                    handleFollow();
-                  }
-                }}
+                  onClick={() => {
+                    if (isFollowing || isRequested) {
+                      handleUnfollow();
+                    } else {
+                      handleFollow();
+                    }
+                  }}
                   className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450]`}
                 >
-                    {isFollowing ? 'Unfollow' : isRequested ? 'Requested' : 'Follow'}
+                  {isFollowing
+                    ? "Unfollow"
+                    : isRequested
+                    ? "Requested"
+                    : "Follow"}
                 </button>
               ) : (
                 <Link to="/user-discovery">

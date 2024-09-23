@@ -16,37 +16,35 @@ export default function UserProfile() {
     return null;
   }, []);
 
+  useEffect(() => {
+    if (currentUser) {
+      //for existing users, if they do not yet have a privacy setting, set it to public
+      if (currentUser.profile?.privacy === undefined) {
+        Meteor.call("users.updatePrivacy", "Public", (error) => {
+          if (error) {
+            console.error("Error updating privacy setting:", error.reason);
+          } else {
+            console.log("Privacy setting updated to:", "Public");
+          }
+        });
+      }
+    }
+  }, [currentUser]);
 
   useEffect(() => {
-    if (currentUser) {      
-        //for existing users, if they do not yet have a privacy setting, set it to public
-        if (currentUser.profile?.privacy === undefined) {
-            Meteor.call('users.updatePrivacy','Public', (error) => {
-                if (error) {
-                    console.error('Error updating privacy setting:', error.reason);
-                } else {
-                    console.log('Privacy setting updated to:', 'Public');
-                }
-            });
-        }
+    if (currentUser) {
+      //for existing users, if they do not yet have a privacy setting, set it to public
+      if (currentUser.profile?.privacy === undefined) {
+        Meteor.call("users.updatePrivacy", "Public", (error) => {
+          if (error) {
+            console.error("Error updating privacy setting:", error.reason);
+          } else {
+            console.log("Privacy setting updated to:", "Public");
+          }
+        });
+      }
     }
-}, [currentUser]);
-
-
-  useEffect(() => {
-    if (currentUser) {      
-        //for existing users, if they do not yet have a privacy setting, set it to public
-        if (currentUser.profile?.privacy === undefined) {
-            Meteor.call('users.updatePrivacy','Public', (error) => {
-                if (error) {
-                    console.error('Error updating privacy setting:', error.reason);
-                } else {
-                    console.log('Privacy setting updated to:', 'Public');
-                }
-            });
-        }
-    }
-}, [currentUser]);
+  }, [currentUser]);
 
   const { lists, subscribedLists, followUser, unfollowUser, ratings, loading } =
     useTracker(() => {
