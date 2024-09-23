@@ -645,3 +645,129 @@ Meteor.methods({
   },
 });
 
+
+let similarMovies = null;
+let similarTVs = null;
+
+// Load and cache similar movies data
+function loadSimilarMovies() {
+  if (!similarMovies) {
+    try {
+      const data = Assets.getText('ml_matrices/similar_movies_titles.json');
+      similarMovies = JSON.parse(data);
+      console.log('Loaded similar_movies_titles.json');
+    } catch (error) {
+      console.error('Error loading similar_movies_titles.json:', error);
+      similarMovies = [];
+    }
+  }
+}
+
+// Load and cache similar TV shows data
+function loadSimilarTVs() {
+  if (!similarTVs) {
+    try {
+      const data = Assets.getText('ml_matrices/similar_tvs_title.json');
+      similarTVs = JSON.parse(data);
+      console.log('Loaded similar_tvs_title.json');
+    } catch (error) {
+      console.error('Error loading similar_tvs_title.json:', error);
+      similarTVs = [];
+    }
+  }
+}
+
+Meteor.methods({
+  'getRecommendations'() {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized');
+    }
+
+    console.log('getRecommendations called for user:', this.userId);
+
+    loadSimilarMovies();
+    loadSimilarTVs();
+
+    const userId = this.userId;
+
+    // Fetch user's Favourite and To Watch lists
+    const favouritesList = ListCollection.findOne({ userId, listType: 'Favourite' });
+    const toWatchList = ListCollection.findOne({ userId, listType: 'To Watch' });
+
+    console.log('Fetched lists:', { favouritesList, toWatchList });
+
+    const allContent = [];
+    if (favouritesList?.content?.length > 0) {
+      allContent.push(...favouritesList.content);
+    }
+    if (toWatchList?.content?.length > 0) {
+      allContent.push(...toWatchList.content);
+    }
+
+    console.log('All content from lists:', allContent);
+
+    if (allContent.length === 0) {
+      console.log('No content in Favourite or To Watch lists.');
+      return { movies: [], shows: [] };
+    }
+
+    // Select random content from user's lists
+    const selectedContent = selectRandomContent(allContent, 5);
+    console.log('Selected random content:', selectedContent);
+
+    // Separate titles by content type
+    const movieTitles = selectedContent.filter(item => item.contentType === 'Movie').map(item => item.title);
+    const tvTitles = selectedContent.filter(item => item.contentType === 'TV Show').map(item => item.title);
+
+    console.log('Movie Titles:', movieTitles);
+    console.log('TV Show Titles:', tvTitles);
+
+    const recommendedMovies = movieTitles.length > 0 ? fetchContentRecommendations(movieTitles, 'movies') : [];
+    const recommendedShows = tvTitles.length > 0 ? fetchContentRecommendations(tvTitles, 'tv') : [];
+
+    console.log('Recommended Movies:', recommendedMovies);
+    console.log('Recommended Shows:', recommendedShows);
+
+    return { movies: recommendedMovies, shows: recommendedShows };
+  },
+});
+
+// Helper function to select random content
+function selectRandomContent(contentList, maxItems) {
+  const selectedItems = [];
+  const listCopy = [...contentList];
+
+  while (selectedItems.length < maxItems && listCopy.length > 0) {
+    const randomIndex = Math.floor(Math.random() * listCopy.length);
+    selectedItems.push(listCopy.splice(randomIndex, 1)[0]);
+  }
+  return selectedItems;
+}
+
+// Helper function to fetch content recommendations
+function fetchContentRecommendations(titles, contentType) {
+  const recommendations = [];
+  const similarData = contentType === 'movies' ? similarMovies : similarTVs;
+
+  titles.forEach(title => {
+    const recommendationData = similarData.find(rec => rec.Title === title);
+    console.log(`Recommendation data for ${title}:`, recommendationData);
+    const recommendedIds = recommendationData ? recommendationData[contentType === 'movies' ? 'similar_movies' : 'similar_tvs'] : [];
+    const idsToFetch = recommendedIds.slice(0, 35).map(id => Number(id)); // Convert to Number
+
+    console.log(`IDs to fetch for ${title}:`, idsToFetch);
+
+    const contentItems = (contentType === 'movies' ? MovieCollection : TVCollection)
+      .find({ contentId: { $in: idsToFetch } })
+      .fetch();
+
+    console.log(`Recommendations for ${title}:`, contentItems);
+
+    recommendations.push({
+      title,
+      recommendations: contentItems,
+    });
+  });
+
+  return recommendations;
+}
