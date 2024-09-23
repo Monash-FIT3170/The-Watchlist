@@ -82,9 +82,15 @@ Meteor.publish('contentById', function (contentId, contentType) {
   if (!this.userId) {
     return this.ready();
   }
-  const collection = contentType === 'Movie' ? MovieCollection : TVCollection;
-  return collection.find({ contentId: contentId });
+  if (contentType === 'Movie') {
+    return MovieCollection.find({ contentId: contentId });
+  } else if (contentType === 'TV Show' || contentType === 'Season') {
+    return TVCollection.find({ contentId: contentId });
+  } else {
+    return this.ready();
+  }
 });
+
 
 Meteor.publish('seasonRatings', function (contentId, seasonId) {
 

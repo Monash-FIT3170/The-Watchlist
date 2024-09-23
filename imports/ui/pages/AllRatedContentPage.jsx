@@ -23,6 +23,7 @@ const AllRatedContentPage = ({ currentUser }) => {
     All: 'All',
     Movies: 'Movie',
     'TV Shows': 'TV Show',
+    Seasons: 'Season',
   };
 
   const { ratedContent, isLoading } = useTracker(() => {
@@ -32,17 +33,34 @@ const AllRatedContentPage = ({ currentUser }) => {
       : RatingCollection.find({ userId }).fetch();
 
     const contentSubscriptions = ratings.map(rating =>
-      Meteor.subscribe('contentById', rating.contentId, rating.contentType)
+      Meteor.subscribe('contentById', rating.contentId, rating.contentType === 'Movie' ? 'Movie' : 'TV Show')
     );
 
     const contentDetails = ratings.map(rating => {
-      const collection = rating.contentType === 'Movie' ? MovieCollection : TVCollection;
-      const content = collection.findOne({ contentId: rating.contentId });
+      let content = null;
+      if (rating.contentType === 'Movie') {
+        content = MovieCollection.findOne({ contentId: rating.contentId });
+      } else if (rating.contentType === 'TV Show' || rating.contentType === 'Season') {
+        content = TVCollection.findOne({ contentId: rating.contentId });
+      }
+
+      if (content && rating.contentType === 'Season') {
+        // Modify the title to include the season number
+        content = {
+          ...content,
+          title: `${content.title} - Season ${rating.seasonId}`,
+          contentType: 'TV Show', // For ContentItem
+          originalContentType: 'Season', // For filtering
+        };
+      } else if (content) {
+        content.originalContentType = rating.contentType;
+      }
 
       return content ? {
         ...content,
         rating: rating.rating,
-        contentType: rating.contentType
+        contentType: content.contentType, // 'TV Show' or 'Movie'
+        originalContentType: content.originalContentType || rating.contentType,
       } : null;
     }).filter(content => content && content.title);
 
@@ -57,7 +75,8 @@ const AllRatedContentPage = ({ currentUser }) => {
   useEffect(() => {
     const filtered = ratedContent.filter(content => {
       const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTab = selectedTab === 'All' || content.contentType === tabMapping[selectedTab];
+      const matchesTab =
+        selectedTab === 'All' || content.originalContentType === tabMapping[selectedTab];
       return matchesSearch && matchesTab;
     });
 
@@ -76,10 +95,6 @@ const AllRatedContentPage = ({ currentUser }) => {
     setSortOrder(prevOrder => prevOrder === 'ascending' ? 'descending' : 'ascending');
   };
 
-  // if (isLoading) {
-  //   return <div>Loading...</div>;
-  // }
-
   const handleFormSubmit = (e) => {
     e.preventDefault();
   };
@@ -91,7 +106,7 @@ const AllRatedContentPage = ({ currentUser }) => {
       </div>
       <form className="flex flex-col items-start w-full pl-1" onSubmit={handleFormSubmit}>
         <div className="flex justify-between items-center w-full">
-        <div className="relative flex-grow max-w-xl">
+          <div className="relative flex-grow max-w-xl">
             <input
               type="text"
               className="rounded-full bg-dark border border-gray-300 pl-10 pr-3 py-3 w-full focus:border-custom-border"
@@ -139,7 +154,7 @@ const AllRatedContentPage = ({ currentUser }) => {
               key={index}
               content={content}
               isUserSpecificRating={userSpecific}
-              contentType={content.contentType}
+              contentType={content.contentType} // 'TV Show' or 'Movie'
             />
           )) : <p>No rated content available.</p>}
         </div>
