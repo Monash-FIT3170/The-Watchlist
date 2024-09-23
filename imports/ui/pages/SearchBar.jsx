@@ -41,11 +41,50 @@ const SearchBar = ({ currentUser }) => {
   ];
 
   const languagesList = [
+    { code: 'ar', name: 'Arabic' },
+    { code: 'bn', name: 'Bengali' },
+    { code: 'ca', name: 'Catalan' },
+    { code: 'zh', name: 'Chinese' },
+    { code: 'cs', name: 'Czech' },
+    { code: 'da', name: 'Danish' },
+    { code: 'nl', name: 'Dutch' },
     { code: 'en', name: 'English' },
-    { code: 'es', name: 'Spanish' },
+    { code: 'eo', name: 'Esperanto' },
+    { code: 'fi', name: 'Finnish' },
     { code: 'fr', name: 'French' },
-    // Add more languages as needed
+    { code: 'ka', name: 'Georgian' },
+    { code: 'de', name: 'German' },
+    { code: 'el', name: 'Greek' },
+    { code: 'he', name: 'Hebrew' },
+    { code: 'hi', name: 'Hindi' },
+    { code: 'hu', name: 'Hungarian' },
+    { code: 'id', name: 'Indonesian' },
+    { code: 'it', name: 'Italian' },
+    { code: 'ja', name: 'Japanese' },
+    { code: 'kn', name: 'Kannada' },
+    { code: 'ko', name: 'Korean' },
+    { code: 'lt', name: 'Lithuanian' },
+    { code: 'ml', name: 'Malayalam' },
+    { code: 'nb', name: 'Norwegian' },
+    { code: 'no', name: 'Norwegian' },
+    { code: 'fa', name: 'Persian' },
+    { code: 'pl', name: 'Polish' },
+    { code: 'pt', name: 'Portuguese' },
+    { code: 'ro', name: 'Romanian' },
+    { code: 'ru', name: 'Russian' },
+    { code: 'sr', name: 'Serbian' },
+    { code: 'sk', name: 'Slovak' },
+    { code: 'sl', name: 'Slovenian' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'sv', name: 'Swedish' },
+    { code: 'ta', name: 'Tamil' },
+    { code: 'te', name: 'Telugu' },
+    { code: 'th', name: 'Thai' },
+    { code: 'tr', name: 'Turkish' },
+    { code: 'uk', name: 'Ukrainian' },
+    { code: 'vi', name: 'Vietnamese' },
   ];
+  
 
   const sortingOptions = [
     { value: 'title_asc', label: 'Title A-Z' },
@@ -387,7 +426,7 @@ const SearchBar = ({ currentUser }) => {
                   onChange={handleSortOptionChange}
                   className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
                 >
-                  <option value="">Default</option>
+                  <option value="">Sort By</option>
                   {sortingOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
