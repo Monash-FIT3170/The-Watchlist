@@ -74,37 +74,37 @@ export const App = () => {
 
   return (
     <SearchProvider>
-    <div className="app flex h-screen overflow-hidden bg-darkest text-white">
-      <div className="flex-none">
-        <Navbar staticNavData={staticNavbarData} currentUser={currentUser}/>
-      </div>
-      <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
-        {location.pathname !== '/home' ? (
-          <Scrollbar className="h-custom">
+      <div className="app flex h-screen overflow-hidden bg-darkest text-white">
+        <div className="flex-none">
+          <Navbar staticNavData={staticNavbarData} currentUser={currentUser} />
+        </div>
+        <div className="flex-auto p-0 bg-darkest rounded-lg shadow-lg mx-2 my-4 h-custom overflow-hidden">
+          {location.pathname !== '/home' ? (
+            <Scrollbar className="h-custom">
+              <Routes>
+                <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
+                <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
+                <Route path="/profile" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount} loading={loading} />} />
+                <Route path="/ai-picks" element={<AIPicks currentUser={currentUser} />} />
+                <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
+                <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
+                <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />
+                <Route path="/" element={currentUser ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+                <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />
+                <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
+                <Route path="/settings" element={<Settings currentUser={currentUser} />} />
+                <Route path="/follow-requests" element={<FollowRequests currentUser={currentUser} />} />
+                <Route path="/watchlist/:listId" element={<SharedWatchlistPage />} />
+              </Routes>
+            </Scrollbar>
+          ) : (
             <Routes>
-              <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
               <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
-              <Route path="/profile" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount} loading={loading} />} />
-              <Route path="/ai-picks" element={<AIPicks currentUser={currentUser} />} />
-              <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
-              <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
-              <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />
-              <Route path="/" element={currentUser ? <Navigate to="/home" /> : <Navigate to="/login" />} />
-              <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />
-              <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
-              <Route path="/settings" element={<Settings currentUser={currentUser} />} />
-              <Route path="/follow-requests" element={<FollowRequests currentUser={currentUser} />} />
-              <Route path="/watchlist/:listId" element={<SharedWatchlistPage/>} />
             </Routes>
-          </Scrollbar>
-        ) : (
-          <Routes>
-            <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
-          </Routes>
-        )}
+          )}
+        </div>
+        {currentUser && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
       </div>
-      {currentUser && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
-    </div>
     </SearchProvider>
   );
 };
