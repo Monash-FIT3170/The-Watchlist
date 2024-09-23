@@ -51,35 +51,8 @@ Meteor.publish('userLists', function (userId) {
   return ListCollection.find({ userId });
 });
 
-
 Meteor.publish('userRatings', function (userId) {
   return RatingCollection.find({ userId });
-});
-
-Meteor.publish('ratedContent', function (userId) {
-  console.log("Publishing rated content for user:", userId);
-  if (!this.userId) {
-    console.log("No user logged in, stopping publication.");
-    return this.ready();
-  }
-
-  const ratings = RatingCollection.find({ userId }).fetch();
-  if (!ratings.length) {
-    console.log("No ratings found for this user.");
-  } else {
-    console.log("Ratings found:", ratings.length);
-  }
-
-  const movieIds = ratings.filter(r => r.contentType === 'Movie').map(r => r.contentId);
-  const tvIds = ratings.filter(r => r.contentType === 'TV').map(r => r.contentId);
-
-  console.log("Publishing movies and TV data for IDs:", movieIds, tvIds);
-
-  return [
-    RatingCollection.find({ userId }),
-    MovieCollection.find({ contentId: { $in: movieIds } }),
-    TVCollection.find({ contentId: { $in: tvIds } })
-  ];
 });
 
 // Server: publications.js
@@ -111,21 +84,6 @@ Meteor.publish('contentById', function (contentId, contentType) {
   }
   const collection = contentType === 'Movie' ? MovieCollection : TVCollection;
   return collection.find({ contentId: contentId });
-});
-
-Meteor.publish('searchContent', function(searchParams) {
-  const { searchTerm, type, limit, skip } = searchParams;
-  if (!this.userId) return this.ready();
-
-  const collection = type === 'Movie' ? MovieCollection : TVCollection;
-  const query = searchTerm ? { title: { $regex: searchTerm, $options: 'i' } } : {};
-
-  return collection.find(query, {
-    fields: { title: 1, contentId: 1, image_url: 1, popularity: 1 }, // only necessary fields
-    limit,
-    skip,
-    sort: { popularity: -1 }
-  });
 });
 
 Meteor.publish('seasonRatings', function (contentId, seasonId) {

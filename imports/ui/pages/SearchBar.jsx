@@ -1,4 +1,5 @@
-// SearchBar.jsx
+// imports/ui/pages/SearchBar.jsx
+
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { useTracker } from 'meteor/react-meteor-data';
@@ -11,6 +12,7 @@ import ListCardDisplay from '../components/lists/ListCardDisplay';
 import ContentItemDisplay from '../components/contentItems/ContentItemDisplay';
 import Loading from './Loading';
 import { SearchContext } from '../contexts/SearchContext';
+import { FaTimesCircle } from 'react-icons/fa';
 
 const SearchBar = ({ currentUser }) => {
   const { searchState, setSearchState } = useContext(SearchContext);
@@ -26,7 +28,70 @@ const SearchBar = ({ currentUser }) => {
     users,
     globalRatings,
     loading,
+    selectedGenre,
+    selectedLanguage,
+    selectedSortOption,
   } = searchState;
+
+  // Define genres, languages, and sorting options
+  const genresList = [
+    'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama',
+    'Family', 'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance',
+    'Science Fiction', 'TV Movie', 'Thriller', 'War', 'Western',
+  ];
+
+  const languagesList = [
+    { code: 'ar', name: 'Arabic' },
+    { code: 'bn', name: 'Bengali' },
+    { code: 'ca', name: 'Catalan' },
+    { code: 'zh', name: 'Chinese' },
+    { code: 'cs', name: 'Czech' },
+    { code: 'da', name: 'Danish' },
+    { code: 'nl', name: 'Dutch' },
+    { code: 'en', name: 'English' },
+    { code: 'eo', name: 'Esperanto' },
+    { code: 'fi', name: 'Finnish' },
+    { code: 'fr', name: 'French' },
+    { code: 'ka', name: 'Georgian' },
+    { code: 'de', name: 'German' },
+    { code: 'el', name: 'Greek' },
+    { code: 'he', name: 'Hebrew' },
+    { code: 'hi', name: 'Hindi' },
+    { code: 'hu', name: 'Hungarian' },
+    { code: 'id', name: 'Indonesian' },
+    { code: 'it', name: 'Italian' },
+    { code: 'ja', name: 'Japanese' },
+    { code: 'kn', name: 'Kannada' },
+    { code: 'ko', name: 'Korean' },
+    { code: 'lt', name: 'Lithuanian' },
+    { code: 'ml', name: 'Malayalam' },
+    { code: 'nb', name: 'Norwegian' },
+    { code: 'no', name: 'Norwegian' },
+    { code: 'fa', name: 'Persian' },
+    { code: 'pl', name: 'Polish' },
+    { code: 'pt', name: 'Portuguese' },
+    { code: 'ro', name: 'Romanian' },
+    { code: 'ru', name: 'Russian' },
+    { code: 'sr', name: 'Serbian' },
+    { code: 'sk', name: 'Slovak' },
+    { code: 'sl', name: 'Slovenian' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'sv', name: 'Swedish' },
+    { code: 'ta', name: 'Tamil' },
+    { code: 'te', name: 'Telugu' },
+    { code: 'th', name: 'Thai' },
+    { code: 'tr', name: 'Turkish' },
+    { code: 'uk', name: 'Ukrainian' },
+    { code: 'vi', name: 'Vietnamese' },
+  ];
+  
+
+  const sortingOptions = [
+    { value: 'title_asc', label: 'Title A-Z' },
+    { value: 'title_desc', label: 'Title Z-A' },
+    { value: 'release_date_desc', label: 'Release Date (Newest First)' },
+    { value: 'release_date_asc', label: 'Release Date (Oldest First)' },
+  ];
 
   const escapeRegExp = (string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -75,13 +140,69 @@ const SearchBar = ({ currentUser }) => {
     debouncedChangeHandler(value);
   };
 
+  // Event handlers for the new dropdowns
+  const handleGenreChange = (e) => {
+    const value = e.target.value;
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedGenre: value,
+      currentPage: 0, // Reset to first page when filter changes
+    }));
+  };
+
+  const handleLanguageChange = (e) => {
+    const value = e.target.value;
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedLanguage: value,
+      currentPage: 0, // Reset to first page when filter changes
+    }));
+  };
+
+  const handleSortOptionChange = (e) => {
+    const value = e.target.value;
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedSortOption: value,
+      currentPage: 0, // Reset to first page when sort changes
+    }));
+  };
+
+  const handleClearFilters = () => {
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedGenre: '',
+      selectedLanguage: '',
+      selectedSortOption: '',
+      searchTerm: '',
+      debouncedSearchTerm: '',
+      currentPage: 0,
+    }));
+  };
+
   const fetchContent = useCallback(() => {
     setSearchState((prevState) => ({
       ...prevState,
       loading: true,
     }));
 
-    const options = { searchString: debouncedSearchTerm, limit, page: currentPage };
+    // Map selectedTab to contentType
+    let contentType;
+    if (selectedTab === 'Movies') {
+      contentType = 'Movie';
+    } else if (selectedTab === 'TV Shows') {
+      contentType = 'TV Show';
+    }
+
+    const options = {
+      searchString: debouncedSearchTerm,
+      limit,
+      page: currentPage,
+      genre: selectedGenre,
+      language: selectedLanguage,
+      sortOption: selectedSortOption,
+      contentType, // Now correctly set to 'Movie' or 'TV Show'
+    };
 
     Meteor.call('content.read', options, (error, result) => {
       if (!error) {
@@ -90,8 +211,8 @@ const SearchBar = ({ currentUser }) => {
           ...prevState,
           loading: false,
           totalPages: Math.ceil(totalItems / limit),
-          filteredMovies: result.movie?.map((movie) => ({ ...movie, contentType: 'Movie' })) || [],
-          filteredTVShows: result.tv?.map((tv) => ({ ...tv, contentType: 'TV Show' })) || [],
+          filteredMovies: selectedTab === 'Movies' ? result.content : [],
+          filteredTVShows: selectedTab === 'TV Shows' ? result.content : [],
         }));
       } else {
         console.error('Error fetching content:', error);
@@ -103,7 +224,15 @@ const SearchBar = ({ currentUser }) => {
         }));
       }
     });
-  }, [debouncedSearchTerm, currentPage]);
+  }, [
+    debouncedSearchTerm,
+    currentPage,
+    selectedGenre,
+    selectedLanguage,
+    selectedSortOption,
+    selectedTab,
+  ]);
+
 
   const fetchUsers = useCallback(() => {
     setSearchState((prevState) => ({
@@ -225,66 +354,144 @@ const SearchBar = ({ currentUser }) => {
             </span>
           </div>
         </div>
-        <div className="bubbles-container flex justify-end mt-2">
-          {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
-            <div
-              key={tab}
-              className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${
-                selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
-              } border-transparent border`}
-              onClick={() => {
-                setSearchState((prevState) => ({
-                  ...prevState,
-                  selectedTab: tab,
-                  currentPage: 0, // Reset to first page when tab changes
-                }));
-              }}
-            >
-              {tab}
+        {/* Tabs and Filters */}
+        <div className="flex items-center justify-between w-full mt-2">
+          {/* Tabs */}
+          <div className="flex">
+            {['Movies', 'TV Shows', 'Lists', 'Users'].map((tab) => (
+              <div
+                key={tab}
+                className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab
+                    ? 'bg-[#7B1450] text-white border-[#7B1450]'
+                    : 'bg-[#282525] text-white border-transparent'
+                  } border`}
+                onClick={() => {
+                  setSearchState((prevState) => ({
+                    ...prevState,
+                    selectedTab: tab,
+                    currentPage: 0, // Reset to first page when tab changes
+                  }));
+                }}
+              >
+                {tab}
+              </div>
+            ))}
+          </div>
+
+          {/* Filters and Sorting Dropdowns */}
+          {(selectedTab === 'Movies' || selectedTab === 'TV Shows') && (
+            <div className="flex items-center">
+              {/* Genres Dropdown */}
+              <div className="mr-4 mb-2">
+                <select
+                  id="genre-select"
+                  name="genre"
+                  value={selectedGenre}
+                  onChange={handleGenreChange}
+                  className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
+                >
+                  <option value="">All Genres</option>
+                  {genresList.map((genre) => (
+                    <option key={genre} value={genre}>
+                      {genre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Language Dropdown */}
+              <div className="mr-4 mb-2">
+                <select
+                  id="language-select"
+                  name="language"
+                  value={selectedLanguage}
+                  onChange={handleLanguageChange}
+                  className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
+                >
+                  <option value="">All Languages</option>
+                  {languagesList.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sorting Dropdown */}
+              <div className="mr-4 mb-2">
+                <select
+                  id="sort-select"
+                  name="sort"
+                  value={selectedSortOption}
+                  onChange={handleSortOptionChange}
+                  className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
+                >
+                  <option value="">Sort By</option>
+                  {sortingOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Clear Filters Icon */}
+              <div className="mb-2">
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="bg-dark text-white p-2 rounded-full hover:bg-[#5a0e3c] focus:outline-none focus:ring-2 focus:ring-[#5a0e3c]"
+                  title="Clear Filters"
+                >
+                  <FaTimesCircle className="text-gray-400" size={20} />
+                </button>
+              </div>
             </div>
-          ))}
+          )}
         </div>
+
+
       </form>
       <Scrollbar className="search-results-container flex-grow overflow-auto">
-          <>
-            {selectedTab === 'Movies' && (
-              <ContentItemDisplay
-                contentItems={filteredMovies}
-                contentType="Movie"
-                globalRatings={globalRatings}
-                setGlobalRatings={setGlobalRatings}
-              />
-            )}
-            {selectedTab === 'TV Shows' && (
-              <ContentItemDisplay
-                contentItems={filteredTVShows}
-                contentType="TV Show"
-                globalRatings={globalRatings}
-                setGlobalRatings={setGlobalRatings}
-              />
-            )}
-            {selectedTab === 'Lists' &&
-              (filteredLists.length > 0 ? (
-                <ListCardDisplay lists={filteredLists} />
-              ) : debouncedSearchTerm === '' ? (
-                <div className="flex justify-center items-center w-full h-full">
-                  <img src="/images/popcorn.png" alt="No Lists" className="w-32 h-32" />
-                </div>
-              ) : (
-                <div className="text-center text-gray-400">No lists found.</div>
-              ))}
+        <>
+          {selectedTab === 'Movies' && (
+            <ContentItemDisplay
+              contentItems={filteredMovies}
+              contentType="Movie"
+              globalRatings={globalRatings}
+              setGlobalRatings={setGlobalRatings}
+            />
+          )}
+          {selectedTab === 'TV Shows' && (
+            <ContentItemDisplay
+              contentItems={filteredTVShows}
+              contentType="TV Show"
+              globalRatings={globalRatings}
+              setGlobalRatings={setGlobalRatings}
+            />
+          )}
+          {selectedTab === 'Lists' &&
+            (filteredLists.length > 0 ? (
+              <ListCardDisplay lists={filteredLists} />
+            ) : debouncedSearchTerm === '' ? (
+              <div className="flex justify-center items-center w-full h-full">
+                <img src="/images/popcorn.png" alt="No Lists" className="w-32 h-32" />
+              </div>
+            ) : (
+              <div className="text-center text-gray-400">No lists found.</div>
+            ))}
 
-            {selectedTab === 'Users' &&
-              (users.length > 0 ? (
-                <UserList users={users} searchTerm={debouncedSearchTerm} currentUser={currentUser} />
-              ) : debouncedSearchTerm === '' ? (
-                <div className="flex justify-center items-center w-full h-full">
-                  <img src="/images/popcorn.png" alt="No Users" className="w-32 h-32" />
-                </div>
-              ) : (
-                <div>No users found.</div>
-              ))}
-          </>
+          {selectedTab === 'Users' &&
+            (users.length > 0 ? (
+              <UserList users={users} searchTerm={debouncedSearchTerm} currentUser={currentUser} />
+            ) : debouncedSearchTerm === '' ? (
+              <div className="flex justify-center items-center w-full h-full">
+                <img src="/images/popcorn.png" alt="No Users" className="w-32 h-32" />
+              </div>
+            ) : (
+              <div>No users found.</div>
+            ))}
+        </>
       </Scrollbar>
 
       {/* Pagination buttons */}
@@ -300,9 +507,8 @@ const SearchBar = ({ currentUser }) => {
           <button
             onClick={handleNextPage}
             disabled={currentPage >= totalPages - 1}
-            className={`py-2 px-4 rounded-lg ${
-              currentPage >= totalPages - 1 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'
-            }`}
+            className={`py-2 px-4 rounded-lg ${currentPage >= totalPages - 1 ? 'bg-gray-300' : 'bg-[#7B1450] text-white'
+              }`}
           >
             Next
           </button>

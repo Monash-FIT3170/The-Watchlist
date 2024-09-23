@@ -1,4 +1,5 @@
-// SearchContext.js
+// imports/ui/contexts/SearchContext.js
+
 import React, { createContext, useState } from 'react';
 
 export const SearchContext = createContext();
@@ -14,7 +15,11 @@ export const SearchProvider = ({ children }) => {
     filteredTVShows: [],
     filteredLists: [],
     users: [],
-    globalRatings: {},
+    globalRatings: [],
+    loading: false,
+    selectedGenre: '',
+    selectedLanguage: '',
+    selectedSortOption: '',
   });
 
   return (

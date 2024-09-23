@@ -19,12 +19,18 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
             Meteor.call('content.read', { id: content.contentId, contentType }, (error, result) => {
                 if (!error) {
                     let contentDetails = null;
-                    if (contentType === 'Movie' && result.movie?.length > 0) {
-                        contentDetails = result.movie[0];
-                    } else if (contentType === 'TV Show' && result.tv?.length > 0) {
-                        contentDetails = result.tv[0];
+                    console.log("contentType:", contentType);
+                    console.log("Result:", result);
+    
+                    if (result.content?.length > 0) {
+                        contentDetails = result.content[0];
+                    } else {
+                        console.warn("No content found for the given ID and contentType.");
                     }
+    
+                    console.log("Content Details:", contentDetails);
                     setFullContent(contentDetails); // Store the full content details
+                    console.log("Opening modal");
                     setOpen(true); // Open the modal after fetching
                 } else {
                     console.error("Error fetching full content details:", error);
@@ -34,6 +40,7 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
             setOpen(!isOpen);
         }
     };
+    
 
     const { rating, isRatingLoading } = useTracker(() => {
 
@@ -56,6 +63,7 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
     }, [content.contentId, isUserSpecificRating, globalRating]);
 
     const handleImageError = (e) => {
+        console.log("image error")
         e.target.onerror = null; // Prevent looping
         e.target.src = popcornUrl;
     };

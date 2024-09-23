@@ -302,15 +302,6 @@ Accounts.onLogin(() => {
   FlowRouter.go('/home');
 });
 
-
-Meteor.methods({
-  'users.ratingsCount'({ userId }) {
-    check(userId, String);
-    return RatingCollection.find({ userId }).count();
-  },
-});
-
-
 Meteor.methods({
   'users.updatePrivacy'(privacySetting) {
     check(privacySetting, String);
@@ -399,34 +390,6 @@ Meteor.methods({
   }
 });
 
-
-// Server-side method to fetch subscribed lists
-Meteor.methods({
-  'list.getSubscribed': function ({ userId }) {
-    // Check if the userId is provided
-    if (!userId) {
-      throw new Meteor.Error('invalid-argument', 'You must provide a user ID.');
-    }
-
-    // Check if the user calling the method is logged in
-    if (!this.userId) {
-      throw new Meteor.Error('not-authorized', 'You must be logged in to access subscribed lists.');
-    }
-
-    // Check if the user is requesting their own subscribed lists
-    if (this.userId !== userId) {
-      throw new Meteor.Error('not-authorized', 'You are not authorized to view other users\' subscribed lists.');
-    }
-
-    // Fetch and return lists where the specified userId is in the subscribers array
-    return Lists.find({
-      subscribers: { $in: [userId] }
-    }, {
-      fields: { title: 1, userName: 1, content: 1 }  // Limit the fields returned for privacy/security
-    }).fetch();
-  }
-});
-
 Meteor.methods({
   'list.unsubscribe'(listId) {
     check(listId, String);
@@ -489,17 +452,6 @@ Meteor.methods({
 
     return rating ? rating.rating : null; // Return null if no rating exists
   },
-});
-Meteor.methods({
-  'genres.getAll': async function () {
-    const movieGenres = await MovieCollection.rawCollection().distinct("genres");
-    const tvGenres = await TVCollection.rawCollection().distinct("genres");
-
-    // Combine and deduplicate the genres
-    const allGenres = Array.from(new Set([...movieGenres, ...tvGenres]));
-
-    return allGenres;
-  }
 });
 Meteor.methods({
   'ratings.getGlobalAverages'() {
@@ -644,7 +596,6 @@ Meteor.methods({
     };
   },
 });
-
 
 let similarMovies = null;
 let similarTVs = null;
