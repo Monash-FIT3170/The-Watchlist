@@ -31,6 +31,7 @@ import { SearchProvider } from "./contexts/SearchContext.js";
 
 // Create a Context for User Data (if needed)
 export const UserContext = React.createContext();
+import SharedWatchlistPage from "./pages/SharedWatchlistPage.jsx";
 
 export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -93,6 +94,7 @@ export const App = () => {
               <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
               <Route path="/settings" element={<Settings currentUser={currentUser} />} />
               <Route path="/follow-requests" element={<FollowRequests currentUser={currentUser} />} />
+              <Route path="/watchlist/:listId" element={<SharedWatchlistPage/>} />
             </Routes>
           </Scrollbar>
         ) : (
