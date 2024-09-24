@@ -3,7 +3,6 @@ import { useTracker } from 'meteor/react-meteor-data';
 import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 import HomeList from '../components/lists/HomeList';
 import { RatingCollection } from '../../db/Rating';
-import { FaUser } from "react-icons/fa";
 import { ListCollection } from '../../db/List';
 
 const Home = ({ currentUser }) => {

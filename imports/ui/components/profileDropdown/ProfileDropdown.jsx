@@ -44,12 +44,24 @@ const ProfileDropdown = ({ user }) => {
 
   return (
     <div className="relative" ref={dropdownRef}>
+      <div className="relative">
       <img
         src={user.avatarUrl || 'https://randomuser.me/api/portraits/lego/1.jpg'}
         alt="avatar"
         className="w-10 h-10 rounded-full cursor-pointer"
         onClick={toggleDropdown}
       />
+
+
+      {/* Notification Badge */}
+      {user.followerRequests && user.followerRequests.length > 0 && (
+          <span className="absolute top-0 right-0 w-5 h-5 bg-red-700 text-white text-xs font-bold flex items-center justify-center rounded-full">
+            {user.followerRequests.length}
+          </span>
+        )}
+      </div>
+
+
       {dropdownOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-gray-800 text-white rounded-lg shadow-lg z-50">
           <ul className="py-2">
@@ -63,6 +75,21 @@ const ProfileDropdown = ({ user }) => {
                 Account Settings
               </Link>
             </li>
+            <li className="relative flex items-center justify-between">
+            <Link to="/follow-requests" className="px-4 py-2 text-sm hover:bg-gray-700 flex items-center w-full">
+              <span>Follow Requests</span>
+
+              {user.followerRequests && user.followerRequests.length > 0 ? (
+                // Show notification badge if there are follower requests
+                <span className="ml-9 mb-1 w-5 h-5 bg-red-700 text-white text-xs font-bold flex items-center justify-center rounded-full">
+                  {user.followerRequests.length}
+                </span>
+              ) : (
+                // Placeholder to maintain space when there are no follower requests
+                <span className="ml-9 mb-1 w-5 h-5" />
+              )}
+            </Link>
+          </li>
             <li className="border-t border-gray-700 mt-2">
               <button
                 onClick={handleLogout}

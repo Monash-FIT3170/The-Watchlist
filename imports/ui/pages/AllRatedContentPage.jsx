@@ -76,9 +76,9 @@ const AllRatedContentPage = ({ currentUser }) => {
     setSortOrder(prevOrder => prevOrder === 'ascending' ? 'descending' : 'ascending');
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  // if (isLoading) {
+  //   return <div>Loading...</div>;
+  // }
 
   const handleFormSubmit = (e) => {
     e.preventDefault();

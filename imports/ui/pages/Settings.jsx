@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTracker } from 'meteor/react-meteor-data';
 import { passwordStrength } from 'check-password-strength';
+import { Checkbox, FormControlLabel, FormGroup } from '@mui/material';
+import { Meteor } from 'meteor/meteor';
+
 
 const Settings = () => {
     const currentUser = useTracker(() => {
@@ -21,20 +24,54 @@ const Settings = () => {
     const [passwordSuccessMessage, setPasswordSuccessMessage] = useState('');
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [strength, setStrength] = useState('');
+    const [selectedPrivacy, setSelectedPrivacy] = useState(null);
 
     useEffect(() => {
         if (currentUser) {
             setUsername(currentUser.username || '');
+            setSelectedPrivacy(currentUser.profile?.privacy || 'Public');
+            
+            //for existing users, if they do not yet have a privacy setting, set it to public
+            if (currentUser.profile?.privacy === undefined) {
+                Meteor.call('users.updatePrivacy','Public', (error) => {
+                    if (error) {
+                        console.error('Error updating privacy setting:', error.reason);
+                    } else {
+                        console.log('Privacy setting updated to:', 'Public');
+                    }
+                });
+            }
         }
     }, [currentUser]);
 
+    const handlePrivacyChange = (event) => {
+        const value = event.target.name;
+        setSelectedPrivacy(value);
+        Meteor.call('users.updatePrivacy',value, (error) => {
+            if (error) {
+                console.error('Error updating privacy setting:', error.reason);
+            } else {
+                console.log('Privacy setting updated to:', value);
+            }
+        });
+      };
+
     const handleUpdate = () => {
+        // Check if the username is within the allowed length
         if (!username) {
             setUsernameErrorMessage('Username cannot be empty.');
             setUsernameSuccessMessage('');
             return;
         }
-
+        
+        // Ensure username is between 3 and 15 characters
+        if (username.length < 3 || username.length > 15) {
+            setUsernameErrorMessage('Username must be between 3 and 15 characters.');
+            setUsernameSuccessMessage('');
+            return;
+        }
+    
+        // Proceed with updating the profile if validations pass
         Meteor.call('users.updateProfile', { username }, (error, result) => {
             if (error) {
                 setUsernameErrorMessage(error.reason);
@@ -45,6 +82,7 @@ const Settings = () => {
             }
         });
     };
+    
 
     const handlePasswordStrength = (password) => {
         setStrength(passwordStrength(password).value);
@@ -226,8 +264,48 @@ const Settings = () => {
                     </div>
                 </div>
             )}
-
             <hr className="border-t border-gray-700 my-4" />
+
+            {/* Left Column - Privacy settings*/}
+            <div>
+            <label className="block text-lg font-semibold text-white">Privacy Settings</label>
+            <p className="text-gray-400">Choose the privacy settings for your account.</p>
+            </div>
+
+             {/* Right Column - Privacy settings*/}
+             <div className="flex justify-center">
+            <div className="space-y-4 ml-32">
+            <FormGroup className="flex text-4xl">
+                <FormControlLabel
+                    control={
+                    <Checkbox
+                        checked={selectedPrivacy === 'Public'}
+                        onChange={handlePrivacyChange}
+                        name="Public"
+                        sx={{ transform: 'scale(1.1)' }}
+                    />
+                    }
+                    label={<span className="text-xl font-bold">Public</span>}
+                />
+                <FormControlLabel
+                    control={
+                    <Checkbox
+                        checked={selectedPrivacy === 'Private'}
+                        onChange={handlePrivacyChange}
+                        name="Private"
+                        sx={{ transform: 'scale(1.1)' }}
+                    />
+                    }
+                    label={<span className="text-xl font-bold">Private</span>}
+                />
+                </FormGroup>
+            </div>
+            </div>
+            <hr className="border-t border-gray-700 my-4" />
+
+
+
+            
 
             <div className="mt-8 flex space-x-4">
     <button

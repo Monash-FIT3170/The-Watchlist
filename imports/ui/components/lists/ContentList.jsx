@@ -1,63 +1,46 @@
-import React, { useRef, useState, useEffect } from 'react';
+// ContentList.jsx
+
+import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ContentItem from '../contentItems/ContentItem';
 import usePopup from '../../modals/usePopup';
 import ListPopup from './ListPopup';
 
-const ContentList = ({ list, isUserOwned, globalRatings = {} }) => {
+const ContentList = React.memo(({ list, isUserOwned, globalRatings = {} }) => {
   const navigate = useNavigate();
-  const containerRef = useRef(null);
-  const [visibleContentCount, setVisibleContentCount] = useState(0);
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
-
-  const updateVisibleContent = () => {
-    const container = containerRef.current;
-    if (container) {
-      const containerWidth = container.offsetWidth;
-      const contentWidth = 160 + 16; // Assuming each content pane is 160px wide and has 8px margin on each side
-      const visibleContent = Math.floor(containerWidth / contentWidth);
-      setVisibleContentCount(visibleContent);
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('resize', updateVisibleContent);
-    updateVisibleContent(); // Initial update
-    return () => {
-      window.removeEventListener('resize', updateVisibleContent);
-    };
-  }, []);
 
   return (
     <div className="flex flex-col mb-2 bg-transparent overflow-hidden shadow-none py-0 px-0">
       <div className="flex justify-between items-center mb-0 text-base">
         <button
-          onClick={() => handleItemClick(list)} // Same click handler as "Show all"
-          className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 hover:underline cursor-pointer bg-transparent border-none" // Styling to make it look like the original h1 plus hover effect
+          onClick={() => handleItemClick(list)}
+          className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 hover:underline cursor-pointer bg-transparent border-none"
         >
           {list.title}
         </button>
-
-        {isUserOwned && (
+        {true && (
           <button onClick={() => handleItemClick(list)} className="text-gray-400 text-base bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
             Show all
           </button>
         )}
       </div>
       {list.content.length === 0 && (
-          <div className="text-center text-gray-500 mt-2">
-            {list.title} List is empty. Add your movies/TV shows.
+        <div className="text-center text-gray-500 mt-2">
+          {list.title} List is empty. Add your movies/TV shows.
+        </div>
+      )}
+      <div className="flex space-x-6 overflow-x-hidden py-4">
+        {list.content.map((item) => (
+          <div key={item.contentId} className="flex-shrink-0" style={{ minWidth: '130px', width: '13%' }}>
+            <ContentItem 
+              content={item}
+              isUserSpecificRating={item.isUserSpecificRating}
+              contentType={item.contentType}
+              globalRating={globalRatings[item.contentId]?.average || 0}
+            />
           </div>
-        )}
-      <div ref={containerRef} className="flex justify-flex-start items-start overflow-hidden">
-        {React.Children.toArray(list.content.map((item, index) => (
-          <ContentItem 
-            content={item}
-            isUserSpecificRating={item.isUserSpecificRating}
-            contentType={item.contentType}
-            globalRating={globalRatings[item.contentId]?.average || 0} // Pass global ratings
-          />
-        ))).slice(0, visibleContentCount)}
+        ))}
       </div>
       {isPopupOpen && selectedList && (
         <ListPopup
@@ -69,6 +52,6 @@ const ContentList = ({ list, isUserOwned, globalRatings = {} }) => {
       )}
     </div>
   );
-};
+});
 
 export default ContentList;
