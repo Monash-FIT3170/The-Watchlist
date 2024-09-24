@@ -19,7 +19,6 @@ import UserDiscovery from './pages/UserDiscovery.jsx';
 import AIPicks from './pages/AIPicks.jsx';
 import Scrollbar from './components/scrollbar/ScrollBar.jsx';
 import LoginPage from "./pages/LoginPage.jsx";
-import UserProfilePage from './pages/UserProfilePage.jsx';
 import FollowersFollowingPage from "./pages/FollowersFollowingPage.jsx";
 import AllUsersPage from "./pages/AllUsersPage.jsx";
 import AllRatedContentPage from "./pages/AllRatedContentPage.jsx";
@@ -102,10 +101,11 @@ export const App = () => {
               <Routes>
                 <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
                 <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
+                {/* Unified UserProfile for both own and others' profiles */}
                 <Route path="/profile" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount} loading={loading} />} />
+                <Route path="/user/:userId" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount} loading={loading} />} />
                 <Route path="/ai-picks" element={<AIPicks currentUser={currentUser} />} />
                 <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
-                <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
                 <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />
                 <Route path="/" element={<Navigate to="/home" />} />
                 <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />

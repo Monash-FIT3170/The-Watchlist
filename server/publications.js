@@ -170,7 +170,7 @@ Meteor.publish('userProfileData', function (userId) {
   );
 
   // Publish ratings count using publish-counts
-  Counts.publish(this, 'userRatingsCount', RatingCollection.find({ userId }), { noReady: true });
+  Counts.publish(this, `userRatingsCount_${userId}`, RatingCollection.find({ userId }), { noReady: true });
 
   return [listCursor, userCursor];
 });
