@@ -66,9 +66,9 @@ export const App = () => {
   // Determine loading state
   const loading = !userProfileHandle.ready() || !userListsHandle.ready() || !currentUser;
 
-  // if (loading) {
-  //   return <Loading />;
-  // }
+  if (loading) {
+    return <Loading />;
+  }
 
   if (!currentUser) {
     return (
