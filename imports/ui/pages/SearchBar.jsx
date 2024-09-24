@@ -97,12 +97,43 @@ const SearchBar = ({ currentUser }) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   };
 
+  // Function to check if the current user is following the given userId
+  const isFollowing = (userId) => {
+    const currentUser = Meteor.user();
+    return (Array.isArray(currentUser.following) && (currentUser.following.includes(userId)) || currentUser._id == userId);
+  };
+
+  const isVisible = (list) => {
+    if (list.visibility == "PUBLIC"){
+      return true
+    }
+    else if (list.visibility == "FOLLOWERS" && isFollowing(list.userId)){
+      return true
+    }
+    else {
+      return false
+    }
+  }
+
   const limit = 50; // Number of items per page
 
   const lists = useTracker(() => {
     // Subscribe to all lists; this will be restricted to visible lists once list visibility is implemented.
     Meteor.subscribe('allLists');
-    return ListCollection.find().fetch(); // Fetch all lists, not just the user's lists
+    let returnLists = ListCollection.find(
+      { 
+        //! Fix this to include own lists. Need an OR clause
+        //! Fix to handle FOLLOWERS visibility check
+        // Following conditions dictate what lists are returned
+        visibility: { $in: ["PUBLIC", "FOLLOWERS"] }, 
+        listType: { $in: ["Custom"] }
+      }
+    ).fetch(); // Fetch all lists, not just the user's lists
+
+    //! Jank in following lines. Handles FOLLOWERS visibility with following filter.
+    returnLists = returnLists.filter(isVisible)
+    
+    return returnLists
   }, []);
 
   useEffect(() => {
