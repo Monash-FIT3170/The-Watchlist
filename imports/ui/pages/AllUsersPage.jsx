@@ -11,6 +11,8 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
   const location = useLocation();
   const currentUserId = Meteor.userId();
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState('recentlyAdded'); // Default sort option
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const isFollowing = (userId) => {
     return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
@@ -29,6 +31,29 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
   const filteredUsers = users.filter(user =>
     user.username.toLowerCase().includes(searchTerm)
   );
+
+  // Sorting function based on selected option
+  const sortUsers = (users, option) => {
+    const filteredUsers = users.filter(user => user.username.toLowerCase().includes(searchTerm));
+    if (option === 'alphabetical') {
+      return [...filteredUsers].sort((a, b) => {
+        const nameA = a.username || ''; // Fallback to an empty string if name is undefined
+        const nameB = b.username || ''; // Fallback to an empty string if name is undefined
+        return nameA.localeCompare(nameB);
+      });
+    } else if (option === 'recentlyAdded') {
+      return [...filteredUsers].sort((a, b) => {
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateB - dateA;
+      });
+    }
+    return filteredUsers;
+  };
+
+  // Get the sorted list of users
+  const sortedUsersList = sortUsers(propUsers, sortOption);
+  
 
   useEffect(() => {
     console.log('AllUsersPage loaded with users:', users);
@@ -53,10 +78,41 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
               <AiOutlineSearch className="text-gray-400" size={20} />
             </span>
           </div>
+        {/* Sorting Dropdown */}
+        <div className="relative border border-solid rounded-full px-2 py-1 focus:bg-magenta">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="text-sm text-white"
+            >
+              Sort by
+            </button>
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-darkest rounded-lg shadow-lg z-50">
+                <ul className="py-1">
+                  <li>
+                    <button
+                      onClick={() => { setSortOption('alphabetical'); setIsDropdownOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
+                    >
+                      Alphabetical Order
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => { setSortOption('recentlyAdded'); setIsDropdownOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
+                    >
+                      Recently Added
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
         <Scrollbar className="w-full">
           <div className="flex flex-wrap justify-start items-start gap-8 p-4">
-            {filteredUsers.map((user, index) => (
+            {sortedUsersList.map((user, index) => (
               <div
                 key={index}
                 className="min-w-[200px] max-w-[200px] flex flex-col items-center p-2 rounded-lg hover:bg-gray-700 transition-colors duration-300"
