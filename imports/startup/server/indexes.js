@@ -2,6 +2,7 @@
 
 import { Meteor } from 'meteor/meteor';
 import { MovieCollection, TVCollection } from '/imports/db/Content';
+import { RatingCollection } from '../../db/Rating';
 
 Meteor.startup(() => {
   // Ensure indexes are created
@@ -16,4 +17,7 @@ Meteor.startup(() => {
   TVCollection._ensureIndex({ language: 1 });
   TVCollection._ensureIndex({ first_aired: 1 });
   TVCollection._ensureIndex({ popularity: -1 });
+
+  RatingCollection._ensureIndex({ userId: 1 });
+
 });

@@ -28,13 +28,42 @@ const AllRatedContentPage = ({ currentUser }) => {
 
   const { ratedContent, isLoading } = useTracker(() => {
     const ratingsHandle = Meteor.subscribe('userRatings', userId);
+
+    // Log subscription readiness
+    console.log("ratingsHandle.ready():", ratingsHandle.ready());
+
+    // Log user information
+    console.log("userId:", userId);
+    console.log("userSpecific:", userSpecific);
+    console.log("currentUser._id:", currentUser._id);
+
     const ratings = userSpecific
       ? RatingCollection.find({ userId: currentUser._id }).fetch()
       : RatingCollection.find({ userId }).fetch();
 
-    const contentSubscriptions = ratings.map(rating =>
-      Meteor.subscribe('contentById', rating.contentId, rating.contentType === 'Movie' ? 'Movie' : 'TV Show')
-    );
+    // Log ratings
+    console.log("ratings:", ratings);
+
+    // Group content IDs by content type
+    const contentIdsByType = ratings.reduce((acc, rating) => {
+      const contentTypeKey = rating.contentType === 'Movie' ? 'Movie' : 'TV Show';
+      if (!acc[contentTypeKey]) {
+        acc[contentTypeKey] = new Set();
+      }
+      acc[contentTypeKey].add(rating.contentId);
+      return acc;
+    }, {});
+
+    // Log content IDs by type
+    console.log("contentIdsByType:", contentIdsByType);
+
+    // Subscribe to content IDs per content type
+    const contentSubscriptions = Object.entries(contentIdsByType).map(([contentType, ids]) => {
+      const subscription = Meteor.subscribe('contentByIds', Array.from(ids), contentType);
+      console.log(`Subscribed to contentByIds for contentType: ${contentType}, ids:`, Array.from(ids));
+      console.log(`Subscription ready: ${subscription.ready()}`);
+      return subscription;
+    });
 
     const contentDetails = ratings.map(rating => {
       let content = null;
@@ -44,6 +73,9 @@ const AllRatedContentPage = ({ currentUser }) => {
         content = TVCollection.findOne({ contentId: rating.contentId });
       }
 
+      // Log content fetched
+      console.log(`Content for rating ${rating._id}:`, content);
+
       if (content && rating.contentType === 'Season') {
         // Modify the title to include the season number
         content = {
@@ -51,38 +83,59 @@ const AllRatedContentPage = ({ currentUser }) => {
           title: `${content.title} - Season ${rating.seasonId}`,
           contentType: 'TV Show', // For ContentItem
           originalContentType: 'Season', // For filtering
+          seasonId: rating.seasonId, // Include seasonId for unique key
         };
       } else if (content) {
+        content.contentType = rating.contentType; // Ensure contentType is set
         content.originalContentType = rating.contentType;
       }
 
       return content ? {
         ...content,
         rating: rating.rating,
-        contentType: content.contentType, // 'TV Show' or 'Movie'
+        contentType: content.contentType || rating.contentType,
         originalContentType: content.originalContentType || rating.contentType,
       } : null;
     }).filter(content => content && content.title);
 
+    // Log content details
+    console.log("contentDetails:", contentDetails);
+
     const allSubscriptionsReady = ratingsHandle.ready() && contentSubscriptions.every(sub => sub.ready());
+
+    // Log if all subscriptions are ready
+    console.log("allSubscriptionsReady:", allSubscriptionsReady);
 
     return {
       ratedContent: contentDetails,
-      isLoading: !allSubscriptionsReady
+      isLoading: !allSubscriptionsReady,
     };
-  }, [userId, currentUser, userSpecific]);
+  }, [userId, currentUser._id, userSpecific]);
 
   useEffect(() => {
+    // Log rated content
+    console.log("ratedContent in useEffect:", ratedContent);
+
     const filtered = ratedContent.filter(content => {
       const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesTab =
         selectedTab === 'All' || content.originalContentType === tabMapping[selectedTab];
+
+      // Log filtering criteria
+      console.log(`Content "${content.title}" matchesSearch: ${matchesSearch}, matchesTab: ${matchesTab}`);
+
       return matchesSearch && matchesTab;
     });
+
+    // Log filtered content
+    console.log("filteredContent:", filtered);
 
     const sorted = filtered.sort((a, b) => {
       return sortOrder === 'ascending' ? a.rating - b.rating : b.rating - a.rating;
     });
+
+    // Log sorted content
+    console.log("sortedContent:", sorted);
 
     setFilteredContent(sorted);
   }, [searchTerm, selectedTab, ratedContent, sortOrder]);
@@ -98,6 +151,9 @@ const AllRatedContentPage = ({ currentUser }) => {
   const handleFormSubmit = (e) => {
     e.preventDefault();
   };
+
+  // Log filtered content length before rendering
+  console.log("filteredContent.length:", filteredContent.length);
 
   return (
     <div className="relative flex flex-col mb-2 bg-darker rounded-lg overflow-hidden shadow-lg py-5 px-2 h-full">
@@ -149,9 +205,11 @@ const AllRatedContentPage = ({ currentUser }) => {
 
       <Scrollbar className="search-results-container flex-grow overflow-auto">
         <div className="grid-responsive">
-          {filteredContent.length > 0 ? filteredContent.map((content, index) => (
+          {filteredContent.length > 0 ? filteredContent.map((content) => (
             <ContentItem
-              key={index}
+              key={content.originalContentType === 'Season'
+                ? `Season-${content.contentId}-${content.seasonId}`
+                : `${content.contentType}-${content.contentId}`}
               content={content}
               isUserSpecificRating={userSpecific}
               contentType={content.contentType} // 'TV Show' or 'Movie'
