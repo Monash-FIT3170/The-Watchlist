@@ -107,7 +107,7 @@ const UserProfilePage = () => {
     if (list.listType !== "Custom") {  return false }
 
     if (list.visibility == "PUBLIC") { return true }
-    else if (list.visibility == "FOLLOWERS"){ return isFollowing(userId) }
+    else if (list.visibility == "FOLLOWERS"){ return isFollowing }
     else { return false } // else visibility = ONLY_ME
 
   };

@@ -222,7 +222,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         }, (err) => {
             if (err) {
                 console.error('Set visibility error:', err);
-            } else {
+            } else { 
                 setVisibility(choices[index]);
             }
         });
