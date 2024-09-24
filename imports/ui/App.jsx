@@ -45,26 +45,37 @@ export const App = () => {
     { title: "AI Picks", path: "/ai-picks", icon: <BsStars />, cName: "flex" },
   ], []);
 
-  // Subscribe to userProfileData at the top level
-  const userProfileHandle = useTracker(() => Meteor.subscribe('userProfileData', Meteor.userId()), []);
-
-  // Subscribe to userLists
-  const userListsHandle = useTracker(() => Meteor.subscribe('userLists', Meteor.userId()), []);
-
   // Track currentUser reactively from Meteor.users collection
-  const currentUser = useTracker(() => {
-    const userId = Meteor.userId();
-    return Meteor.users.findOne({ _id: userId });
-  }, []);
+  const currentUser = useTracker(() => Meteor.user(), []);
+
+  // Conditionally subscribe based on user login status
+  const userProfileHandle = useTracker(() => {
+    if (currentUser) {
+      return Meteor.subscribe('userProfileData', currentUser._id);
+    }
+    return { ready: () => true };
+  }, [currentUser]);
+
+  const userListsHandle = useTracker(() => {
+    if (currentUser) {
+      return Meteor.subscribe('userLists', currentUser._id);
+    }
+    return { ready: () => true };
+  }, [currentUser]);
 
   // Track userLists reactively
-  const userLists = useTracker(() => ListCollection.find({ userId: Meteor.userId() }).fetch(), [Meteor.userId()]);
+  const userLists = useTracker(() => {
+    if (currentUser) {
+      return ListCollection.find({ userId: currentUser._id }).fetch();
+    }
+    return [];
+  }, [currentUser]);
 
   // Get ratingsCount using publish-counts
   const ratingsCount = useTracker(() => Counts.get('userRatingsCount'), []);
 
   // Determine loading state
-  const loading = !userProfileHandle.ready() || !userListsHandle.ready() || !currentUser;
+  const loading = (!userProfileHandle.ready() || !userListsHandle.ready());
 
   if (loading) {
     return <Loading />;
@@ -96,7 +107,7 @@ export const App = () => {
                 <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
                 <Route path="/user/:userId" element={<UserProfilePage currentUser={currentUser} />} />
                 <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />
-                <Route path="/" element={currentUser ? <Navigate to="/home" /> : <Navigate to="/login" />} />
+                <Route path="/" element={<Navigate to="/home" />} />
                 <Route path="/all-users" element={<AllUsersPage currentUser={currentUser} />} />
                 <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
                 <Route path="/settings" element={<Settings currentUser={currentUser} />} />
