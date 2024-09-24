@@ -3,6 +3,7 @@ import { RatingCollection } from '../imports/db/Rating';
 import { MovieCollection } from '../imports/db/Content';
 import { TVCollection } from '../imports/db/Content';
 import { ListCollection } from '../imports/db/List';
+import { check } from "meteor/check";
 
 Meteor.publish('userData', function (userId) {
   if (!this.userId) {
@@ -82,9 +83,27 @@ Meteor.publish('contentById', function (contentId, contentType) {
   if (!this.userId) {
     return this.ready();
   }
-  const collection = contentType === 'Movie' ? MovieCollection : TVCollection;
-  return collection.find({ contentId: contentId });
+  if (contentType === 'Movie') {
+    return MovieCollection.find({ contentId: contentId });
+  } else if (contentType === 'TV Show' || contentType === 'Season') {
+    return TVCollection.find({ contentId: contentId });
+  } else {
+    return this.ready();
+  }
 });
+
+// Server-side publication
+Meteor.publish('contentByIds', function (contentIds, contentType) {
+  if (!this.userId) {
+    return this.ready();
+  }
+  check(contentIds, [Number]);
+  check(contentType, String);
+  
+  const collection = contentType === 'Movie' ? MovieCollection : TVCollection;
+  return collection.find({ contentId: { $in: contentIds } });
+});
+
 
 Meteor.publish('seasonRatings', function (contentId, seasonId) {
 
