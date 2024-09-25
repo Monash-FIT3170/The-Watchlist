@@ -5,19 +5,19 @@ import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
 
-
 const AllUsersPage = ({ users: propUsers, currentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUserId = Meteor.userId();
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState('recentlyAdded'); // Default sort option
 
   const isFollowing = (userId) => {
     return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
   };
 
   const isRequested = (userId) => {
-    return (currentUser.followingRequests && currentUser.followingRequests.includes(userId)) 
+    return currentUser.followingRequests && currentUser.followingRequests.includes(userId);
   };
 
   const handleSearchChange = (event) => {
@@ -29,6 +29,27 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
   const filteredUsers = users.filter(user =>
     user.username.toLowerCase().includes(searchTerm)
   );
+
+  // Sorting function based on selected option
+  const sortUsers = (users, option) => {
+    if (option === 'alphabetical') {
+      return [...users].sort((a, b) => {
+        const nameA = (a.username || '').toLowerCase();
+        const nameB = (b.username || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+    } else if (option === 'recentlyAdded') {
+      return [...users].sort((a, b) => {
+        const dateA = new Date(a.followedAt || a.createdAt);
+        const dateB = new Date(b.followedAt || b.createdAt);
+        return dateB - dateA;
+      });
+    }
+    return users;
+  };
+
+  // Get the sorted list of users
+  const sortedUsersList = sortUsers(filteredUsers, sortOption);
 
   useEffect(() => {
     console.log('AllUsersPage loaded with users:', users);
@@ -53,10 +74,23 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
               <AiOutlineSearch className="text-gray-400" size={20} />
             </span>
           </div>
+          {/* Sorting Dropdown - Match the UI from SearchBar.jsx */}
+          <div className="relative mr-4 mb-2">
+            <select
+              id="sort-select"
+              name="sort"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
+            >
+              <option value="recentlyAdded">Recently Added</option>
+              <option value="alphabetical">Alphabetical Order</option>
+            </select>
+          </div>
         </div>
         <Scrollbar className="w-full">
           <div className="flex flex-wrap justify-start items-start gap-8 p-4">
-            {filteredUsers.map((user, index) => (
+            {sortedUsersList.map((user, index) => (
               <div
                 key={index}
                 className="min-w-[200px] max-w-[200px] flex flex-col items-center p-2 rounded-lg hover:bg-gray-700 transition-colors duration-300"
