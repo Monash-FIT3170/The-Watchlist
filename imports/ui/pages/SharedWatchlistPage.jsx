@@ -67,7 +67,7 @@ const SharedWatchlistPage = ({currentUser}) => {
                             isUserSpecificRating={false}
                             contentType={content.contentType}
                         />
-                    )) : <p>No content available.</p>}
+                    )) : <p className="text-center text-gray-500 mt-2">No content available.</p>}
                 </div>
             </Scrollbar>
         </div>
