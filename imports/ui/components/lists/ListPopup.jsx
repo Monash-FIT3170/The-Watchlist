@@ -53,7 +53,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     // const domain = "thewatchlist.xyz" 
                     // Change between domain and localhost when testing
                     // setShareUrl(`https://${localhost}/watchlist/${result._id}`);
-                    setShareUrl(`${Meteor.absoluteUrl.defaultOptions.rootUrl}watchlist/${result._id}`);
+                    setShareUrl(`${Meteor.absoluteUrl.defaultOptions.rootUrl}/list/${result._id}`);
                 }
             });
         }
