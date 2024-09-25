@@ -17,7 +17,7 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
   };
 
   const isRequested = (userId) => {
-    return currentUser.followingRequests && currentUser.followingRequests.includes(userId);
+    return (currentUser.followingRequests && currentUser.followingRequests.includes(userId));
   };
 
   const handleSearchChange = (event) => {
@@ -61,6 +61,7 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
         <ProfileDropdown user={currentUser} />
       </div>
       <div className="flex flex-col items-left w-full">
+        {/* Search Bar */}
         <div className="flex items-left justify-start mb-4 space-x-7 w-full max-w-xl mt-1 ml-0">
           <div className="relative flex-grow">
             <input
@@ -74,20 +75,23 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
               <AiOutlineSearch className="text-gray-400" size={20} />
             </span>
           </div>
-          {/* Sorting Dropdown - Match the UI from SearchBar.jsx */}
-          <div className="relative mr-4 mb-2">
-            <select
-              id="sort-select"
-              name="sort"
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
-              className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
-            >
-              <option value="recentlyAdded">Recently Added</option>
-              <option value="alphabetical">Alphabetical Order</option>
-            </select>
-          </div>
         </div>
+
+        {/* Sorting Dropdown - Now placed below search bar */}
+        <div className="relative mb-4">
+          <select
+            id="sort-select"
+            name="sort"
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="block w-50 bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
+          >
+            <option value="recentlyAdded">Recently Added</option>
+            <option value="alphabetical">Alphabetical Order</option>
+          </select>
+        </div>
+
+        {/* Users List */}
         <Scrollbar className="w-full">
           <div className="flex flex-wrap justify-start items-start gap-8 p-4">
             {sortedUsersList.map((user, index) => (
