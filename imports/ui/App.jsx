@@ -74,8 +74,9 @@ export const App = () => {
     return (
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/list/:listId" element={<SharedWatchlistPage currentUser={currentUser}/>} />
         <Route path="*" element={<Navigate replace to="/login" />} />
+        {/* Note: This /list/:listId route is added below because if you type the /list url in the browser search bar, SharedWatchlistPage does not open due to a delay when checking if a user is logged in, which redirects you to the login page instead even if you are already logged in. If you find a better way to fix this bug, feel free to change this, but otherwise please do not remove. */}
+        <Route path="/list/:listId" element={<SharedWatchlistPage currentUser={currentUser}/>} />
       </Routes>
     );
   }
