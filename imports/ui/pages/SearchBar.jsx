@@ -103,7 +103,11 @@ const SearchBar = ({ currentUser }) => {
     return (Array.isArray(currentUser.following) && (currentUser.following.includes(userId)) || currentUser._id == userId);
   };
 
+  // Given a list, checks if the currentUser should be able to view it
   const isVisible = (list) => {
+    if (list.userId == Meteor.user()._id){
+      return true
+    }
     if (list.visibility == "PUBLIC"){
       return true
     }
@@ -119,18 +123,31 @@ const SearchBar = ({ currentUser }) => {
 
   const lists = useTracker(() => {
     // Subscribe to all lists; this will be restricted to visible lists once list visibility is implemented.
+    //! adjust publication if changes made below
     Meteor.subscribe('allLists');
     let returnLists = ListCollection.find(
       { 
-        //! Fix this to include own lists. Need an OR clause
-        //! Fix to handle FOLLOWERS visibility check
-        // Following conditions dictate what lists are returned
-        visibility: { $in: ["PUBLIC", "FOLLOWERS"] }, 
-        listType: { $in: ["Custom"] }
-      }
+        
+        $or: 
+        [
+          // Grab all custom lists with public or followers visibility
+          //! FIXME: to handle extra FOLLOWERS check in mongo call
+          {        
+            visibility: { $in: ["PUBLIC", "FOLLOWERS"] }, 
+            listType: { $in: ["Custom"] }
+          },
+          {
+            userId: { $eq: Meteor.user()._id }
+          }
+
+        ] 
+
+        }
+      
     ).fetch(); // Fetch all lists, not just the user's lists
 
-    //! Jank in following lines. Handles FOLLOWERS visibility with following filter.
+    //! Jank. Handles FOLLOWERS visibility with following filter.
+    //! Ideally, this should be handled by the mongodb call above 
     returnLists = returnLists.filter(isVisible)
     
     return returnLists
