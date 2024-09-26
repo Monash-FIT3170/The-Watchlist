@@ -49,11 +49,11 @@ const SharedWatchlistPage = ({currentUser}) => {
 
     if (loading) return <Loading/>;
 
-    if (!currentUser) {
-        // Redirect to login page if user is not logged in
-        navigate("/login");
-        return;
-    }
+    // if (!currentUser) {
+    //     // Redirect to login page if user is not logged in
+    //     navigate("/login");
+    //     return;
+    // }
 
     return (
         <div className="flex flex-col min-h-screen bg-darker">
