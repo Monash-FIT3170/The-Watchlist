@@ -46,7 +46,12 @@ export const App = () => {
   ], []);
 
   // Track currentUser reactively from Meteor.users collection
-  const currentUser = useTracker(() => Meteor.user(), []);
+  const currentUser = useTracker(() => {
+    const userId = Meteor.userId();
+    setLoggedIn(userId ? true : false); // If userId is found, then a user is logged in
+    return Meteor.users.findOne({ _id: userId });
+    // return Meteor.user()
+  }, []);
 
   // Conditionally subscribe based on user login status
   const userProfileHandle = useTracker(() => {
@@ -75,7 +80,7 @@ export const App = () => {
   const ratingsCount = useTracker(() => Counts.get('userRatingsCount'), []);
 
   // Determine loading state
-  const loading = (!userProfileHandle.ready() || !userListsHandle.ready());
+  const loading = (!userProfileHandle.ready() || !userListsHandle.ready() || !currentUser);
 
   if (loading && loggedIn) {
     return <Loading />;

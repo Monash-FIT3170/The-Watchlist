@@ -10,6 +10,7 @@ import ProfileCard from '../components/headers/ProfileCard';
 import ListDisplay from '../components/lists/ListDisplay';
 import { FaLock } from "react-icons/fa";
 import { Counts } from 'meteor/tmeasday:publish-counts';
+import Loading from './Loading';
 
 const UserProfile = ({ currentUser, loading }) => {
   const { userId } = useParams(); // Extract userId from route parameters
@@ -152,7 +153,7 @@ const UserProfile = ({ currentUser, loading }) => {
   }, [isOwnProfile, userProfile, isFollowing]);
 
   if (loading || !profileUser) {
-    return <div>Loading...</div>;
+    return <Loading/>;
   }
 
   return (
