@@ -23,7 +23,7 @@ Meteor.methods({
       Meteor.users.update(this.userId, { $addToSet: { followingRequests: targetUserId } });
     }else{ //else add the current user to the target user's followers and the target user to the current user's following
     Meteor.users.update(this.userId, { $addToSet: { following: targetUserId } });
-    Meteor.users.update(targetUserId, { $addToSet: { followers: this.userId } });
+    Meteor.users.update(targetUserId, { $addToSet: { followers: this.userId }, $set: { followedAt: new Date() } });
     }
   },
   acceptRequest(followerUserID) {

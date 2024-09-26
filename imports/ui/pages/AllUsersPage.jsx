@@ -4,11 +4,13 @@ import Scrollbar from '../components/scrollbar/ScrollBar';
 import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
+import { useTracker } from 'meteor/react-meteor-data';
 
-const AllUsersPage = ({ users: propUsers, currentUser }) => {
+const AllUsersPage = ({ currentUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUserId = Meteor.userId();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState('recentlyAdded'); // Default sort option
 
@@ -17,14 +19,22 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
   };
 
   const isRequested = (userId) => {
-    return (currentUser.followingRequests && currentUser.followingRequests.includes(userId));
+    return currentUser.followingRequests && currentUser.followingRequests.includes(userId);
   };
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value.toLowerCase());
   };
 
-  const users = propUsers || location.state?.users || [];
+  // Fetch users from the publication
+  const { users, isLoading } = useTracker(() => {
+    const subscription = Meteor.subscribe('allUsers');
+
+    return {
+      isLoading: !subscription.ready(),
+      users: Meteor.users.find({}, { fields: { username: 1, avatarUrl: 1, followedAt: 1, following: 1 } }).fetch(),
+    };
+  }, []);
 
   const filteredUsers = users.filter(user =>
     user.username.toLowerCase().includes(searchTerm)
@@ -40,9 +50,9 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
       });
     } else if (option === 'recentlyAdded') {
       return [...users].sort((a, b) => {
-        const dateA = new Date(a.followedAt || a.createdAt);
-        const dateB = new Date(b.followedAt || b.createdAt);
-        return dateB - dateA;
+        const dateA = a.followedAt ? new Date(a.followedAt) : new Date(0);
+        const dateB = b.followedAt ? new Date(b.followedAt) : new Date(0);
+        return dateB - dateA; // Sort by followedAt in descending order
       });
     }
     return users;
@@ -54,6 +64,10 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
   useEffect(() => {
     console.log('AllUsersPage loaded with users:', users);
   }, [users]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="bg-darker min-h-screen p-4">
@@ -77,7 +91,7 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
           </div>
         </div>
 
-        {/* Sorting Dropdown - Now placed below search bar */}
+        {/* Sorting Dropdown */}
         <div className="relative mb-4">
           <select
             id="sort-select"

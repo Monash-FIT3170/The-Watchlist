@@ -22,6 +22,7 @@ Meteor.publish('userData', function (userId) {
         following: 1,
         realName: 1,
         description: 1,
+        followedAt: 1,
       },
     }
   );
@@ -39,6 +40,7 @@ Meteor.publish('allUsers', function () {
       avatarUrl: 1,
       realName: 1,
       description: 1,
+      followedAt: 1,
     },
   });
 });
@@ -73,7 +75,8 @@ Meteor.publish('subscribedLists', function (viewedUserId) {
       content: 1,
       createdAt: 1,
       updatedAt: 1,
-      subscribers: 1  // Ensure to publish the subscribers field
+      subscribers: 1,  // Ensure to publish the subscribers field
+      followedAt: 1
     }
   });
 });
@@ -110,7 +113,8 @@ Meteor.publish('allLists', function () {
       content: 1,
       createdAt: 1,
       updatedAt: 1,
-      subscribers: 1 // Include subscribers field to later restrict based on visibility.
+      subscribers: 1, // Include subscribers field to later restrict based on visibility.
+      followedAt: 1 
     }
   });
 });
@@ -146,6 +150,7 @@ Meteor.publish('userProfileData', function (userId) {
         following: 1,
         realName: 1,
         description: 1,
+        followedAt: 1,
       },
     }
   );
