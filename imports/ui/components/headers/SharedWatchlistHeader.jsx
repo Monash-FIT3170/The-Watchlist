@@ -1,7 +1,13 @@
 import React from 'react';
 import ProfileDropdown from '../profileDropdown/ProfileDropdown';
+import { useNavigate } from 'react-router-dom';
 
 const SharedWatchlistHeader = ({ list, tabMapping, selectedTab, setSelectedTab, currentUser }) => {
+    const navigate = useNavigate();
+
+    const handleUserRedirect = () => {
+        navigate(`/user/${list.userId}`);
+    }
 
     return (
         <div className="flex flex-col justify-end items-start w-full h-72 p-4 bg-gradient-to-tl from-zinc-900 via-zinc-700 to-zinc-600 rounded-t-lg shadow-md mb-4">
@@ -12,7 +18,7 @@ const SharedWatchlistHeader = ({ list, tabMapping, selectedTab, setSelectedTab, 
             {list ? (
                 <div>
                     <h1 className="text-7xl text-white font-bold mb-2">{`${list.title}`}</h1>
-                    <a href={`http://localhost:3000/user/${list.userId}`} className="text-white hover:underline">
+                    <a onClick={handleUserRedirect} className="text-white hover:underline">
                         <span className="text-white hover:underline">{list.userName}</span>
                     </a>
                 </div>
