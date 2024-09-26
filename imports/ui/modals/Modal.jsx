@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, forwardRef } from 'react';
-import { MdMovieFilter, MdAdd } from 'react-icons/md';
+import { MdMovieFilter, MdAdd, MdCheck } from 'react-icons/md';
 import { useTracker } from 'meteor/react-meteor-data';
 import { ListCollection } from '../../db/List';
 import { ToastContainer, toast } from 'react-toastify';
@@ -82,8 +82,14 @@ const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
                         className="text-white bg-purple-500 hover:bg-purple-700 rounded-full p-2"
                         onClick={(event) => handleAddContentClick(list._id, event)}
                       >
-                        <MdAdd size={"20px"} />
+                        { // check if list contains the content, if so then display tick 
+                        list.content.some(item => item.contentId === content.contentId) ? (
+                          <MdCheck size={"20px"} />
+                        ) : (
+                          <MdAdd size={"20px"} />
+                        )}
                       </button>
+
                     </li>
                   ))}
                 </ul>
