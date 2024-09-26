@@ -8,16 +8,18 @@ const SharedWatchlistHeader = ({ list, tabMapping, selectedTab, setSelectedTab, 
             <div className="absolute top-4 right-4">
                 <ProfileDropdown user={currentUser} />
             </div>
-            
-                { list ? (
-                        <div>
-                            <h1 className="text-7xl text-white font-bold mb-2">{`Watchlist: ${list.title}`}</h1>
-                            <p className="text-xl text-white font-bold mb-2">{`User: ${list.userName}`}</p>
-                        </div>
-                    ) : (
-                        <h1 className="text-7xl text-white font-bold mb-2">No List Found</h1>
-                    )
-                }
+
+            {list ? (
+                <div>
+                    <h1 className="text-7xl text-white font-bold mb-2">{`${list.title}`}</h1>
+                    <a href={`http://localhost:3000/user/${list.userId}`} className="text-white hover:underline">
+                        <span className="text-white hover:underline">{list.userName}</span>
+                    </a>
+                </div>
+            ) : (
+                <h1 className="text-7xl text-white font-bold mb-2">No List Found</h1>
+            )
+            }
             
             <div className="flex gap-4 mb-4">
                 <div>
