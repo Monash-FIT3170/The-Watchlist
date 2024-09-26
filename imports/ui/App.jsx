@@ -35,6 +35,7 @@ import SharedWatchlistPage from "./pages/SharedWatchlistPage.jsx";
 export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation(); // Use to check the current route
+  const [loggedIn, setLoggedIn] = useState(false);
 
   // Define static navbar data
   const staticNavbarData = useMemo(() => [
@@ -45,7 +46,12 @@ export const App = () => {
   ], []);
 
   // Track currentUser reactively from Meteor.users collection
-  const currentUser = useTracker(() => Meteor.user(), []);
+  const currentUser = useTracker(() => {
+    const userId = Meteor.userId();
+    setLoggedIn(userId ? true : false); // If userId is found, then a user is logged in
+    return Meteor.users.findOne({ _id: userId });
+    // return Meteor.user()
+  }, []);
 
   // Conditionally subscribe based on user login status
   const userProfileHandle = useTracker(() => {
@@ -74,9 +80,9 @@ export const App = () => {
   const ratingsCount = useTracker(() => Counts.get('userRatingsCount'), []);
 
   // Determine loading state
-  const loading = (!userProfileHandle.ready() || !userListsHandle.ready());
+  const loading = (!userProfileHandle.ready() || !userListsHandle.ready() || !currentUser);
 
-  if (loading) {
+  if (loading && loggedIn) {
     return <Loading />;
   }
 
@@ -112,7 +118,7 @@ export const App = () => {
                 <Route path="/user/:userId/ratings" element={<AllRatedContentPage currentUser={currentUser} />} />
                 <Route path="/settings" element={<Settings currentUser={currentUser} />} />
                 <Route path="/follow-requests" element={<FollowRequests currentUser={currentUser} />} />
-                <Route path="/watchlist/:listId" element={<SharedWatchlistPage/>} />
+                <Route path="/list/:listId" element={<SharedWatchlistPage currentUser={currentUser}/>} />
               </Routes>
             </Scrollbar>
           ) : (

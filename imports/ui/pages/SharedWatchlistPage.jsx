@@ -1,9 +1,10 @@
 import { Meteor } from 'meteor/meteor';
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import SharedWatchlistHeader from '../components/headers/SharedWatchlistHeader';
 import Scrollbar from '../components/scrollbar/ScrollBar';
 import ContentItem from '../components/contentItems/ContentItem';
+import Loading from './Loading';
 
 const SharedWatchlistPage = ({currentUser}) => {
     const { listId } = useParams();
@@ -11,7 +12,7 @@ const SharedWatchlistPage = ({currentUser}) => {
     const [filteredContent, setFilteredContent] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedTab, setSelectedTab] = useState('All');
-
+    const navigate = useNavigate();
 
     const tabMapping = {
         All: 'All',
@@ -36,7 +37,7 @@ const SharedWatchlistPage = ({currentUser}) => {
 
     // Filter content list based on selected tab
     useEffect(() => {
-        if (!loading) {
+        if (!loading && list) {
             const filtered = list.content.filter(content => {
                 const matchesTab = (selectedTab === 'All' || content.contentType === tabMapping[selectedTab]);
                 return matchesTab;
@@ -46,11 +47,17 @@ const SharedWatchlistPage = ({currentUser}) => {
         }
     }, [selectedTab, list]);
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <Loading/>;
+
+    // if (!currentUser) {
+    //     // Redirect to login page if user is not logged in
+    //     navigate("/login");
+    //     return;
+    // }
 
     return (
         <div className="flex flex-col min-h-screen bg-darker">
-            <SharedWatchlistHeader username={list.userName} listName={list.title} tabMapping={tabMapping} selectedTab={selectedTab} setSelectedTab={setSelectedTab} currentUser={currentUser} />
+            <SharedWatchlistHeader list={list} tabMapping={tabMapping} selectedTab={selectedTab} setSelectedTab={setSelectedTab} currentUser={currentUser} />
             <Scrollbar className="search-results-container flex-grow overflow-auto">
                 <div className="grid-responsive">
                     {filteredContent.length > 0 ? filteredContent.map((content, index) => (
@@ -60,7 +67,7 @@ const SharedWatchlistPage = ({currentUser}) => {
                             isUserSpecificRating={false}
                             contentType={content.contentType}
                         />
-                    )) : <p>No content available.</p>}
+                    )) : <p className="text-center text-gray-500 mt-2">No content available.</p>}
                 </div>
             </Scrollbar>
         </div>
