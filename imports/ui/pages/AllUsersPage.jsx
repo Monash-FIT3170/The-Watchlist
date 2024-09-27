@@ -1,25 +1,32 @@
+// imports/ui/pages/AllUsersPage.jsx
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Scrollbar from '../components/scrollbar/ScrollBar';
 import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 import { AiOutlineSearch } from 'react-icons/ai';
-import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
 import { useTracker } from 'meteor/react-meteor-data';
 
 const AllUsersPage = ({ currentUser }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const currentUserId = Meteor.userId();
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState('recentlyAdded'); // Default sort option
 
+  // Adjusted isFollowing function
   const isFollowing = (userId) => {
-    return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
+    return (
+      currentUser &&
+      Array.isArray(currentUser.following) &&
+      currentUser.following.some((f) => f.userId === userId)
+    );
   };
 
   const isRequested = (userId) => {
-    return currentUser.followingRequests && currentUser.followingRequests.includes(userId);
+    return (
+      currentUser.followingRequests &&
+      currentUser.followingRequests.includes(userId)
+    );
   };
 
   const handleSearchChange = (event) => {
@@ -32,13 +39,36 @@ const AllUsersPage = ({ currentUser }) => {
 
     return {
       isLoading: !subscription.ready(),
-      users: Meteor.users.find({}, { fields: { username: 1, avatarUrl: 1, followedAt: 1, following: 1 } }).fetch(),
+      users: Meteor.users
+        .find(
+          {},
+          {
+            fields: {
+              username: 1,
+              avatarUrl: 1,
+              createdAt: 1,
+              // Include followedAt if available
+              'following.userId': 1,
+              'following.followedAt': 1,
+            },
+          }
+        )
+        .fetch(),
     };
   }, []);
 
+  // Map over users to include followedAt
+  const updatedUsers = users.map((user) => {
+    const followingObj =
+      currentUser.following &&
+      currentUser.following.find((f) => f.userId === user._id);
+    return {
+      ...user,
+      followedAt: followingObj ? followingObj.followedAt : user.createdAt,
+    };
+  });
 
-
-  const filteredUsers = users.filter(user =>
+  const filteredUsers = updatedUsers.filter((user) =>
     user.username.toLowerCase().includes(searchTerm)
   );
 
@@ -117,22 +147,38 @@ const AllUsersPage = ({ currentUser }) => {
                 onClick={() => navigate(`/user/${user._id}`)}
               >
                 <div className="flex flex-col items-center cursor-pointer">
-                  <img src={user.avatarUrl || './default-avatar.png'} alt={user.username} className="w-full h-auto rounded-full" />
-                  <p className="text-white mt-2 text-xl text-center">{user.username}</p>
+                  <img
+                    src={user.avatarUrl || './default-avatar.png'}
+                    alt={user.username}
+                    className="w-full h-auto rounded-full"
+                  />
+                  <p className="text-white mt-2 text-xl text-center">
+                    {user.username}
+                  </p>
                 </div>
                 {currentUserId !== user._id && (
                   <button
-                    className={`mt-2 px-4 py-1 ${isFollowing(user._id) ? 'bg-blue-600' : 'bg-fuchsia-600'} text-white rounded-full`}
+                    className={`mt-2 px-4 py-1 ${
+                      isFollowing(user._id)
+                        ? 'bg-blue-600'
+                        : isRequested(user._id)
+                        ? 'bg-gray-600'
+                        : 'bg-fuchsia-600'
+                    } text-white rounded-full`}
                     onClick={(e) => {
                       e.stopPropagation();
                       if (isFollowing(user._id) || isRequested(user._id)) {
-                        handleUnfollow(user._id);
+                        Meteor.call('unfollowUser', user._id);
                       } else {
-                        handleFollow(user._id);
+                        Meteor.call('followUser', user._id);
                       }
                     }}
                   >
-                    {isFollowing(user._id) ? 'Unfollow'  : isRequested(user._id) ? 'Requested' : 'Follow'}
+                    {isFollowing(user._id)
+                      ? 'Unfollow'
+                      : isRequested(user._id)
+                      ? 'Requested'
+                      : 'Follow'}
                   </button>
                 )}
               </div>
