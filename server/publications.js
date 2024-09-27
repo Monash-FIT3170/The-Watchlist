@@ -118,8 +118,14 @@ Meteor.publish('allLists', function () {
     return this.ready();
   }
 
-  // Publish all lists for now; later this will be restricted to only visible lists.
-  return ListCollection.find({}, {
+  // Publish all lists for now with restrictions to only Custom lists and lists with public / follower visibility settings
+  return ListCollection.find(
+    {
+      // Following conditions dictate what lists are returned
+      visibility: { $in: ["PUBLIC", "FOLLOWERS"] }, 
+      listType: { $in: ["Custom"] }
+    },
+    {
     fields: {
       userId: 1,
       userName: 1,
@@ -129,7 +135,8 @@ Meteor.publish('allLists', function () {
       content: 1,
       createdAt: 1,
       updatedAt: 1,
-      subscribers: 1 // Include subscribers field to later restrict based on visibility.
+      visibility: 1,
+      subscribers: 1 
     }
   });
 });

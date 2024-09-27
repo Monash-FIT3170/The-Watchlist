@@ -350,6 +350,9 @@ Meteor.methods({
           }
         });
       }
+
+      // if list visibility interaction is wanted when changed to 'public' profile, add here.
+
     } else {
       // For Private setting, just update the privacy setting
       Meteor.users.update(this.userId, {
@@ -357,6 +360,23 @@ Meteor.methods({
           'profile.privacy': privacySetting
         }
       });
+
+      // set all PUBLIC list visibilities to FOLLOWERS when profile changed to private
+      ListCollection.update(
+        {
+          userId: this.userId, 
+          visibility: "PUBLIC"
+        }, 
+        {
+          $set: {
+            visibility: "FOLLOWERS"
+          }
+        },
+        {
+          upsert: false,
+          multi: true
+        }
+      );
     }
   }
 });

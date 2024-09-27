@@ -211,7 +211,6 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     };
 
     const handleVisibilityChange = () => {
-        console.log('change logged --------')
         choices = ["PUBLIC", "FOLLOWERS", "ONLY_ME"]
         index = choices.indexOf(getVisibility)
 
@@ -223,7 +222,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         }, (err) => {
             if (err) {
                 console.error('Set visibility error:', err);
-            } else {
+            } else { 
                 setVisibility(choices[index]);
             }
         });
