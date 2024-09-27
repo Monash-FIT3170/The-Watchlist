@@ -13,6 +13,7 @@ import ContentItemDisplay from '../components/contentItems/ContentItemDisplay';
 import Loading from './Loading';
 import { SearchContext } from '../contexts/SearchContext';
 import { FaTimesCircle } from 'react-icons/fa';
+import DropdownMenu from '../components/dropdowns/DropdownMenu';
 
 const SearchBar = ({ currentUser }) => {
   const { searchState, setSearchState } = useContext(SearchContext);
@@ -39,6 +40,22 @@ const SearchBar = ({ currentUser }) => {
     'Family', 'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance',
     'Science Fiction', 'TV Movie', 'Thriller', 'War', 'Western',
   ];
+
+  // **Updated Genre Items Without onClick**
+  const genreItems = genresList.map(genre => ({
+    id: genre, // Unique identifier
+    label: genre,
+    value: genre,
+  }));
+
+  // **Updated Handle Genre Select**
+  const handleGenreSelect = (item) => {
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedGenre: item.value, // Set to empty string if "All" is selected
+      currentPage: 0, // Reset to first page when filter changes
+    }));
+  };
 
   const languagesList = [
     { code: 'ar', name: 'Arabic' },
@@ -84,7 +101,14 @@ const SearchBar = ({ currentUser }) => {
     { code: 'uk', name: 'Ukrainian' },
     { code: 'vi', name: 'Vietnamese' },
   ];
-  
+
+  // **Updated Language Items Without onClick**
+  const languageItems = languagesList.map(lang => ({
+    id: lang.code,
+    label: lang.name,
+    value: lang.code,
+  }));
+
 
   const sortingOptions = [
     { value: 'title_asc', label: 'Title A-Z' },
@@ -93,16 +117,89 @@ const SearchBar = ({ currentUser }) => {
     { value: 'release_date_asc', label: 'Release Date (Oldest First)' },
   ];
 
+  // **Updated Sort Items Without onClick**
+  const sortItems = sortingOptions.map(option => ({
+    id: option.value,
+    label: option.label,
+    value: option.value,
+  }));
+
+  // **Updated Handle Language Select**
+  const handleLanguageSelect = (item) => {
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedLanguage: item.value, // Set to empty string if "All" is selected
+      currentPage: 0, // Reset to first page when filter changes
+    }));
+  };
+
+  // **Updated Handle Sort Option Select**
+  const handleSortOptionSelect = (item) => {
+    setSearchState((prevState) => ({
+      ...prevState,
+      selectedSortOption: item.value, // Set to empty string if "All" is selected
+      currentPage: 0, // Reset to first page when sort changes
+    }));
+  };
+
   const escapeRegExp = (string) => {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   };
+
+  // Function to check if the current user is following the given userId
+  const isFollowing = (userId) => {
+    const currentUser = Meteor.user();
+    return (Array.isArray(currentUser.following) && (currentUser.following.includes(userId)) || currentUser._id == userId);
+  };
+
+  // Given a list, checks if the currentUser should be able to view it
+  const isVisible = (list) => {
+    if (list.userId == Meteor.user()._id){
+      return true
+    }
+    if (list.visibility == "PUBLIC"){
+      return true
+    }
+    else if (list.visibility == "FOLLOWERS" && isFollowing(list.userId)){
+      return true
+    }
+    else {
+      return false
+    }
+  }
 
   const limit = 50; // Number of items per page
 
   const lists = useTracker(() => {
     // Subscribe to all lists; this will be restricted to visible lists once list visibility is implemented.
+    //! adjust publication if changes made below
     Meteor.subscribe('allLists');
-    return ListCollection.find().fetch(); // Fetch all lists, not just the user's lists
+    let returnLists = ListCollection.find(
+      { 
+        
+        $or: 
+        [
+          // Grab all custom lists with public or followers visibility
+          //! FIXME: to handle extra FOLLOWERS check in mongo call
+          {        
+            visibility: { $in: ["PUBLIC", "FOLLOWERS"] }, 
+            listType: { $in: ["Custom"] }
+          },
+          {
+            userId: { $eq: Meteor.user()._id }
+          }
+
+        ] 
+
+        }
+      
+    ).fetch(); // Fetch all lists, not just the user's lists
+
+    //! Jank. Handles FOLLOWERS visibility with following filter.
+    //! Ideally, this should be handled by the mongodb call above 
+    returnLists = returnLists.filter(isVisible)
+    
+    return returnLists
   }, []);
 
   useEffect(() => {
@@ -362,8 +459,8 @@ const SearchBar = ({ currentUser }) => {
               <div
                 key={tab}
                 className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab
-                    ? 'bg-[#7B1450] text-white border-[#7B1450]'
-                    : 'bg-[#282525] text-white border-transparent'
+                  ? 'bg-[#7B1450] text-white border-[#7B1450]'
+                  : 'bg-[#282525] text-white border-transparent'
                   } border`}
                 onClick={() => {
                   setSearchState((prevState) => ({
@@ -383,56 +480,38 @@ const SearchBar = ({ currentUser }) => {
             <div className="flex items-center">
               {/* Genres Dropdown */}
               <div className="mr-4 mb-2">
-                <select
-                  id="genre-select"
-                  name="genre"
-                  value={selectedGenre}
-                  onChange={handleGenreChange}
-                  className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
-                >
-                  <option value="">All Genres</option>
-                  {genresList.map((genre) => (
-                    <option key={genre} value={genre}>
-                      {genre}
-                    </option>
-                  ))}
-                </select>
+                <DropdownMenu
+                  defaultText="All Genres"
+                  allText="All Genres"
+                  items={genreItems}
+                  onSelect={handleGenreSelect}
+                  selectedValue={selectedGenre}
+                  isDarkMode={true} // Set to true for dark mode
+                />
               </div>
 
               {/* Language Dropdown */}
               <div className="mr-4 mb-2">
-                <select
-                  id="language-select"
-                  name="language"
-                  value={selectedLanguage}
-                  onChange={handleLanguageChange}
-                  className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
-                >
-                  <option value="">All Languages</option>
-                  {languagesList.map((lang) => (
-                    <option key={lang.code} value={lang.code}>
-                      {lang.name}
-                    </option>
-                  ))}
-                </select>
+                <DropdownMenu
+                  defaultText="All Languages"
+                  allText="All Languages"
+                  items={languageItems}
+                  onSelect={handleLanguageSelect}
+                  selectedValue={selectedLanguage}
+                  isDarkMode={true} // Set to true for dark mode
+                />
               </div>
 
               {/* Sorting Dropdown */}
               <div className="mr-4 mb-2">
-                <select
-                  id="sort-select"
-                  name="sort"
-                  value={selectedSortOption}
-                  onChange={handleSortOptionChange}
-                  className="block w-full bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
-                >
-                  <option value="">Sort By</option>
-                  {sortingOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                <DropdownMenu
+                  defaultText="Sort By"
+                  allText="Sort By"
+                  items={sortItems}
+                  onSelect={handleSortOptionSelect}
+                  selectedValue={selectedSortOption}
+                  isDarkMode={true} // Set to true for dark mode
+                />
               </div>
 
               {/* Clear Filters Icon */}
