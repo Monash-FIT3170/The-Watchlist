@@ -12,16 +12,50 @@ Meteor.methods({
   followUser(targetUserId) {
     check(targetUserId, String);
     if (!this.userId) {
-      throw new Meteor.Error('not-authorized');
+      throw new Meteor.Error('not-authorised');
     }
+    // grab the target user so we can check their privacy settings
+    const targetUser = Meteor.users.findOne({ _id: targetUserId }, { fields: { 'profile.privacy': 1, followers: 1, following: 1 } });
+
+    // check if the target user has a private profile, and if so add the current user to their requests
+    if (targetUser.profile && targetUser.profile.privacy === 'Private') {
+      Meteor.users.update(targetUserId, { $addToSet: { followerRequests: this.userId } });
+      Meteor.users.update(this.userId, { $addToSet: { followingRequests: targetUserId } });
+    }else{ //else add the current user to the target user's followers and the target user to the current user's following
     Meteor.users.update(this.userId, { $addToSet: { following: targetUserId } });
     Meteor.users.update(targetUserId, { $addToSet: { followers: this.userId } });
+    }
+  },
+  acceptRequest(followerUserID) {
+    check(followerUserID, String);
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorised');
+    }
+    // add the user to the follow list
+    Meteor.users.update(followerUserID, { $addToSet: { following: this.userId } });
+    Meteor.users.update(this.userId, { $addToSet: { followers: followerUserID } });
+    //remove the user from the requests list
+    Meteor.users.update(followerUserID, { $pull: { followingRequests: this.userId } });
+    Meteor.users.update(this.userId, { $pull: { followerRequests: followerUserID } });
+  },
+  declineRequest(followerUserID) {
+    check(followerUserID, String);
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorised');
+    }
+    //remove the user from the requests list
+    Meteor.users.update(followerUserID, { $pull: { followingRequests: this.userId } });
+    Meteor.users.update(this.userId, { $pull: { followerRequests: followerUserID } });
   },
   unfollowUser(targetUserId) {
     check(targetUserId, String);
     if (!this.userId) {
-      throw new Meteor.Error('not-authorized');
+      throw new Meteor.Error('not-authorised');
     }
+    //remove from request if they are in there
+    Meteor.users.update(this.userId, { $pull: { followingRequests: targetUserId } });
+    Meteor.users.update(targetUserId, { $pull: { followerRequests: this.userId } });
+    //and remove from the following list
     Meteor.users.update(this.userId, { $pull: { following: targetUserId } });
     Meteor.users.update(targetUserId, { $pull: { followers: this.userId } });
   },
@@ -47,6 +81,14 @@ Meteor.methods({
       throw new Meteor.Error('not-found', 'User not found');
     }
     return Meteor.users.find({ _id: { $in: user.following } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
+  },
+  'users.followerRequests'({ userId }) {
+    check(userId, String);
+    const user = Meteor.users.findOne(userId);
+    if (!user) {
+      throw new Meteor.Error('not-found', 'User not found');
+    }
+    return Meteor.users.find({ _id: { $in: user.followerRequests } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
   },
   'ratings.addOrUpdate'({ userId, contentId, contentType, rating }) {
     console.log('addOrUpdate method called with:', { userId, contentId, contentType, rating });
@@ -74,7 +116,50 @@ Meteor.methods({
       });
     }
   },
+  'ratings.addOrUpdateSeasonRating'({ userId, contentId, seasonId, rating }) {
+    console.log("Received parameters for addOrUpdateSeasonRating", { userId, contentId, seasonId, rating });
+    check(userId, String);
+    check(contentId, Number);
+    check(seasonId, Number);
+    check(rating, Number);
 
+    const existingRating = Rating.findOne({ userId, contentId, seasonId });
+    if (existingRating) {
+      Rating.update({ _id: existingRating._id }, {
+        $set: { rating }
+      });
+    } else {
+      Rating.insert({
+        userId: userId,
+        contentId: contentId,
+        seasonId: seasonId,
+        contentType: "Season",
+        rating: rating
+      });
+    }
+  },
+  'ratings.getSeasonAverage'({ contentId, seasonId }) {
+    check(contentId, Number);
+    check(seasonId, Number);
+
+    // Fetch all ratings for the given content and season
+    const seasonRatings = RatingCollection.find({ contentId, seasonId, contentType: "Season" }).fetch();
+
+    const totalRatings = seasonRatings.length;
+
+    if (totalRatings === 0) {
+      return { averageRating: 0, totalRatings: 0 }; // Return 0 if no ratings exist
+    }
+
+    // Calculate the average rating for the season
+    const totalRatingsValue = seasonRatings.reduce((sum, rating) => sum + rating.rating, 0);
+    const averageRating = totalRatingsValue / totalRatings;
+
+    return {
+      averageRating: averageRating.toFixed(1), // Return average rating to one decimal place
+      totalRatings
+    };
+  },
   updateAvatar(userId, avatarUrl) {
     check(userId, String);
     check(avatarUrl, String);
@@ -92,9 +177,66 @@ Meteor.methods({
     });
   },
 
-  // add method here
+  'users.updateProfile'(username) {
+    // Ensure the user is logged in
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to update your profile.');
+    }
 
+    // Update user profile
+    try {
+      // Update the user's username
+      if (username.username) {
+        Accounts.setUsername(this.userId, username.username);
+      }
+      return 'Profile updated successfully';
+    } catch (error) {
+      throw new Meteor.Error('update-failed', error.message);
+    }
+  },
 
+  'users.deleteUser'() {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to delete your account.');
+    }
+
+    const userId = this.userId;
+
+    // Remove the user from other users' following and followers lists
+    Meteor.users.update(
+      { following: userId },
+      { $pull: { following: userId } },
+      { multi: true }
+    );
+
+    Meteor.users.update(
+      { followers: userId },
+      { $pull: { followers: userId } },
+      { multi: true }
+    );
+
+    // Remove the user from other users' followerRequests  and followingRequests lists
+    Meteor.users.update(
+      { followingRequests: userId },
+      { $pull: { followingRequests: userId } },
+      { multi: true }
+    );
+
+    Meteor.users.update(
+      { followerRequests: userId },
+      { $pull: { followerRequests: userId } },
+      { multi: true }
+    );
+
+    // Remove user's ratings
+    RatingCollection.remove({ userId });
+
+    // Remove user's lists
+    ListCollection.remove({ userId });
+
+    // Finally, remove the user
+    Meteor.users.remove(userId);
+  }
 });
 
 const createDefaultLists = (userId) => {
@@ -131,11 +273,14 @@ Accounts.onCreateUser((options, user) => {
     user.avatarUrl = defaultAvatarUrl;
   }
   user.following = [];
+  user.followerRequests = [];
+  user.followingRequests = [];
   user.followers = [];
 
-  if (options.profile) {
-    user.profile = options.profile;
-  }
+  user.profile = {
+    ...options.profile,  
+    privacy: 'Public'    
+  };
 
   return user;
 });
@@ -157,12 +302,63 @@ Accounts.onLogin(() => {
   FlowRouter.go('/home');
 });
 
-
 Meteor.methods({
-  'users.ratingsCount'({ userId }) {
-    check(userId, String);
-    return RatingCollection.find({ userId }).count();
-  },
+  'users.updatePrivacy'(privacySetting) {
+    check(privacySetting, String);
+
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorised', 'You must be logged in to update your privacy setting.');
+    }
+
+    if (!['Public', 'Private'].includes(privacySetting)) {
+      throw new Meteor.Error('invalid-argument', 'Invalid privacy setting.');
+    }
+
+    const currentUser = Meteor.users.findOne(this.userId);
+
+    // Ensure followerRequests exists or treat it as an empty array
+    const followerRequests = currentUser?.followerRequests || [];
+
+
+    if (!currentUser.followingRequests) {
+      Meteor.users.update(this.userId, { $set: { followingRequests: [] } });
+    }
+
+    if (privacySetting === 'Public') {
+      if (followerRequests.length > 0) {
+        // Add all users from followerRequests to followers
+        Meteor.users.update(this.userId, {
+          $addToSet: { followers: { $each: followerRequests } },
+          $set: {
+            'profile.privacy': 'Public',
+            followerRequests: [] // Clear follower requests since they are accepted
+          }
+        });
+
+        // Update the followers for each user in followerRequests
+        followerRequests.forEach(followerId => {
+          Meteor.users.update(followerId, {
+            $addToSet: { following: this.userId }
+          });
+        });
+      } else {
+        // If no follower requests, just update the privacy setting
+        Meteor.users.update(this.userId, {
+          $set: {
+            'profile.privacy': 'Public',
+            followerRequests: [] // Clear follower requests
+          }
+        });
+      }
+    } else {
+      // For Private setting, just update the privacy setting
+      Meteor.users.update(this.userId, {
+        $set: {
+          'profile.privacy': privacySetting
+        }
+      });
+    }
+  }
 });
 
 Meteor.methods({
@@ -191,34 +387,6 @@ Meteor.methods({
     } else {
       throw new Meteor.Error('failed', 'Failed to subscribe to list.');
     }
-  }
-});
-
-
-// Server-side method to fetch subscribed lists
-Meteor.methods({
-  'list.getSubscribed': function ({ userId }) {
-    // Check if the userId is provided
-    if (!userId) {
-      throw new Meteor.Error('invalid-argument', 'You must provide a user ID.');
-    }
-
-    // Check if the user calling the method is logged in
-    if (!this.userId) {
-      throw new Meteor.Error('not-authorized', 'You must be logged in to access subscribed lists.');
-    }
-
-    // Check if the user is requesting their own subscribed lists
-    if (this.userId !== userId) {
-      throw new Meteor.Error('not-authorized', 'You are not authorized to view other users\' subscribed lists.');
-    }
-
-    // Fetch and return lists where the specified userId is in the subscribers array
-    return Lists.find({
-      subscribers: { $in: [userId] }
-    }, {
-      fields: { title: 1, userName: 1, content: 1 }  // Limit the fields returned for privacy/security
-    }).fetch();
   }
 });
 
@@ -319,17 +487,6 @@ Meteor.methods({
   },
 });
 Meteor.methods({
-  'genres.getAll': async function () {
-    const movieGenres = await MovieCollection.rawCollection().distinct("genres");
-    const tvGenres = await TVCollection.rawCollection().distinct("genres");
-
-    // Combine and deduplicate the genres
-    const allGenres = Array.from(new Set([...movieGenres, ...tvGenres]));
-
-    return allGenres;
-  }
-});
-Meteor.methods({
   'ratings.getGlobalAverages'() {
     const ratings = RatingCollection.find().fetch();
     const ratingMap = ratings.reduce((acc, rating) => {
@@ -383,7 +540,7 @@ Meteor.methods({
 
     const userScores = users.map(user => {
       if (user._id === this.userId) {
-        return null; 
+        return null;
       }
 
       const userFavourites = ListCollection.findOne({
@@ -396,7 +553,7 @@ Meteor.methods({
       }
 
       const userFavouritesSet = new Set(userFavourites.content);
-      
+
       const userFavouritesArray = Array.from(userFavouritesSet);
       const currentUserFavouritesArray = Array.from(currentUserFavouritesSet);
 
@@ -406,11 +563,11 @@ Meteor.methods({
 
       if (commonFavourites.size === 0) {
         return null;
-      } 
+      }
 
       const avgListLength = (userFavouritesArray.length + currentUserFavouritesArray.length) / 2;
 
-      matchScore = commonFavourites.length/avgListLength * 100 * 1.5;
+      matchScore = commonFavourites.length / avgListLength * 100 * 1.5;
 
       if (matchScore > 100) {
         matchScore = 100;
@@ -452,7 +609,149 @@ Meteor.methods({
       throw new Meteor.Error('not-found', 'List not found.');
     }
 
-    return list;
+    // Fetch content details including popularity
+    const contentWithPopularity = list.content.map(item => {
+      let contentItem;
+      if (item.contentType === 'Movie') {
+        contentItem = MovieCollection.findOne({ contentId: item.contentId }, { fields: { popularity: 1 } });
+      } else if (item.contentType === 'TV Show') {
+        contentItem = TVCollection.findOne({ contentId: item.contentId }, { fields: { popularity: 1 } });
+      }
+      return {
+        ...item,
+        popularity: contentItem ? contentItem.popularity : null
+      };
+    });
+
+    return {
+      ...list,
+      content: contentWithPopularity
+    };
   },
 });
 
+let similarMovies = null;
+let similarTVs = null;
+
+// Load and cache similar movies data
+function loadSimilarMovies() {
+  if (!similarMovies) {
+    try {
+      const data = Assets.getText('ml_matrices/similar_movies_titles.json');
+      similarMovies = JSON.parse(data);
+      console.log('Loaded similar_movies_titles.json');
+    } catch (error) {
+      console.error('Error loading similar_movies_titles.json:', error);
+      similarMovies = [];
+    }
+  }
+}
+
+// Load and cache similar TV shows data
+function loadSimilarTVs() {
+  if (!similarTVs) {
+    try {
+      const data = Assets.getText('ml_matrices/similar_tvs_title.json');
+      similarTVs = JSON.parse(data);
+      console.log('Loaded similar_tvs_title.json');
+    } catch (error) {
+      console.error('Error loading similar_tvs_title.json:', error);
+      similarTVs = [];
+    }
+  }
+}
+
+Meteor.methods({
+  'getRecommendations'() {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized');
+    }
+
+    console.log('getRecommendations called for user:', this.userId);
+
+    loadSimilarMovies();
+    loadSimilarTVs();
+
+    const userId = this.userId;
+
+    // Fetch user's Favourite and To Watch lists
+    const favouritesList = ListCollection.findOne({ userId, listType: 'Favourite' });
+    const toWatchList = ListCollection.findOne({ userId, listType: 'To Watch' });
+
+    console.log('Fetched lists:', { favouritesList, toWatchList });
+
+    const allContent = [];
+    if (favouritesList?.content?.length > 0) {
+      allContent.push(...favouritesList.content);
+    }
+    if (toWatchList?.content?.length > 0) {
+      allContent.push(...toWatchList.content);
+    }
+
+    console.log('All content from lists:', allContent);
+
+    if (allContent.length === 0) {
+      console.log('No content in Favourite or To Watch lists.');
+      return { movies: [], shows: [] };
+    }
+
+    // Select random content from user's lists
+    const selectedContent = selectRandomContent(allContent, 5);
+    console.log('Selected random content:', selectedContent);
+
+    // Separate titles by content type
+    const movieTitles = selectedContent.filter(item => item.contentType === 'Movie').map(item => item.title);
+    const tvTitles = selectedContent.filter(item => item.contentType === 'TV Show').map(item => item.title);
+
+    console.log('Movie Titles:', movieTitles);
+    console.log('TV Show Titles:', tvTitles);
+
+    const recommendedMovies = movieTitles.length > 0 ? fetchContentRecommendations(movieTitles, 'movies') : [];
+    const recommendedShows = tvTitles.length > 0 ? fetchContentRecommendations(tvTitles, 'tv') : [];
+
+    console.log('Recommended Movies:', recommendedMovies);
+    console.log('Recommended Shows:', recommendedShows);
+
+    return { movies: recommendedMovies, shows: recommendedShows };
+  },
+});
+
+// Helper function to select random content
+function selectRandomContent(contentList, maxItems) {
+  const selectedItems = [];
+  const listCopy = [...contentList];
+
+  while (selectedItems.length < maxItems && listCopy.length > 0) {
+    const randomIndex = Math.floor(Math.random() * listCopy.length);
+    selectedItems.push(listCopy.splice(randomIndex, 1)[0]);
+  }
+  return selectedItems;
+}
+
+// Helper function to fetch content recommendations
+function fetchContentRecommendations(titles, contentType) {
+  const recommendations = [];
+  const similarData = contentType === 'movies' ? similarMovies : similarTVs;
+
+  titles.forEach(title => {
+    const recommendationData = similarData.find(rec => rec.Title === title);
+    console.log(`Recommendation data for ${title}:`, recommendationData);
+    const recommendedIds = recommendationData ? recommendationData[contentType === 'movies' ? 'similar_movies' : 'similar_tvs'] : [];
+    const idsToFetch = recommendedIds.slice(0, 35).map(id => Number(id)); // Convert to Number
+
+    console.log(`IDs to fetch for ${title}:`, idsToFetch);
+
+    const contentItems = (contentType === 'movies' ? MovieCollection : TVCollection)
+      .find({ contentId: { $in: idsToFetch } })
+      .fetch();
+
+    console.log(`Recommendations for ${title}:`, contentItems);
+
+    recommendations.push({
+      title,
+      recommendations: contentItems,
+    });
+  });
+
+  return recommendations;
+}

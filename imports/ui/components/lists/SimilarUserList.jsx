@@ -17,7 +17,7 @@ const SimilarUserList = () => {
     Meteor.call('users.getSimilarUsers', (error, result) => {
       if (error) {
         console.error('Error fetching similar users:', error);
-        setLoading(false); 
+        setLoading(false);
       } else {
         console.log('Similar Users:', result);
 
@@ -32,6 +32,17 @@ const SimilarUserList = () => {
       }
     });
   }, []);
+
+  // Function to check if the current user is following the given userId
+  const isFollowing = (userId) => {
+    const currentUser = Meteor.user();
+    return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
+  };
+
+  const isRequested = (userId) => {
+    const currentUser = Meteor.user();
+    return (currentUser?.followingRequests && currentUser?.followingRequests.includes(userId)) 
+  };
 
   useEffect(() => {
     const updateContainerWidth = () => {
@@ -58,7 +69,7 @@ const SimilarUserList = () => {
       </div>
       {loading ? (
         <div className="flex justify-center items-center py-4">
-          <div className="loader"></div> 
+          <div className="loader"></div>
           <p className="text-white text-lg">Loading...</p>
         </div>
       ) : (
@@ -81,13 +92,17 @@ const SimilarUserList = () => {
                   </div>
                   {currentUserId !== match.user._id && (
                     <button
-                      className={`mt-2 px-4 py-1 bg-fuchsia-600 text-white rounded-full`}
+                      className={`mt-2 px-4 py-1 ${isFollowing(match.user._id) ? 'bg-blue-600' : 'bg-fuchsia-600'} text-white rounded-full`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleFollow(match.user._id);
-                      }}
-                    >
-                      Follow
+                      if (isFollowing(match.user._id) || isRequested(match.user._id)) {
+                    handleUnfollow(match.user._id);
+                  } else {
+                    handleFollow(match.user._id);
+                  }
+                }}
+              >
+                {isFollowing(match.user._id) ? 'Unfollow'  : isRequested(match.user._id) ? 'Requested' : 'Follow'}
                     </button>
                   )}
                 </div>

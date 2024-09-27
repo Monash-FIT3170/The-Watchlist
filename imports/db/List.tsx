@@ -96,10 +96,12 @@ export const ContentSummary = Class.create({
             type: [String],
             optional: true
         },
+        popularity: {
+            type: Number,
+            optional: true
+        }
     }
 });
-
-
 
 // Define the schema for the List
 const List = Class.create({
