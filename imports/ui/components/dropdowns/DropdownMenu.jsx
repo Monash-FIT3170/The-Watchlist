@@ -49,9 +49,10 @@ const DropdownMenu = ({
   const dropdownItems = [allOption, ...items];
 
   // Tailwind classes for dark mode
-  const buttonClasses = 'inline-flex w-full justify-center gap-x-1.5 rounded-md bg-dark px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-gray-700 hover:bg-gray-700';
+  const buttonClasses = 'inline-flex w-full justify-center gap-x-1.5 rounded-md bg-dark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700';
 
-  const menuClasses = 'absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-dark shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none';
+  // Add `max-h-80 overflow-y-auto` to make the dropdown scrollable
+  const menuClasses = 'absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-dark shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-80 overflow-y-auto';
 
   const itemClasses = 'block px-4 py-2 text-sm text-white hover:bg-gray-700';
 
@@ -72,7 +73,7 @@ const DropdownMenu = ({
         stroke="#7B1450"
       />
     </svg>
-  );  
+  );
 
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
