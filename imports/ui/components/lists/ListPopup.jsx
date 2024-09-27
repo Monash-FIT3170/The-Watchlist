@@ -49,11 +49,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     setList(null);
                 } else {
                     setList(result);
-                    // const localhost = "localhost:3000";
-                    // const domain = "thewatchlist.xyz" 
-                    // Change between domain and localhost when testing
-                    // setShareUrl(`https://${localhost}/watchlist/${result._id}`);
-                    setShareUrl(`${Meteor.absoluteUrl.defaultOptions.rootUrl}/list/${result._id}`);
+                    const localhost = "http://localhost:3000";
+                    const domain = "https://www.thewatchlist.xyz" 
+                    // Change to domain before merging with main
+                    setShareUrl(`${domain}/list/${result._id}`);
+                    // setShareUrl(`${Meteor.absoluteUrl.defaultOptions.rootUrl}/list/${result._id}`); // For some reason the production link doesn't have www.
                 }
             });
         }
