@@ -25,6 +25,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [selectedTab, setSelectedTab] = useState('all');
     const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
+    const [getVisibility, setVisibility] = useState('PUBLIC')
     const popupRef = useRef(null);
     const contentInfoModalRef = useRef(null); // Ref for ContentInfoModal
     const modalRef = useRef(null) // Ref for Modal
@@ -75,6 +76,12 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
             setIsSubscribed(isSubscribed);
         }
     }, [list?.subscribers]);
+
+    useEffect(() => {
+        if (list?.visibility) {
+            setVisibility(list.visibility)
+        }
+    }, [list?.visibility]);
 
     useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside);
@@ -199,6 +206,24 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                 console.error('Unsubscription error:', err);
             } else {
                 setIsSubscribed(false);
+            }
+        });
+    };
+
+    const handleVisibilityChange = () => {
+        choices = ["PUBLIC", "FOLLOWERS", "ONLY_ME"]
+        index = choices.indexOf(getVisibility)
+
+        index = ++index%choices.length;
+
+        Meteor.call('list.setVisibility', {
+            listId: listId, 
+            visibleType: choices[index]
+        }, (err) => {
+            if (err) {
+                console.error('Set visibility error:', err);
+            } else { 
+                setVisibility(choices[index]);
             }
         });
     };
@@ -368,6 +393,18 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                 {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
                             </button>
                         )}
+
+                        {/* Conditionally render visibility settings */}
+                        {list.userId === Meteor.userId() && (
+                            <button
+                            onClick={ handleVisibilityChange }
+                            className={`px-4 py-2 rounded-full font-bold bg-blue-500 hover:bg-blue-700 text-white`}
+                            >
+                                { getVisibility }
+                                
+                            </button>
+                        )}
+                        
                         <button
                             className="text-2xl font-bold text-gray-500 hover:text-gray-800"
                             onClick={onClose}

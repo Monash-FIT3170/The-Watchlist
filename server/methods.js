@@ -350,6 +350,9 @@ Meteor.methods({
           }
         });
       }
+
+      // if list visibility interaction is wanted when changed to 'public' profile, add here.
+
     } else {
       // For Private setting, just update the privacy setting
       Meteor.users.update(this.userId, {
@@ -357,6 +360,23 @@ Meteor.methods({
           'profile.privacy': privacySetting
         }
       });
+
+      // set all PUBLIC list visibilities to FOLLOWERS when profile changed to private
+      ListCollection.update(
+        {
+          userId: this.userId, 
+          visibility: "PUBLIC"
+        }, 
+        {
+          $set: {
+            visibility: "FOLLOWERS"
+          }
+        },
+        {
+          upsert: false,
+          multi: true
+        }
+      );
     }
   }
 });
@@ -417,6 +437,39 @@ Meteor.methods({
       return 'Unsubscribed successfully';
     } else {
       throw new Meteor.Error('failed', 'Failed to unsubscribe from list.');
+    }
+  }
+});
+
+Meteor.methods({
+  'list.setVisibility'({listId, visibleType}) {
+    check(listId, String);
+    check(visibleType, String);
+
+
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized', 'You must be logged in to set list visibility.');
+    }
+
+    const list = ListCollection.findOne({ _id: listId });
+
+    if (!list) {
+      throw new Meteor.Error('not-found', 'List not found.');
+    }
+
+    if (list.userId !== this.userId) {
+      throw new Meteor.Error('invalid-action', "You cannot change visibility settings of other user's lists.");
+    }
+
+    const result = ListCollection.update(
+      { _id: listId },
+      { $set: { visibility: visibleType } }
+    );
+
+    if (result) {
+      return `Successfully changed list visibility to ${visibleType}`;
+    } else {
+      throw new Meteor.Error('failed', 'Failed to change visibility of list.');
     }
   }
 });
