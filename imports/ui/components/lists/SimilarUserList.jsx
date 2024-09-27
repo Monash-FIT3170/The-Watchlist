@@ -35,13 +35,18 @@ const SimilarUserList = () => {
 
   // Function to check if the current user is following the given userId
   const isFollowing = (userId) => {
-    const currentUser = Meteor.user();
-    return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
+    return (
+      currentUser &&
+      Array.isArray(currentUser.following) &&
+      currentUser.following.some((f) => f.userId === userId)
+    );
   };
 
   const isRequested = (userId) => {
-    const currentUser = Meteor.user();
-    return (currentUser?.followingRequests && currentUser?.followingRequests.includes(userId)) 
+    return (
+      currentUser.followingRequests &&
+      currentUser.followingRequests.includes(userId)
+    );
   };
 
   useEffect(() => {
@@ -92,18 +97,28 @@ const SimilarUserList = () => {
                   </div>
                   {currentUserId !== match.user._id && (
                     <button
-                      className={`mt-2 px-4 py-1 ${isFollowing(match.user._id) ? 'bg-blue-600' : 'bg-fuchsia-600'} text-white rounded-full`}
-                      onClick={(e) => {
-                        e.stopPropagation();
+                    className={`mt-2 px-4 py-1 ${
+                      isFollowing(match.user._id)
+                        ? 'bg-blue-600'
+                        : isRequested(match.user._id)
+                        ? 'bg-gray-600'
+                        : 'bg-fuchsia-600'
+                    } text-white rounded-full`}
+                    onClick={(e) => {
+                      e.stopPropagation();
                       if (isFollowing(match.user._id) || isRequested(match.user._id)) {
-                    handleUnfollow(match.user._id);
-                  } else {
-                    handleFollow(match.user._id);
-                  }
-                }}
-              >
-                {isFollowing(match.user._id) ? 'Unfollow'  : isRequested(match.user._id) ? 'Requested' : 'Follow'}
-                    </button>
+                        Meteor.call('unfollowUser', match.user._id);
+                      } else {
+                        Meteor.call('followUser', match.user._id);
+                      }
+                    }}
+                  >
+                    {isFollowing(match.user._id)
+                      ? 'Unfollow'
+                      : isRequested(match.user._id)
+                      ? 'Requested'
+                      : 'Follow'}
+                  </button>
                   )}
                 </div>
               ))}
