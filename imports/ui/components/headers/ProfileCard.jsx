@@ -22,7 +22,7 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser }) => {
     // Set following state based on currentUser's following list
     if (
       Array.isArray(currentUser.following) &&
-      currentUser.following.includes(user._id)
+    currentUser.following.some((f) => f.userId === user._id)
     ) {
       setIsFollowing(true);
     } else {
@@ -219,22 +219,26 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser }) => {
             </div>
             <div>
               {showFollowButton ? (
-                <button
-                  onClick={() => {
-                    if (isFollowing || isRequested) {
-                      handleUnfollow();
-                    } else {
-                      handleFollow();
-                    }
-                  }}
-                  className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450]`}
-                >
-                  {isFollowing
-                    ? 'Unfollow'
-                    : isRequested
-                      ? 'Requested'
-                      : 'Follow'}
-                </button>
+                currentUser._id !== user._id && (
+                  <button
+                    onClick={() => {
+                      if (isFollowing || isRequested) {
+                        handleUnfollow();
+                      } else {
+                        handleFollow();
+                      }
+                    }}
+                    className={`mt-2 px-6 py-2 ${
+                      isFollowing
+                        ? 'bg-blue-600'
+                        : isRequested
+                        ? 'bg-gray-600'
+                        : 'bg-fuchsia-600'
+                    } text-white rounded-full`}
+                  >
+                    {isFollowing ? 'Unfollow' : isRequested ? 'Requested' : 'Follow'}
+                  </button>
+                )
               ) : (
                 <Link to="/user-discovery">
                   <button className="mt-2 ml-1 p-3 text-xl bg-transparent border-2 border-white rounded-full hover:bg-white hover:text-zinc-900 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-zinc-700 focus:ring-opacity-50">
