@@ -14,6 +14,9 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error('not-authorised');
     }
+
+    const followedAt = new Date();
+
     // grab the target user so we can check their privacy settings
     const targetUser = Meteor.users.findOne({ _id: targetUserId }, { fields: { 'profile.privacy': 1, followers: 1, following: 1 } });
 
@@ -22,8 +25,8 @@ Meteor.methods({
       Meteor.users.update(targetUserId, { $addToSet: { followerRequests: this.userId } });
       Meteor.users.update(this.userId, { $addToSet: { followingRequests: targetUserId } });
     }else{ //else add the current user to the target user's followers and the target user to the current user's following
-    Meteor.users.update(this.userId, { $addToSet: { following: targetUserId } });
-    Meteor.users.update(targetUserId, { $addToSet: { followers: this.userId }, $set: { followedAt: new Date() } });
+    Meteor.users.update(this.userId, { $addToSet: { following: { userId: targetUserId, followedAt: followedAt }} });
+    Meteor.users.update(targetUserId, { $addToSet: { followers: { userId: this.userId, followedAt: followedAt } } });
     }
   },
   acceptRequest(followerUserID) {

@@ -28,13 +28,15 @@ const AllUsersPage = ({ currentUser }) => {
 
   // Fetch users from the publication
   const { users, isLoading } = useTracker(() => {
-    const subscription = Meteor.subscribe('allUsers');
+    const subscription = Meteor.subscribe('allUsers', currentUserId);
 
     return {
       isLoading: !subscription.ready(),
       users: Meteor.users.find({}, { fields: { username: 1, avatarUrl: 1, followedAt: 1, following: 1 } }).fetch(),
     };
   }, []);
+
+
 
   const filteredUsers = users.filter(user =>
     user.username.toLowerCase().includes(searchTerm)
