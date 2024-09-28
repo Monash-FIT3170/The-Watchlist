@@ -6,7 +6,7 @@ import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { useTracker } from 'meteor/react-meteor-data';
 
-const AllUsersPage = ({ currentUser }) => {
+const AllUsersPage = ({ users: propUsers, currentUser }) => {
   const navigate = useNavigate();
   const currentUserId = Meteor.userId();
 
@@ -33,29 +33,38 @@ const AllUsersPage = ({ currentUser }) => {
     setSearchTerm(event.target.value.toLowerCase());
   };
 
-  // Fetch users from the publication
-  const { users, isLoading } = useTracker(() => {
-    const subscription = Meteor.subscribe('allUsers', currentUserId);
+  // const users = propUsers || [];
 
-    return {
-      isLoading: !subscription.ready(),
-      users: Meteor.users
-        .find(
-          {},
-          {
-            fields: {
-              username: 1,
-              avatarUrl: 1,
-              createdAt: 1,
-              // Include followedAt if available
-              'following.userId': 1,
-              'following.followedAt': 1,
-            },
-          }
-        )
-        .fetch(),
-    };
-  }, []);
+  // Fetch users from the publication
+  const { users: fetchedUsers, isLoading } = useTracker(() => {
+    if (propUsers && propUsers.length > 0) {
+      // When propUsers is provided, use it and avoid the subscription
+      return { users: propUsers, isLoading: false };
+    } else {
+      const subscription = Meteor.subscribe('allUsers', currentUserId);
+
+      return {
+        isLoading: !subscription.ready(),
+        users: Meteor.users
+          .find(
+            {},
+            {
+              fields: {
+                username: 1,
+                avatarUrl: 1,
+                createdAt: 1,
+                'following.userId': 1,
+                'following.followedAt': 1,
+              },
+            }
+          )
+          .fetch(),
+      };
+    }
+  }, [propUsers, currentUserId]);
+
+  // Use propUsers if provided, else use fetchedUsers
+  const users = propUsers && propUsers.length > 0 ? propUsers : fetchedUsers;
 
   // Map over users to include followedAt
   const updatedUsers = users.map((user) => {
@@ -67,6 +76,8 @@ const AllUsersPage = ({ currentUser }) => {
       followedAt: followingObj ? followingObj.followedAt : user.createdAt,
     };
   });
+
+  
 
   const filteredUsers = updatedUsers.filter((user) =>
     user.username.toLowerCase().includes(searchTerm)
@@ -97,7 +108,7 @@ const AllUsersPage = ({ currentUser }) => {
     console.log('AllUsersPage loaded with users:', users);
   }, [users]);
 
-  if (isLoading) {
+  if (isLoading && (!propUsers || propUsers.length === 0)) {
     return <div>Loading...</div>;
   }
 
