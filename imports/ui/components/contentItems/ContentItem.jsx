@@ -116,6 +116,7 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
                             }
                         });
                     }}
+                    seasonId={content.originalContentType === 'Season' ? content.seasonId : null} // Pass seasonId if applicable
                 />
             )}
             <div className="text-white mt-2 text-left w-full" style={{

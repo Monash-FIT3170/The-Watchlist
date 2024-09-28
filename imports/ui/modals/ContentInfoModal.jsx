@@ -9,7 +9,7 @@ import SingleStarRating from '../components/ratings/SingleStarRating';
 
 const popcornUrl = "./images/popcorn-banner.png"; // Default image URL
 
-const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRatingUpdate }, ref) => {
+const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRatingUpdate, seasonId }, ref) => {
 
   const contentId = content.contentId || content.id;
   const [showModal, setShowModal] = useState(false);
@@ -277,6 +277,13 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
     };
   }, []);
 
+  useEffect(() => {
+    if (isOpen && seasonId) {
+      setSelectedSeason(seasonId);
+      setShowEpisodes(true);
+    }
+  }, [isOpen, seasonId]);
+
 
   const firstAiredYear = new Date(content.first_aired).getFullYear();
   const lastAiredYear = content.last_aired ? new Date(content.last_aired).getFullYear() : 'present';
@@ -402,7 +409,7 @@ const ContentInfoModal = forwardRef(({ isOpen, onClose, content, modalRef, onRat
                   </Scrollbar>
                 )}
                 <div className="mt-4">
-                  <h4 className="text-lg mb-2">Rate this Season</h4>
+                  <h4 className="text-lg mb-2">{`Rate season ${selectedSeason}`}</h4>
                   <ClickableRatingStar
                     totalStars={5}
                     rating={seasonRating || 0}
