@@ -262,9 +262,10 @@ const Settings = () => {
                             </div>
                         )}
                     </div>
+                    <hr className="border-t border-gray-700 my-4" />
                 </div>
             )}
-            <hr className="border-t border-gray-700 my-4" />
+            
 
             <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
                 {/* Left Column - Privacy settings */}
