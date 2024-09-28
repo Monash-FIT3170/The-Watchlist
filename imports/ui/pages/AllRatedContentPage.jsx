@@ -73,9 +73,6 @@ const AllRatedContentPage = ({ currentUser }) => {
         content = TVCollection.findOne({ contentId: rating.contentId });
       }
 
-      // Log content fetched
-      console.log(`Content for rating ${rating._id}:`, content);
-
       if (content && rating.contentType === 'Season') {
         // Modify the title to include the season number
         content = {
@@ -92,10 +89,10 @@ const AllRatedContentPage = ({ currentUser }) => {
 
       return content ? {
         ...content,
-        rating: rating.rating,
+        rating: Number(rating.rating), // Ensure rating is a number
         contentType: content.contentType || rating.contentType,
         originalContentType: content.originalContentType || rating.contentType,
-      } : null;
+      } : null;      
     }).filter(content => content && content.title);
 
     // Log content details
@@ -113,32 +110,25 @@ const AllRatedContentPage = ({ currentUser }) => {
   }, [userId, currentUser._id, userSpecific]);
 
   useEffect(() => {
-    // Log rated content
-    console.log("ratedContent in useEffect:", ratedContent);
-
     const filtered = ratedContent.filter(content => {
       const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTab =
-        selectedTab === 'All' || content.originalContentType === tabMapping[selectedTab];
-
-      // Log filtering criteria
-      console.log(`Content "${content.title}" matchesSearch: ${matchesSearch}, matchesTab: ${matchesTab}`);
-
+      const matchesTab = selectedTab === 'All'
+        ? content.contentType === 'Movie' || content.originalContentType === 'TV Show'
+        : content.originalContentType === tabMapping[selectedTab];
       return matchesSearch && matchesTab;
     });
 
-    // Log filtered content
-    console.log("filteredContent:", filtered);
+    // Log ratings for debugging
+    console.log('Before sorting, ratings are:', filtered.map(c => ({ title: c.title, rating: c.rating })));
 
+  
     const sorted = filtered.sort((a, b) => {
       return sortOrder === 'ascending' ? a.rating - b.rating : b.rating - a.rating;
     });
-
-    // Log sorted content
-    console.log("sortedContent:", sorted);
-
+  
     setFilteredContent(sorted);
   }, [searchTerm, selectedTab, ratedContent, sortOrder]);
+  
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
