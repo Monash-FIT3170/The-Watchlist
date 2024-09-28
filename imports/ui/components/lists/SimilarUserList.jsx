@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
 import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
 
-const SimilarUserList = () => {
+const SimilarUserList = React.memo(({ currentUser }) => {
   const [similarUsers, setSimilarUsers] = useState([]);
   const [containerWidth, setContainerWidth] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -128,6 +128,6 @@ const SimilarUserList = () => {
       )}
     </div>
   );
-};
+});
 
 export default SimilarUserList;
