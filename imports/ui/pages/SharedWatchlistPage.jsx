@@ -58,8 +58,8 @@ const SharedWatchlistPage = ({currentUser}) => {
     return (
         <div className="flex flex-col min-h-screen bg-darker">
             <SharedWatchlistHeader list={list} tabMapping={tabMapping} selectedTab={selectedTab} setSelectedTab={setSelectedTab} currentUser={currentUser} />
-            <Scrollbar className="search-results-container flex-grow overflow-auto">
-                <div className="grid-responsive">
+            <Scrollbar className="search-results-container flex-grow overflow-auto px-4">
+            <div className="grid gap-4 grid-cols-[repeat(auto-fill,_200px)] justify-between items-center">
                     {filteredContent.length > 0 ? filteredContent.map((content, index) => (
                         <ContentItem
                             key={index}
