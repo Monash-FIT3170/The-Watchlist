@@ -74,15 +74,15 @@ const AllRatedContentPage = ({ currentUser }) => {
       }
 
       if (content && rating.contentType === 'Season') {
-        // Modify the title to include the season number
         content = {
           ...content,
           title: `${content.title} - Season ${rating.seasonId}`,
-          contentType: 'TV Show', // For ContentItem
-          originalContentType: 'Season', // For filtering
+          contentType: 'Season', // Set contentType to 'Season'
+          originalContentType: 'Season',
           seasonId: rating.seasonId, // Include seasonId for unique key
         };
-      } else if (content) {
+      }
+      else if (content) {
         content.contentType = rating.contentType; // Ensure contentType is set
         content.originalContentType = rating.contentType;
       }
@@ -92,7 +92,7 @@ const AllRatedContentPage = ({ currentUser }) => {
         rating: Number(rating.rating), // Ensure rating is a number
         contentType: content.contentType || rating.contentType,
         originalContentType: content.originalContentType || rating.contentType,
-      } : null;      
+      } : null;
     }).filter(content => content && content.title);
 
     // Log content details
@@ -121,14 +121,14 @@ const AllRatedContentPage = ({ currentUser }) => {
     // Log ratings for debugging
     console.log('Before sorting, ratings are:', filtered.map(c => ({ title: c.title, rating: c.rating })));
 
-  
+
     const sorted = filtered.sort((a, b) => {
       return sortOrder === 'ascending' ? a.rating - b.rating : b.rating - a.rating;
     });
-  
+
     setFilteredContent(sorted);
   }, [searchTerm, selectedTab, ratedContent, sortOrder]);
-  
+
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -197,12 +197,14 @@ const AllRatedContentPage = ({ currentUser }) => {
         <div className="grid-responsive">
           {filteredContent.length > 0 ? filteredContent.map((content) => (
             <ContentItem
-              key={content.originalContentType === 'Season'
-                ? `Season-${content.contentId}-${content.seasonId}`
-                : `${content.contentType}-${content.contentId}`}
+              key={
+                content.originalContentType === 'Season'
+                  ? `Season-${content.contentId}-${content.seasonId}`
+                  : `${content.contentType}-${content.contentId}`
+              }
               content={content}
               isUserSpecificRating={userSpecific}
-              contentType={content.contentType} // 'TV Show' or 'Movie'
+              contentType={content.contentType} // This will be 'Season' for seasons
             />
           )) : <p>No rated content available.</p>}
         </div>
