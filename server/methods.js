@@ -14,29 +14,55 @@ Meteor.methods({
     if (!this.userId) {
       throw new Meteor.Error('not-authorised');
     }
-    // grab the target user so we can check their privacy settings
-    const targetUser = Meteor.users.findOne({ _id: targetUserId }, { fields: { 'profile.privacy': 1, followers: 1, following: 1 } });
 
-    // check if the target user has a private profile, and if so add the current user to their requests
+    const followedAt = new Date();
+
+    // Fetch target user's privacy settings
+    const targetUser = Meteor.users.findOne(
+      { _id: targetUserId },
+      { fields: { 'profile.privacy': 1 } }
+    );
+
     if (targetUser.profile && targetUser.profile.privacy === 'Private') {
-      Meteor.users.update(targetUserId, { $addToSet: { followerRequests: this.userId } });
-      Meteor.users.update(this.userId, { $addToSet: { followingRequests: targetUserId } });
-    }else{ //else add the current user to the target user's followers and the target user to the current user's following
-    Meteor.users.update(this.userId, { $addToSet: { following: targetUserId } });
-    Meteor.users.update(targetUserId, { $addToSet: { followers: this.userId } });
+      Meteor.users.update(targetUserId, {
+        $addToSet: { followerRequests: this.userId },
+      });
+      Meteor.users.update(this.userId, {
+        $addToSet: { followingRequests: targetUserId },
+      });
+    } else {
+      // Add to following/followers with followedAt
+      Meteor.users.update(this.userId, {
+        $addToSet: { following: { userId: targetUserId, followedAt } },
+      });
+      Meteor.users.update(targetUserId, {
+        $addToSet: { followers: { userId: this.userId, followedAt } },
+      });
     }
   },
   acceptRequest(followerUserID) {
     check(followerUserID, String);
     if (!this.userId) {
-      throw new Meteor.Error('not-authorised');
+      throw new Meteor.Error('not-authorized');
     }
-    // add the user to the follow list
-    Meteor.users.update(followerUserID, { $addToSet: { following: this.userId } });
-    Meteor.users.update(this.userId, { $addToSet: { followers: followerUserID } });
-    //remove the user from the requests list
-    Meteor.users.update(followerUserID, { $pull: { followingRequests: this.userId } });
-    Meteor.users.update(this.userId, { $pull: { followerRequests: followerUserID } });
+
+    const followedAt = new Date();
+
+    // Add to following/followers with followedAt
+    Meteor.users.update(followerUserID, {
+      $addToSet: { following: { userId: this.userId, followedAt } },
+    });
+    Meteor.users.update(this.userId, {
+      $addToSet: { followers: { userId: followerUserID, followedAt } },
+    });
+
+    // Remove from requests
+    Meteor.users.update(followerUserID, {
+      $pull: { followingRequests: this.userId },
+    });
+    Meteor.users.update(this.userId, {
+      $pull: { followerRequests: followerUserID },
+    });
   },
   declineRequest(followerUserID) {
     check(followerUserID, String);
@@ -50,21 +76,34 @@ Meteor.methods({
   unfollowUser(targetUserId) {
     check(targetUserId, String);
     if (!this.userId) {
-      throw new Meteor.Error('not-authorised');
+      throw new Meteor.Error('not-authorized');
     }
-    //remove from request if they are in there
-    Meteor.users.update(this.userId, { $pull: { followingRequests: targetUserId } });
-    Meteor.users.update(targetUserId, { $pull: { followerRequests: this.userId } });
-    //and remove from the following list
-    Meteor.users.update(this.userId, { $pull: { following: targetUserId } });
-    Meteor.users.update(targetUserId, { $pull: { followers: this.userId } });
+
+    // Remove from requests if present
+    Meteor.users.update(this.userId, {
+      $pull: { followingRequests: targetUserId },
+    });
+    Meteor.users.update(targetUserId, {
+      $pull: { followerRequests: this.userId },
+    });
+
+    // Remove from following/followers
+    Meteor.users.update(this.userId, {
+      $pull: { following: { userId: targetUserId } },
+    });
+    Meteor.users.update(targetUserId, {
+      $pull: { followers: { userId: this.userId } },
+    });
   },
   isFollowing(targetUserId) {
     if (!this.userId) {
       throw new Meteor.Error('not-authorized');
     }
     const user = Meteor.users.findOne(this.userId);
-    return user.following.includes(targetUserId);
+    return (
+      user.following &&
+      user.following.some((f) => f.userId === targetUserId)
+    );
   },
   'users.followers'({ userId }) {
     check(userId, String);
@@ -72,7 +111,10 @@ Meteor.methods({
     if (!user) {
       throw new Meteor.Error('not-found', 'User not found');
     }
-    return Meteor.users.find({ _id: { $in: user.followers } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
+    const followerUserIds = user.followers.map((f) => f.userId);
+    return Meteor.users
+      .find({ _id: { $in: followerUserIds } }, { fields: { username: 1, avatarUrl: 1 } })
+      .fetch();
   },
   'users.following'({ userId }) {
     check(userId, String);
@@ -80,8 +122,12 @@ Meteor.methods({
     if (!user) {
       throw new Meteor.Error('not-found', 'User not found');
     }
-    return Meteor.users.find({ _id: { $in: user.following } }, { fields: { username: 1, avatarUrl: 1 } }).fetch();
+    const followingUserIds = user.following.map((f) => f.userId);
+    return Meteor.users
+      .find({ _id: { $in: followingUserIds } }, { fields: { username: 1, avatarUrl: 1 } })
+      .fetch();
   },
+
   'users.followerRequests'({ userId }) {
     check(userId, String);
     const user = Meteor.users.findOne(userId);
@@ -278,8 +324,8 @@ Accounts.onCreateUser((options, user) => {
   user.followers = [];
 
   user.profile = {
-    ...options.profile,  
-    privacy: 'Public'    
+    ...options.profile,
+    privacy: 'Public'
   };
 
   return user;

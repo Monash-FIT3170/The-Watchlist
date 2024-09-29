@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
 import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
 
-const UserList = React.memo(({ heading, users, searchTerm, onUnfollow }) => {
+const UserList = React.memo(({ heading, users, searchTerm, onUnfollow, currentUser }) => {
   const [containerWidth, setContainerWidth] = useState(0);
   const [displayedUsers, setDisplayedUsers] = useState([]);
 
@@ -17,14 +17,20 @@ const UserList = React.memo(({ heading, users, searchTerm, onUnfollow }) => {
   
   // Function to check if the current user is following the given userId
   const isFollowing = (userId) => {
-    const currentUser = Meteor.user();
-    return currentUser && Array.isArray(currentUser.following) && currentUser.following.includes(userId);
+    return (
+      currentUser &&
+      Array.isArray(currentUser.following) &&
+      currentUser.following.some((f) => f.userId === userId)
+    );
   };
 
   const isRequested = (userId) => {
-    const currentUser = Meteor.user();
-    return (currentUser?.followingRequests && currentUser?.followingRequests.includes(userId)) 
+    return (
+      currentUser.followingRequests &&
+      currentUser.followingRequests.includes(userId)
+    );
   };
+
 
   // Adjusting how many users to show based on the container width
   useEffect(() => {
@@ -78,18 +84,28 @@ const UserList = React.memo(({ heading, users, searchTerm, onUnfollow }) => {
             </div>
             {currentUserId !== user._id && (
               <button
-                className={`mt-2 px-4 py-1 ${isFollowing(user._id) ? 'bg-blue-600' : 'bg-fuchsia-600'} text-white rounded-full`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isFollowing(user._id) || isRequested(user._id)) {
-                    handleUnfollow(user._id);
-                  } else {
-                    handleFollow(user._id);
-                  }
-                }}
-              >
-                {isFollowing(user._id) ? 'Unfollow'  : isRequested(user._id) ? 'Requested' : 'Follow'}
-              </button>
+              className={`mt-2 px-4 py-1 ${
+                isFollowing(user._id)
+                  ? 'bg-blue-600'
+                  : isRequested(user._id)
+                  ? 'bg-gray-600'
+                  : 'bg-fuchsia-600'
+              } text-white rounded-full`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isFollowing(user._id) || isRequested(user._id)) {
+                  Meteor.call('unfollowUser', user._id);
+                } else {
+                  Meteor.call('followUser', user._id);
+                }
+              }}
+            >
+              {isFollowing(user._id)
+                ? 'Unfollow'
+                : isRequested(user._id)
+                ? 'Requested'
+                : 'Follow'}
+            </button>
             )}
           </div>
         ))}

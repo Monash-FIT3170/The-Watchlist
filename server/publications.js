@@ -20,7 +20,8 @@ Meteor.publish('userData', function (userId) {
         followerRequests: 1,
         followingRequests: 1,
         followers: 1,
-        following: 1,
+        'following.userId': 1,
+        'following.followedAt': 1,
         realName: 1,
         description: 1,
       },
@@ -29,20 +30,26 @@ Meteor.publish('userData', function (userId) {
 });
 
 Meteor.publish('allUsers', function () {
-  return Meteor.users.find({}, {
-    fields: {
-      'profile.privacy': 1,
-      username: 1,
-      followerRequests: 1,
-      followingRequests: 1,
-      followers: 1,
-      following: 1,
-      avatarUrl: 1,
-      realName: 1,
-      description: 1,
-    },
-  });
+  return Meteor.users.find(
+    {},
+    {
+      fields: {
+        'profile.privacy': 1,
+        username: 1,
+        followerRequests: 1,
+        followingRequests: 1,
+        followers: 1,
+        'following.userId': 1,
+        'following.followedAt': 1,
+        avatarUrl: 1,
+        realName: 1,
+        description: 1,
+        createdAt: 1, // Include createdAt field
+      },
+    }
+  );
 });
+
 
 // Server-side publication for user-created lists
 Meteor.publish('userLists', function (userId) {
@@ -169,7 +176,8 @@ Meteor.publish('userProfileData', function (userId) {
         followerRequests: 1,
         followingRequests: 1,
         followers: 1,
-        following: 1,
+        'following.userId': 1,
+        'following.followedAt': 1,
         realName: 1,
         description: 1,
       },
