@@ -1,5 +1,5 @@
 // imports/ui/pages/AllUsersPage.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Scrollbar from '../components/scrollbar/ScrollBar';
 import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
@@ -33,8 +33,6 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
     setSearchTerm(event.target.value.toLowerCase());
   };
 
-  // const users = propUsers || [];
-
   // Fetch users from the publication
   const { users: fetchedUsers, isLoading } = useTracker(() => {
     if (propUsers && propUsers.length > 0) {
@@ -43,45 +41,48 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
     } else {
       const subscription = Meteor.subscribe('allUsers', currentUserId);
 
+      const fetched = Meteor.users.find(
+        {},
+        {
+          fields: {
+            username: 1,
+            avatarUrl: 1,
+            createdAt: 1,
+            'following.userId': 1,
+            'following.followedAt': 1,
+          },
+        }
+      ).fetch();
+
       return {
         isLoading: !subscription.ready(),
-        users: Meteor.users
-          .find(
-            {},
-            {
-              fields: {
-                username: 1,
-                avatarUrl: 1,
-                createdAt: 1,
-                'following.userId': 1,
-                'following.followedAt': 1,
-              },
-            }
-          )
-          .fetch(),
+        users: fetched,
       };
     }
-  }, [propUsers, currentUserId]);
+  }, [currentUserId]); // Removed propUsers from dependencies
 
   // Use propUsers if provided, else use fetchedUsers
   const users = propUsers && propUsers.length > 0 ? propUsers : fetchedUsers;
 
-  // Map over users to include followedAt
-  const updatedUsers = users.map((user) => {
-    const followingObj =
-      currentUser.following &&
-      currentUser.following.find((f) => f.userId === user._id);
-    return {
-      ...user,
-      followedAt: followingObj ? followingObj.followedAt : user.createdAt,
-    };
-  });
+  // Memoize updatedUsers
+  const updatedUsers = useMemo(() => {
+    return users.map((user) => {
+      const followingObj =
+        currentUser.following &&
+        currentUser.following.find((f) => f.userId === user._id);
+      return {
+        ...user,
+        followedAt: followingObj ? followingObj.followedAt : user.createdAt,
+      };
+    });
+  }, [users, currentUser]);
 
-  
-
-  const filteredUsers = updatedUsers.filter((user) =>
-    user.username.toLowerCase().includes(searchTerm)
-  );
+  // Memoize filteredUsers
+  const filteredUsers = useMemo(() => {
+    return updatedUsers.filter((user) =>
+      user.username.toLowerCase().includes(searchTerm)
+    );
+  }, [updatedUsers, searchTerm]);
 
   // Sorting function based on selected option
   const sortUsers = (users, option) => {
@@ -101,8 +102,10 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
     return users;
   };
 
-  // Get the sorted list of users
-  const sortedUsersList = sortUsers(filteredUsers, sortOption);
+  // Memoize sortedUsersList
+  const sortedUsersList = useMemo(() => {
+    return sortUsers(filteredUsers, sortOption);
+  }, [filteredUsers, sortOption]);
 
   useEffect(() => {
     console.log('AllUsersPage loaded with users:', users);
@@ -151,9 +154,9 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
         {/* Users List */}
         <Scrollbar className="w-full">
           <div className="flex flex-wrap justify-start items-start gap-8 p-4">
-            {sortedUsersList.map((user, index) => (
+            {sortedUsersList.map((user) => (
               <div
-                key={index}
+                key={user._id} // Use unique key
                 className="min-w-[200px] max-w-[200px] flex flex-col items-center p-2 rounded-lg hover:bg-gray-700 transition-colors duration-300"
                 onClick={() => navigate(`/user/${user._id}`)}
               >
