@@ -12,7 +12,7 @@ import { FaLock } from "react-icons/fa";
 import { Counts } from 'meteor/tmeasday:publish-counts';
 import Loading from './Loading';
 
-const UserProfile = ({ currentUser, loading }) => {
+const UserProfile = ({ currentUser }) => {
   const { userId } = useParams(); // Extract userId from route parameters
   const isOwnProfile = !userId || userId === currentUser._id; // Determine if viewing own profile
 
@@ -153,8 +153,10 @@ const UserProfile = ({ currentUser, loading }) => {
     return false;
   }, [isOwnProfile, userProfile, isFollowing]);
 
-  if (loading || !profileUser) {
-    return <Loading/>;
+  const localLoading = !profileUserHandle.ready() || !listsHandle.ready() || !profileUser;
+
+  if (localLoading) {
+    return <Loading />;
   }
 
   return (
