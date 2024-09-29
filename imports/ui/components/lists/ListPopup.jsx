@@ -1,8 +1,8 @@
-    // imports/ui/ListPopup.jsx
+// imports/ui/ListPopup.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { useTracker } from 'meteor/react-meteor-data';
 import RatingStar from "../ratings/RatingStar";
-import { FiEdit, FiTrash2, FiGrid, FiList, FiLink, FiShare2} from "react-icons/fi";
+import { FiEdit, FiTrash2, FiGrid, FiList, FiLink, FiShare2 } from "react-icons/fi";
 import RenameListModal from "../../modals/RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import Scrollbar from '../scrollbar/ScrollBar';
@@ -13,6 +13,7 @@ import ContentInfoModal from "../../modals/ContentInfoModal";  // Import the mod
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import { EmailShareButton, FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailIcon, FacebookIcon, TwitterIcon, WhatsappIcon } from "react-share";
+import VisibilityDropdown from "../dropdowns/VisibilityDropdown";
 
 const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [list, setList] = useState(null);
@@ -52,7 +53,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                 } else {
                     setList(result);
                     const localhost = "http://localhost:3000";
-                    const domain = "https://www.thewatchlist.xyz" 
+                    const domain = "https://www.thewatchlist.xyz"
                     // Change to domain before merging with main
                     setShareUrl(`${domain}/list/${result._id}`);
                     // setShareUrl(`${Meteor.absoluteUrl.defaultOptions.rootUrl}/list/${result._id}`); // For some reason the production link doesn't have www.
@@ -215,15 +216,15 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         choices = ["PUBLIC", "FOLLOWERS", "ONLY_ME"]
         index = choices.indexOf(getVisibility)
 
-        index = ++index%choices.length;
+        index = ++index % choices.length;
 
         Meteor.call('list.setVisibility', {
-            listId: listId, 
+            listId: listId,
             visibleType: choices[index]
         }, (err) => {
             if (err) {
                 console.error('Set visibility error:', err);
-            } else { 
+            } else {
                 setVisibility(choices[index]);
             }
         });
@@ -335,7 +336,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     </h2>
                     <div className="flex space-x-1">
 
-                        <div className={`flex space-x-3 px-2 pt-2 rounded-full ${isShareDropdownOpen ? "bg-[#282525]":"bg-inherit"}`}>
+                        <div className={`flex space-x-3 px-2 pt-2 rounded-full ${isShareDropdownOpen ? "bg-[#282525]" : "bg-inherit"}`}>
                             {/* Actual Dropdown */}
                             {isShareDropdownOpen && (
                                 <div className="flex flex-row space-x-3">
@@ -370,19 +371,19 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                 </div>
                             )}
                             {/* Dropdown Toggle Button */}
-                            <button 
-                                    onClick = {() => toggleShareDropdown()}
-                                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
-                                    title="Share Options"
-                                    style={{ width: iconSize, height: iconSize }}
-                                >
-                                    <FiShare2 size="24"/>
+                            <button
+                                onClick={() => toggleShareDropdown()}
+                                className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                                title="Share Options"
+                                style={{ width: iconSize, height: iconSize }}
+                            >
+                                <FiShare2 size="24" />
                             </button>
                         </div>
 
-                        <div className="pb-2 pt-2 flex space-x-3">
-                            
-                        
+                        <div className="pb-2 pt-2 flex space-x-3 items-center">
+
+
                             <button
                                 onClick={isCurrentUserList ? handleRenameListClick : null}
                                 disabled={!isCurrentUserList}
@@ -421,15 +422,15 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
 
                             {/* Conditionally render visibility settings */}
                             {list.userId === Meteor.userId() && (
-                                <button
-                                onClick={ handleVisibilityChange }
-                                className={`px-4 py-2 rounded-full font-bold bg-blue-500 hover:bg-blue-700 text-white`}
-                                >
-                                    { getVisibility }
-                                    
-                                </button>
+                                <VisibilityDropdown
+                                    list={list}
+                                    setVisibility={setVisibility}
+                                    listId={listId}
+                                    currentVisibility={getVisibility}
+                                    defaultText={<FaGlobe size={24} />}
+                                />
                             )}
-                            
+
                             <button
                                 className="text-2xl font-bold text-gray-500 hover:text-gray-800"
                                 onClick={onClose}
