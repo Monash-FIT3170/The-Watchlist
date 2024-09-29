@@ -32,6 +32,18 @@ const handleAvatarChange = (e) => {
   }
 };
 
+const handlePresetAvatarSelect = (avatarUrl) => {
+  Meteor.call('updateAvatar', user._id, avatarUrl, (error) => {
+    if (error) {
+      console.error('Error updating avatar:', error);
+    } else {
+      setNewAvatar(avatarUrl);
+      setShowAvatarModal(false);
+    }
+  });
+};
+
+
   return (
     <div
       className="bg-darker border border-transparent rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:border-dark hover:bg-dark"
