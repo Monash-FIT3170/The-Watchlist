@@ -9,6 +9,7 @@ const DropdownMenu = ({
   items,
   onSelect,
   selectedValue,
+  customTrigger, // New optional prop
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -16,10 +17,7 @@ const DropdownMenu = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
@@ -40,21 +38,17 @@ const DropdownMenu = ({
     }
   };
 
-  // Determine the button text based on selectedValue
-  const selectedItem = items.find(item => item.value === selectedValue);
-  const buttonText = selectedValue ? selectedItem?.label : defaultText;
+  // Determine the button content based on selectedValue
+  const selectedItem = items.find((item) => item.value === selectedValue);
+  const buttonContent = selectedValue ? selectedItem?.label : defaultText;
 
-  // Prepare items with "All" option
-  const allOption = { id: 'all', label: allText, value: '' }; // Use empty string for "All"
-  const dropdownItems = allText ? [allOption, ...items] : items;
+  // Tailwind classes
+  const defaultButtonClasses = 'inline-flex w-full justify-center gap-x-1.5 rounded-md bg-dark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700';
 
-  // Tailwind classes for dark mode
-  const buttonClasses = 'inline-flex w-full justify-center gap-x-1.5 rounded-md bg-dark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700';
+  const menuClasses =
+    'absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-dark shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-80 overflow-y-auto';
 
-  // Add `max-h-80 overflow-y-auto` to make the dropdown scrollable
-  const menuClasses = 'absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-dark shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-80 overflow-y-auto';
-
-  const itemClasses = 'block px-4 py-2 text-sm text-white hover:bg-gray-700';
+  const itemClasses = 'block px-4 py-2 text-sm text-white hover:bg-gray-700 w-full text-left flex items-center';
 
   const checkmark = (
     <svg
@@ -78,28 +72,34 @@ const DropdownMenu = ({
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <div>
-        <button
-          type="button"
-          className={buttonClasses}
-          id="menu-button"
-          aria-expanded={isOpen}
-          aria-haspopup="true"
-          onClick={toggleMenu}
-        >
-          {buttonText}
-          <svg
-            className="-mr-1 ml-2 h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
+        {customTrigger ? (
+          // Render custom trigger if provided
+          <div onClick={toggleMenu}>{customTrigger}</div>
+        ) : (
+          // Default button
+          <button
+            type="button"
+            className={defaultButtonClasses}
+            id="menu-button"
+            aria-expanded={isOpen}
+            aria-haspopup="true"
+            onClick={toggleMenu}
           >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
+            {buttonContent}
+            <svg
+              className="-mr-1 ml-2 h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        )}
       </div>
 
       {isOpen && (
@@ -111,16 +111,28 @@ const DropdownMenu = ({
           tabIndex="-1"
         >
           <div className="py-1" role="none">
-            {dropdownItems.map((item) => (
+            {allText && (
+              <button
+                type="button"
+                onClick={() => handleItemClick({ id: 'all', label: allText, value: '' })}
+                className={`${itemClasses} font-bold`}
+                role="menuitem"
+                tabIndex="-1"
+              >
+                {allText}
+                {selectedValue === '' && checkmark}
+              </button>
+            )}
+            {items.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => handleItemClick(item)}
-                className={`${itemClasses} w-full text-left flex items-center`}
+                className={itemClasses}
                 role="menuitem"
                 tabIndex="-1"
               >
-                <span>{item.label}</span>
+                {item.label}
                 {item.value === selectedValue && checkmark}
               </button>
             ))}
@@ -133,24 +145,27 @@ const DropdownMenu = ({
 
 // PropTypes for type checking
 DropdownMenu.propTypes = {
-  defaultText: PropTypes.string.isRequired, // Text when no item is selected
-  allText: PropTypes.string, // Text for the "All" option
+  defaultText: PropTypes.node, // Changed to node to accept JSX
+  allText: PropTypes.string,
   items: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired, // Unique identifier
-      label: PropTypes.node.isRequired, // Display text (can include JSX)
-      value: PropTypes.any, // Value associated with the item
+      id: PropTypes.string.isRequired,
+      label: PropTypes.node.isRequired,
+      value: PropTypes.any,
     })
   ).isRequired,
-  onSelect: PropTypes.func, // Callback when an item is selected
-  selectedValue: PropTypes.any, // Currently selected value
+  onSelect: PropTypes.func,
+  selectedValue: PropTypes.any,
+  customTrigger: PropTypes.node, // New prop
 };
 
 // Default props
 DropdownMenu.defaultProps = {
-  allText: 'All',
+  defaultText: 'Select',
+  allText: null,
   onSelect: null,
   selectedValue: '',
+  customTrigger: null,
 };
 
 export default DropdownMenu;

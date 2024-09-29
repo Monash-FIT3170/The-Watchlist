@@ -486,7 +486,6 @@ const SearchBar = ({ currentUser }) => {
                   items={genreItems}
                   onSelect={handleGenreSelect}
                   selectedValue={selectedGenre}
-                  isDarkMode={true} // Set to true for dark mode
                 />
               </div>
 
@@ -498,7 +497,6 @@ const SearchBar = ({ currentUser }) => {
                   items={languageItems}
                   onSelect={handleLanguageSelect}
                   selectedValue={selectedLanguage}
-                  isDarkMode={true} // Set to true for dark mode
                 />
               </div>
 
@@ -510,7 +508,6 @@ const SearchBar = ({ currentUser }) => {
                   items={sortItems}
                   onSelect={handleSortOptionSelect}
                   selectedValue={selectedSortOption}
-                  isDarkMode={true} // Set to true for dark mode
                 />
               </div>
 

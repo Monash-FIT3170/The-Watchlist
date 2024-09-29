@@ -6,18 +6,20 @@ import DropdownMenu from './DropdownMenu';
 import PropTypes from 'prop-types';
 
 const VisibilityDropdown = ({ list, setVisibility, listId, currentVisibility }) => {
+    const iconSize = 24; // Adjust as needed to match other icons
 
-    const handleVisibilitySelect = (item) => {
-        Meteor.call('list.setVisibility', {
-            listId: listId, 
-            visibleType: item.value
-        }, (err) => {
-            if (err) {
-                console.error('Set visibility error:', err);
-            } else { 
-                setVisibility(item.value);
-            }
-        });
+    // Determine the icon based on current visibility
+    const getCurrentIcon = () => {
+        switch (currentVisibility) {
+            case 'PUBLIC':
+                return <FaGlobe size={iconSize} />;
+            case 'FOLLOWERS':
+                return <FaUsers size={iconSize} />;
+            case 'ONLY_ME':
+                return <FaLock size={iconSize} />;
+            default:
+                return <FaGlobe size={iconSize} />;
+        }
     };
 
     const visibilityOptions = [
@@ -29,7 +31,7 @@ const VisibilityDropdown = ({ list, setVisibility, listId, currentVisibility }) 
                     Public
                 </span>
             ),
-            value: 'PUBLIC'
+            value: 'PUBLIC',
         },
         {
             id: 'followers',
@@ -39,7 +41,7 @@ const VisibilityDropdown = ({ list, setVisibility, listId, currentVisibility }) 
                     Followers
                 </span>
             ),
-            value: 'FOLLOWERS'
+            value: 'FOLLOWERS',
         },
         {
             id: 'only_me',
@@ -49,19 +51,44 @@ const VisibilityDropdown = ({ list, setVisibility, listId, currentVisibility }) 
                     Only Me
                 </span>
             ),
-            value: 'ONLY_ME'
-        }
+            value: 'ONLY_ME',
+        },
     ];
 
+    const handleVisibilitySelect = (item) => {
+        Meteor.call(
+            'list.setVisibility',
+            {
+                listId: listId,
+                visibleType: item.value,
+            },
+            (err) => {
+                if (err) {
+                    console.error('Set visibility error:', err);
+                } else {
+                    setVisibility(item.value);
+                }
+            }
+        );
+    };
+
     return (
-        // Conditionally render visibility settings
         list.userId === Meteor.userId() && (
             <DropdownMenu
-                defaultText="Visibility"
+                defaultText={null} // We won't use the default text
                 items={visibilityOptions}
                 onSelect={handleVisibilitySelect}
                 selectedValue={currentVisibility}
                 allText={null} // Do not include "All" option
+                customTrigger={
+                    <button
+                        className="bg-green-500 hover:bg-green-700 text-white font-bold rounded-full flex items-center justify-center"
+                        style={{ width: 44, height: 44 }}
+                        title="Change Visibility"
+                    >
+                        {getCurrentIcon()}
+                    </button>
+                }
             />
         )
     );
@@ -69,10 +96,10 @@ const VisibilityDropdown = ({ list, setVisibility, listId, currentVisibility }) 
 
 // Define PropTypes for type checking
 VisibilityDropdown.propTypes = {
-    list: PropTypes.object.isRequired, // Ensure 'list' prop has 'userId'
-    setVisibility: PropTypes.func.isRequired, // Function to update visibility state
-    listId: PropTypes.string.isRequired, // ID of the list
-    currentVisibility: PropTypes.string.isRequired, // Current visibility value
+    list: PropTypes.object.isRequired,
+    setVisibility: PropTypes.func.isRequired,
+    listId: PropTypes.string.isRequired,
+    currentVisibility: PropTypes.string.isRequired,
 };
 
 export default VisibilityDropdown;
