@@ -73,26 +73,23 @@ const AllRatedContentPage = ({ currentUser }) => {
         content = TVCollection.findOne({ contentId: rating.contentId });
       }
 
-      // Log content fetched
-      console.log(`Content for rating ${rating._id}:`, content);
-
       if (content && rating.contentType === 'Season') {
-        // Modify the title to include the season number
         content = {
           ...content,
           title: `${content.title} - Season ${rating.seasonId}`,
-          contentType: 'TV Show', // For ContentItem
-          originalContentType: 'Season', // For filtering
+          contentType: 'Season', // Set contentType to 'Season'
+          originalContentType: 'Season',
           seasonId: rating.seasonId, // Include seasonId for unique key
         };
-      } else if (content) {
+      }
+      else if (content) {
         content.contentType = rating.contentType; // Ensure contentType is set
         content.originalContentType = rating.contentType;
       }
 
       return content ? {
         ...content,
-        rating: rating.rating,
+        rating: Number(rating.rating), // Ensure rating is a number
         contentType: content.contentType || rating.contentType,
         originalContentType: content.originalContentType || rating.contentType,
       } : null;
@@ -113,32 +110,25 @@ const AllRatedContentPage = ({ currentUser }) => {
   }, [userId, currentUser._id, userSpecific]);
 
   useEffect(() => {
-    // Log rated content
-    console.log("ratedContent in useEffect:", ratedContent);
-
     const filtered = ratedContent.filter(content => {
       const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTab =
-        selectedTab === 'All' || content.originalContentType === tabMapping[selectedTab];
-
-      // Log filtering criteria
-      console.log(`Content "${content.title}" matchesSearch: ${matchesSearch}, matchesTab: ${matchesTab}`);
-
+      const matchesTab = selectedTab === 'All'
+        ? content.contentType === 'Movie' || content.originalContentType === 'TV Show'
+        : content.originalContentType === tabMapping[selectedTab];
       return matchesSearch && matchesTab;
     });
 
-    // Log filtered content
-    console.log("filteredContent:", filtered);
+    // Log ratings for debugging
+    console.log('Before sorting, ratings are:', filtered.map(c => ({ title: c.title, rating: c.rating })));
+
 
     const sorted = filtered.sort((a, b) => {
       return sortOrder === 'ascending' ? a.rating - b.rating : b.rating - a.rating;
     });
 
-    // Log sorted content
-    console.log("sortedContent:", sorted);
-
     setFilteredContent(sorted);
   }, [searchTerm, selectedTab, ratedContent, sortOrder]);
+
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -207,12 +197,14 @@ const AllRatedContentPage = ({ currentUser }) => {
         <div className="grid-responsive">
           {filteredContent.length > 0 ? filteredContent.map((content) => (
             <ContentItem
-              key={content.originalContentType === 'Season'
-                ? `Season-${content.contentId}-${content.seasonId}`
-                : `${content.contentType}-${content.contentId}`}
+              key={
+                content.originalContentType === 'Season'
+                  ? `Season-${content.contentId}-${content.seasonId}`
+                  : `${content.contentType}-${content.contentId}`
+              }
               content={content}
               isUserSpecificRating={userSpecific}
-              contentType={content.contentType} // 'TV Show' or 'Movie'
+              contentType={content.contentType} // This will be 'Season' for seasons
             />
           )) : <p>No rated content available.</p>}
         </div>
