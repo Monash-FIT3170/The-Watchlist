@@ -61,12 +61,12 @@ const Modal = forwardRef(({ show, onClose, content, type }, ref) => {
       <div ref={modalRef} className="bg-gray-900 rounded-lg shadow-lg p-8 max-w-2xl w-full h-3/4 relative" onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-2 right-2 text-white text-xl">×</button>
         <div className="mb-4 h-full">
-          <div className="bg-gray-800 rounded-lg shadow-lg p-4 h-full overflow-hidden">
+          <div className="bg-gray-800 rounded-lg shadow-lg p-4 h-full overflow-y-auto">
             <nav>
               <h2 className="flex justify-start items-center space-x-5 w-full px-4 py-2 mb-2 font-bold text-gray-300 text-lg">
                 <MdMovieFilter size={"24px"} /><span>Your Watchlists</span>
               </h2>
-              <Scrollbar className="h-full overflow-y-auto scrollbar-webkit scrollbar-thumb-gray-700 scrollbar-track-gray-900">
+              <Scrollbar className="h-full overflow-y-auto">
                 <ul>
                   {lists.map((list) => (
                     <li key={list._id} className="flex items-center justify-between p-2 bg-gray-700 rounded-lg mb-2">
