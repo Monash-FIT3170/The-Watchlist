@@ -381,7 +381,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                             </button>
                         </div>
 
-                        <div className="pb-2 pt-2 flex space-x-3">
+                        <div className="pb-2 pt-2 flex space-x-3 items-center">
 
 
                             <button
@@ -427,6 +427,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                     setVisibility={setVisibility}
                                     listId={listId}
                                     currentVisibility={getVisibility}
+                                    defaultText={<FaGlobe size={24} />}
                                 />
                             )}
 
