@@ -14,8 +14,6 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser }) => {
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const navigate = useNavigate();
 
-  console.log('ProfileCard User Data:', user); // For debugging
-
   useEffect(() => {
     if (!user || !user._id || !currentUser) return;
 

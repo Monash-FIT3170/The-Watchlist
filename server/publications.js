@@ -51,13 +51,28 @@ Meteor.publish('allUsers', function () {
 });
 
 
-// Server-side publication for user-created lists
+// server/publications.js
+
 Meteor.publish('userLists', function (userId) {
-  if (!this.userId || this.userId !== userId) {
+  if (!userId) {
     return this.ready();
   }
-  return ListCollection.find({ userId });
+
+  // If the subscriber is requesting their own lists
+  if (this.userId === userId) {
+    return ListCollection.find({ userId });
+  }
+
+  // If the subscriber is viewing another user's profile
+  return ListCollection.find({
+    userId,
+    $or: [
+      { visibility: 'PUBLIC' },
+      { visibility: 'FOLLOWERS', subscribers: this.userId }
+    ]
+  });
 });
+
 
 Meteor.publish('userRatings', function (userId) {
   return RatingCollection.find({ userId });
