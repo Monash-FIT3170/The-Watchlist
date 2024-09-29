@@ -58,10 +58,10 @@ const VisibilityDropdown = ({ list, setVisibility, listId, currentVisibility }) 
         list.userId === Meteor.userId() && (
             <DropdownMenu
                 defaultText="Visibility"
-                allText="" // Remove "All" option if not needed
                 items={visibilityOptions}
                 onSelect={handleVisibilitySelect}
                 selectedValue={currentVisibility}
+                allText={null} // Do not include "All" option
             />
         )
     );

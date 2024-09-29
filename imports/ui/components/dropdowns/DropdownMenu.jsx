@@ -1,4 +1,4 @@
-// imports/ui/components/dropdowns/DropdownMenu.jsx
+// src/components/dropdowns/DropdownMenu.jsx
 
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
@@ -42,11 +42,11 @@ const DropdownMenu = ({
 
   // Determine the button text based on selectedValue
   const selectedItem = items.find(item => item.value === selectedValue);
-  const buttonText = selectedValue ? selectedItem?.label : allText;
+  const buttonText = selectedValue ? selectedItem?.label : defaultText;
 
   // Prepare items with "All" option
   const allOption = { id: 'all', label: allText, value: '' }; // Use empty string for "All"
-  const dropdownItems = [allOption, ...items];
+  const dropdownItems = allText ? [allOption, ...items] : items;
 
   // Tailwind classes for dark mode
   const buttonClasses = 'inline-flex w-full justify-center gap-x-1.5 rounded-md bg-dark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700';
@@ -138,7 +138,7 @@ DropdownMenu.propTypes = {
   items: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired, // Unique identifier
-      label: PropTypes.string.isRequired, // Display text
+      label: PropTypes.node.isRequired, // Display text (can include JSX)
       value: PropTypes.any, // Value associated with the item
     })
   ).isRequired,
