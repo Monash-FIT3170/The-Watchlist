@@ -43,10 +43,16 @@ const UserProfile = ({ currentUser, loading }) => {
     return currentUser.following.some(follow => follow.userId === profileUserId);
   }, [isOwnProfile, currentUser.following, profileUserId]);
 
+  const isRequested = useMemo(() => {
+    if (isOwnProfile || !currentUser.followingRequests) return false;
+    return currentUser.followingRequests.includes(profileUserId);
+  }, [isOwnProfile, currentUser.followingRequests, profileUserId]);
+
+
   // Handle follow/unfollow actions (only for other users)
   const toggleFollow = () => {
     if (isFollowing) {
-      Meteor.call('unfollowUser', currentUser._id, profileUser._id, (error) => {
+      Meteor.call('unfollowUser', profileUser._id, (error) => {
         if (!error) {
           // No need to manually set isFollowing; it's reactive
         } else {
@@ -54,7 +60,7 @@ const UserProfile = ({ currentUser, loading }) => {
         }
       });
     } else {
-      Meteor.call('followUser', currentUser._id, profileUser._id, (error) => {
+      Meteor.call('followUser', profileUser._id, (error) => {
         if (!error) {
           // No need to manually set isFollowing; it's reactive
         } else {
@@ -158,6 +164,7 @@ const UserProfile = ({ currentUser, loading }) => {
         user={userProfile}
         showFollowButton={!isOwnProfile}
         isFollowing={isFollowing}
+        isRequested={isRequested}
         toggleFollow={toggleFollow}
       />
       <div className="p-6">

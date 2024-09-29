@@ -67,7 +67,7 @@ export const App = () => {
     }
     return { ready: () => true };
   }, [currentUser]);
-
+ 
   // Track userLists reactively
   const userLists = useTracker(() => {
     if (currentUser) {

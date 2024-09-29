@@ -50,29 +50,44 @@ Meteor.publish('allUsers', function () {
   );
 });
 
+Meteor.publish('userLists', function (profileUserId) {
+  // Validate the input
+  check(profileUserId, String);
 
-// server/publications.js
+  // If no user is logged in, only publish public lists
+  if (!this.userId) {
+    const publicLists = ListCollection.find({ userId: profileUserId, visibility: 'PUBLIC' });
+    return publicLists;
+  }
 
-Meteor.publish('userLists', function (userId) {
-  if (!userId) {
+  // If the viewer is the profile owner, publish all their lists
+  if (this.userId === profileUserId) {
+    const allLists = ListCollection.find({ userId: profileUserId });
+    return allLists;
+  }
+
+  // Otherwise, check if the viewer is a follower
+  const currentUser = Meteor.users.findOne(this.userId);
+  if (!currentUser) {
     return this.ready();
   }
 
-  // If the subscriber is requesting their own lists
-  if (this.userId === userId) {
-    return ListCollection.find({ userId });
+  const isFollower = currentUser.following?.some(follow => follow.userId === profileUserId);
+
+  if (isFollower) {
+    const cursor = ListCollection.find({
+      userId: profileUserId,
+      $or: [
+        { visibility: 'PUBLIC' },
+        { visibility: 'FOLLOWERS' }
+      ]
+    });
+    return cursor;
+  } else {
+    const publicLists = ListCollection.find({ userId: profileUserId, visibility: 'PUBLIC' });
+    return publicLists;
   }
-
-  // If the subscriber is viewing another user's profile
-  return ListCollection.find({
-    userId,
-    $or: [
-      { visibility: 'PUBLIC' },
-      { visibility: 'FOLLOWERS', subscribers: this.userId }
-    ]
-  });
 });
-
 
 Meteor.publish('userRatings', function (userId) {
   return RatingCollection.find({ userId });
@@ -200,7 +215,7 @@ Meteor.publish('userProfileData', function (userId) {
   );
 
   // Publish ratings count using publish-counts
-  Counts.publish(this, `userRatingsCount_${userId}`, RatingCollection.find({ userId }), { noReady: true });
+  Counts.publish(this, `userRatingsCount_${userId}`, RatingCollection.find({ userId }));
 
   return [listCursor, userCursor];
 });
