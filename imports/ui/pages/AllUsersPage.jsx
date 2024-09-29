@@ -35,7 +35,7 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
 
   // Fetch users from the publication
   const { users: fetchedUsers, isLoading } = useTracker(() => {
-    if (propUsers && propUsers.length > 0) {
+    if (propUsers !== undefined) {
       // When propUsers is provided, use it and avoid the subscription
       return { users: propUsers, isLoading: false };
     } else {
