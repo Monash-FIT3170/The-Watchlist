@@ -9,11 +9,14 @@ import { RatingCollection } from '../../db/Rating.tsx';
 const AIPicks = ({ currentUser }) => {
   const DISPLAY_MOVIES = "Display Movie";
   const DISPLAY_SHOWS = "Display Show";
+  const DISPLAY_TRENDING = "Display Trending";
+  const DISPLAY_GENRES = "Display Genres";
   const NUM_LIST_SLOTS = 8;
 
   const [display, setDisplay] = useState(DISPLAY_MOVIES);
   const [loading, setLoading] = useState(true);
   const [displayRecommendations, setDisplayRecommendations] = useState({ movies: [], shows: [] });
+  const [trendingContent, setTrendingContent] = useState({ movies: [], shows: [] });
   const [contentMovieNone, setContentMovieNone] = useState(true);
   const [contentTVNone, setContentTVNone] = useState(true);
 
@@ -44,8 +47,25 @@ const AIPicks = ({ currentUser }) => {
   }, []); // No dependencies needed; reactivity is handled by the subscription
 
   useEffect(() => {
-    fetchRecommendations();
-  }, []);
+    if (display === DISPLAY_TRENDING) {
+      fetchTrendingContent();
+    } else {
+      fetchRecommendations();
+    }
+  }, [display]);
+
+  const fetchTrendingContent = () => {
+    setLoading(true);
+    Meteor.call('getTrendingContent', (error, result) => {
+      if (error) {
+        console.error("Error fetching trending content:", error);
+        setLoading(false);
+      } else {
+        setTrendingContent(result);
+        setLoading(false);
+      }
+    });
+  };
 
   const fetchRecommendations = () => {
     console.log('Fetching recommendations...');
@@ -118,8 +138,11 @@ const AIPicks = ({ currentUser }) => {
   };
 
   const refreshRecommendations = () => {
-    console.log('Refreshing recommendations...');
-    fetchRecommendations();
+    if (display === DISPLAY_TRENDING) {
+      fetchTrendingContent();
+    } else {
+      fetchRecommendations();
+    }
   };
 
   if (loading) {
@@ -146,6 +169,16 @@ const AIPicks = ({ currentUser }) => {
         Refresh AI Recommendations
       </button>
       <Scrollbar className="w-full overflow-y-auto p-4">
+      {display === DISPLAY_TRENDING && (
+            <Scrollbar className="w-full overflow-y-auto">
+              <div className="px-8 py-2">
+                <ContentList list={{ title: 'Trending Movies', content: trendingContent.movies }} isUserOwned={false} globalRatings={globalRatings} hideShowAllButton={true}/>
+              </div>
+              <div className="px-8 py-2">
+                <ContentList list={{ title: 'Trending TV Shows', content: trendingContent.shows }} isUserOwned={false} globalRatings={globalRatings} hideShowAllButton={true}/>
+              </div>
+            </Scrollbar>
+          )}
         {display === DISPLAY_MOVIES && (
           contentMovieNone ? (
             <div className="flex flex-col items-center justify-center mt-10 p-6 rounded-lg shadow-lg">
