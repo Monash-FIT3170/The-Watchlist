@@ -15,13 +15,13 @@ const ContentList = React.memo(({ list, isUserOwned, globalRatings = {}, hideSho
       {/* Header Section */}
       <div className="flex justify-between items-center mb-0 text-base">
         {hideShowAllButton ? (
-          <div className="font-bold text-2xl text-white leading-tight tracking-tight">
+          <div className="font-bold text-xl text-white leading-tight tracking-tight">
             {list.title}
           </div>
         ) : (
           <button
             onClick={() => handleItemClick(list)}
-            className="font-bold text-2xl text-white leading-tight tracking-tight hover:underline cursor-pointer bg-transparent border-none"
+            className="font-bold text-xl text-white leading-tight tracking-tight hover:underline cursor-pointer bg-transparent border-none"
           >
             {list.title}
           </button>
