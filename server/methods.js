@@ -7,6 +7,7 @@ import Lists from '../imports/db/List';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { ListCollection } from '../imports/db/List';
 import { MovieCollection, TVCollection } from '../imports/db/Content';
+import { HTTP } from 'meteor/http';
 
 Meteor.methods({
   followUser(targetUserId) {
@@ -744,8 +745,6 @@ Meteor.methods({
     const favouritesList = ListCollection.findOne({ userId, listType: 'Favourite' });
     const toWatchList = ListCollection.findOne({ userId, listType: 'To Watch' });
 
-    console.log('Fetched lists:', { favouritesList, toWatchList });
-
     const allContent = [];
     if (favouritesList?.content?.length > 0) {
       allContent.push(...favouritesList.content);
@@ -754,8 +753,6 @@ Meteor.methods({
       allContent.push(...toWatchList.content);
     }
 
-    console.log('All content from lists:', allContent);
-
     if (allContent.length === 0) {
       console.log('No content in Favourite or To Watch lists.');
       return { movies: [], shows: [] };
@@ -763,20 +760,13 @@ Meteor.methods({
 
     // Select random content from user's lists
     const selectedContent = selectRandomContent(allContent, 5);
-    console.log('Selected random content:', selectedContent);
 
     // Separate titles by content type
     const movieTitles = selectedContent.filter(item => item.contentType === 'Movie').map(item => item.title);
     const tvTitles = selectedContent.filter(item => item.contentType === 'TV Show').map(item => item.title);
 
-    console.log('Movie Titles:', movieTitles);
-    console.log('TV Show Titles:', tvTitles);
-
     const recommendedMovies = movieTitles.length > 0 ? fetchContentRecommendations(movieTitles, 'movies') : [];
     const recommendedShows = tvTitles.length > 0 ? fetchContentRecommendations(tvTitles, 'tv') : [];
-
-    console.log('Recommended Movies:', recommendedMovies);
-    console.log('Recommended Shows:', recommendedShows);
 
     return { movies: recommendedMovies, shows: recommendedShows };
   },
@@ -801,17 +791,12 @@ function fetchContentRecommendations(titles, contentType) {
 
   titles.forEach(title => {
     const recommendationData = similarData.find(rec => rec.Title === title);
-    console.log(`Recommendation data for ${title}:`, recommendationData);
     const recommendedIds = recommendationData ? recommendationData[contentType === 'movies' ? 'similar_movies' : 'similar_tvs'] : [];
     const idsToFetch = recommendedIds.slice(0, 35).map(id => Number(id)); // Convert to Number
-
-    console.log(`IDs to fetch for ${title}:`, idsToFetch);
 
     const contentItems = (contentType === 'movies' ? MovieCollection : TVCollection)
       .find({ contentId: { $in: idsToFetch } })
       .fetch();
-
-    console.log(`Recommendations for ${title}:`, contentItems);
 
     recommendations.push({
       title,
@@ -821,3 +806,61 @@ function fetchContentRecommendations(titles, contentType) {
 
   return recommendations;
 }
+
+function processTMDbData(items, contentType) {
+  return items.map(item => ({
+    contentId: item.id,
+    title: item.title || item.name,
+    popularity: item.popularity,
+    release_year: (item.release_date || item.first_air_date || '').split('-')[0],
+    overview: item.overview,
+    language: item.original_language,
+    genres: item.genre_ids, // We may need to map genre IDs to names
+    image_url: item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : null,
+    background_url: item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : null,
+    contentType,
+    rating: 0 // Placeholder; we can fetch average ratings if needed
+  }));
+}
+
+
+Meteor.methods({
+  'getTrendingContent'() {
+    const apiKey = Meteor.settings.TMDB_API_KEY;
+
+    if (!apiKey) {
+      throw new Meteor.Error('tmdb-api-key-not-set', 'TMDb API key is not set in Meteor settings.');
+    }
+
+    // Define TMDb API endpoints
+    const trendingMoviesUrl = `https://api.themoviedb.org/3/trending/movie/week`;
+    const trendingTVsUrl = `https://api.themoviedb.org/3/trending/tv/week`;
+
+    try {
+      // Fetch trending movies
+      const moviesResponse = HTTP.get(trendingMoviesUrl, {
+        headers: {
+          "Authorization": `Bearer ${apiKey}`
+        }
+      });
+      const moviesData = JSON.parse(moviesResponse.content).results;
+
+      // Fetch trending TV shows
+      const tvsResponse = HTTP.get(trendingTVsUrl, {
+        headers: {
+          "Authorization": `Bearer ${apiKey}`
+        }
+      });
+      const tvsData = JSON.parse(tvsResponse.content).results;
+
+      // Process the data
+      const movies = processTMDbData(moviesData, 'Movie');
+      const shows = processTMDbData(tvsData, 'TV Show');
+
+      return { movies, shows };
+    } catch (error) {
+      console.error('Error fetching trending content from TMDb:', error);
+      throw new Meteor.Error('tmdb-api-error', 'Failed to fetch trending content from TMDb.');
+    }
+  }
+});
