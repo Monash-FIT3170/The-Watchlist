@@ -1,10 +1,24 @@
 import React, {useState, useEffect, useMemo} from 'react';
 import {Meteor} from 'meteor/meteor';
 import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
+import ContentItemDisplay from '../components/contentItems/ContentItemDisplay';
 
 const TopRated = ({currentUser}) => {
     const [isMovie, setIsMovie] = useState(true);   
     const [topRatedContent, setTopRatedContent] = useState([]);
+    const [globalRatings, setGlobalRatings] = useState({});
+
+
+    useEffect(() => {
+      Meteor.call('ratings.getGlobalAverages', (error, result) => {
+        if (!error) {
+          console.log('Global Ratings:', result);
+          setGlobalRatings(result);
+        } else {
+          console.error("Error fetching global ratings:", error);
+        }
+      });
+    }, []);
 
 
     //if user is not logged in, redirect to login page.
@@ -39,13 +53,13 @@ const TopRated = ({currentUser}) => {
       <h1 className="text-7xl text-white font-bold mb-8">Top Rated Content</h1>
       <div className="flex gap-4 mb-4">
         <button
-          className={`text-lg text-white py-2 px-6 rounded-full shadow ${isMovie === true ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'}`}
+          className={`text-lg text-white py-2 px-6 rounded-full shadow ${isMovie  ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'}`}
           onClick={() => setIsMovie(true)}
         >
           Movies
         </button>
         <button
-          className={`text-lg text-white py-2 px-6 rounded-full shadow ${isMovie === false ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'} border-transparent border`}
+          className={`text-lg text-white py-2 px-6 rounded-full shadow ${isMovie === false  ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'} border-transparent border`}
           onClick={() => setIsMovie(false)}
         >
           TV Shows
@@ -53,15 +67,15 @@ const TopRated = ({currentUser}) => {
       </div>
     </div>
 
-    {topRatedContent.map((content) => (
-      console.log("g")
-    ))}
-
-
-
-
-
-
+    <ContentItemDisplay
+             contentItems={topRatedContent.map((item, index) => ({
+              ...item.contentDetails, 
+              title: `${index + 1}. ${item.contentDetails.title}` 
+            }))} 
+              contentType= {isMovie  ? 'Movie' : "TV Show"}
+              globalRatings={globalRatings}
+              setGlobalRatings={setGlobalRatings}
+            />
     </>
 
 

@@ -10,7 +10,7 @@ const AIPicksHeader = ({ setDisplay, currentDisplay, currentUser }) => {
       <div className="absolute top-4 right-6">
         <ProfileDropdown user={currentUser} />
       </div>
-      <h1 className="text-7xl text-white font-bold mb-2">AI Picks</h1>
+      <h1 className="text-7xl text-white font-bold mb-8">AI Picks</h1>
       <div className="flex gap-4 mb-4">
         <button
           className={`text-lg text-white py-2 px-6 rounded-full shadow ${currentDisplay === DISPLAY_MOVIES ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'}`}
