@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import ContentListAI from '../components/lists/ContentListAI.jsx';
 import Scrollbar from '../components/scrollbar/ScrollBar.jsx';
 import { Meteor } from 'meteor/meteor';
 import AIPicksHeader from '../components/headers/AIPicksHeader.jsx';
 import { useTracker } from 'meteor/react-meteor-data';
+import ContentList from '../components/lists/ContentList.jsx';
 
 export default function AIPicks() {
   const DISPLAY_MOVIES = "Display Movie";
@@ -144,7 +144,7 @@ export default function AIPicks() {
               console.log('Rendering Movie List:', list);
               return (
                 <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4">
-                  <ContentListAI list={list} isUserOwned={false} />
+                  <ContentList list={list} isUserOwned={false} hideShowAllButton = {true} />
                 </div>
               );
             })
@@ -161,7 +161,7 @@ export default function AIPicks() {
               console.log('Rendering Show List:', list);
               return (
                 <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4">
-                  <ContentListAI list={list} isUserOwned={false} />
+                  <ContentList list={list} isUserOwned={false} hideShowAllButton = {true} />
                 </div>
               );
             })

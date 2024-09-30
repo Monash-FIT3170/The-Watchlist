@@ -6,20 +6,27 @@ import ContentItem from '../contentItems/ContentItem';
 import usePopup from '../../modals/usePopup';
 import ListPopup from './ListPopup';
 
-const ContentList = React.memo(({ list, isUserOwned, globalRatings = {} }) => {
+const ContentList = React.memo(({ list, isUserOwned, globalRatings = {}, hideShowAllButton = false }) => {
   const navigate = useNavigate();
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
 
   return (
     <div className="flex flex-col mb-2 bg-transparent overflow-hidden shadow-none py-0 px-0">
       <div className="flex justify-between items-center mb-0 text-base">
-        <button
-          onClick={() => handleItemClick(list)}
-          className="font-bold text-2xl text-white leading-tight tracking-tight hover:underline cursor-pointer bg-transparent border-none"
-        >
-          {list.title}
-        </button>
-        {true && (
+        {/* Conditional rendering based on hideShowAllButton prop */}
+        {hideShowAllButton ? (
+          <div className="font-bold text-2xl text-white leading-tight tracking-tight">
+            {list.title}
+          </div>
+        ) : (
+          <button
+            onClick={() => handleItemClick(list)}
+            className="font-bold text-2xl text-white leading-tight tracking-tight hover:underline cursor-pointer bg-transparent border-none"
+          >
+            {list.title}
+          </button>
+        )}
+        {!hideShowAllButton && (
           <button onClick={() => handleItemClick(list)} className="text-gray-400 text-base bg-transparent border-none cursor-pointer hover:underline pr-4 pt-2">
             Show all
           </button>
@@ -33,7 +40,7 @@ const ContentList = React.memo(({ list, isUserOwned, globalRatings = {} }) => {
       <div className="flex space-x-6 overflow-x-hidden py-4">
         {list.content.map((item) => (
           <div key={item.contentId} className="flex-shrink-0" style={{ minWidth: '130px', width: '13%' }}>
-            <ContentItem 
+            <ContentItem
               content={item}
               isUserSpecificRating={item.isUserSpecificRating}
               contentType={item.contentType}
