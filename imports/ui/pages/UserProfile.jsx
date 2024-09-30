@@ -14,6 +14,7 @@ import Loading from './Loading';
 import ListCardDisplay from '../components/lists/ListCardDisplay';
 
 const UserProfile = ({ currentUser }) => {
+  const [globalRatings, setGlobalRatings] = useState({});
   const { userId } = useParams(); // Extract userId from route parameters
   const isOwnProfile = !userId || userId === currentUser._id; // Determine if viewing own profile
 
@@ -83,6 +84,17 @@ const UserProfile = ({ currentUser }) => {
       });
     }
   }, [isOwnProfile, profileUser]);
+
+  useEffect(() => {
+    Meteor.call('ratings.getGlobalAverages', (error, result) => {
+      if (!error) {
+        console.log('Global Ratings:', result);
+        setGlobalRatings(result);
+      } else {
+        console.error("Error fetching global ratings:", error);
+      }
+    });
+  }, []);
 
   // Prepare user profile data
   const userProfile = useMemo(() => {
@@ -192,6 +204,7 @@ const UserProfile = ({ currentUser }) => {
                     isUserSpecificRating: isOwnProfile,
                   })),
                 }}
+                globalRatings = {globalRatings}
               />
             )}
             {toWatchList && (
@@ -204,6 +217,7 @@ const UserProfile = ({ currentUser }) => {
                     isUserSpecificRating: isOwnProfile,
                   })),
                 }}
+                globalRatings = {globalRatings}
               />
             )}
             <h2 className="text-white text-2xl font-semibold mb-4">{"Custom Watchlists"}</h2>
