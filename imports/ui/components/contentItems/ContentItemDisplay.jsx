@@ -5,8 +5,8 @@ import ContentItem from './ContentItem';
 
 const ContentItemDisplay = ({ contentItems, contentType, globalRatings, setGlobalRatings }) => {
     return (
-        <div className="flex justify-center py-4">
-            <div className="w-full px-4">
+        <div className="flex justify-center py-2">
+            <div className="w-full px-2">
                 <div
                     className="grid gap-6"
                     style={{
