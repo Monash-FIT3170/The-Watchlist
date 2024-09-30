@@ -67,7 +67,7 @@ export const App = () => {
     }
     return { ready: () => true };
   }, [currentUser]);
-
+ 
   // Track userLists reactively
   const userLists = useTracker(() => {
     if (currentUser) {
@@ -108,8 +108,8 @@ export const App = () => {
                 <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
                 <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
                 {/* Unified UserProfile for both own and others' profiles */}
-                <Route path="/profile" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount} loading={loading} />} />
-                <Route path="/user/:userId" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount} loading={loading} />} />
+                <Route path="/profile" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount}/>} />
+                <Route path="/user/:userId" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount}/>} />
                 <Route path="/ai-picks" element={<AIPicks currentUser={currentUser} />} />
                 <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
                 <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />

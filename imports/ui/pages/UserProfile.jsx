@@ -12,11 +12,9 @@ import { FaLock } from "react-icons/fa";
 import { Counts } from 'meteor/tmeasday:publish-counts';
 import Loading from './Loading';
 
-const UserProfile = ({ currentUser, loading }) => {
+const UserProfile = ({ currentUser }) => {
   const { userId } = useParams(); // Extract userId from route parameters
   const isOwnProfile = !userId || userId === currentUser._id; // Determine if viewing own profile
-
-  const [isFollowing, setIsFollowing] = useState(false);
 
   // Define the profileUserId based on the context
   const profileUserId = isOwnProfile ? currentUser._id : userId;
@@ -39,31 +37,32 @@ const UserProfile = ({ currentUser, loading }) => {
     return Counts.get(`userRatingsCount_${profileUserId}`) || 0;
   }, [profileUserId]);
 
-  // Check if current user is following the profile user (only if not own profile)
-  useEffect(() => {
-    if (!isOwnProfile && profileUser) {
-      Meteor.call('isFollowing', currentUser._id, profileUser._id, (error, result) => {
-        if (!error) {
-          setIsFollowing(result);
-        }
-      });
-    }
-  }, [isOwnProfile, profileUser, currentUser._id]);
+  // Derive isFollowing reactively from currentUser.following
+  const isFollowing = useMemo(() => {
+    if (isOwnProfile || !currentUser.following) return false;
+    return currentUser.following.some(follow => follow.userId === profileUserId);
+  }, [isOwnProfile, currentUser.following, profileUserId]);
+
+  const isRequested = useMemo(() => {
+    if (isOwnProfile || !currentUser.followingRequests) return false;
+    return currentUser.followingRequests.includes(profileUserId);
+  }, [isOwnProfile, currentUser.followingRequests, profileUserId]);
+
 
   // Handle follow/unfollow actions (only for other users)
   const toggleFollow = () => {
     if (isFollowing) {
-      Meteor.call('unfollowUser', currentUser._id, profileUser._id, (error) => {
+      Meteor.call('unfollowUser', profileUser._id, (error) => {
         if (!error) {
-          setIsFollowing(false);
+          // No need to manually set isFollowing; it's reactive
         } else {
           console.error('Error unfollowing user:', error.reason);
         }
       });
     } else {
-      Meteor.call('followUser', currentUser._id, profileUser._id, (error) => {
+      Meteor.call('followUser', profileUser._id, (error) => {
         if (!error) {
-          setIsFollowing(true);
+          // No need to manually set isFollowing; it's reactive
         } else {
           console.error('Error following user:', error.reason);
         }
@@ -86,6 +85,7 @@ const UserProfile = ({ currentUser, loading }) => {
 
   // Prepare user profile data
   const userProfile = useMemo(() => {
+    console.log("profileUser: ", profileUser)
     if (!profileUser) return null;
     return {
       avatarUrl: profileUser.avatarUrl || 'https://randomuser.me/api/portraits/lego/1.jpg',
@@ -138,6 +138,7 @@ const UserProfile = ({ currentUser, loading }) => {
   // Determine if content can be viewed based on privacy and follow status
   const canViewContent = useMemo(() => {
     if (!userProfile) {
+      console.log("not user profile")
       return false;
     }
     if (isOwnProfile) {
@@ -152,8 +153,10 @@ const UserProfile = ({ currentUser, loading }) => {
     return false;
   }, [isOwnProfile, userProfile, isFollowing]);
 
-  if (loading || !profileUser) {
-    return <Loading/>;
+  const localLoading = !profileUserHandle.ready() || !listsHandle.ready() || !profileUser;
+
+  if (localLoading) {
+    return <Loading />;
   }
 
   return (
@@ -163,6 +166,7 @@ const UserProfile = ({ currentUser, loading }) => {
         user={userProfile}
         showFollowButton={!isOwnProfile}
         isFollowing={isFollowing}
+        isRequested={isRequested}
         toggleFollow={toggleFollow}
       />
       <div className="p-6">
