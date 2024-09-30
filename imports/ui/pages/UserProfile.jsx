@@ -13,6 +13,7 @@ import { Counts } from 'meteor/tmeasday:publish-counts';
 import Loading from './Loading';
 
 const UserProfile = ({ currentUser }) => {
+  const [globalRatings, setGlobalRatings] = useState({});
   const { userId } = useParams(); // Extract userId from route parameters
   const isOwnProfile = !userId || userId === currentUser._id; // Determine if viewing own profile
 
@@ -83,6 +84,17 @@ const UserProfile = ({ currentUser }) => {
     }
   }, [isOwnProfile, profileUser]);
 
+  useEffect(() => {
+    Meteor.call('ratings.getGlobalAverages', (error, result) => {
+      if (!error) {
+        console.log('Global Ratings:', result);
+        setGlobalRatings(result);
+      } else {
+        console.error("Error fetching global ratings:", error);
+      }
+    });
+  }, []);
+
   // Prepare user profile data
   const userProfile = useMemo(() => {
     console.log("profileUser: ", profileUser)
@@ -113,13 +125,22 @@ const UserProfile = ({ currentUser }) => {
     return [];
   }, [listsHandle, profileUserId]);
 
+  // Subscribe to the profile user's lists
+  const subscribedListsHandle = useTracker(() => {
+    return Meteor.subscribe('subscribedLists', profileUserId);
+  }, [profileUserId]);
+
+    // Fetch the profile user's subscribed lists
+  const subscribedLists = useTracker(() => {
+    if (subscribedListsHandle.ready()) {
+      return ListCollection.find({ subscribers: profileUserId }).fetch();
+    }
+    return [];
+  }, [listsHandle, profileUserId]);
+
   // Separate owned lists and subscribed lists
   const ownedLists = useMemo(() => (
     userLists.filter(list => list.userId === profileUserId)
-  ), [userLists, profileUserId]);
-
-  const subscribedLists = useMemo(() => (
-    userLists.filter(list => list.userId !== profileUserId)
   ), [userLists, profileUserId]);
 
   // Further categorize owned lists by listType
@@ -156,7 +177,7 @@ const UserProfile = ({ currentUser }) => {
   const localLoading = !profileUserHandle.ready() || !listsHandle.ready() || !profileUser;
 
   if (localLoading) {
-    return <Loading />;
+    return <Loading pageName={"User Profile"}/>;
   }
 
   return (
@@ -182,6 +203,7 @@ const UserProfile = ({ currentUser }) => {
                     isUserSpecificRating: isOwnProfile,
                   })),
                 }}
+                globalRatings = {globalRatings}
               />
             )}
             {toWatchList && (
@@ -194,6 +216,7 @@ const UserProfile = ({ currentUser }) => {
                     isUserSpecificRating: isOwnProfile,
                   })),
                 }}
+                globalRatings = {globalRatings}
               />
             )}
             <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />
