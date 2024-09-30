@@ -4,6 +4,7 @@ import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
 
 const TopRated = ({currentUser}) => {
     const [isMovie, setIsMovie] = useState(true);   
+    const [topRatedContent, setTopRatedContent] = useState([]);
 
 
     //if user is not logged in, redirect to login page.
@@ -12,20 +13,23 @@ const TopRated = ({currentUser}) => {
     }
 
     //get the top rated content for the user.
-    const topRatedContent = useMemo(() => {
+     useMemo(() => {
         //if user has selected movies, get top rated movies.
         if (isMovie) {
             return Meteor.call('ratings.getTopRated', "Movie", (error, result) => {
                 if (error) {
                     console.error('Error fetching top rated movies:', error.reason);
                 }
+                setTopRatedContent(result);
                 console.log(result);
+
             });
         }else{
             return Meteor.call('ratings.getTopRated', "TV Show", (error, result) => {
                 if (error) {
                     console.error('Error fetching top rated tv shows:', error.reason);
                 }
+                setTopRatedContent(result);
                 console.log(result);
             });
         }
@@ -34,6 +38,8 @@ const TopRated = ({currentUser}) => {
 
 
     return(
+
+      <>
     
         <div className="flex flex-col justify-end items-start w-full h-72 p-4 bg-gradient-to-tl from-zinc-900 via-zinc-700 to-zinc-600 rounded-t-lg shadow-md mb-4">
       <div className="absolute top-4 right-6">
@@ -55,7 +61,21 @@ const TopRated = ({currentUser}) => {
         </button>
       </div>
     </div>
-    )
+
+    {topRatedContent.map((content) => (
+      console.log("g")
+    ))}
+
+
+
+
+
+
+    </>
+
+
+
+    );   
 
     
 
