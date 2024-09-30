@@ -221,8 +221,8 @@ const AIPicks = ({ currentUser }) => {
             displayRecommendations.movies.map(list => {
               console.log('Rendering Movie List:', list);
               return (
-                <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg p-2 mr-4">
-                  <ContentList list={list} isUserOwned={false} hideShowAllButton={true} globalRatings={globalRatings}/>
+                <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg p-4 mr-4">
+                  <ContentList list={list} isUserOwned={false} hideShowAllButton={true} globalRatings={globalRatings} />
                 </div>
               );
             })
@@ -246,72 +246,71 @@ const AIPicks = ({ currentUser }) => {
           )
         )}
         {display === DISPLAY_GENRES && (
-  <Scrollbar className="w-full overflow-y-auto">
-    <div className="px-8 py-4">
-      {/* Explanation Alert Box */}
-      <div className="bg-blue-500 bg-opacity-10 border border-blue-500 text-blue-300 px-4 py-3 rounded relative mb-4" role="alert">
-        <strong className="font-bold">Understanding Your Top Genres:</strong>
-        <span className="block sm:inline ml-1">
-          The numbers next to each genre indicate how many times you've interacted with content from that genre through ratings or adding to your lists. Select a genre to see personalised recommendations!
-        </span>
-      </div>
-      <h2 className="text-white text-2xl font-bold mb-4">Your Top Genres</h2>
-      {genreStatistics.length > 0 ? (
-        <div className="flex flex-wrap">
-          {genreStatistics.map((genreStat) => (
-            <button
-              key={genreStat.genre}
-              className={`m-2 px-4 py-2 rounded-full border ${
-                selectedGenre === genreStat.genre
-                  ? 'bg-magenta text-white border-magenta'
-                  : 'bg-dark text-white border-gray-300'
-              }`}
-              onClick={() => {
-                setSelectedGenre(genreStat.genre);
-                fetchRecommendationsByGenre(genreStat.genre);
-              }}
-            >
-              {genreStat.genre} ({genreStat.count})
-            </button>
-          ))}
-        </div>
-      ) : (
-        <p className="text-gray-400">
-          You haven't interacted with any genres yet. Start rating or adding content to see recommendations here!
-        </p>
-      )}
-      {selectedGenre && (
-        <div className="mt-6">
-          <h2 className="text-white text-2xl font-bold mb-4">Recommendations for "{selectedGenre}"</h2>
-          <div className="py-2">
-            {genreRecommendations.movies.length > 0 ? (
-              <ContentList
-                list={{ title: 'Movies You Might Like', content: genreRecommendations.movies }}
-                isUserOwned={false}
-                globalRatings={globalRatings}
-                hideShowAllButton={true}
-              />
-            ) : (
-              <p className="text-gray-400">No movie recommendations available for this genre.</p>
-            )}
-          </div>
-          <div className="py-2">
-            {genreRecommendations.shows.length > 0 ? (
-              <ContentList
-                list={{ title: 'TV Shows You Might Like', content: genreRecommendations.shows }}
-                isUserOwned={false}
-                globalRatings={globalRatings}
-                hideShowAllButton={true}
-              />
-            ) : (
-              <p className="text-gray-400">No TV show recommendations available for this genre.</p>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  </Scrollbar>
-)}
+          <Scrollbar className="w-full overflow-y-auto">
+            <div className="px-8 py-4">
+              {/* Explanation Alert Box */}
+              <div className="bg-blue-500 bg-opacity-10 border border-blue-500 text-blue-300 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong className="font-bold">Understanding Your Top Genres:</strong>
+                <span className="block sm:inline ml-1">
+                  The numbers next to each genre indicate how many times you've interacted with content from that genre through ratings or adding to your lists. Select a genre to see personalised recommendations!
+                </span>
+              </div>
+              <h2 className="text-white text-2xl font-bold mb-4">Your Top Genres</h2>
+              {genreStatistics.length > 0 ? (
+                <div className="flex flex-wrap">
+                  {genreStatistics.map((genreStat) => (
+                    <button
+                      key={genreStat.genre}
+                      className={`m-2 px-4 py-2 rounded-full border ${selectedGenre === genreStat.genre
+                          ? 'bg-magenta text-white border-magenta'
+                          : 'bg-dark text-white border-gray-300'
+                        }`}
+                      onClick={() => {
+                        setSelectedGenre(genreStat.genre);
+                        fetchRecommendationsByGenre(genreStat.genre);
+                      }}
+                    >
+                      {genreStat.genre} ({genreStat.count})
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400">
+                  You haven't interacted with any genres yet. Start rating or adding content to see recommendations here!
+                </p>
+              )}
+              {selectedGenre && (
+                <div className="mt-6">
+                  <h2 className="text-white text-2xl font-bold mb-4">Recommendations for "{selectedGenre}"</h2>
+                  <div className="py-2">
+                    {genreRecommendations.movies.length > 0 ? (
+                      <ContentList
+                        list={{ title: 'Movies You Might Like', content: genreRecommendations.movies }}
+                        isUserOwned={false}
+                        globalRatings={globalRatings}
+                        hideShowAllButton={true}
+                      />
+                    ) : (
+                      <p className="text-gray-400">No movie recommendations available for this genre.</p>
+                    )}
+                  </div>
+                  <div className="py-2">
+                    {genreRecommendations.shows.length > 0 ? (
+                      <ContentList
+                        list={{ title: 'TV Shows You Might Like', content: genreRecommendations.shows }}
+                        isUserOwned={false}
+                        globalRatings={globalRatings}
+                        hideShowAllButton={true}
+                      />
+                    ) : (
+                      <p className="text-gray-400">No TV show recommendations available for this genre.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </Scrollbar>
+        )}
 
       </Scrollbar>
     </div>
