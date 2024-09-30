@@ -1,5 +1,3 @@
-// AIPicks.jsx
-
 import React, { useState, useEffect } from 'react';
 import ContentListAI from '../components/lists/ContentListAI.jsx';
 import Scrollbar from '../components/scrollbar/ScrollBar.jsx';
@@ -116,8 +114,8 @@ export default function AIPicks() {
       <div className="flex flex-col min-h-screen bg-darker">
         <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
         <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-          <div className="-mt-52 animate-spin rounded-full h-32 w-32 border-t-4 border-blue-500 mb-4"></div>
-          <p className="text-xl font-semibold">Loading Updated AI Recommendations...</p>
+          <div className="animate-spin rounded-full h-24 w-24 border-t-4 border-magenta"></div>
+          <p className="text-xl font-semibold mt-4">Loading Updated AI Recommendations...</p>
           <p className="text-gray-400 mt-2">Please wait a moment while we fetch your content.</p>
         </div>
       </div>
@@ -125,26 +123,27 @@ export default function AIPicks() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-darker">
+    <div className="flex flex-col min-h-screen bg-darker pb-10">
       <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
       <button
-        className="mx-4 px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
-          focus:outline-none focus:ring-4 focus:ring-purple-300 transform active:scale-95 transition-transform duration-200"
+        className="mx-4 my-6 px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
+          focus:outline-none focus:ring-4 focus:ring-magenta transform active:scale-95 transition-transform duration-300"
         onClick={refreshRecommendations}
       >
         Refresh AI Recommendations
       </button>
-      <Scrollbar className="w-full overflow-y-auto">
+      <Scrollbar className="w-full overflow-y-auto p-4">
         {display === DISPLAY_MOVIES && (
           contentMovieNone ? (
-            <div className="px-8 py-2 mt-10 text-white text-3xl">
-              Not enough Movies yet. Add some to your favourites or watchlist to get started!
-            </div>
+          <div className="flex flex-col items-center justify-center mt-10 p-6 rounded-lg shadow-lg">
+            <p className="text-white text-2xl font-semibold mb-2">Not enough Movies yet.</p>
+            <p className="text-gray-400 text-lg">Add some to your favourites or watchlist to get started!</p>
+          </div>
           ) : (
             displayRecommendations.movies.map(list => {
               console.log('Rendering Movie List:', list);
               return (
-                <div key={list.listId} className="px-8 py-2">
+                <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4">
                   <ContentListAI list={list} isUserOwned={false} />
                 </div>
               );
@@ -153,14 +152,15 @@ export default function AIPicks() {
         )}
         {display === DISPLAY_SHOWS && (
           contentTVNone ? (
-            <div className="px-8 py-2 mt-10 text-white text-3xl">
-              Not enough Shows yet. Add some to your favourites or watchlist to get started!
+            <div className="flex flex-col items-center justify-center mt-10 p-6 rounded-lg shadow-lg">
+              <p className="text-white text-2xl font-semibold mb-2">Not enough Shows yet.</p>
+              <p className="text-gray-400 text-lg">Add some to your favourites or watchlist to get started!</p>
             </div>
           ) : (
             displayRecommendations.shows.map(list => {
               console.log('Rendering Show List:', list);
               return (
-                <div key={list.listId} className="px-8 py-2">
+                <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4">
                   <ContentListAI list={list} isUserOwned={false} />
                 </div>
               );
