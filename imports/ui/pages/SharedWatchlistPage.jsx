@@ -1,5 +1,7 @@
 // imports/ui/pages/SharedWatchlistPage.jsx
 
+// imports/ui/pages/SharedWatchlistPage.jsx
+
 import { Meteor } from 'meteor/meteor';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -22,6 +24,11 @@ const SharedWatchlistPage = ({  currentUser  }) => {
   const [selectedSortOption, setSelectedSortOption] = useState('');
   const navigate = useNavigate();
 
+  const tabMapping = {
+    All: 'All',
+    Movies: 'Movie',
+    'TV Shows': 'TV Show',
+  };
   const tabMapping = {
     All: 'All',
     Movies: 'Movie',
