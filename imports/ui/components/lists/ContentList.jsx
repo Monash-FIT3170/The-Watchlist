@@ -10,6 +10,8 @@ const ContentList = React.memo(({ list, isUserOwned, globalRatings = {}, hideSho
   const navigate = useNavigate();
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
 
+  console.log(globalRatings)
+
   return (
     <div className="flex flex-col mb-2 bg-transparent overflow-hidden shadow-none py-0 px-0">
       <div className="flex justify-between items-center mb-0 text-base">

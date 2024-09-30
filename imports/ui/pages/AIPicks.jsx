@@ -4,31 +4,44 @@ import { Meteor } from 'meteor/meteor';
 import AIPicksHeader from '../components/headers/AIPicksHeader.jsx';
 import { useTracker } from 'meteor/react-meteor-data';
 import ContentList from '../components/lists/ContentList.jsx';
+import { RatingCollection } from '../../db/Rating.tsx';
 
-export default function AIPicks() {
+const AIPicks = ({ currentUser }) => {
   const DISPLAY_MOVIES = "Display Movie";
   const DISPLAY_SHOWS = "Display Show";
   const NUM_LIST_SLOTS = 5;
 
   const [display, setDisplay] = useState(DISPLAY_MOVIES);
-  const [globalRatings, setGlobalRatings] = useState({});
   const [loading, setLoading] = useState(true);
   const [displayRecommendations, setDisplayRecommendations] = useState({ movies: [], shows: [] });
   const [contentMovieNone, setContentMovieNone] = useState(true);
   const [contentTVNone, setContentTVNone] = useState(true);
 
-  const currentUser = useTracker(() => Meteor.user(), []);
-
-  useEffect(() => {
-    Meteor.call('ratings.getGlobalAverages', (error, result) => {
-      if (!error) {
-        console.log('Global Ratings:', result);
-        setGlobalRatings(result);
-      } else {
-        console.error("Error fetching global ratings:", error);
+  // Use useTracker to reactively fetch global ratings
+  const globalRatings = useTracker(() => {
+    const ratingsHandle = Meteor.subscribe('ratings'); // Subscribe to ratings collection
+    if (!ratingsHandle.ready()) {
+      return {}; // Return an empty object while subscription is loading
+    }
+    const ratings = RatingCollection.find().fetch(); // Fetch all ratings
+    const ratingMap = ratings.reduce((acc, rating) => {
+      if (!acc[rating.contentId]) {
+        acc[rating.contentId] = {
+          count: 0,
+          total: 0,
+        };
       }
-    });
-  }, []);
+      acc[rating.contentId].count += 1;
+      acc[rating.contentId].total += rating.rating;
+      return acc;
+    }, {});
+
+    for (const id in ratingMap) {
+      ratingMap[id].average = (ratingMap[id].total / ratingMap[id].count).toFixed(2);
+    }
+
+    return ratingMap;
+  }, []); // No dependencies needed; reactivity is handled by the subscription
 
   useEffect(() => {
     fetchRecommendations();
@@ -135,16 +148,16 @@ export default function AIPicks() {
       <Scrollbar className="w-full overflow-y-auto p-4">
         {display === DISPLAY_MOVIES && (
           contentMovieNone ? (
-          <div className="flex flex-col items-center justify-center mt-10 p-6 rounded-lg shadow-lg">
-            <p className="text-white text-2xl font-semibold mb-2">Not enough Movies yet.</p>
-            <p className="text-gray-400 text-lg">Add some to your favourites or watchlist to get started!</p>
-          </div>
+            <div className="flex flex-col items-center justify-center mt-10 p-6 rounded-lg shadow-lg">
+              <p className="text-white text-2xl font-semibold mb-2">Not enough Movies yet.</p>
+              <p className="text-gray-400 text-lg">Add some to your favourites or watchlist to get started!</p>
+            </div>
           ) : (
             displayRecommendations.movies.map(list => {
               console.log('Rendering Movie List:', list);
               return (
                 <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4">
-                  <ContentList list={list} isUserOwned={false} hideShowAllButton = {true} />
+                  <ContentList list={list} isUserOwned={false} hideShowAllButton={true} globalRatings={globalRatings} />
                 </div>
               );
             })
@@ -161,7 +174,7 @@ export default function AIPicks() {
               console.log('Rendering Show List:', list);
               return (
                 <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4">
-                  <ContentList list={list} isUserOwned={false} hideShowAllButton = {true} />
+                  <ContentList list={list} isUserOwned={false} hideShowAllButton={true} globalRatings={globalRatings} />
                 </div>
               );
             })
@@ -171,3 +184,5 @@ export default function AIPicks() {
     </div>
   );
 }
+
+export default AIPicks;
