@@ -83,7 +83,7 @@ export const App = () => {
   const loading = (!userProfileHandle.ready() || !userListsHandle.ready() || !currentUser);
 
   if (loading && loggedIn) {
-    return <Loading />;
+    return <Loading pageName={"The Watchlist"} />;
   }
 
   if (!currentUser) {
