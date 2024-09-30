@@ -23,6 +23,9 @@ const AIPicks = ({ currentUser }) => {
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [genreRecommendations, setGenreRecommendations] = useState({ movies: [], shows: [] });
 
+  const [trendingContentFetched, setTrendingContentFetched] = useState(false);
+  const [recommendationsFetched, setRecommendationsFetched] = useState(false);
+  const [genreStatisticsFetched, setGenreStatisticsFetched] = useState(false);
 
   // Use useTracker to reactively fetch global ratings
   const globalRatings = useTracker(() => {
@@ -51,15 +54,15 @@ const AIPicks = ({ currentUser }) => {
   }, []); // No dependencies needed; reactivity is handled by the subscription
 
   useEffect(() => {
-    if (display === DISPLAY_TRENDING) {
+    if (display === DISPLAY_TRENDING && !trendingContentFetched) {
       fetchTrendingContent();
-    } else {
+    } else if (display !== DISPLAY_TRENDING && !recommendationsFetched) {
       fetchRecommendations();
     }
   }, [display]);
 
   useEffect(() => {
-    if (display === DISPLAY_GENRES) {
+    if (display === DISPLAY_GENRES && !genreStatisticsFetched) {
       setLoading(true);
       Meteor.call('getUserGenreStatistics', (error, result) => {
         if (error) {
@@ -67,6 +70,7 @@ const AIPicks = ({ currentUser }) => {
           setLoading(false);
         } else {
           setGenreStatistics(result);
+          setGenreStatisticsFetched(true); // Mark as fetched
           setLoading(false);
         }
       });
@@ -81,21 +85,22 @@ const AIPicks = ({ currentUser }) => {
         setLoading(false);
       } else {
         setTrendingContent(result);
+        setTrendingContentFetched(true); // Mark as fetched
         setLoading(false);
       }
     });
   };
 
   const fetchRecommendations = () => {
-    console.log('Fetching recommendations...');
     setLoading(true);
     Meteor.call('getRecommendations', (error, result) => {
       if (error) {
         console.error("Error fetching recommendations:", error);
         setLoading(false);
       } else {
-        console.log('Received recommendations:', result);
         processRecommendations(result);
+        setRecommendationsFetched(true); // Mark as fetched
+        setLoading(false);
       }
     });
   };
@@ -114,8 +119,6 @@ const AIPicks = ({ currentUser }) => {
   };
 
   const processRecommendations = ({ movies, shows }) => {
-    console.log('Processing recommendations:', { movies, shows });
-
     setContentMovieNone(movies.length === 0);
     setContentTVNone(shows.length === 0);
 
@@ -139,11 +142,7 @@ const AIPicks = ({ currentUser }) => {
       })),
     }));
 
-    console.log('Updated Movies:', updatedMovies);
-    console.log('Updated Shows:', updatedShows);
-
     setDisplayRecommendations({ movies: updatedMovies, shows: updatedShows });
-    setLoading(false);
   };
 
   const selectRandomItems = (array, numItems) => {

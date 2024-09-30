@@ -879,8 +879,26 @@ function processTMDbData(items, contentType) {
 }
 
 
+// methods.js
+
+// Cache object for trending content
+let trendingCache = {
+  movies: [],
+  shows: [],
+  timestamp: 0
+};
+
+// Cache duration in milliseconds (1 hour)
+const TRENDING_CACHE_DURATION = 1 * 60 * 60 * 1000; // 1 hour
+
 Meteor.methods({
   'getTrendingContent'() {
+    const now = Date.now();
+    if (now - trendingCache.timestamp < TRENDING_CACHE_DURATION) {
+      // Return cached data
+      return { movies: trendingCache.movies, shows: trendingCache.shows };
+    }
+
     const apiKey = Meteor.settings.TMDB_API_KEY;
 
     if (!apiKey) {
@@ -911,6 +929,11 @@ Meteor.methods({
       // Process the data
       const movies = processTMDbData(moviesData, 'Movie');
       const shows = processTMDbData(tvsData, 'TV Show');
+
+      // Update the cache
+      trendingCache.movies = movies;
+      trendingCache.shows = shows;
+      trendingCache.timestamp = now;
 
       return { movies, shows };
     } catch (error) {
