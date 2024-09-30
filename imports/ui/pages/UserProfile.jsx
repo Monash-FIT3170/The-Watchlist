@@ -13,6 +13,7 @@ import { Counts } from 'meteor/tmeasday:publish-counts';
 import Loading from './Loading';
 
 const UserProfile = ({ currentUser }) => {
+  const [globalRatings, setGlobalRatings] = useState({});
   const { userId } = useParams(); // Extract userId from route parameters
   const isOwnProfile = !userId || userId === currentUser._id; // Determine if viewing own profile
 
@@ -82,6 +83,17 @@ const UserProfile = ({ currentUser }) => {
       });
     }
   }, [isOwnProfile, profileUser]);
+
+  useEffect(() => {
+    Meteor.call('ratings.getGlobalAverages', (error, result) => {
+      if (!error) {
+        console.log('Global Ratings:', result);
+        setGlobalRatings(result);
+      } else {
+        console.error("Error fetching global ratings:", error);
+      }
+    });
+  }, []);
 
   // Prepare user profile data
   const userProfile = useMemo(() => {
@@ -182,6 +194,7 @@ const UserProfile = ({ currentUser }) => {
                     isUserSpecificRating: isOwnProfile,
                   })),
                 }}
+                globalRatings = {globalRatings}
               />
             )}
             {toWatchList && (
@@ -194,6 +207,7 @@ const UserProfile = ({ currentUser }) => {
                     isUserSpecificRating: isOwnProfile,
                   })),
                 }}
+                globalRatings = {globalRatings}
               />
             )}
             <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />
