@@ -228,50 +228,50 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
       {/* Avatar Modal */}
       {showAvatarModal && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full">
+        <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full mt-20 z-50">
             <h3 className="text-lg font-bold mb-4 text-center">
-              Change Profile Picture
+            Change Profile Picture
             </h3>
             <input
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className="mb-4 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarChange}
+            className="mb-4 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
             />
             <div className="grid grid-cols-5 gap-4 mb-4">
-              {presetAvatars.slice(0, 5).map((avatarUrl, index) => (
+            {presetAvatars.slice(0, 5).map((avatarUrl, index) => (
                 <img
-                  key={index}
-                  src={avatarUrl}
-                  alt="preset avatar"
-                  className="w-16 h-16 object-cover rounded-full cursor-pointer transition-transform transform hover:scale-110"
-                  onClick={() => handlePresetAvatarSelect(avatarUrl)}
+                key={index}
+                src={avatarUrl}
+                alt="preset avatar"
+                className="w-16 h-16 object-cover rounded-full cursor-pointer transition-transform transform hover:scale-110"
+                onClick={() => handlePresetAvatarSelect(avatarUrl)}
                 />
-              ))}
+            ))}
             </div>
             <div className="flex justify-center">
-              <div
+            <div
                 className="grid grid-cols-4 gap-4 mb-4"
                 style={{ marginLeft: "0%" }}
-              >
+            >
                 {presetAvatars.slice(5).map((avatarUrl, index) => (
-                  <img
+                <img
                     key={index}
                     src={avatarUrl}
                     alt="preset avatar"
                     className="w-16 h-16 object-cover rounded-full cursor-pointer transition-transform transform hover:scale-110"
                     onClick={() => handlePresetAvatarSelect(avatarUrl)}
-                  />
+                />
                 ))}
-              </div>
+            </div>
             </div>
             <div className="flex justify-end">
-              <button
+            <button
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                 onClick={() => setShowAvatarModal(false)}
-              >
+            >
                 Cancel
-              </button>
+            </button>
             </div>
           </div>
         </div>
