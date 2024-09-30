@@ -194,7 +194,7 @@ const AllRatedContentPage = ({ currentUser }) => {
       </form>
 
       <Scrollbar className="search-results-container flex-grow overflow-auto">
-      <div className="grid gap-4 grid-cols-[repeat(auto-fill,_200px)] justify-between items-center">
+      <div className="grid gap-4 grid-cols-[repeat(auto-fill,_200px)] justify-between items-center px-2 py-2">
           {filteredContent.length > 0 ? filteredContent.map((content) => (
             <ContentItem
               key={

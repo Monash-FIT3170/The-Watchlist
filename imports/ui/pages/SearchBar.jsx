@@ -548,7 +548,9 @@ const SearchBar = ({ currentUser }) => {
           )}
           {selectedTab === 'Lists' &&
             (filteredLists.length > 0 ? (
+              <div className="px-2 py-2">
               <ListCardDisplay lists={filteredLists} />
+              </div>
             ) : debouncedSearchTerm === '' ? (
               <div className="flex justify-center items-center w-full h-full">
                 <img src="/images/popcorn.png" alt="No Lists" className="w-32 h-32" />

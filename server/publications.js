@@ -89,6 +89,10 @@ Meteor.publish('userLists', function (profileUserId) {
   }
 });
 
+Meteor.publish('ratings', function () {
+  return RatingCollection.find({ });
+});
+
 Meteor.publish('userRatings', function (userId) {
   return RatingCollection.find({ userId });
 });

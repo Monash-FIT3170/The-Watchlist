@@ -11,6 +11,7 @@ import ListDisplay from '../components/lists/ListDisplay';
 import { FaLock } from "react-icons/fa";
 import { Counts } from 'meteor/tmeasday:publish-counts';
 import Loading from './Loading';
+import ListCardDisplay from '../components/lists/ListCardDisplay';
 
 const UserProfile = ({ currentUser }) => {
   const [globalRatings, setGlobalRatings] = useState({});
@@ -219,8 +220,10 @@ const UserProfile = ({ currentUser }) => {
                 globalRatings = {globalRatings}
               />
             )}
-            <ListDisplay listData={customWatchlists} heading="Custom Watchlists" />
-            <ListDisplay heading="Subscribed Watchlists" listData={subscribedLists} />
+            <h2 className="text-white text-2xl font-semibold mb-4">{"Custom Watchlists"}</h2>
+            <ListCardDisplay lists={customWatchlists} heading="Custom Watchlists" />
+            <h2 className="text-white text-2xl font-semibold mb-4">{"Subscribed Watchlists"}</h2>
+            <ListCardDisplay heading="Subscribed Watchlists" lists={subscribedLists} />
           </div>
         ) : (
           <div className="flex flex-col items-center mt-40 min-h-screen">
