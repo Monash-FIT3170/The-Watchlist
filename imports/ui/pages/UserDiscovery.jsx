@@ -28,7 +28,7 @@ const UserDiscovery = ({ currentUser }) => {
   };
 
   return (
-    <div className="bg-darker min-h-screen p-4">
+    <div className="relative bg-darker min-h-screen p-4">
             <div className="absolute top-4 right-4">
         <ProfileDropdown user={currentUser} />
       </div>
