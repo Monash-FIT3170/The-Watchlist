@@ -156,7 +156,7 @@ const UserProfile = ({ currentUser }) => {
   const localLoading = !profileUserHandle.ready() || !listsHandle.ready() || !profileUser;
 
   if (localLoading) {
-    return <Loading />;
+    return <Loading pageName={"User Profile"}/>;
   }
 
   return (
