@@ -1,3 +1,5 @@
+// imports/ui/pages/SharedWatchlistPage.jsx
+
 import { Meteor } from 'meteor/meteor';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -9,22 +11,22 @@ import { AiOutlineSearch } from 'react-icons/ai';  // Import search icon
 import DropdownMenu from '../components/dropdowns/DropdownMenu';
 import { FaTimesCircle } from 'react-icons/fa';
 
-const SharedWatchlistPage = ({ currentUser }) => {
-    const { listId } = useParams();
-    const [list, setList] = useState([]);
-    const [filteredContent, setFilteredContent] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedTab, setSelectedTab] = useState('All');
-    const [searchTerm, setSearchTerm] = useState(''); // Add searchTerm state
-    const [selectedGenre, setSelectedGenre] = useState('');
-    const [selectedSortOption, setSelectedSortOption] = useState('');
-    const navigate = useNavigate();
+const SharedWatchlistPage = ({  currentUser  }) => {
+  const { listId } = useParams();
+  const [list, setList] = useState([]);
+  const [filteredContent, setFilteredContent] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedTab, setSelectedTab] = useState('All');
+  const [searchTerm, setSearchTerm] = useState(''); // Add searchTerm state
+  const [selectedGenre, setSelectedGenre] = useState('');
+  const [selectedSortOption, setSelectedSortOption] = useState('');
+  const navigate = useNavigate();
 
-    const tabMapping = {
-        All: 'All',
-        Movies: 'Movie',
-        'TV Shows': 'TV Show',
-    };
+  const tabMapping = {
+    All: 'All',
+    Movies: 'Movie',
+    'TV Shows': 'TV Show',
+  };
 
     const genresList = [
         'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama',
@@ -210,3 +212,4 @@ const SharedWatchlistPage = ({ currentUser }) => {
 };
 
 export default SharedWatchlistPage;
+

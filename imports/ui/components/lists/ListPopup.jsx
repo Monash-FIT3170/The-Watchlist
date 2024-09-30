@@ -14,6 +14,7 @@ import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import { EmailShareButton, FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailIcon, FacebookIcon, TwitterIcon, WhatsappIcon } from "react-share";
 import VisibilityDropdown from "../dropdowns/VisibilityDropdown";
+import { useNavigate } from "react-router-dom";
 
 const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [list, setList] = useState(null);
@@ -42,6 +43,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [isShareDropdownOpen, setShareDropdown] = useState(false);
     const shareQuote = "Check out this watchlist!";
     const iconSize = 44;
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (listId) {
@@ -55,7 +57,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     const localhost = "http://localhost:3000";
                     const domain = "http://localhost:3000"
                     // Change to domain before merging with main
-                    setShareUrl(`${domain}/list/${result._id}`);
+                    setShareUrl(`${localhost}/list/${result._id}`);
                     // setShareUrl(`${Meteor.absoluteUrl.defaultOptions.rootUrl}/list/${result._id}`); // For some reason the production link doesn't have www.
                 }
             });
