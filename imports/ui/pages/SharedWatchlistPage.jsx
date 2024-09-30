@@ -29,11 +29,6 @@ const SharedWatchlistPage = ({  currentUser  }) => {
     Movies: 'Movie',
     'TV Shows': 'TV Show',
   };
-  const tabMapping = {
-    All: 'All',
-    Movies: 'Movie',
-    'TV Shows': 'TV Show',
-  };
 
     const genresList = [
         'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama',
