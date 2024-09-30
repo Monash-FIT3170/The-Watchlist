@@ -9,7 +9,7 @@ import { RatingCollection } from '../../db/Rating.tsx';
 const AIPicks = ({ currentUser }) => {
   const DISPLAY_MOVIES = "Display Movie";
   const DISPLAY_SHOWS = "Display Show";
-  const NUM_LIST_SLOTS = 5;
+  const NUM_LIST_SLOTS = 8;
 
   const [display, setDisplay] = useState(DISPLAY_MOVIES);
   const [loading, setLoading] = useState(true);
@@ -139,7 +139,7 @@ const AIPicks = ({ currentUser }) => {
     <div className="flex flex-col min-h-screen bg-darker pb-10">
       <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
       <button
-        className="mx-4 my-6 px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
+        className="mx-4 my-2 px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
           focus:outline-none focus:ring-4 focus:ring-magenta transform active:scale-95 transition-transform duration-300"
         onClick={refreshRecommendations}
       >
@@ -156,7 +156,7 @@ const AIPicks = ({ currentUser }) => {
             displayRecommendations.movies.map(list => {
               console.log('Rendering Movie List:', list);
               return (
-                <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4">
+                <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg p-2 mr-4">
                   <ContentList list={list} isUserOwned={false} hideShowAllButton={true} globalRatings={globalRatings} />
                 </div>
               );
@@ -173,7 +173,7 @@ const AIPicks = ({ currentUser }) => {
             displayRecommendations.shows.map(list => {
               console.log('Rendering Show List:', list);
               return (
-                <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4">
+                <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4 mr-4">
                   <ContentList list={list} isUserOwned={false} hideShowAllButton={true} globalRatings={globalRatings} />
                 </div>
               );
