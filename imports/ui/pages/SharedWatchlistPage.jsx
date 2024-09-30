@@ -133,7 +133,7 @@ const SharedWatchlistPage = ({ currentUser }) => {
     }
   }, [selectedTab, selectedGenre, selectedSortOption, list, loading]);
 
-  if (loading) return <Loading />;
+  if (loading) return <Loading pageName={"List"} />;
 
   // if (!currentUser) {
   //     // Redirect to login page if user is not logged in

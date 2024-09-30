@@ -28,7 +28,7 @@ const Home = ({ currentUser }) => {
 
   return (
     <div className="flex flex-row min-h-screen bg-darker">
-      <div className="absolute top-4 right-8">
+      <div className="absolute top-8 right-10">
         <ProfileDropdown user={currentUser} />
       </div>
       <div className="w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center">
