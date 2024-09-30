@@ -819,7 +819,8 @@ Meteor.methods({
   
       {$project: {
         averageRating: 1, 
-        count: 1 
+        count: 1,
+        contentDetails: 1
       }}
     ];
   
