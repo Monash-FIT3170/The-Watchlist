@@ -1,15 +1,14 @@
-// src/components/dropdowns/DropdownMenu.jsx
-
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import Scrollbar from '../scrollbar/ScrollBar'; // Import the Scrollbar component
 
 const DropdownMenu = ({
-  defaultText,
-  allText,
+  defaultText = 'Select',
+  allText = null,
   items,
-  onSelect,
-  selectedValue,
-  customTrigger, // New optional prop
+  onSelect = null,
+  selectedValue = '',
+  customTrigger = null, // New optional prop
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -46,7 +45,7 @@ const DropdownMenu = ({
   const defaultButtonClasses = 'inline-flex w-full justify-center gap-x-1.5 rounded-md bg-dark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700';
 
   const menuClasses =
-    'absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-dark shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-80 overflow-y-auto';
+    'absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-dark shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none';
 
   const itemClasses = 'block px-4 py-2 text-sm text-white hover:bg-gray-700 w-full text-left flex items-center';
 
@@ -110,33 +109,35 @@ const DropdownMenu = ({
           aria-labelledby="menu-button"
           tabIndex="-1"
         >
-          <div className="py-1" role="none">
-            {allText && (
-              <button
-                type="button"
-                onClick={() => handleItemClick({ id: 'all', label: allText, value: '' })}
-                className={`${itemClasses} font-bold`}
-                role="menuitem"
-                tabIndex="-1"
-              >
-                {allText}
-                {selectedValue === '' && checkmark}
-              </button>
-            )}
-            {items.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleItemClick(item)}
-                className={itemClasses}
-                role="menuitem"
-                tabIndex="-1"
-              >
-                {item.label}
-                {item.value === selectedValue && checkmark}
-              </button>
-            ))}
-          </div>
+          <Scrollbar className="max-h-80">
+            <div className="py-1" role="none">
+              {allText && (
+                <button
+                  type="button"
+                  onClick={() => handleItemClick({ id: 'all', label: allText, value: '' })}
+                  className={`${itemClasses} font-bold`}
+                  role="menuitem"
+                  tabIndex="-1"
+                >
+                  {allText}
+                  {selectedValue === '' && checkmark}
+                </button>
+              )}
+              {items.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleItemClick(item)}
+                  className={itemClasses}
+                  role="menuitem"
+                  tabIndex="-1"
+                >
+                  {item.label}
+                  {item.value === selectedValue && checkmark}
+                </button>
+              ))}
+            </div>
+          </Scrollbar>
         </div>
       )}
     </div>
@@ -157,15 +158,6 @@ DropdownMenu.propTypes = {
   onSelect: PropTypes.func,
   selectedValue: PropTypes.any,
   customTrigger: PropTypes.node, // New prop
-};
-
-// Default props
-DropdownMenu.defaultProps = {
-  defaultText: 'Select',
-  allText: null,
-  onSelect: null,
-  selectedValue: '',
-  customTrigger: null,
 };
 
 export default DropdownMenu;
