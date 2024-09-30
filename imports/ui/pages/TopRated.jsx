@@ -49,8 +49,8 @@ const TopRated = ({currentUser}) => {
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-darker">
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-          <div className="-mt-52 animate-spin rounded-full h-32 w-32 border-t-4 border-blue-500 mb-4"></div>
+       <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
+       <div className="animate-spin rounded-full h-24 w-24 border-t-4 border-magenta"></div>
           <p className="text-xl font-semibold">Loading the Top Rated Content</p>
           <p className="text-gray-400 mt-2">Please wait a moment while we fetch your content.</p>
         </div>
@@ -60,9 +60,7 @@ const TopRated = ({currentUser}) => {
 
 
     return(
-
       <>
-    
         <div className="flex flex-col justify-end items-start w-full h-72 p-4 bg-gradient-to-tl from-zinc-900 via-zinc-700 to-zinc-600 rounded-t-lg shadow-md mb-4">
       <div className="absolute top-4 right-6">
         <ProfileDropdown user={currentUser} />
@@ -94,13 +92,7 @@ const TopRated = ({currentUser}) => {
               setGlobalRatings={setGlobalRatings}
             />
     </>
-
-
-
     );   
-
-    
-
 };
 
 
