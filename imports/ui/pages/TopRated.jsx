@@ -85,7 +85,7 @@ const TopRated = ({currentUser}) => {
     <ContentItemDisplay
              contentItems={topRatedContent.map((item, index) => ({
               ...item.contentDetails, 
-              title: `${index + 1}. ${item.contentDetails.title}` 
+              title: `${index + 1}. ${item.contentDetails.title} (${item.count})` 
             }))} 
               contentType= {isMovie  ? 'Movie' : "TV Show"}
               globalRatings={globalRatings}
