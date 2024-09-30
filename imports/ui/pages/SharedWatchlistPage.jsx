@@ -154,7 +154,7 @@ const SharedWatchlistPage = ({ currentUser }) => {
       {/* Filters and Sorting */}
       <div className="flex items-center justify-between w-full mt-2 px-4">
         {/* Tabs */}
-        <div className="flex">
+        {/* <div className="flex">
           {Object.keys(tabMapping).map((tab) => (
             <div
               key={tab}
@@ -170,10 +170,10 @@ const SharedWatchlistPage = ({ currentUser }) => {
               {tab}
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* Filters and Sorting Dropdowns */}
-        <div className="flex items-center">
+        <div className="flex items-center justify-end w-full mt-2 px-4">
           {/* Genres Dropdown */}
           <div className="mr-4 mb-2">
             <DropdownMenu
