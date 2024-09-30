@@ -15,15 +15,32 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
 
     const toggleModal = () => {
         if (!fullContent) {
+            // Determine the actual content type to pass to content.read
+            const actualContentType = content.originalContentType === 'Season' ? 'TV Show' : contentType;
+    
+            // Prepare the parameters for content.read
+            const readParams = {
+                id: content.contentId,
+                contentType: actualContentType,
+            };
+    
+            // If it's a season, include the seasonId
+            if (content.originalContentType === 'Season') {
+                readParams.seasonId = content.seasonId;
+            }
+    
             // Fetch full content details only when the modal is opened
-            Meteor.call('content.read', { id: content.contentId, contentType }, (error, result) => {
+            Meteor.call('content.read', readParams, (error, result) => {
                 if (!error) {
                     let contentDetails = null;
-                    if (contentType === 'Movie' && result.movie?.length > 0) {
-                        contentDetails = result.movie[0];
-                    } else if (contentType === 'TV Show' && result.tv?.length > 0) {
-                        contentDetails = result.tv[0];
+    
+                    if (result.content?.length > 0) {
+                        contentDetails = result.content[0];
+                        
+                    } else {
+                        console.warn("No content found for the given ID and contentType.");
                     }
+    
                     setFullContent(contentDetails); // Store the full content details
                     setOpen(true); // Open the modal after fetching
                 } else {
@@ -34,28 +51,39 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
             setOpen(!isOpen);
         }
     };
+    
+    
 
     const { rating, isRatingLoading } = useTracker(() => {
-
         if (isUserSpecificRating) {
-            const subscription = Meteor.subscribe('userRatings', Meteor.userId());
-            if (!subscription.ready()) {
-                return { isRatingLoading: true, rating: 0 };
-            }
-            const userRating = RatingCollection.findOne({ userId: Meteor.userId(), contentId: content.contentId });
-            return {
-                isRatingLoading: false,
-                rating: userRating ? userRating.rating : 0 // Default to 0 if no user rating is found
-            };
+          const subscription = Meteor.subscribe('userRatings', Meteor.userId());
+          if (!subscription.ready()) {
+            return { isRatingLoading: true, rating: 0 };
+          }
+      
+          // Build the query
+          let query = { userId: Meteor.userId(), contentId: content.contentId };
+          if (contentType === 'Season' && content.seasonId) {
+            query.seasonId = content.seasonId;
+          }
+      
+          const userRating = RatingCollection.findOne(query);
+      
+          return {
+            isRatingLoading: false,
+            rating: userRating ? userRating.rating : 0, // Default to 0 if no user rating is found
+          };
         } else {
-            return {
-                isRatingLoading: false,
-                rating: globalRating || 0 // Use the passed globalRating or default to 0
-            };
+          return {
+            isRatingLoading: false,
+            rating: globalRating || 0, // Use the passed globalRating or default to 0
+          };
         }
-    }, [content.contentId, isUserSpecificRating, globalRating]);
+      }, [content.contentId, content.seasonId, contentType, isUserSpecificRating, globalRating]);
+      
 
     const handleImageError = (e) => {
+        console.log("image error")
         e.target.onerror = null; // Prevent looping
         e.target.src = popcornUrl;
     };
@@ -88,6 +116,7 @@ const ContentItem = ({ content, isUserSpecificRating, contentType, globalRating,
                             }
                         });
                     }}
+                    seasonId={content.originalContentType === 'Season' ? content.seasonId : null} // Pass seasonId if applicable
                 />
             )}
             <div className="text-white mt-2 text-left w-full" style={{

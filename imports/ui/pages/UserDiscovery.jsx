@@ -28,7 +28,7 @@ const UserDiscovery = ({ currentUser }) => {
   };
 
   return (
-    <div className="bg-darker min-h-screen p-4">
+    <div className="relative bg-darker min-h-screen p-4">
             <div className="absolute top-4 right-4">
         <ProfileDropdown user={currentUser} />
       </div>
@@ -47,9 +47,9 @@ const UserDiscovery = ({ currentUser }) => {
         </div>
       </div>
       <div>
-        <SimilarUserList />
+        <SimilarUserList currentUser={currentUser}/>
         <div className="mt-8">
-          <UserList heading='Search Results' users={users} searchTerm={searchTerm} onSelectUser={selectUser} />
+          <UserList heading='Search Results' users={users} searchTerm={searchTerm} onSelectUser={selectUser} currentUser={currentUser} />
         </div>
       </div>
     </div>

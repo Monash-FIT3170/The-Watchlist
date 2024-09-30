@@ -1,76 +1,31 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FaUserPlus, FaPencilAlt } from "react-icons/fa";
-import { Meteor } from "meteor/meteor";
-import ProfileDropdown from "../profileDropdown/ProfileDropdown";
+// imports/ui/components/headers/ProfileCard.jsx
 
-const ProfileCard = ({ user, showFollowButton, currentUser }) => {
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [isRequested, setIsRequested] = useState(false);
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaUserPlus, FaPencilAlt } from 'react-icons/fa';
+import ProfileDropdown from '../profileDropdown/ProfileDropdown';
+
+const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowing, isRequested, toggleFollow }) => {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [newAvatar, setNewAvatar] = useState(null);
-  const [ratingsCount, setRatingsCount] = useState(0);
   const [privateAccount, setPrivateAccount] = useState(false);
   const [isCurrentUser, setIsCurrentUser] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user || !user._id) return;
-    const currentUser = Meteor.user();
-    if (
-      currentUser &&
-      Array.isArray(currentUser.following) &&
-      currentUser.following.includes(user._id)
-    ) {
-      setIsFollowing(true);
-    }
+    if (!user || !user._id || !currentUser) return;
 
-    if (user.userPrivacy === "Private") {
+    // Set privacy state
+    if (user.userPrivacy === 'Private') {
       setPrivateAccount(true);
     } else {
       setPrivateAccount(false);
     }
 
-    if (currentUser._id === user._id) {
-      setIsCurrentUser(true);
-    } else {
-      setIsCurrentUser(false);
-    }
+    // Check if viewing own profile
+    setIsCurrentUser(currentUser._id === user._id);
+  }, [user, currentUser]);
 
-    if (
-      currentUser.followingRequests &&
-      currentUser.followingRequests.includes(user._id)
-    ) {
-      setIsRequested(true);
-    }
-
-    if (user.userPrivacy === "Private") {
-      setPrivateAccount(true);
-    } else {
-      setPrivateAccount(false);
-    }
-
-    if (currentUser._id === user._id) {
-      setIsCurrentUser(true);
-    } else {
-      setIsCurrentUser(false);
-    }
-
-    if (
-      currentUser.followingRequests &&
-      currentUser.followingRequests.includes(user._id)
-    ) {
-      setIsRequested(true);
-    }
-
-    Meteor.call("users.ratingsCount", { userId: user._id }, (error, result) => {
-      if (error) {
-        console.error("Error fetching ratings count:", error);
-      } else {
-        setRatingsCount(result);
-      }
-    });
-  }, [user._id]);
   const isOwnProfile = currentUser && user && currentUser._id === user._id;
 
   const handleAvatarClick = () => {
@@ -113,7 +68,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       } else {
         if (!privateAccount) {
           setIsFollowing(true);
-          console.log("Followed user successfully");
+          console.log('Followed user successfully');
         } else {
           setIsRequested(true);
           console.log("Requested user successfully");
@@ -135,9 +90,9 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
   };
 
   const presetAvatars = [
-    "https://randomuser.me/api/portraits/lego/1.jpg",
-    "https://randomuser.me/api/portraits/lego/2.jpg",
-    "https://randomuser.me/api/portraits/lego/3.jpg",
+    'https://randomuser.me/api/portraits/lego/1.jpg',
+    'https://randomuser.me/api/portraits/lego/2.jpg',
+    'https://randomuser.me/api/portraits/lego/3.jpg',
     "https://randomuser.me/api/portraits/lego/4.jpg",
     "https://randomuser.me/api/portraits/lego/5.jpg",
     "https://randomuser.me/api/portraits/lego/6.jpg",
@@ -157,7 +112,7 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
             src={
               newAvatar ||
               user.avatarUrl ||
-              "https://randomuser.me/api/portraits/lego/1.jpg"
+              'https://randomuser.me/api/portraits/lego/1.jpg'
             }
             alt="avatar"
             className="w-full h-full object-cover"
@@ -174,24 +129,22 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
 
         <div className="flex flex-col gap-2">
           <h2 className="pl-1 text-8xl font-bold truncate">
-            {user.userName || "Loading..."}
+            {user.userName || 'Loading...'}
           </h2>
           <div className="flex flex-col gap-2 pl-2">
             <div className="flex gap-2 items-center">
               <button
-                className={`p-1 text-lg flex-initial ${
-                  user.userPrivacy === "Public" || isCurrentUser || isFollowing
-                    ? "hover:underline"
-                    : "text-white-500 cursor-not-allowed"
-                }`}
+                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                    ? 'hover:underline'
+                    : 'text-gray-500 cursor-not-allowed'
+                  }`}
                 onClick={
-                  user.userPrivacy === "Public" || isCurrentUser || isFollowing
-                    ? () =>
-                        navigate(`/followers-following/${user._id}/followers`)
+                  user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                    ? () => navigate(`/followers-following/${user._id}/followers`)
                     : null
                 }
                 disabled={
-                  user.userPrivacy !== "Public" &&
+                  user.userPrivacy !== 'Public' &&
                   !isCurrentUser &&
                   !isFollowing
                 }
@@ -200,19 +153,17 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
               </button>
               <span className="text-lg">•</span>
               <button
-                className={`p-1 text-lg flex-initial ${
-                  user.userPrivacy === "Public" || isCurrentUser || isFollowing
-                    ? "hover:underline"
-                    : "text-white-500 cursor-not-allowed"
-                }`}
+                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                    ? 'hover:underline'
+                    : 'text-gray-500 cursor-not-allowed'
+                  }`}
                 onClick={
-                  user.userPrivacy === "Public" || isCurrentUser || isFollowing
-                    ? () =>
-                        navigate(`/followers-following/${user._id}/following`)
+                  user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                    ? () => navigate(`/followers-following/${user._id}/following`)
                     : null
                 }
                 disabled={
-                  user.userPrivacy !== "Public" &&
+                  user.userPrivacy !== 'Public' &&
                   !isCurrentUser &&
                   !isFollowing
                 }
@@ -221,14 +172,13 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
               </button>
               <span className="text-lg">•</span>
               <button
-                className={`p-1 text-lg flex-initial ${
-                  user.userPrivacy === "Public" || isCurrentUser || isFollowing
-                    ? "hover:underline"
-                    : "text-white-500 cursor-not-allowed"
-                }`}
+                className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
+                    ? 'hover:underline'
+                    : 'text-gray-500 cursor-not-allowed'
+                  }`}
                 onClick={() => {
                   if (
-                    user.userPrivacy === "Public" ||
+                    user.userPrivacy === 'Public' ||
                     isCurrentUser ||
                     isFollowing
                   ) {
@@ -240,32 +190,29 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
                   }
                 }}
                 disabled={
-                  user.userPrivacy !== "Public" &&
+                  user.userPrivacy !== 'Public' &&
                   !isCurrentUser &&
                   !isFollowing
                 }
               >
-                {ratingsCount} Ratings
+                {user.ratings} Ratings
               </button>
             </div>
             <div>
               {showFollowButton ? (
-                <button
-                  onClick={() => {
-                    if (isFollowing || isRequested) {
-                      handleUnfollow();
-                    } else {
-                      handleFollow();
-                    }
-                  }}
-                  className={`mt-2 px-6 py-2 bg-[#7B1450] text-white border-[#7B1450]`}
-                >
-                  {isFollowing
-                    ? "Unfollow"
-                    : isRequested
-                    ? "Requested"
-                    : "Follow"}
-                </button>
+                currentUser._id !== user._id && (
+                  <button
+                    onClick={toggleFollow}
+                    className={`mt-2 px-6 py-2 ${isFollowing
+                        ? 'bg-blue-600'
+                        : isRequested
+                          ? 'bg-gray-600'
+                          : 'bg-fuchsia-600'
+                      } text-white rounded-full`}
+                  >
+                    {isFollowing ? 'Unfollow' : isRequested ? 'Requested' : 'Follow'}
+                  </button>
+                )
               ) : (
                 <Link to="/user-discovery">
                   <button className="mt-2 ml-1 p-3 text-xl bg-transparent border-2 border-white rounded-full hover:bg-white hover:text-zinc-900 transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-zinc-700 focus:ring-opacity-50">
@@ -278,9 +225,10 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
         </div>
       </div>
 
+      {/* Avatar Modal */}
       {showAvatarModal && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full mt-40">
+          <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full">
             <h3 className="text-lg font-bold mb-4 text-center">
               Change Profile Picture
             </h3>
@@ -330,6 +278,6 @@ const ProfileCard = ({ user, showFollowButton, currentUser }) => {
       )}
     </div>
   );
-};
+});
 
 export default ProfileCard;

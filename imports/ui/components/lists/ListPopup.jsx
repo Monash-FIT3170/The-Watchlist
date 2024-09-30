@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTracker } from 'meteor/react-meteor-data';
 import RatingStar from "../ratings/RatingStar";
-import { FiEdit, FiTrash2, FiGrid, FiList } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiGrid, FiList, FiLink, FiShare2 } from "react-icons/fi";
 import RenameListModal from "../../modals/RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import Scrollbar from '../scrollbar/ScrollBar';
@@ -12,7 +12,9 @@ import ContentItem from "../contentItems/ContentItem";
 import ContentInfoModal from "../../modals/ContentInfoModal";  // Import the modal component
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { EmailShareButton, FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailIcon, FacebookIcon, TwitterIcon, WhatsappIcon } from "react-share";
+import VisibilityDropdown from "../dropdowns/VisibilityDropdown";
+import { useNavigate } from "react-router-dom";
 
 const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [list, setList] = useState(null);
@@ -25,6 +27,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [selectedTab, setSelectedTab] = useState('all');
     const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
+    const [getVisibility, setVisibility] = useState('PUBLIC')
     const popupRef = useRef(null);
     const contentInfoModalRef = useRef(null); // Ref for ContentInfoModal
     const modalRef = useRef(null) // Ref for Modal
@@ -36,6 +39,10 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const confirmDialogRef = useRef(null);
     const renameListRef = useRef(null); // Ref for RenameListModal
     const [contentToDelete, setContentToDelete] = useState(null);
+    const [shareUrl, setShareUrl] = useState();
+    const [isShareDropdownOpen, setShareDropdown] = useState(false);
+    const shareQuote = "Check out this watchlist!";
+    const iconSize = 44;
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -47,6 +54,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     setList(null);
                 } else {
                     setList(result);
+                    const localhost = "http://localhost:3000";
+                    const domain = "https://www.thewatchlist.xyz"
+                    // Change to domain before merging with main
+                    setShareUrl(`${domain}/list/${result._id}`);
+                    // setShareUrl(`${Meteor.absoluteUrl.defaultOptions.rootUrl}/list/${result._id}`); // For some reason the production link doesn't have www.
                 }
             });
         }
@@ -68,6 +80,12 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
             setIsSubscribed(isSubscribed);
         }
     }, [list?.subscribers]);
+
+    useEffect(() => {
+        if (list?.visibility) {
+            setVisibility(list.visibility)
+        }
+    }, [list?.visibility]);
 
     useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside);
@@ -196,6 +214,24 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         });
     };
 
+    const handleVisibilityChange = () => {
+        choices = ["PUBLIC", "FOLLOWERS", "ONLY_ME"]
+        index = choices.indexOf(getVisibility)
+
+        index = ++index % choices.length;
+
+        Meteor.call('list.setVisibility', {
+            listId: listId,
+            visibleType: choices[index]
+        }, (err) => {
+            if (err) {
+                console.error('Set visibility error:', err);
+            } else {
+                setVisibility(choices[index]);
+            }
+        });
+    };
+
     const handleImageLoad = (event, id) => {
         const { naturalWidth, naturalHeight } = event.target;
         if (naturalHeight > naturalWidth) {
@@ -243,6 +279,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     };
 
 
+
     const resetConfirmationState = () => {
         setShowConfirmDialog(false);
         setContentToDelete(null);
@@ -264,6 +301,16 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         resetConfirmationState();
     };
 
+    const handleCopy = async (text) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            console.log('Copied to clipboard: ', text);
+            toast.success('Link copied to clipboard');
+        } catch (error) {
+            console.error('Unable to copy to clipboard:', error);
+        }
+    };
+
     const filteredContent = list?.content?.filter(item =>
         selectedTab === 'all' ||
         (selectedTab === 'movies' && item.contentType === 'Movie') ||
@@ -275,6 +322,10 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     if (loading) return <div>Loading...</div>;
     if (!list) return <div>No list found.</div>;
 
+    const toggleShareDropdown = () => {
+        setShareDropdown(!isShareDropdownOpen);
+    }
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
             <div
@@ -285,48 +336,110 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     <h2 className="text-2xl font-bold truncate max-w-full" title={list.title}>
                         {list.title.length > 30 ? `${list.title.slice(0, 30)}...` : list.title}
                     </h2>
-                    <div className="flex space-x-2">
-                        <button
-                            onClick={isCurrentUserList ? handleRenameListClick : null}
-                            disabled={!isCurrentUserList}
-                            className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
-                            title="Rename List"
-                            style={{ width: 44, height: 44 }}
-                        >
-                            <FiEdit size="24" />
-                        </button>
-                        <button
-                            onClick={() => isCurrentUserList && confirmDeleteList(list._id)}
-                            disabled={!isCurrentUserList}
-                            className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-red-500 hover:bg-red-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
-                            title="Delete List"
-                            style={{ width: 44, height: 44 }}
-                        >
-                            <FiTrash2 size="24" />
-                        </button>
-                        <button
-                            onClick={() => setIsGridView(!isGridView)}
-                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
-                            title={isGridView ? "Switch to List View" : "Switch to Grid View"}
-                            style={{ width: 44, height: 44 }}
-                        >
-                            {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
-                        </button>
-                        {/* Conditionally render subscribe/unsubscribe button */}
-                        {list.userId !== Meteor.userId() && (
+                    <div className="flex space-x-1">
+
+                        <div className={`flex space-x-3 px-2 pt-2 rounded-full ${isShareDropdownOpen ? "bg-[#282525]" : "bg-inherit"}`}>
+                            {/* Actual Dropdown */}
+                            {isShareDropdownOpen && (
+                                <div className="flex flex-row space-x-3">
+                                    <button
+                                        onClick={() => handleCopy(shareUrl)}
+                                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                                        title="Copy Link"
+                                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                                    >
+                                        <FiLink size="24" />
+                                    </button>
+                                    <button title="Share to Facebook">
+                                        <FacebookShareButton url={shareUrl} quote={shareQuote}>
+                                            <FacebookIcon size={iconSize} round />
+                                        </FacebookShareButton>
+                                    </button>
+                                    <button title="Share to Twitter">
+                                        <TwitterShareButton url={shareUrl} title={shareQuote}>
+                                            <TwitterIcon size={iconSize} round />
+                                        </TwitterShareButton>
+                                    </button>
+                                    <button title="Share to Whatsapp">
+                                        <WhatsappShareButton url={shareUrl} title={shareQuote}>
+                                            <WhatsappIcon size={iconSize} round />
+                                        </WhatsappShareButton>
+                                    </button>
+                                    <button title="Send in Email">
+                                        <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
+                                            <EmailIcon size={iconSize} round />
+                                        </EmailShareButton>
+                                    </button>
+                                </div>
+                            )}
+                            {/* Dropdown Toggle Button */}
                             <button
-                                onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
-                                className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
+                                onClick={() => toggleShareDropdown()}
+                                className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                                title="Share Options"
+                                style={{ width: iconSize, height: iconSize }}
                             >
-                                {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                                <FiShare2 size="24" />
                             </button>
-                        )}
-                        <button
-                            className="text-2xl font-bold text-gray-500 hover:text-gray-800"
-                            onClick={onClose}
-                        >
-                            &times;
-                        </button>
+                        </div>
+
+                        <div className="pb-2 pt-2 flex space-x-3 items-center">
+
+
+                            <button
+                                onClick={isCurrentUserList ? handleRenameListClick : null}
+                                disabled={!isCurrentUserList}
+                                className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
+                                title="Rename List"
+                                style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                            >
+                                <FiEdit size="24" />
+                            </button>
+                            <button
+                                onClick={() => isCurrentUserList && confirmDeleteList(list._id)}
+                                disabled={!isCurrentUserList}
+                                className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-red-500 hover:bg-red-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
+                                title="Delete List"
+                                style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                            >
+                                <FiTrash2 size="24" />
+                            </button>
+                            <button
+                                onClick={() => setIsGridView(!isGridView)}
+                                className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                                title={isGridView ? "Switch to List View" : "Switch to Grid View"}
+                                style={{ width: iconSize, height: iconSize }}
+                            >
+                                {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
+                            </button>
+                            {/* Conditionally render subscribe/unsubscribe button */}
+                            {list.userId !== Meteor.userId() && (
+                                <button
+                                    onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
+                                    className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
+                                >
+                                    {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                                </button>
+                            )}
+
+                            {/* Conditionally render visibility settings */}
+                            {list.userId === Meteor.userId() && (
+                                <VisibilityDropdown
+                                    list={list}
+                                    setVisibility={setVisibility}
+                                    listId={listId}
+                                    currentVisibility={getVisibility}
+                                    defaultText={<FaGlobe size={24} />}
+                                />
+                            )}
+
+                            <button
+                                className="text-2xl font-bold text-gray-500 hover:text-gray-800"
+                                onClick={onClose}
+                            >
+                                &times;
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div className="flex justify-between items-center mb-4">
@@ -422,19 +535,19 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                                         <RatingStar totalStars={5} rating={rating} />
                                                     </div>
                                                 </div>
-                                                    <button
-                                                        className={`absolute top-4 right-4 rounded-full p-2 ${isCurrentUserList ? 'text-white bg-red-500 hover:bg-red-700' : 'text-gray-500 bg-gray-300 cursor-not-allowed'}`}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (isCurrentUserList) {
-                                                                confirmRemoveContent(item.contentId);
-                                                            }
-                                                        }}
-                                                        title="Remove from List"
-                                                        disabled={!isCurrentUserList}
-                                                    >
-                                                        <FiTrash2 />
-                                                    </button>
+                                                <button
+                                                    className={`absolute top-4 right-4 rounded-full p-2 ${isCurrentUserList ? 'text-white bg-red-500 hover:bg-red-700' : 'text-gray-500 bg-gray-300 cursor-not-allowed'}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (isCurrentUserList) {
+                                                            confirmRemoveContent(item.contentId);
+                                                        }
+                                                    }}
+                                                    title="Remove from List"
+                                                    disabled={!isCurrentUserList}
+                                                >
+                                                    <FiTrash2 />
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -503,6 +616,6 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
             <ToastContainer />
         </div>
     );
-};
+}
 
 export default ListPopup;
