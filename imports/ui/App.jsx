@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-route
 import { FaRegUserCircle } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { AiOutlineHome, AiOutlineSearch } from "react-icons/ai";
+import { GiPodium } from "react-icons/gi";
 import { useTracker } from 'meteor/react-meteor-data';
 import { ListCollection } from '../db/List';
 import { Counts } from 'meteor/tmeasday:publish-counts';
@@ -27,6 +28,7 @@ import Settings from "./pages/Settings.jsx";
 import FollowRequests from "./pages/FollowRequests.jsx";
 import { useEffect } from "react";
 import { SearchProvider } from "./contexts/SearchContext.js";
+import TopRated from "./pages/TopRated.jsx";
 
 // Create a Context for User Data (if needed)
 export const UserContext = React.createContext();
@@ -43,6 +45,7 @@ export const App = () => {
     { title: "Search", path: "/search", icon: <AiOutlineSearch />, cName: "flex text-light hover-text-magenta" },
     { title: "Profile", path: "/profile", icon: <FaRegUserCircle />, cName: "flex" },
     { title: "AI Picks", path: "/ai-picks", icon: <BsStars />, cName: "flex" },
+    {title: "Top Rated", path: "/top-rated", icon: <GiPodium />, cName: "flex"},
   ], []);
 
   // Track currentUser reactively from Meteor.users collection
@@ -119,6 +122,7 @@ export const App = () => {
                 <Route path="/settings" element={<Settings currentUser={currentUser} />} />
                 <Route path="/follow-requests" element={<FollowRequests currentUser={currentUser} />} />
                 <Route path="/list/:listId" element={<SharedWatchlistPage currentUser={currentUser}/>} />
+                <Route path="/top-rated" element={<TopRated currentUser={currentUser} />} />
               </Routes>
             </Scrollbar>
           ) : (

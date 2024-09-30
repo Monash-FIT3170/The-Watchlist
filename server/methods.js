@@ -782,6 +782,62 @@ Meteor.methods({
   },
 });
 
+Meteor.methods({
+  async 'ratings.getTopRated'(contentType ){
+  
+    if (!["Movie", "TV Show"].includes(contentType)) {
+      throw new Meteor.Error('invalid-content-type', 'Content type must be either "Movie" or "TV Show"');
+    }
+  
+    const pipeline = [
+  
+      {
+        $match: {
+          contentType: contentType
+        }
+      },
+  
+      {
+        $group:{
+          _id: "$contentId",
+          averageRating: { $avg: "$rating" },
+          count: { $sum: 1 }
+        }
+      },
+  
+      {$sort: { averageRating: -1 }},
+      {$limit: 50},
+  
+      {$lookup:{
+        from: contentType === 'Movie' ? 'movie' : 'tv',
+        localField: "_id",
+        foreignField: "contentId",
+        as: "contentDetails"
+      }},
+  
+      {$unwind: '$contentDetails'},
+  
+      {$project: {
+        averageRating: 1, 
+        count: 1,
+        contentDetails: 1
+      }}
+    ];
+  
+    const rawCollection = RatingCollection.rawCollection();
+  
+    try{
+  
+      const aggregateResult = await rawCollection.aggregate(pipeline).toArray();
+  
+      return aggregateResult;
+    }catch (error){
+      console.error('Error fetching top rated content:', error);
+      throw new Meteor.Error('fetch-failed', 'Failed to fetch top rated content');
+    }
+  }
+  });
+
 // Helper function to select random content
 function selectRandomContent(contentList, maxItems) {
   const selectedItems = [];
