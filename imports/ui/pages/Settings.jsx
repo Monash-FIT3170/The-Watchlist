@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useTracker } from "meteor/react-meteor-data";
 import { passwordStrength } from "check-password-strength";
 import ProfileDropdown from "../components/profileDropdown/ProfileDropdown";
-import { Radio, FormControlLabel, FormGroup} from "@mui/material";
+import { Radio, FormControlLabel, FormGroup } from "@mui/material";
 import { Meteor } from "meteor/meteor";
+import { Accounts } from "meteor/accounts-base";
 
 const Settings = () => {
   const currentUser = useTracker(() => {
@@ -31,7 +32,7 @@ const Settings = () => {
       setUsername(currentUser.username || "");
       setSelectedPrivacy(currentUser.profile?.privacy || "Public");
 
-      // If existing users do not have a privacy setting, set it to public
+      // Set default privacy to 'Public' if not set
       if (currentUser.profile?.privacy === undefined) {
         Meteor.call("users.updatePrivacy", "Public", (error) => {
           if (error) {
@@ -51,7 +52,14 @@ const Settings = () => {
       return;
     }
 
-    Meteor.call("users.updateProfile", { username }, (error, result) => {
+    // Ensure username is between 3 and 15 characters
+    if (username.length < 3 || username.length > 15) {
+      setUsernameErrorMessage("Username must be between 3 and 15 characters.");
+      setUsernameSuccessMessage("");
+      return;
+    }
+
+    Meteor.call("users.updateProfile", { username }, (error) => {
       if (error) {
         setUsernameErrorMessage(error.reason);
         setUsernameSuccessMessage("");
@@ -61,34 +69,6 @@ const Settings = () => {
       }
     });
   };
-
-    const handleUpdate = () => {
-        // Check if the username is within the allowed length
-        if (!username) {
-            setUsernameErrorMessage('Username cannot be empty.');
-            setUsernameSuccessMessage('');
-            return;
-        }
-        
-        // Ensure username is between 3 and 15 characters
-        if (username.length < 3 || username.length > 15) {
-            setUsernameErrorMessage('Username must be between 3 and 15 characters.');
-            setUsernameSuccessMessage('');
-            return;
-        }
-    
-        // Proceed with updating the profile if validations pass
-        Meteor.call('users.updateProfile', { username }, (error, result) => {
-            if (error) {
-                setUsernameErrorMessage(error.reason);
-                setUsernameSuccessMessage('');
-            } else {
-                setUsernameSuccessMessage('Profile updated successfully!');
-                setUsernameErrorMessage('');
-            }
-        });
-    };
-    
 
   const handlePasswordStrength = (password) => {
     setStrength(passwordStrength(password).value);
@@ -119,9 +99,21 @@ const Settings = () => {
   };
 
   const handleDeleteUser = () => {
-    Meteor.call("users.deleteUser", { username }, (error, result) => {
+    Meteor.call("users.deleteUser", (error) => {
       if (error) {
         setUsernameErrorMessage(error.reason);
+      }
+    });
+  };
+
+  const handlePrivacyChange = (event) => {
+    const newPrivacy = event.target.name;
+    setSelectedPrivacy(newPrivacy);
+    Meteor.call("users.updatePrivacy", newPrivacy, (error) => {
+      if (error) {
+        console.error("Error updating privacy:", error.reason);
+      } else {
+        console.log("Privacy updated to:", newPrivacy);
       }
     });
   };
@@ -234,150 +226,134 @@ const Settings = () => {
               <p className="text-red-500 mt-2">{passwordErrorMessage}</p>
             )}
 
-                        {/* Password Strength Indicator */}
-                        {newPassword && (
-                            <div className="space-y-2">
-                                <div className="relative pt-1">
-                                    <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
-                                        <div
-                                            style={{
-                                                width:
-                                                    strength === 'Too weak'
-                                                        ? '25%'
-                                                        : strength === 'Weak'
-                                                        ? '50%'
-                                                        : strength === 'Medium'
-                                                        ? '75%'
-                                                        : '100%',
-                                            }}
-                                            className={`flex flex-col text-center whitespace-nowrap text-white justify-center ${
-                                                strength === 'Too weak'
-                                                    ? 'bg-red-600'
-                                                    : strength === 'Weak'
-                                                    ? 'bg-yellow-500'
-                                                    : strength === 'Medium'
-                                                    ? 'bg-blue-500'
-                                                    : 'bg-green-500'
-                                            }`}
-                                        ></div>
-                                    </div>
-                                </div>
-
-                                <p
-                                    className={`font-semibold ${
-                                        strength === 'Too weak'
-                                            ? 'text-red-600'
-                                            : strength === 'Weak'
-                                            ? 'text-yellow-500'
-                                            : strength === 'Medium'
-                                            ? 'text-blue-500'
-                                            : 'text-green-500'
-                                    }`}
-                                >
-                                    {strength === 'Too weak'
-                                        ? 'Password is too weak. Consider adding numbers, symbols, and more characters.'
-                                        : strength === 'Weak'
-                                        ? 'Password is weak. Add a mix of uppercase, lowercase, and special characters.'
-                                        : strength === 'Medium'
-                                        ? 'Password is decent but could be stronger.'
-                                        : 'Strong password!'}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                    <hr className="border-t border-gray-700 my-4" />
+            {/* Password Strength Indicator */}
+            {newPassword && (
+              <div className="space-y-2">
+                <div className="relative pt-1">
+                  <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
+                    <div
+                      style={{
+                        width:
+                          strength === "Too weak"
+                            ? "25%"
+                            : strength === "Weak"
+                            ? "50%"
+                            : strength === "Medium"
+                            ? "75%"
+                            : "100%",
+                      }}
+                      className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center ${
+                        strength === "Too weak"
+                          ? "bg-red-600"
+                          : strength === "Weak"
+                          ? "bg-orange-500"
+                          : strength === "Medium"
+                          ? "bg-yellow-400"
+                          : "bg-green-500"
+                      }`}
+                    ></div>
+                  </div>
                 </div>
+                <p>Password strength: {strength}</p>
+              </div>
             )}
-            
-
-            <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
-                {/* Left Column - Privacy settings */}
-                <div>
-                    <label className="block text-lg font-semibold text-white">Privacy Settings</label>
-                    <p className="text-gray-400">Choose the privacy settings for your account.</p>
-                </div>
-
-                {/* Right Column - Privacy settings */}
-                <div className="flex">
-                    <FormGroup className="w-full flex text-4xl">
-                        <FormControlLabel
-                            control={
-                                <Radio
-                                    checked={selectedPrivacy === 'Public'}
-                                    onChange={handlePrivacyChange}
-                                    name="Public"
-                                    sx={{
-                                        color: 'white', 
-                                        '&.Mui-checked': {
-                                            color: 'purple', 
-                                        },
-                                        transform: 'scale(1.1)',
-                                    }}
-                                />
-                            }
-                            label={<span className="text-xl font-bold">Public</span>}
-                        />
-                        <FormControlLabel
-                            control={
-                                <Radio
-                                    checked={selectedPrivacy === 'Private'}
-                                    onChange={handlePrivacyChange}
-                                    name="Private"
-                                    sx={{
-                                        color: 'white', 
-                                        '&.Mui-checked': {
-                                            color: 'purple',
-                                        },
-                                        transform: 'scale(1.1)',
-                                    }}
-                                />
-                            }
-                            label={<span className="text-xl font-bold">Private</span>}
-                        />
-                    </FormGroup>
-                </div>
-            </div>
-
-            <hr className="border-t border-gray-700 my-4" />
-            <div className="mt-8 flex space-x-4">
-    <button
-        onClick={() => Meteor.logout()}
-        className="bg-gray-600 text-white px-7 py-2 rounded-md hover:bg-gray-700 transition-colors w-auto"
-    >
-        Log Out
-    </button>
-    {!showConfirmation ? (
-        <button
-          onClick={() => setShowConfirmation(true)}
-          className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors w-auto"
-        >
-          Delete Account
-        </button>
-    ) : (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-gray-800 p-6 rounded-md">
-                <h2 className="text-xl font-bold">Delete your account?</h2>
-                <p>This action cannot be undone.</p>
-                <div className="mt-4 flex justify-between space-x-4">
-                    <button
-                        onClick={handleDeleteUser}
-                        className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors w-auto"
-                    >
-                        Delete
-                    </button>
-                    <button
-                        onClick={() => setShowConfirmation(false)}
-                        className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors w-auto"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
+          </div>
         </div>
-    )}
-</div>
+      )}
+
+      <hr className="border-t border-gray-700 my-4" />
+
+      {/* Privacy Settings */}
+      <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+        <div>
+          <label className="block text-lg font-semibold text-white">
+            Privacy
+          </label>
+          <p className="text-gray-400">Control who can see your activity.</p>
         </div>
-    );
+
+        <div>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Radio
+                  checked={selectedPrivacy === "Public"}
+                  onChange={handlePrivacyChange}
+                  name="Public"
+                />
+              }
+              label="Public"
+            />
+            <FormControlLabel
+              control={
+                <Radio
+                  checked={selectedPrivacy === "Friends"}
+                  onChange={handlePrivacyChange}
+                  name="Friends"
+                />
+              }
+              label="Friends"
+            />
+            <FormControlLabel
+              control={
+                <Radio
+                  checked={selectedPrivacy === "Private"}
+                  onChange={handlePrivacyChange}
+                  name="Private"
+                />
+              }
+              label="Private"
+            />
+          </FormGroup>
+        </div>
+      </div>
+
+      <hr className="border-t border-gray-700 my-4" />
+
+      {/* Delete Account */}
+      <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+        <div>
+          <label className="block text-lg font-semibold text-white">
+            Delete Account
+          </label>
+          <p className="text-gray-400">
+            Once deleted, your account cannot be recovered.
+          </p>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => setShowConfirmation(!showConfirmation)}
+            className="bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-800 transition-colors"
+          >
+            Delete Account
+          </button>
+        </div>
+
+        {showConfirmation && (
+          <div className="mt-2">
+            <p className="text-red-500">
+              Are you sure you want to delete your account?
+            </p>
+            <div className="flex items-center space-x-4 mt-4">
+              <button
+                onClick={handleDeleteUser}
+                className="bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-800 transition-colors"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={() => setShowConfirmation(false)}
+                className="bg-gray-700 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Settings;
