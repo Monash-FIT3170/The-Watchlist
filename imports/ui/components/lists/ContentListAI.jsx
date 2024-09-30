@@ -40,7 +40,7 @@ const ContentListAI = ({ list, isUserOwned }) => {
           {list.title} List is empty. Add your movies/TV shows.
         </div>
       )}
-      <div ref={containerRef} className="flex space-x-6 overflow-x-hidden py-4">
+      <div ref={containerRef} className="flex justify-between flex-wrap overflow-x-hidden py-8 px-8">
         {list.content.map((item) => (
           <div key={item.contentId} className="flex-shrink-0" style={{ minWidth: '130px', width: '13%' }}>
             <ContentItem
