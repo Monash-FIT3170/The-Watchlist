@@ -15,7 +15,7 @@ const ContentList = React.memo(({ list, isUserOwned, globalRatings = {} }) => {
       <div className="flex justify-between items-center mb-0 text-base">
         <button
           onClick={() => handleItemClick(list)}
-          className="font-bold text-2xl text-white leading-tight tracking-tight pl-2 hover:underline cursor-pointer bg-transparent border-none"
+          className="font-bold text-2xl text-white leading-tight tracking-tight hover:underline cursor-pointer bg-transparent border-none"
         >
           {list.title}
         </button>
