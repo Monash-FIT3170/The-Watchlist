@@ -1018,3 +1018,93 @@ function fetchTMDbContentByGenres(apiKey, genreIds, type) {
     return [];
   }
 }
+
+Meteor.methods({
+  'getUserGenreStatistics'() {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized');
+    }
+
+    // Fetch user's ratings and lists
+    const userRatings = RatingCollection.find({ userId: this.userId }).fetch();
+    const userLists = ListCollection.find({ userId: this.userId }).fetch();
+
+    // Collect content IDs from ratings and lists
+    const ratedContentIds = userRatings.map(r => ({ contentId: r.contentId, contentType: r.contentType }));
+    const listContentIds = [];
+    userLists.forEach(list => {
+      if (list.content) {
+        list.content.forEach(item => {
+          listContentIds.push({ contentId: item.contentId, contentType: item.contentType });
+        });
+      }
+    });
+
+    // Combine and deduplicate content IDs
+    const allUserContent = [...ratedContentIds, ...listContentIds];
+    const uniqueUserContentMap = new Map();
+    allUserContent.forEach(item => {
+      const key = `${item.contentId}-${item.contentType}`;
+      uniqueUserContentMap.set(key, item);
+    });
+    const uniqueUserContent = Array.from(uniqueUserContentMap.values());
+
+    // Fetch content documents
+    const userContentDocs = [];
+    uniqueUserContent.forEach(item => {
+      const collection = item.contentType === 'Movie' ? MovieCollection : TVCollection;
+      const contentDoc = collection.findOne({ contentId: item.contentId });
+      if (contentDoc) {
+        userContentDocs.push(contentDoc);
+      }
+    });
+
+    // Tally genres
+    const genreCounts = {};
+    userContentDocs.forEach(content => {
+      if (content.genres && content.genres.length > 0) {
+        content.genres.forEach(genre => {
+          genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+        });
+      }
+    });
+
+    // Convert to array and sort by count
+    const genreStatistics = Object.entries(genreCounts)
+      .map(([genre, count]) => ({ genre, count }))
+      .sort((a, b) => b.count - a.count);
+
+    return genreStatistics;
+  }
+});
+
+Meteor.methods({
+  'getRecommendationsByGenre'(genreName) {
+    check(genreName, String);
+
+    const apiKey = Meteor.settings.TMDB_API_KEY;
+    if (!apiKey) {
+      throw new Meteor.Error('tmdb-api-key-not-set', 'TMDb API key is not set in Meteor settings.');
+    }
+
+    // Map genre name to TMDb genre IDs
+    const movieGenreIds = [];
+    const tvGenreIds = [];
+    for (const [id, name] of Object.entries(genreMappings.movies)) {
+      if (name === genreName) {
+        movieGenreIds.push(id);
+      }
+    }
+    for (const [id, name] of Object.entries(genreMappings.tv)) {
+      if (name === genreName) {
+        tvGenreIds.push(id);
+      }
+    }
+
+    // Fetch recommendations from TMDb based on the genre
+    const recommendedMovies = fetchTMDbContentByGenres(apiKey, movieGenreIds, 'movie');
+    const recommendedShows = fetchTMDbContentByGenres(apiKey, tvGenreIds, 'tv');
+
+    return { movies: recommendedMovies, shows: recommendedShows };
+  }
+});
