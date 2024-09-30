@@ -125,13 +125,22 @@ const UserProfile = ({ currentUser }) => {
     return [];
   }, [listsHandle, profileUserId]);
 
+  // Subscribe to the profile user's lists
+  const subscribedListsHandle = useTracker(() => {
+    return Meteor.subscribe('subscribedLists', profileUserId);
+  }, [profileUserId]);
+
+    // Fetch the profile user's subscribed lists
+  const subscribedLists = useTracker(() => {
+    if (subscribedListsHandle.ready()) {
+      return ListCollection.find({ subscribers: profileUserId }).fetch();
+    }
+    return [];
+  }, [listsHandle, profileUserId]);
+
   // Separate owned lists and subscribed lists
   const ownedLists = useMemo(() => (
     userLists.filter(list => list.userId === profileUserId)
-  ), [userLists, profileUserId]);
-
-  const subscribedLists = useMemo(() => (
-    userLists.filter(list => list.userId !== profileUserId)
   ), [userLists, profileUserId]);
 
   // Further categorize owned lists by listType
