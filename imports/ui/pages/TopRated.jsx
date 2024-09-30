@@ -13,28 +13,19 @@ const TopRated = ({currentUser}) => {
     }
 
     //get the top rated content for the user.
-     useMemo(() => {
-        //if user has selected movies, get top rated movies.
-        if (isMovie) {
-            return Meteor.call('ratings.getTopRated', "Movie", (error, result) => {
-                if (error) {
-                    console.error('Error fetching top rated movies:', error.reason);
-                }
-                setTopRatedContent(result);
-                console.log(result);
+    useEffect(() => {
+      // Fetch based on the is movie type
+      const contentType = isMovie ? 'Movie' : 'TV Show';
+      Meteor.call('ratings.getTopRated', contentType, (error, result) => {
+          if (error) {
+              console.error(`Error fetching top rated ${contentType.toLowerCase()}:`, error.reason);
+          } else {
+              setTopRatedContent(result); 
+              console.log(result); 
+          }
+      });
 
-            });
-        }else{
-            return Meteor.call('ratings.getTopRated', "TV Show", (error, result) => {
-                if (error) {
-                    console.error('Error fetching top rated tv shows:', error.reason);
-                }
-                setTopRatedContent(result);
-                console.log(result);
-            });
-        }
-        //needs to update on each change of selection, same page between users.
-    }, [isMovie]);
+  }, [isMovie]);
 
 
     return(
