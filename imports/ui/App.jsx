@@ -28,6 +28,7 @@ import Settings from "./pages/Settings.jsx";
 import FollowRequests from "./pages/FollowRequests.jsx";
 import { useEffect } from "react";
 import { SearchProvider } from "./contexts/SearchContext.js";
+import TopRated from "./pages/TopRated.jsx";
 
 // Create a Context for User Data (if needed)
 export const UserContext = React.createContext();
@@ -121,6 +122,7 @@ export const App = () => {
                 <Route path="/settings" element={<Settings currentUser={currentUser} />} />
                 <Route path="/follow-requests" element={<FollowRequests currentUser={currentUser} />} />
                 <Route path="/list/:listId" element={<SharedWatchlistPage currentUser={currentUser}/>} />
+                <Route path="/top-rated" element={<TopRated currentUser={currentUser} />} />
               </Routes>
             </Scrollbar>
           ) : (
