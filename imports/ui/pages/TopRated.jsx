@@ -7,6 +7,7 @@ const TopRated = ({currentUser}) => {
     const [isMovie, setIsMovie] = useState(true);   
     const [topRatedContent, setTopRatedContent] = useState([]);
     const [globalRatings, setGlobalRatings] = useState({});
+    const [loading, setLoading] = useState(true);
 
 
     useEffect(() => {
@@ -29,6 +30,7 @@ const TopRated = ({currentUser}) => {
     //get the top rated content for the user.
     useEffect(() => {
       // Fetch based on the is movie type
+      setLoading(true);
       const contentType = isMovie ? 'Movie' : 'TV Show';
       Meteor.call('ratings.getTopRated', contentType, (error, result) => {
           if (error) {
@@ -39,7 +41,22 @@ const TopRated = ({currentUser}) => {
           }
       });
 
+      setLoading(false);
+
   }, [isMovie]);
+
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-darker">
+        <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
+          <div className="-mt-52 animate-spin rounded-full h-32 w-32 border-t-4 border-blue-500 mb-4"></div>
+          <p className="text-xl font-semibold">Loading the Top Rated Content</p>
+          <p className="text-gray-400 mt-2">Please wait a moment while we fetch your content.</p>
+        </div>
+      </div>
+    );
+  }
 
 
     return(
