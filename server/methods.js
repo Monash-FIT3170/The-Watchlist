@@ -8,6 +8,7 @@ import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { ListCollection } from '../imports/db/List';
 import { MovieCollection, TVCollection } from '../imports/db/Content';
 import { HTTP } from 'meteor/http';
+import { _ } from 'meteor/underscore';
 
 Meteor.methods({
   followUser(targetUserId) {
@@ -807,7 +808,61 @@ function fetchContentRecommendations(titles, contentType) {
   return recommendations;
 }
 
+let genreMappings = { movies: {}, tv: {} };
+
+function loadGenreMappings(apiKey) {
+  const movieGenresUrl = `https://api.themoviedb.org/3/genre/movie/list?language=en-US`;
+  const tvGenresUrl = `https://api.themoviedb.org/3/genre/tv/list?language=en-US`;
+
+  try {
+    // Fetch movie genres
+    const movieGenresResponse = HTTP.get(movieGenresUrl, {
+      headers: {
+        "Authorization": `Bearer ${apiKey}`
+      }
+    });
+    const movieGenres = JSON.parse(movieGenresResponse.content).genres;
+
+    // Fetch TV genres
+    const tvGenresResponse = HTTP.get(tvGenresUrl, {
+      headers: {
+        "Authorization": `Bearer ${apiKey}`
+      }
+    });
+    const tvGenres = JSON.parse(tvGenresResponse.content).genres;
+
+    // Reset the genre mappings
+    genreMappings.movies = {};
+    genreMappings.tv = {};
+
+    // Map movie genres
+    movieGenres.forEach(genre => {
+      genreMappings.movies[genre.id] = genre.name;
+    });
+
+    // Map TV genres
+    tvGenres.forEach(genre => {
+      genreMappings.tv[genre.id] = genre.name;
+    });
+
+  } catch (error) {
+    console.error('Error loading genre mappings:', error);
+  }
+}
+
+// Call this function when the server starts
+Meteor.startup(() => {
+  const apiKey = Meteor.settings.TMDB_API_KEY;
+  if (apiKey) {
+    loadGenreMappings(apiKey);
+  }
+});
+
+
 function processTMDbData(items, contentType) {
+
+  const genreMap = contentType === 'Movie' ? genreMappings.movies : genreMappings.tv;
+  
   return items.map(item => ({
     contentId: item.id,
     title: item.title || item.name,
@@ -815,7 +870,7 @@ function processTMDbData(items, contentType) {
     release_year: (item.release_date || item.first_air_date || '').split('-')[0],
     overview: item.overview,
     language: item.original_language,
-    genres: item.genre_ids, // We may need to map genre IDs to names
+    genres: item.genre_ids.map(id => genreMap[id]).filter(Boolean),
     image_url: item.poster_path ? `https://image.tmdb.org/t/p/original${item.poster_path}` : null,
     background_url: item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : null,
     contentType,
@@ -864,3 +919,102 @@ Meteor.methods({
     }
   }
 });
+
+Meteor.methods({
+  'getRecommendationsByFavoriteGenres'() {
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized');
+    }
+
+    const apiKey = Meteor.settings.TMDB_API_KEY;
+    if (!apiKey) {
+      throw new Meteor.Error('tmdb-api-key-not-set', 'TMDb API key is not set in Meteor settings.');
+    }
+
+    // Fetch user's ratings and lists
+    const userRatings = RatingCollection.find({ userId: this.userId }).fetch();
+    const userLists = ListCollection.find({ userId: this.userId }).fetch();
+
+    // Collect content IDs from ratings and lists
+    const ratedContentIds = userRatings.map(r => ({ contentId: r.contentId, contentType: r.contentType }));
+    const listContentIds = [];
+    userLists.forEach(list => {
+      if (list.content) {
+        list.content.forEach(item => {
+          listContentIds.push({ contentId: item.contentId, contentType: item.contentType });
+        });
+      }
+    });
+
+    // Combine and deduplicate content IDs
+    const allUserContent = [...ratedContentIds, ...listContentIds];
+    const uniqueUserContent = _.uniq(allUserContent, item => `${item.contentId}-${item.contentType}`);
+
+    // Fetch content documents
+    const userContentDocs = [];
+    uniqueUserContent.forEach(item => {
+      const collection = item.contentType === 'Movie' ? MovieCollection : TVCollection;
+      const contentDoc = collection.findOne({ contentId: item.contentId });
+      if (contentDoc) {
+        userContentDocs.push(contentDoc);
+      }
+    });
+
+    // Tally genres
+    const genreCounts = {};
+    userContentDocs.forEach(content => {
+      if (content.genres && content.genres.length > 0) {
+        content.genres.forEach(genre => {
+          genreCounts[genre] = (genreCounts[genre] || 0) + 1;
+        });
+      }
+    });
+
+    // Get top N favorite genres
+    const topGenres = Object.entries(genreCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)  // Top 3 genres
+      .map(entry => entry[0]);
+
+    // Map genre names back to TMDb genre IDs
+    const movieGenreIds = [];
+    const tvGenreIds = [];
+    for (const genreName of topGenres) {
+      for (const [id, name] of Object.entries(genreMappings.movies)) {
+        if (name === genreName) {
+          movieGenreIds.push(id);
+        }
+      }
+      for (const [id, name] of Object.entries(genreMappings.tv)) {
+        if (name === genreName) {
+          tvGenreIds.push(id);
+        }
+      }
+    }
+
+    // Fetch recommendations from TMDb based on genres
+    const recommendedMovies = fetchTMDbContentByGenres(apiKey, movieGenreIds, 'movie');
+    const recommendedShows = fetchTMDbContentByGenres(apiKey, tvGenreIds, 'tv');
+
+    return { movies: recommendedMovies, shows: recommendedShows, genres: topGenres };
+  }
+});
+
+// Helper function to fetch content by genres from TMDb
+function fetchTMDbContentByGenres(apiKey, genreIds, type) {
+  const genreIdsParam = genreIds.join(',');
+  const url = `https://api.themoviedb.org/3/discover/${type}?with_genres=${genreIdsParam}&sort_by=popularity.desc`;
+
+  try {
+    const response = HTTP.get(url, {
+      headers: {
+        "Authorization": `Bearer ${apiKey}`
+      }
+    });
+    const data = JSON.parse(response.content).results;
+    return processTMDbData(data, type === 'movie' ? 'Movie' : 'TV Show');
+  } catch (error) {
+    console.error(`Error fetching ${type} content by genres from TMDb:`, error);
+    return [];
+  }
+}

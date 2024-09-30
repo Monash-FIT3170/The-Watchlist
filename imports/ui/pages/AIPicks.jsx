@@ -19,6 +19,7 @@ const AIPicks = ({ currentUser }) => {
   const [trendingContent, setTrendingContent] = useState({ movies: [], shows: [] });
   const [contentMovieNone, setContentMovieNone] = useState(true);
   const [contentTVNone, setContentTVNone] = useState(true);
+  const [genreRecommendations, setGenreRecommendations] = useState({ movies: [], shows: [], genres: [] });
 
   // Use useTracker to reactively fetch global ratings
   const globalRatings = useTracker(() => {
@@ -51,6 +52,21 @@ const AIPicks = ({ currentUser }) => {
       fetchTrendingContent();
     } else {
       fetchRecommendations();
+    }
+  }, [display]);
+
+  useEffect(() => {
+    if (display === DISPLAY_GENRES) {
+      setLoading(true);
+      Meteor.call('getRecommendationsByFavoriteGenres', (error, result) => {
+        if (error) {
+          console.error("Error fetching genre recommendations:", error);
+          setLoading(false);
+        } else {
+          setGenreRecommendations(result);
+          setLoading(false);
+        }
+      });
     }
   }, [display]);
 
@@ -168,17 +184,17 @@ const AIPicks = ({ currentUser }) => {
       >
         Refresh AI Recommendations
       </button>
-      <Scrollbar className="w-full overflow-y-auto p-4">
-      {display === DISPLAY_TRENDING && (
-            <Scrollbar className="w-full overflow-y-auto">
-              <div className="px-8 py-2">
-                <ContentList list={{ title: 'Trending Movies', content: trendingContent.movies }} isUserOwned={false} globalRatings={globalRatings} hideShowAllButton={true}/>
-              </div>
-              <div className="px-8 py-2">
-                <ContentList list={{ title: 'Trending TV Shows', content: trendingContent.shows }} isUserOwned={false} globalRatings={globalRatings} hideShowAllButton={true}/>
-              </div>
-            </Scrollbar>
-          )}
+      <Scrollbar className="w-full overflow-y-auto">
+        {display === DISPLAY_TRENDING && (
+          <div>
+            <div className="px-6 py-2">
+              <ContentList list={{ title: 'Trending Movies', content: trendingContent.movies }} isUserOwned={false} globalRatings={globalRatings} hideShowAllButton={true} />
+            </div>
+            <div className="px-6 py-2">
+              <ContentList list={{ title: 'Trending TV Shows', content: trendingContent.shows }} isUserOwned={false} globalRatings={globalRatings} hideShowAllButton={true} />
+            </div>
+          </div>
+        )}
         {display === DISPLAY_MOVIES && (
           contentMovieNone ? (
             <div className="flex flex-col items-center justify-center mt-10 p-6 rounded-lg shadow-lg">
@@ -212,6 +228,22 @@ const AIPicks = ({ currentUser }) => {
               );
             })
           )
+        )}
+        {display === DISPLAY_GENRES && (
+          <div>
+            <div className="px-8 py-2">
+              <h2 className="text-white text-2xl font-bold">
+                Recommended Movies Based on Your Favorite Genres: {genreRecommendations.genres.join(', ')}
+              </h2>
+              <ContentList list={{ title: 'Movies You Might Like', content: genreRecommendations.movies }} isUserOwned={false} />
+            </div>
+            <div className="px-8 py-2">
+              <h2 className="text-white text-2xl font-bold">
+                Recommended TV Shows Based on Your Favorite Genres: {genreRecommendations.genres.join(', ')}
+              </h2>
+              <ContentList list={{ title: 'TV Shows You Might Like', content: genreRecommendations.shows }} isUserOwned={false} />
+            </div>
+            </div>
         )}
       </Scrollbar>
     </div>
