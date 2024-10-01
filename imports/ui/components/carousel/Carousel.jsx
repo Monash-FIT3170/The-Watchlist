@@ -1,16 +1,21 @@
+// imports/ui/components/carousel/Carousel.jsx
+
 import React, { useState } from 'react';
+import { Meteor } from 'meteor/meteor';
+import ContentInfoModal from '../../modals/ContentInfoModal';
 
 const Carousel = ({ items }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [filter, setFilter] = useState('Movies'); // 'Movies' or 'TV Shows'
+  const [isOpen, setIsOpen] = useState(false);
+  const [fullContent, setFullContent] = useState(null);
 
   // Filter items based on the selected filter
   const filteredItems = items.filter(
     (item) => item.contentType === (filter === 'Movies' ? 'Movie' : 'TV Show')
   );
 
-  // Updated handleMouseEnter to prevent hover on the selected item
   const handleMouseEnter = (index) => {
     if (index !== selectedIndex) {
       setHoveredIndex(index);
@@ -28,16 +33,37 @@ const Carousel = ({ items }) => {
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
     setSelectedIndex(0);
-    setHoveredIndex(null); // Reset hover when filter changes
+    setHoveredIndex(null);
   };
 
-  // Determine if any item is currently hovered
+  const selectedItem = filteredItems[selectedIndex];
+
+  const toggleModal = () => {
+    if (!fullContent) {
+      // Fetch full content details
+      Meteor.call(
+        'content.read',
+        { id: selectedItem.contentId, contentType: selectedItem.contentType },
+        (error, result) => {
+          if (!error && result.content?.length > 0) {
+            setFullContent(result.content[0]);
+            setIsOpen(true);
+          } else {
+            console.error('Error fetching content details:', error);
+          }
+        }
+      );
+    } else {
+      setIsOpen(!isOpen);
+    }
+  };
+
   const isAnyHovered = hoveredIndex !== null;
 
   return (
-    <div className="relative w-full text-white">
+    <div className="relative w-full text-white z-10">
       {/* Toggle for Filters */}
-      <div className="flex justify-end p-4">
+      <div className="flex justify-center p-4">
         <button
           className={`mx-2 px-4 py-2 rounded ${
             filter === 'Movies' ? 'bg-red-600' : 'bg-gray-700'
@@ -63,7 +89,7 @@ const Carousel = ({ items }) => {
           const isHovered = index === hoveredIndex;
 
           // Determine the width based on hover state
-          let itemWidth = 'w-1/18'; // Default width when no hover
+          let itemWidth = 'w-1/18';
           if (isAnyHovered && !isSelected) {
             if (isHovered) {
               itemWidth = 'w-1/5';
@@ -73,7 +99,6 @@ const Carousel = ({ items }) => {
           }
 
           if (isSelected) {
-            // For the selected item, render a container with the left panel and the item
             return (
               <div key={index} className="flex w-full">
                 {/* Left Panel */}
@@ -82,7 +107,10 @@ const Carousel = ({ items }) => {
                     {index + 1}
                   </div>
                   {/* 'See More' button */}
-                  <button className="mt-4 px-6 py-2 bg-red-600 rounded">
+                  <button
+                    className="mt-4 px-6 py-2 bg-red-600 rounded"
+                    onClick={toggleModal}
+                  >
                     See More
                   </button>
                 </div>
@@ -108,7 +136,6 @@ const Carousel = ({ items }) => {
               </div>
             );
           } else {
-            // For other (unselected) items
             return (
               <div
                 key={index}
@@ -138,6 +165,18 @@ const Carousel = ({ items }) => {
           }
         })}
       </div>
+
+      {/* Content Info Modal */}
+      {isOpen && fullContent && (
+        <ContentInfoModal
+          content={fullContent}
+          isOpen={isOpen}
+          onClose={toggleModal}
+          onRatingUpdate={() => {
+            // Handle rating updates if necessary
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -33,8 +33,8 @@ const Home = ({ currentUser }) => {
         console.error('Error fetching trending content:', error);
         setTrendingLoading(false);
       } else {
-        setTrendingMovies(result.movies.slice(0, 10));
-        setTrendingTVs(result.shows.slice(0, 10))
+        setTrendingMovies(result.movies.sort((a, b) => b.popularity - a.popularity).slice(0, 10));
+        setTrendingTVs(result.shows.sort((a, b) => b.popularity - a.popularity).slice(0, 10))
         const combinedTrending = [...result.movies, ...result.shows];
         console.log("combinedTrending, ", combinedTrending)
         const shuffledTrending = combinedTrending.sort(() => 0.5 - Math.random());
@@ -53,8 +53,8 @@ const Home = ({ currentUser }) => {
   const toWatchList = lists.filter((list) => list.listType === 'To Watch');
 
   return (
-    <div className="flex flex-col min-h-screen bg-darker">
-      <div className="absolute top-8 right-10">
+    <div className="flex flex-col min-h-screen bg-darker z-0">
+      <div className="absolute top-8 right-10 z-20">
         <ProfileDropdown user={currentUser} />
       </div>
 
