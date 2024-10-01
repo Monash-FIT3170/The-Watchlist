@@ -44,12 +44,9 @@ const ContentList = React.memo(({ list, isUserOwned, globalRatings = {}, hideSho
       )}
 
       {/* Items Container */}
-      <div className="flex flex-nowrap space-x-4 py-4">
+      <div className="flex space-x-6 overflow-x-hidden py-4">
         {list.content.map((item) => (
-          <div
-            key={item.contentId}
-            className="flex-[1_1_140px] min-w-[140px]"
-          >
+          <div key={item.contentId} className="flex-shrink-0" style={{ minWidth: '130px', width: '13%' }}>
             <ContentItem
               content={item}
               isUserSpecificRating={item.isUserSpecificRating}
