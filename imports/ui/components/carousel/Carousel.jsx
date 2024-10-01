@@ -27,7 +27,11 @@ const Carousel = ({ items }) => {
   const handleFilterChange = (newFilter) => {
     setFilter(newFilter);
     setSelectedIndex(0);
+    setHoveredIndex(null); // Reset hover when filter changes
   };
+
+  // Determine if any item is currently hovered
+  const isAnyHovered = hoveredIndex !== null;
 
   return (
     <div className="relative w-full text-white">
@@ -56,6 +60,16 @@ const Carousel = ({ items }) => {
         {filteredItems.map((item, index) => {
           const isSelected = index === selectedIndex;
           const isHovered = index === hoveredIndex;
+
+          // Determine the width based on hover state
+          let itemWidth = 'w-1/18'; // Default width when no hover
+          if (isAnyHovered) {
+            if (isHovered) {
+              itemWidth = 'w-1/5';
+            } else {
+              itemWidth = 'w-1/26';
+            }
+          }
 
           if (isSelected) {
             // For the selected item, render a container with the left panel and the item
@@ -93,11 +107,7 @@ const Carousel = ({ items }) => {
               </div>
             );
           } else {
-            // For other items
-
-            // Determine the width based on hover state
-            const itemWidth = isHovered ? 'w-1/5' : 'w-1/18';
-
+            // For other (unselected) items
             return (
               <div
                 key={index}
