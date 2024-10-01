@@ -26,6 +26,13 @@ module.exports = {
         'custom': 'calc(100vh - 2rem)',
         '35vh': '35vh',
       },
+      width: {
+        '1/24': '4.166666%',
+        '1/18': '5.555555%',
+        '1/12': '8.333333%',
+        '2/3': '66.666667%',
+
+      },
     },
   },
   plugins: [
@@ -56,5 +63,6 @@ module.exports = {
       addUtilities(newUtilities, ["responsive", "hover"]);
     },
     require('@tailwindcss/aspect-ratio'),
+    require('@tailwindcss/line-clamp'),
   ],
 }

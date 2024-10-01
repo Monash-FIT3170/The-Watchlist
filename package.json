@@ -16,6 +16,7 @@
     "@material-ui/icons": "^4.11.3",
     "@mui/material": "^5.15.18",
     "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@types/meteor-astronomy": "^2.6.12",
     "@types/meteor-mdg-validated-method": "^1.2.10",
     "bcrypt": "^5.1.1",

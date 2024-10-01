@@ -3,67 +3,129 @@
 import React, { useState } from 'react';
 
 const Carousel = ({ items }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [filter, setFilter] = useState('Movies'); // 'Movies' or 'TV Shows'
 
-  const prevSlide = () => {
-    const newIndex = currentIndex === 0 ? items.length - 1 : currentIndex - 1;
-    setCurrentIndex(newIndex);
+  // Filter items based on the selected filter
+  const filteredItems = items.filter(
+    (item) => item.contentType === (filter === 'Movies' ? 'Movie' : 'TV Show')
+  );
+
+  const handleMouseEnter = (index) => {
+    setHoveredIndex(index);
   };
 
-  const nextSlide = () => {
-    const newIndex = currentIndex === items.length - 1 ? 0 : currentIndex + 1;
-    setCurrentIndex(newIndex);
+  const handleMouseLeave = () => {
+    setHoveredIndex(null);
   };
 
-  const goToSlide = (slideIndex) => {
-    setCurrentIndex(slideIndex);
+  const handleClick = (index) => {
+    setSelectedIndex(index);
   };
 
-  if (!items || items.length === 0) {
-    return null;
-  }
-
-  const currentItem = items[currentIndex];
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    setSelectedIndex(0);
+  };
 
   return (
-    <div className="relative group">
-      <div
-        className="w-full h-64 bg-center bg-cover duration-500"
-        style={{
-          backgroundImage: `url(${currentItem.background_url || currentItem.image_url})`,
-        }}
-      >
-        {/* Overlay with content title */}
-        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 p-4">
-          <h2 className="text-white text-2xl font-bold">{currentItem.title}</h2>
-          <p className="text-white mt-2 line-clamp-2">{currentItem.overview}</p>
-        </div>
+    <div className="relative w-full text-white">
+      {/* Toggle for Filters */}
+      <div className="flex justify-end p-4">
+        <button
+          className={`mx-2 px-4 py-2 rounded ${
+            filter === 'Movies' ? 'bg-red-600' : 'bg-gray-700'
+          }`}
+          onClick={() => handleFilterChange('Movies')}
+        >
+          Movies
+        </button>
+        <button
+          className={`mx-2 px-4 py-2 rounded ${
+            filter === 'TV Shows' ? 'bg-red-600' : 'bg-gray-700'
+          }`}
+          onClick={() => handleFilterChange('TV Shows')}
+        >
+          TV Shows
+        </button>
       </div>
-      {/* Left Arrow */}
-      <div
-        className="hidden group-hover:block absolute top-1/2 transform -translate-y-1/2 left-5 text-3xl rounded-full p-2 bg-black bg-opacity-50 text-white cursor-pointer"
-        onClick={prevSlide}
-      >
-        &#10094;
-      </div>
-      {/* Right Arrow */}
-      <div
-        className="hidden group-hover:block absolute top-1/2 transform -translate-y-1/2 right-5 text-3xl rounded-full p-2 bg-black bg-opacity-50 text-white cursor-pointer"
-        onClick={nextSlide}
-      >
-        &#10095;
-      </div>
-      {/* Dots */}
-      <div className="flex justify-center py-2">
-        {items.map((item, index) => (
-          <div
-            key={index}
-            className={`cursor-pointer mx-1 rounded-full h-2 w-2 ${
-              index === currentIndex ? 'bg-white' : 'bg-gray-400'
-            }`}
-            onClick={() => goToSlide(index)}
-          ></div>
-        ))}
+
+      {/* Carousel Container */}
+      <div className="flex overflow-hidden">
+        {filteredItems.map((item, index) => {
+          const isSelected = index === selectedIndex;
+          const isHovered = index === hoveredIndex;
+
+          if (isSelected) {
+            // For the selected item, render a container with the left panel and the item
+            return (
+              <div key={index} className="flex w-full">
+                {/* Left Panel */}
+                <div className="w-1/3 flex flex-col items-center justify-center bg-gradient-to-r from-black via-transparent to-transparent">
+                  <div className="text-9xl font-bold text-red-600">
+                    {index + 1}
+                  </div>
+                  {/* 'See More' button */}
+                  <button className="mt-4 px-6 py-2 bg-red-600 rounded">
+                    See More
+                  </button>
+                </div>
+
+                {/* Selected Item */}
+                <div
+                  className="relative w-4/5 aspect-[3/2] duration-300 cursor-pointer"
+                  onClick={() => handleClick(index)}
+                  onMouseEnter={() => handleMouseEnter(index)}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  {/* Poster Image */}
+                  <img
+                    src={item.banner_url || item.background_url}
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Title at the bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-center py-2">
+                    <h2 className="text-sm font-bold">{item.title}</h2>
+                  </div>
+                </div>
+              </div>
+            );
+          } else {
+            // For other items
+
+            // Determine the width based on hover state
+            const itemWidth = isHovered ? 'w-1/5' : 'w-1/18';
+
+            return (
+              <div
+                key={index}
+                className={`relative ${itemWidth} aspect-[3/2] duration-300 cursor-pointer`}
+                onClick={() => handleClick(index)}
+                onMouseEnter={() => handleMouseEnter(index)}
+                onMouseLeave={handleMouseLeave}
+              >
+                {/* Rank Number on Unselected Items */}
+                <div className="absolute top-2 right-2 text-2xl font-bold text-white">
+                  {index + 1}
+                </div>
+                {/* Poster Image */}
+                <img
+                  src={item.banner_url || item.background_url}
+                  alt={item.title}
+                  className="w-full h-full object-cover"
+                />
+                {/* Title at the bottom when hovered */}
+                {isHovered && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-center py-2">
+                    <h2 className="text-sm font-bold">{item.title}</h2>
+                  </div>
+                )}
+              </div>
+            );
+          }
+        })}
       </div>
     </div>
   );
