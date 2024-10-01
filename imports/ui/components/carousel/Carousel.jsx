@@ -1,5 +1,3 @@
-// imports/ui/components/carousel/Carousel.jsx
-
 import React, { useState } from 'react';
 
 const Carousel = ({ items }) => {
@@ -12,8 +10,11 @@ const Carousel = ({ items }) => {
     (item) => item.contentType === (filter === 'Movies' ? 'Movie' : 'TV Show')
   );
 
+  // Updated handleMouseEnter to prevent hover on the selected item
   const handleMouseEnter = (index) => {
-    setHoveredIndex(index);
+    if (index !== selectedIndex) {
+      setHoveredIndex(index);
+    }
   };
 
   const handleMouseLeave = () => {
@@ -63,7 +64,7 @@ const Carousel = ({ items }) => {
 
           // Determine the width based on hover state
           let itemWidth = 'w-1/18'; // Default width when no hover
-          if (isAnyHovered) {
+          if (isAnyHovered && !isSelected) {
             if (isHovered) {
               itemWidth = 'w-1/5';
             } else {
