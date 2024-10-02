@@ -26,6 +26,15 @@ module.exports = {
         'custom': 'calc(100vh - 2rem)',
         '35vh': '35vh',
       },
+      keyframes: {
+        moveDown: {
+          '0%': { transform: 'translateY(-100%)' },
+          '100%': { transform: 'translateY(100vh)' },
+        },
+      },
+      animation: {
+        moveDown: 'moveDown 5s linear infinite',
+      },
     },
   },
   plugins: [
