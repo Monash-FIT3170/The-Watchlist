@@ -7,7 +7,7 @@ const Loading = ({ pageName, onComplete }) => {
       if (onComplete) {
         onComplete();
       }
-    }, 4000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [onComplete]);

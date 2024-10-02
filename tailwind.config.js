@@ -41,10 +41,10 @@ module.exports = {
         },
       },
       animation: {
-        moveDown: 'moveDown 1.5s linear forwards',
-        fadeIn: 'fadeIn 1s ease-in 1.5s forwards',
+        moveDown: 'moveDown 1.2s linear forwards',
+        fadeIn: 'fadeIn 1s ease-in 1.2s forwards',
         jiggle: 'jiggle 0.3s ease-in-out infinite',
-        fadeInDelayed: 'fadeIn 1.5s ease-in 2s forwards',
+        fadeInDelayed: 'fadeIn 1.2s ease-in 1.6s forwards',
       },
       textShadow: {
         'custom': '8px 8px 15px rgba(0, 0, 0, 0.5)',
