@@ -2,21 +2,23 @@ import React, { useEffect } from 'react';
 
 const Loading = ({ pageName, onComplete }) => {
   useEffect(() => {
-   
     const timer = setTimeout(() => {
       if (onComplete) {
         onComplete();
       }
-    }, 3000); 
+    }, 4000); 
 
     return () => clearTimeout(timer);
   }, [onComplete]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-      <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-blue-500 mb-4"></div>
-      <p className="text-xl font-semibold animate-moveDown">Loading {pageName}...</p>
-      <p className="text-gray-400 mt-2">Please wait a moment while we fetch your content.</p>
+    <div className="flex flex-col items-center h-screen bg-dark text-white">
+      <p className="text-8xl font-bold font-anton text-shadow-custom bg-gradient-to-r from-magenta via-purple-800 to-magenta bg-clip-text text-transparent animate-moveDown">
+        The Watchlist
+      </p>
+      <p className="text-2xl mt-40 animate-fadeIn">
+        Welcome to the show
+      </p>
     </div>
   );
 };

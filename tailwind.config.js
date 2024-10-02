@@ -29,12 +29,23 @@ module.exports = {
       keyframes: {
         moveDown: {
           '0%': { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(100vh)' },
+          '100%': { transform: 'translateY(50vh)' },
+        },
+        fadeIn: {
+          '0%': { opacity: 0, transform: 'translateY(20px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
         },
       },
       animation: {
-        moveDown: 'moveDown 5s linear infinite',
+        moveDown: 'moveDown 1.5s linear forwards',
+        fadeIn: 'fadeIn 1s ease-in 1.5s forwards',
       },
+      textShadow: {
+        'custom': '8px 8px 15px rgba(0, 0, 0, 0.5)',
+        },
+        fontFamily: {
+          anton: ['Anton', 'sans-serif'],
+        },
     },
   },
   plugins: [
@@ -59,7 +70,10 @@ module.exports = {
         },
         ".scrollbar-hidden::-webkit-scrollbar": {
           display: "none", /* Safari and Chrome */
-        }
+        },
+          '.text-shadow-custom': {
+            'text-shadow': '20px 20px 20px rgba(0, 0, 0, 0.5)',
+          }
       };
 
       addUtilities(newUtilities, ["responsive", "hover"]);
