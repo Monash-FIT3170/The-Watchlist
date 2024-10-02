@@ -329,7 +329,7 @@ const Settings = () => {
         <div className="flex items-center space-x-4">
           <button
             onClick={() => setShowConfirmation(!showConfirmation)}
-            className="bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-800 transition-colors"
+            className="bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-800 transition-colors -ml-1"
           >
             Delete Account
           </button>
