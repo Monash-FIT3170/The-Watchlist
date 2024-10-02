@@ -38,6 +38,7 @@ export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation(); // Use to check the current route
   const [loggedIn, setLoggedIn] = useState(false);
+  const [loadingComplete, setLoadingComplete] = useState(false);
 
   // Define static navbar data
   const staticNavbarData = useMemo(() => [
@@ -85,8 +86,9 @@ export const App = () => {
   // Determine loading state
   const loading = (!userProfileHandle.ready() || !userListsHandle.ready() || !currentUser);
 
-  if (loading && loggedIn) {
-    return <Loading pageName={"The Watchlist"} />;
+
+  if (loading && loggedIn || !loadingComplete) {
+    return <Loading pageName="The Watchlist" onComplete={() => setLoadingComplete(true)} />;
   }
 
   if (!currentUser) {
