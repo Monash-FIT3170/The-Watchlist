@@ -35,10 +35,16 @@ module.exports = {
           '0%': { opacity: 0, transform: 'translateY(20px)' },
           '100%': { opacity: 1, transform: 'translateY(0)' },
         },
+        jiggle: {
+          '0%, 100%': { transform: 'rotate(-5deg)' },
+          '50%': { transform: 'rotate(5deg)' },
+        },
       },
       animation: {
         moveDown: 'moveDown 1.5s linear forwards',
         fadeIn: 'fadeIn 1s ease-in 1.5s forwards',
+        jiggle: 'jiggle 0.3s ease-in-out infinite',
+        fadeInDelayed: 'fadeIn 1.5s ease-in 2s forwards',
       },
       textShadow: {
         'custom': '8px 8px 15px rgba(0, 0, 0, 0.5)',
