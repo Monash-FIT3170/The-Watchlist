@@ -290,7 +290,7 @@ const Settings = () => {
                                     }}
                                 />
                             }
-                            label={<span className="text-xl font-bold">Public</span>}
+                            label={<span className="text-xl font-semibold">Public</span>}
                         />
                         <FormControlLabel
                             control={
@@ -307,7 +307,7 @@ const Settings = () => {
                                     }}
                                 />
                             }
-                            label={<span className="text-xl font-bold">Private</span>}
+                            label={<span className="text-xl font-semibold">Private</span>}
                         />
                     </FormGroup>
                 </div>
