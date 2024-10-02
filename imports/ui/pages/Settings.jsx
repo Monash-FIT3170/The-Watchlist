@@ -272,41 +272,46 @@ const Settings = () => {
           <p className="text-gray-400">Control who can see your activity.</p>
         </div>
 
-        <div>
-          <FormGroup>
-            <FormControlLabel
-              control={
-                <Radio
-                  checked={selectedPrivacy === "Public"}
-                  onChange={handlePrivacyChange}
-                  name="Public"
-                />
-              }
-              label="Public"
-            />
-            <FormControlLabel
-              control={
-                <Radio
-                  checked={selectedPrivacy === "Friends"}
-                  onChange={handlePrivacyChange}
-                  name="Friends"
-                />
-              }
-              label="Friends"
-            />
-            <FormControlLabel
-              control={
-                <Radio
-                  checked={selectedPrivacy === "Private"}
-                  onChange={handlePrivacyChange}
-                  name="Private"
-                />
-              }
-              label="Private"
-            />
-          </FormGroup>
-        </div>
-      </div>
+         {/* Right Column - Privacy settings */}
+         <div className="flex">
+                    <FormGroup className="w-full flex text-4xl">
+                        <FormControlLabel
+                            control={
+                                <Radio
+                                    checked={selectedPrivacy === 'Public'}
+                                    onChange={handlePrivacyChange}
+                                    name="Public"
+                                    sx={{
+                                        color: 'white', 
+                                        '&.Mui-checked': {
+                                            color: 'purple', 
+                                        },
+                                        transform: 'scale(1.1)',
+                                    }}
+                                />
+                            }
+                            label={<span className="text-xl font-bold">Public</span>}
+                        />
+                        <FormControlLabel
+                            control={
+                                <Radio
+                                    checked={selectedPrivacy === 'Private'}
+                                    onChange={handlePrivacyChange}
+                                    name="Private"
+                                    sx={{
+                                        color: 'white', 
+                                        '&.Mui-checked': {
+                                            color: 'purple',
+                                        },
+                                        transform: 'scale(1.1)',
+                                    }}
+                                />
+                            }
+                            label={<span className="text-xl font-bold">Private</span>}
+                        />
+                    </FormGroup>
+                </div>
+            </div>
 
       <hr className="border-t border-gray-700 my-4" />
 
