@@ -177,7 +177,7 @@ const UserProfile = ({ currentUser }) => {
 
   const localLoading = !profileUserHandle.ready() || !listsHandle.ready() || !profileUser;
 
-  if (localLoading || true) {
+  if (localLoading) {
     return (<LoadingNoAnimation pageName="The Watchlist" pageDesc="Loading User Profile..."/>);
   }
 
