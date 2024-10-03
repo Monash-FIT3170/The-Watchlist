@@ -181,7 +181,7 @@ const UserProfile = ({ currentUser }) => {
     return (
         <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
           <div className="animate-spin rounded-full h-24 w-24 border-t-4 border-magenta"></div>
-          <p className="text-xl font-semibold mt-4">Loading Updated AI Recommendations...</p>
+          <p className="text-xl font-semibold mt-4">Loading User Profile...</p>
           <p className="text-gray-400 mt-2">Please wait a moment while we fetch your content.</p>
         </div>
     );
