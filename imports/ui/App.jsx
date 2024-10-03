@@ -40,6 +40,7 @@ export const App = () => {
   const location = useLocation(); // Use to check the current route
   const [loggedIn, setLoggedIn] = useState(false);
   const [previousPath, setPreviousPath] = useState('');
+  const [previousPreviousPath, setPreviousPreviousPath] = useState('');
   const [loadingComplete, setLoadingComplete] = useState(false);
 
   // Define static navbar data
@@ -54,7 +55,9 @@ export const App = () => {
 
   //track the previous path for loading purposes
   useEffect(() => {
+    setPreviousPreviousPath(previousPath);
     setPreviousPath(location.pathname);
+  
   }, [location]);
 
   // Track currentUser reactively from Meteor.users collection
@@ -95,7 +98,7 @@ export const App = () => {
   const loading = (!userProfileHandle.ready() || !userListsHandle.ready() || !currentUser);
 
   //check if we are coming from the login page
-  const cameFromLoginPage = previousPath === '/login';
+  const cameFromLoginPage = previousPreviousPath === '/login';
 
 
   if (loading && loggedIn || !loadingComplete) {
