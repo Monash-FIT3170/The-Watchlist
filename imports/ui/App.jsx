@@ -29,6 +29,7 @@ import FollowRequests from "./pages/FollowRequests.jsx";
 import { useEffect } from "react";
 import { SearchProvider } from "./contexts/SearchContext.js";
 import TopRated from "./pages/TopRated.jsx";
+import LoadingNoAnimation from "./pages/LoadingNoAnimation.jsx";
 
 // Create a Context for User Data (if needed)
 export const UserContext = React.createContext();
@@ -38,6 +39,8 @@ export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation(); // Use to check the current route
   const [loggedIn, setLoggedIn] = useState(false);
+  const [previousPath, setPreviousPath] = useState('');
+  const [previousPreviousPath, setPreviousPreviousPath] = useState('');
   const [loadingComplete, setLoadingComplete] = useState(false);
 
   // Define static navbar data
@@ -48,6 +51,14 @@ export const App = () => {
     { title: "AI Picks", path: "/ai-picks", icon: <BsStars />, cName: "flex" },
     {title: "Top Rated", path: "/top-rated", icon: <GiPodium />, cName: "flex"},
   ], []);
+
+
+  //track the previous path for loading purposes
+  useEffect(() => {
+    setPreviousPreviousPath(previousPath);
+    setPreviousPath(location.pathname);
+  
+  }, [location]);
 
   // Track currentUser reactively from Meteor.users collection
   const currentUser = useTracker(() => {
@@ -86,9 +97,15 @@ export const App = () => {
   // Determine loading state
   const loading = (!userProfileHandle.ready() || !userListsHandle.ready() || !currentUser);
 
+  //check if we are coming from the login page
+  const cameFromLoginPage = previousPreviousPath === '/login';
+
 
   if (loading && loggedIn || !loadingComplete) {
-    return <Loading pageName="The Watchlist" onComplete={() => setLoadingComplete(true)} />;
+    return !cameFromLoginPage ?(
+    <Loading pageName="The Watchlist" onComplete={() => setLoadingComplete(true)} />) :( 
+
+    <LoadingNoAnimation pageName="The Watchlist" pageDesc="Logging in..."/>);
   }
 
   if (!currentUser) {

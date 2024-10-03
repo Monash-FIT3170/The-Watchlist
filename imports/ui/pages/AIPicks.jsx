@@ -5,6 +5,7 @@ import AIPicksHeader from '../components/headers/AIPicksHeader.jsx';
 import { useTracker } from 'meteor/react-meteor-data';
 import ContentList from '../components/lists/ContentList.jsx';
 import { RatingCollection } from '../../db/Rating.tsx';
+import LoadingNoAnimation from './LoadingNoAnimation';
 
 const AIPicks = ({ currentUser }) => {
   const DISPLAY_MOVIES = "Display Movie";
@@ -180,12 +181,10 @@ const AIPicks = ({ currentUser }) => {
     return (
       <div className="flex flex-col min-h-screen bg-darker">
         <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-          <div className="animate-spin rounded-full h-24 w-24 border-t-4 border-magenta"></div>
-          <p className="text-xl font-semibold mt-4">Loading Updated AI Recommendations...</p>
-          <p className="text-gray-400 mt-2">Please wait a moment while we fetch your content.</p>
-        </div>
-      </div>
+        <LoadingNoAnimation pageName="The Watchlist" pageDesc="Loading Updated AI Recommendations
+..." upperScreen={true}/>
+</div>
+
     );
   }
 
