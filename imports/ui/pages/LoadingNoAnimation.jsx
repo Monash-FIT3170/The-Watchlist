@@ -8,7 +8,7 @@ const LoadingNoAnimation = ({ pageName, pageDesc, upperScreen}) => {
     <div 
     className={`flex flex-col items-center ${
       upperScreen ? 'justify-start  pt-36' : 'justify-center'
-    } h-screen bg-dark text-purplish-grey`}
+    } h-screen bg-darker text-purplish-grey`}
   >
       
       <div className="flex justify-center mb-4">
