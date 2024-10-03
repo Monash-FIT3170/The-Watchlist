@@ -11,14 +11,9 @@ const LoadingNoAnimation = ({ pageName, pageDesc, upperScreen}) => {
     } h-screen bg-darker text-purplish-grey`}
   >
       
-      <div className="flex justify-center mb-4">
+      <div className="flex justify-center mb-4 mt-14">
         <GiPopcorn className="text-9xl text-yellow-500 animate-jiggle" />
       </div>
-
-
-      <p className="text-8xl font-bold font-anton text-shadow-custom bg-gradient-to-r from-magenta to-magenta bg-clip-text text-transparent mb-4">
-        The Watchlist
-      </p>
 
 
       <p className="text-2xl font-bold font-anton text-center">

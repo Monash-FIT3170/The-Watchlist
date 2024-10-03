@@ -31,7 +31,7 @@ const ContentItemDisplay = ({ contentItems, contentType, globalRatings, setGloba
             ) : (
                 <LoadingNoAnimation 
                     pageName="The Watchlist" 
-                    pageDesc="Loading Updated AI Recommendations..." 
+                    pageDesc="Looking for content..." 
                     upperScreen={true} 
                 />
             )}
