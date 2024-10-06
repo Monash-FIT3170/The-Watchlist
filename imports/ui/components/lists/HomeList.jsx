@@ -1,22 +1,22 @@
+// HomeList.jsx
+
 import React, { useState } from 'react';
 import RatingStar from '../ratings/RatingStar';
 import { FaUser } from 'react-icons/fa';
 import ContentInfoModal from '../../modals/ContentInfoModal';
-import Scrollbar from '../scrollbar/ScrollBar';  // Import your Scrollbar component
 import { useNavigate } from 'react-router-dom';
 
 const List = ({ list, onContentClick }) => {
-
   return (
     <div key={list._id} className="space-y-8">
       {list.content.map(item => (
         <div key={item.contentId} className="relative" onClick={() => onContentClick(item)}>
           <div className="relative rounded-lg shadow-lg cursor-pointer overflow-visible">
-            <div className="transition-transform duration-300 ease-in-out transform hover:scale-110">
+            <div className="transition-transform duration-300 ease-in-out transform hover:scale-105">
               <img
                 src={item.background_url}
                 alt={item.title}
-                className="w-full h-35vh object-cover rounded-lg"
+                className="w-full h-auto object-cover rounded-lg"
               />
               <div className="absolute inset-0 bg-black bg-opacity-50 flex items-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60">
                 <div className="text-white">
@@ -54,8 +54,8 @@ const HomeList = ({ title, lists }) => {
   const isEmpty = lists.every(list => list.content.length === 0);
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <h1 className="font-sans font-bold text-4xl my-4 mt-0 mb-4">{title}</h1>
+    <div className="flex flex-col">
+      <h1 className="font-sans font-bold text-2xl my-4 mt-0 mb-4">{title}</h1>
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center flex-grow">
           <p className="text-lg text-white mb-4">You don't have any items in this list yet.</p>
@@ -67,11 +67,11 @@ const HomeList = ({ title, lists }) => {
           </button>
         </div>
       ) : (
-        <Scrollbar className="flex-grow overflow-y-auto">  {/* Enable scrolling here */}
+        <div className="space-y-8">
           {lists.map((list) => (
             <List key={list._id} list={list} onContentClick={handleContentClick} />
           ))}
-        </Scrollbar>
+        </div>
       )}
 
       {isModalOpen && selectedContent && (

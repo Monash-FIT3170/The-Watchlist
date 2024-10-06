@@ -145,9 +145,11 @@ export const App = () => {
               </Routes>
             </Scrollbar>
           ) : (
+            <Scrollbar className="h-custom">
             <Routes>
               <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
             </Routes>
+            </Scrollbar>
           )}
         </div>
         {currentUser && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}

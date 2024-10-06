@@ -34,9 +34,8 @@ const Home = ({ currentUser }) => {
         setTrendingLoading(false);
       } else {
         setTrendingMovies(result.movies.sort((a, b) => b.popularity - a.popularity).slice(0, 10));
-        setTrendingTVs(result.shows.sort((a, b) => b.popularity - a.popularity).slice(0, 10))
+        setTrendingTVs(result.shows.sort((a, b) => b.popularity - a.popularity).slice(0, 10));
         const combinedTrending = [...result.movies, ...result.shows];
-        console.log("combinedTrending, ", combinedTrending)
         const shuffledTrending = combinedTrending.sort(() => 0.5 - Math.random());
         setTrendingContent(shuffledTrending);
         setTrendingLoading(false);
@@ -54,7 +53,7 @@ const Home = ({ currentUser }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-darker z-0">
-      <div className="absolute top-8 right-10 z-20">
+      <div className="absolute top-4 right-6 z-20">
         <ProfileDropdown user={currentUser} />
       </div>
 
@@ -65,14 +64,13 @@ const Home = ({ currentUser }) => {
         </div>
       ) : (
         <div className="w-full p-5">
-                    <Carousel
-            items={[...trendingMovies, ...trendingTVs]}
-          />
+          <Carousel items={[...trendingMovies, ...trendingTVs]} />
         </div>
       )}
 
-      <div className="flex flex-row">
-        <div className="w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center">
+      {/* Main Content */}
+      <div className="flex flex-col md:flex-row p-0 space-y-5 md:space-y-0 md:space-x-5">
+        <div className="flex-1 bg-darker text-light rounded-lg shadow-md p-5">
           <HomeList
             title="Favourites"
             lists={favouritesList.map((list) => ({
@@ -85,7 +83,7 @@ const Home = ({ currentUser }) => {
             }))}
           />
         </div>
-        <div className="mx-5 w-1/2 h-custom p-5 bg-darker text-light rounded-lg shadow-md flex justify-center">
+        <div className="flex-1 bg-darker text-light rounded-lg shadow-md p-5">
           <HomeList
             title="To Watch"
             lists={toWatchList.map((list) => ({

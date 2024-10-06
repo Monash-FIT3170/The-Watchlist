@@ -70,14 +70,14 @@ const Carousel = ({ items }) => {
         <h1 className="text-2xl font-bold text-white text-left">Trending</h1>
         <div className="flex justify-left w-full ml-4">
           <button
-            className={`text-lg text-white py-2 px-6 rounded-full shadow mr-4 ${filter === 'Movies' ? 'bg-[#7B1450]' : 'bg-gray-700'
+            className={`text-white py-2 px-6 rounded-full shadow mr-4 ${filter === 'Movies' ? 'bg-[#7B1450]' : 'bg-gray-700'
               }`}
             onClick={() => handleFilterChange('Movies')}
           >
             Movies
           </button>
           <button
-            className={`text-lg text-white py-2 px-6 rounded-full shadow ${filter === 'TV Shows' ? 'bg-[#7B1450]' : 'bg-gray-700'
+            className={`text-white py-2 px-6 rounded-full shadow ${filter === 'TV Shows' ? 'bg-[#7B1450]' : 'bg-gray-700'
               }`}
             onClick={() => handleFilterChange('TV Shows')}
           >
@@ -107,7 +107,7 @@ const Carousel = ({ items }) => {
             return (
               <div key={index} className="flex w-full">
                 {/* Left Panel */}
-                <div className="w-1/3 flex flex-col items-center justify-center bg-gradient-to-r from-black via-transparent to-transparent">
+                <div className="w-1/3 flex flex-col items-center justify-center bg-gradient-to-r from-black via-transparent to-transparent rounded-lg">
                   <div className="text-9xl font-bold text-[#7B1450]">
                     {index + 1}
                   </div>
