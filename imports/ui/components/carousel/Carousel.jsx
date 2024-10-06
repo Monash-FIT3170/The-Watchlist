@@ -6,6 +6,7 @@ import ContentInfoModal from '../../modals/ContentInfoModal';
 import PropTypes from 'prop-types';
 
 const Carousel = ({ items }) => {
+  console.log(items)
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [filter, setFilter] = useState('Movies'); // 'Movies' or 'TV Shows'
