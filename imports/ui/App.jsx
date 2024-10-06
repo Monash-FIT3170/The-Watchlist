@@ -27,7 +27,7 @@ import Loading from "./pages/Loading.jsx";
 import Settings from "./pages/Settings.jsx";
 import FollowRequests from "./pages/FollowRequests.jsx";
 import { useEffect } from "react";
-import { SearchProvider } from "./contexts/SearchContext.js";
+import RootProvider from "./contexts/RootProvider.jsx";
 import TopRated from "./pages/TopRated.jsx";
 import LoadingNoAnimation from "./pages/LoadingNoAnimation.jsx";
 
@@ -118,7 +118,7 @@ export const App = () => {
   }
 
   return (
-    <SearchProvider>
+    <RootProvider>
       <div className="app flex h-screen overflow-hidden bg-darkest text-white">
         <div className="flex-none">
           <Navbar staticNavData={staticNavbarData} currentUser={currentUser}/>
@@ -145,14 +145,16 @@ export const App = () => {
               </Routes>
             </Scrollbar>
           ) : (
+            <Scrollbar className="h-custom">
             <Routes>
               <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
             </Routes>
+            </Scrollbar>
           )}
         </div>
         {currentUser && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
       </div>
-    </SearchProvider>
+    </RootProvider>
   );
 };
 

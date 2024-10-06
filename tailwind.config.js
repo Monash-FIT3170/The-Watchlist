@@ -26,6 +26,17 @@ module.exports = {
         'custom': 'calc(100vh - 2rem)',
         '35vh': '35vh',
       },
+      width: {
+        '1/24': '4.166666%',
+        '1/18': '5.555555%',
+        '1/12': '8.333333%',
+        '2/3': '66.666667%',
+        '1/9': '11.111111%',
+        '1/10': '10%',
+        '1/8': '12.5%',
+        '1/26': '3.846153846%'
+
+      },
       keyframes: {
         moveDown: {
           '0%': { transform: 'translateY(-100%)' },
@@ -85,5 +96,6 @@ module.exports = {
       addUtilities(newUtilities, ["responsive", "hover"]);
     },
     require('@tailwindcss/aspect-ratio'),
+    require('@tailwindcss/line-clamp'),
   ],
 }
