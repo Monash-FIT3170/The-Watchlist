@@ -10,7 +10,7 @@ import ProfileCard from '../components/headers/ProfileCard';
 import ListDisplay from '../components/lists/ListDisplay';
 import { FaLock } from "react-icons/fa";
 import { Counts } from 'meteor/tmeasday:publish-counts';
-import Loading from './Loading';
+import LoadingNoAnimation from './LoadingNoAnimation';
 import ListCardDisplay from '../components/lists/ListCardDisplay';
 
 const UserProfile = ({ currentUser }) => {
@@ -178,7 +178,7 @@ const UserProfile = ({ currentUser }) => {
   const localLoading = !profileUserHandle.ready() || !listsHandle.ready() || !profileUser;
 
   if (localLoading) {
-    return <Loading pageName={"User Profile"}/>;
+    return (<LoadingNoAnimation pageName="The Watchlist" pageDesc="Loading User Profile..."/>);
   }
 
   return (

@@ -22,6 +22,7 @@ const TopRated = ({currentUser}) => {
     }, []);
 
 
+
     //if user is not logged in, redirect to login page.
     if (!currentUser) {
         return <Redirect to="/login" />;
