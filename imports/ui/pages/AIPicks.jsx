@@ -24,7 +24,7 @@ const AIPicks = ({ currentUser }) => {
   const [genreStatistics, setGenreStatistics] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
   const [genreRecommendations, setGenreRecommendations] = useState({ movies: [], shows: [] });
-  const [currentPages, setCurrentPages] = useState([]); // Track current page for each of the 5 movies
+  const [currentPages, setCurrentPages] = useState({ movies: [], shows: [] }); // Track current page for each of the 5 movies
 
   const [trendingContentFetched, setTrendingContentFetched] = useState(false);
   const [recommendationsFetched, setRecommendationsFetched] = useState(false);
@@ -121,7 +121,7 @@ const AIPicks = ({ currentUser }) => {
     setContentTVNone(shows.length === 0);
 
     const selectedMovies = selectRandomItems(movies, MOVIE_COUNT);
-    const recommendations = selectedMovies.map((movie) => ({
+    const movieRecommendations = selectedMovies.map((movie) => ({
       movieTitle: movie.title,
       recommendations: movie.recommendations.map((item) => ({
         ...item,
@@ -130,8 +130,23 @@ const AIPicks = ({ currentUser }) => {
       })),
     }));
 
-    setDisplayRecommendations(recommendations);
-    setCurrentPages(Array(MOVIE_COUNT).fill(0)); // Initialize current page as 0 for each movie
+
+    const selectedShows = selectRandomItems(shows, MOVIE_COUNT);
+  const showRecommendations = selectedShows.map((show) => ({
+    showTitle: show.title,
+    recommendations: show.recommendations.map((item) => ({
+      ...item,
+      rating: globalRatings[item.contentId]?.average || 0,
+      contentType: "TV Show",
+    })),
+  }));
+
+
+    setDisplayRecommendations({ movies: movieRecommendations, shows: showRecommendations });
+    setCurrentPages({
+      movies: Array(movieRecommendations.length).fill(0),
+      shows: Array(showRecommendations.length).fill(0),
+    });
   };
 
   const selectRandomItems = (array, numItems) => {
@@ -145,12 +160,18 @@ const AIPicks = ({ currentUser }) => {
     return selectedItems;
   };
 
-  const nextPage = (movieIndex) => {
-    setCurrentPages((prev) => prev.map((page, idx) => (idx === movieIndex ? page + 1 : page)));
+  const nextPage = (type, index) => {
+    setCurrentPages((prev) => ({
+      ...prev,
+      [type]: prev[type].map((page, idx) => (idx === index ? page + 1 : page)),
+    }));
   };
-
-  const prevPage = (movieIndex) => {
-    setCurrentPages((prev) => prev.map((page, idx) => (idx === movieIndex ? page - 1 : page)));
+  
+  const prevPage = (type, index) => {
+    setCurrentPages((prev) => ({
+      ...prev,
+      [type]: prev[type].map((page, idx) => (idx === index ? page - 1 : page)),
+    }));
   };
 
   if (loading) {
@@ -205,8 +226,8 @@ const AIPicks = ({ currentUser }) => {
               <p className="text-gray-400 text-lg">Add some to your favourites or watchlist to get started!</p>
             </div>
           ) : (
-            displayRecommendations.map((movie, movieIndex) => {
-              const startIndex = currentPages[movieIndex] * MOVIES_PER_PAGE;
+            displayRecommendations.movies.map((movie, movieIndex) => {
+              const startIndex = currentPages.movies[movieIndex] * MOVIES_PER_PAGE;
               const currentRecommendations = movie.recommendations.slice(
                 startIndex,
                 startIndex + MOVIES_PER_PAGE
@@ -224,16 +245,16 @@ const AIPicks = ({ currentUser }) => {
 
                   <div className="flex justify-between mt-4">
                     <button
-                      onClick={() => prevPage(movieIndex)}
+                      onClick={() => prevPage('movies', movieIndex)}
                       className="px-4 py-2 bg-gray-700 text-white rounded-md disabled:opacity-50"
-                      disabled={currentPages[movieIndex] === 0}
+                      disabled={currentPages.movies[movieIndex] === 0}
                     >
                       Previous
                     </button>
                     <button
-                      onClick={() => nextPage(movieIndex)}
+                      onClick={() =>  nextPage('movies', movieIndex)}
                       className="px-4 py-2 bg-gray-700 text-white rounded-md disabled:opacity-50"
-                      disabled={(currentPages[movieIndex] + 1) * MOVIES_PER_PAGE >= movie.recommendations.length}
+                      disabled={(currentPages.movies[movieIndex] + 1) * MOVIES_PER_PAGE >= movie.recommendations.length}
                     >
                       Next
                     </button>
@@ -250,11 +271,42 @@ const AIPicks = ({ currentUser }) => {
               <p className="text-gray-400 text-lg">Add some to your favourites or watchlist to get started!</p>
             </div>
           ) : (
-            displayRecommendations.shows.map((list) => (
-              <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4 mr-4">
-                <ContentList list={list} isUserOwned={false} hideShowAllButton={true} globalRatings={globalRatings} />
-              </div>
-            ))
+            displayRecommendations.shows.map((show, showIndex) => {
+              const startIndex = currentPages.shows[showIndex] * MOVIES_PER_PAGE;
+              const currentRecommendations = show.recommendations.slice(
+                startIndex,
+                startIndex + MOVIES_PER_PAGE
+              );
+        
+              return (
+                <div key={showIndex} className="mb-10">
+                  <h2 className="text-white text-2xl font-bold mb-4">{`Because you liked ${show.showTitle}, here are more:`}</h2>
+                  <ContentList
+                    list={{ content: currentRecommendations }}
+                    isUserOwned={false}
+                    globalRatings={globalRatings}
+                    hideShowAllButton={true}
+                  />
+        
+                  <div className="flex justify-between mt-4">
+                    <button
+                      onClick={() => prevPage('shows', showIndex)}
+                      className="px-4 py-2 bg-gray-700 text-white rounded-md disabled:opacity-50"
+                      disabled={currentPages.shows[showIndex] === 0}
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => nextPage('shows', showIndex)}
+                      className="px-4 py-2 bg-gray-700 text-white rounded-md disabled:opacity-50"
+                      disabled={(currentPages.shows[showIndex] + 1) * MOVIES_PER_PAGE >= show.recommendations.length}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              );
+            })
           )
         )}
         {display === DISPLAY_GENRES && (
