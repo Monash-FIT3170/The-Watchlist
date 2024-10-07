@@ -118,7 +118,7 @@ export const App = () => {
   }
 
   return (
-    <RootProvider>
+    // <RootProvider>
       <div className="app flex h-screen overflow-hidden bg-darkest text-white">
         <div className="flex-none">
           <Navbar staticNavData={staticNavbarData} currentUser={currentUser}/>
@@ -154,7 +154,7 @@ export const App = () => {
         </div>
         {currentUser && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
       </div>
-    </RootProvider>
+    // </RootProvider>
   );
 };
 
