@@ -262,7 +262,7 @@ const AIPicks = ({ currentUser }) => {
                   {currentPages.movies[movieIndex] > 0 && (
                           <button
                             onClick={() => prevPage('movies', movieIndex)}
-                            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10"
+                            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10 hover:scale-110"
                             aria-label="Previous"
                           >
                             <ChevronLeftIcon className="h-20 w-20 text-white opacity-75 hover:opacity-100 drop-shadow-lg"
@@ -272,7 +272,7 @@ const AIPicks = ({ currentUser }) => {
                     {(currentPages.movies[movieIndex] + 1) * MOVIES_PER_PAGE < movie.recommendations.length && (
                       <button
                         onClick={() => nextPage('movies', movieIndex)}
-                        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10"
+                        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10 hover:scale-110"
                         aria-label="Next"
                       >
                         <ChevronRightIcon className="h-20 w-20 text-white opacity-75 hover:opacity-100 drop-shadow-lg"
