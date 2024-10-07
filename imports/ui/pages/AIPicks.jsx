@@ -234,7 +234,7 @@ const AIPicks = ({ currentUser }) => {
               );
 
               return (
-                <div key={movieIndex} className="mb-10">
+                <div key={movieIndex} className="mb-10 px-4">
                   <h2 className="text-white text-2xl font-bold mb-4">{`Because you liked ${movie.movieTitle}, here are more:`}</h2>
                   <ContentList
                     list={{ content: currentRecommendations }}
@@ -279,7 +279,7 @@ const AIPicks = ({ currentUser }) => {
               );
         
               return (
-                <div key={showIndex} className="mb-10">
+                <div key={showIndex} className="mb-10 px-4">
                   <h2 className="text-white text-2xl font-bold mb-4">{`Because you liked ${show.showTitle}, here are more:`}</h2>
                   <ContentList
                     list={{ content: currentRecommendations }}
