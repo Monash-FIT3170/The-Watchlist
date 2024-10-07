@@ -142,6 +142,9 @@ const AIPicks = ({ currentUser }) => {
   }));
 
 
+  
+
+
     setDisplayRecommendations({ movies: movieRecommendations, shows: showRecommendations });
     setCurrentPages({
       movies: Array(movieRecommendations.length).fill(0),
@@ -158,6 +161,18 @@ const AIPicks = ({ currentUser }) => {
       selectedItems.push(arrayCopy.splice(randomIndex, 1)[0]);
     }
     return selectedItems;
+  };
+
+  const getRandomIntro = (title) => {
+    const randomIntros = [
+      `Because you liked ${title}, you'll love these:`,
+      `Based on your love for ${title}, we recommend:`,
+      `${title} was a great choice! Here are more:`,
+      `If you enjoyed ${title}, check out these:`,
+      `We also loved ${title}, and here are the AI's other favourites:`,
+    ];
+    const randomIndex = Math.floor(Math.random() * randomIntros.length);
+    return randomIntros[randomIndex];
   };
 
   const nextPage = (type, index) => {
@@ -235,9 +250,8 @@ const AIPicks = ({ currentUser }) => {
 
               return (
                 <div key={movieIndex} className="mb-10 px-4">
-                  <h2 className="text-white text-2xl font-bold mb-4">{`Because you liked ${movie.movieTitle}, here are more:`}</h2>
                   <ContentList
-                    list={{ content: currentRecommendations }}
+                    list={{ content: currentRecommendations, title: getRandomIntro(movie.movieTitle) }}
                     isUserOwned={false}
                     globalRatings={globalRatings}
                     hideShowAllButton={true}
@@ -280,9 +294,8 @@ const AIPicks = ({ currentUser }) => {
         
               return (
                 <div key={showIndex} className="mb-10 px-4">
-                  <h2 className="text-white text-2xl font-bold mb-4">{`Because you liked ${show.showTitle}, here are more:`}</h2>
                   <ContentList
-                    list={{ content: currentRecommendations }}
+                    list={{ content: currentRecommendations, title:getRandomIntro(show.movieTitle) }}
                     isUserOwned={false}
                     globalRatings={globalRatings}
                     hideShowAllButton={true}
