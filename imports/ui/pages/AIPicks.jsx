@@ -124,7 +124,7 @@ const AIPicks = ({ currentUser }) => {
 
     const selectedMovies = selectRandomItems(movies, MOVIE_COUNT);
     const movieRecommendations = selectedMovies.map((movie) => ({
-      movieTitle: movie.title,
+      movieTitle: getRandomIntro(movie.title),
       recommendations: movie.recommendations.map((item) => ({
         ...item,
         rating: globalRatings[item.contentId]?.average || 0,
@@ -135,7 +135,7 @@ const AIPicks = ({ currentUser }) => {
 
     const selectedShows = selectRandomItems(shows, MOVIE_COUNT);
   const showRecommendations = selectedShows.map((show) => ({
-    showTitle: show.title,
+    showTitle: getRandomIntro(show.title),
     recommendations: show.recommendations.map((item) => ({
       ...item,
       rating: globalRatings[item.contentId]?.average || 0,
@@ -251,9 +251,9 @@ const AIPicks = ({ currentUser }) => {
               );
 
               return (
-                <div key={movieIndex} className="relative mb-10 px-4">
+                <div key={movieIndex} className="relative px-6 py-2">
                   <ContentList
-                    list={{ content: currentRecommendations, title: getRandomIntro(movie.movieTitle) }}
+                    list={{ content: currentRecommendations, title: movie.movieTitle }}
                     isUserOwned={false}
                     globalRatings={globalRatings}
                     hideShowAllButton={true}
@@ -299,9 +299,9 @@ const AIPicks = ({ currentUser }) => {
               );
         
               return (
-                <div key={showIndex} className="relative mb-10 px-4">
+                <div key={showIndex} className="relative px-6 py-2">
                   <ContentList
-                    list={{ content: currentRecommendations, title:getRandomIntro(show.showTitle) }}
+                    list={{ content: currentRecommendations, title: show.showTitle }}
                     isUserOwned={false}
                     globalRatings={globalRatings}
                     hideShowAllButton={true}
