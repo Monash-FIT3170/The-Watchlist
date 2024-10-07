@@ -97,28 +97,29 @@ const SimilarUserList = React.memo(({ currentUser }) => {
                   </div>
                   {currentUserId !== match.user._id && (
                     <button
-                    className={`mt-2 px-4 py-1 ${
-                      isFollowing(match.user._id)
-                        ? 'bg-blue-600'
+                      type="button" // Add this line
+                      className={`mt-2 px-4 py-1 ${isFollowing(match.user._id)
+                          ? 'bg-blue-600'
+                          : isRequested(match.user._id)
+                            ? 'bg-gray-600'
+                            : 'bg-fuchsia-600'
+                        } text-white rounded-full`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isFollowing(match.user._id) || isRequested(match.user._id)) {
+                          Meteor.call('unfollowUser', match.user._id);
+                        } else {
+                          Meteor.call('followUser', match.user._id);
+                        }
+                      }}
+                    >
+                      {isFollowing(match.user._id)
+                        ? 'Unfollow'
                         : isRequested(match.user._id)
-                        ? 'bg-gray-600'
-                        : 'bg-fuchsia-600'
-                    } text-white rounded-full`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isFollowing(match.user._id) || isRequested(match.user._id)) {
-                        Meteor.call('unfollowUser', match.user._id);
-                      } else {
-                        Meteor.call('followUser', match.user._id);
-                      }
-                    }}
-                  >
-                    {isFollowing(match.user._id)
-                      ? 'Unfollow'
-                      : isRequested(match.user._id)
-                      ? 'Requested'
-                      : 'Follow'}
-                  </button>
+                          ? 'Requested'
+                          : 'Follow'}
+                    </button>
+
                   )}
                 </div>
               ))}
