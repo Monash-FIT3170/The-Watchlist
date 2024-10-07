@@ -6,6 +6,8 @@ import { useTracker } from "meteor/react-meteor-data";
 import ContentList from "../components/lists/ContentList.jsx";
 import { RatingCollection } from "../../db/Rating.tsx";
 import LoadingNoAnimation from "./LoadingNoAnimation";
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+
 
 const AIPicks = ({ currentUser }) => {
   const DISPLAY_MOVIES = "Display Movie";
@@ -249,7 +251,7 @@ const AIPicks = ({ currentUser }) => {
               );
 
               return (
-                <div key={movieIndex} className="mb-10 px-4">
+                <div key={movieIndex} className="relative mb-10 px-4">
                   <ContentList
                     list={{ content: currentRecommendations, title: getRandomIntro(movie.movieTitle) }}
                     isUserOwned={false}
@@ -257,22 +259,26 @@ const AIPicks = ({ currentUser }) => {
                     hideShowAllButton={true}
                   />
 
-                  <div className="flex justify-between mt-4">
-                    <button
-                      onClick={() => prevPage('movies', movieIndex)}
-                      className="px-4 py-2 bg-gray-700 text-white rounded-md disabled:opacity-50"
-                      disabled={currentPages.movies[movieIndex] === 0}
-                    >
-                      Previous
-                    </button>
-                    <button
-                      onClick={() =>  nextPage('movies', movieIndex)}
-                      className="px-4 py-2 bg-gray-700 text-white rounded-md disabled:opacity-50"
-                      disabled={(currentPages.movies[movieIndex] + 1) * MOVIES_PER_PAGE >= movie.recommendations.length}
-                    >
-                      Next
-                    </button>
-                  </div>
+                  {currentPages.movies[movieIndex] > 0 && (
+                          <button
+                            onClick={() => prevPage('movies', movieIndex)}
+                            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10"
+                            aria-label="Previous"
+                          >
+                            <ChevronLeftIcon className="h-20 w-20 text-white opacity-75 hover:opacity-100 drop-shadow-lg"
+                            style={{ mixBlendMode: 'difference' }} />
+                          </button>
+                        )}
+                    {(currentPages.movies[movieIndex] + 1) * MOVIES_PER_PAGE < movie.recommendations.length && (
+                      <button
+                        onClick={() => nextPage('movies', movieIndex)}
+                        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10"
+                        aria-label="Next"
+                      >
+                        <ChevronRightIcon className="h-20 w-20 text-white opacity-75 hover:opacity-100 drop-shadow-lg"
+                        style={{ mixBlendMode: 'difference' }} />
+                      </button>
+                    )}
                 </div>
               );
             })
@@ -293,30 +299,34 @@ const AIPicks = ({ currentUser }) => {
               );
         
               return (
-                <div key={showIndex} className="mb-10 px-4">
+                <div key={showIndex} className="relative mb-10 px-4">
                   <ContentList
-                    list={{ content: currentRecommendations, title:getRandomIntro(show.movieTitle) }}
+                    list={{ content: currentRecommendations, title:getRandomIntro(show.showTitle) }}
                     isUserOwned={false}
                     globalRatings={globalRatings}
                     hideShowAllButton={true}
                   />
         
-                  <div className="flex justify-between mt-4">
-                    <button
-                      onClick={() => prevPage('shows', showIndex)}
-                      className="px-4 py-2 bg-gray-700 text-white rounded-md disabled:opacity-50"
-                      disabled={currentPages.shows[showIndex] === 0}
-                    >
-                      Previous
-                    </button>
-                    <button
-                      onClick={() => nextPage('shows', showIndex)}
-                      className="px-4 py-2 bg-gray-700 text-white rounded-md disabled:opacity-50"
-                      disabled={(currentPages.shows[showIndex] + 1) * MOVIES_PER_PAGE >= show.recommendations.length}
-                    >
-                      Next
-                    </button>
-                  </div>
+        {currentPages.shows[showIndex] > 0 && (
+                          <button
+                            onClick={() => prevPage('shows', showIndex)}
+                            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10  hover:scale-110"
+                            aria-label="Previous"
+                          >
+                            <ChevronLeftIcon className="h-20 w-20 text-white opacity-75 hover:opacity-100 drop-shadow-lg"
+                            style={{ mixBlendMode: 'difference' }} />
+                          </button>
+                        )}
+                    {(currentPages.shows[showIndex] + 1) * MOVIES_PER_PAGE < show.recommendations.length && (
+                      <button
+                        onClick={() => nextPage('shows', showIndex)}
+                        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10  hover:scale-110"
+                        aria-label="Next"
+                      >
+                        <ChevronRightIcon className="h-20 w-20 text-white opacity-75 hover:opacity-100 drop-shadow-lg"
+                        style={{ mixBlendMode: 'difference' }} />
+                      </button>
+                    )}
                 </div>
               );
             })
