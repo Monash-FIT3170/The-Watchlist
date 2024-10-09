@@ -222,7 +222,7 @@ Meteor.methods({
       $set: { avatarUrl: avatarUrl }
     });
   },
-
+  
   'users.updateProfile'(username) {
     // Ensure the user is logged in
     if (!this.userId) {
@@ -282,8 +282,25 @@ Meteor.methods({
 
     // Finally, remove the user
     Meteor.users.remove(userId);
+  },
+  updateList(userId, avatarUrl) {
+    check(userId, String);
+    check(avatarUrl, String);
+  
+    if (!this.userId) {
+      throw new Meteor.Error('not-authorized');
+    }
+  
+    if (this.userId !== userId) {
+      throw new Meteor.Error('not-authorized', 'You can only update your own avatar');
+    }
+    Lists.update({ userId: this.userId }, {
+      $set: { listUrl: avatarUrl }
+    });
   }
 });
+
+
 
 const createDefaultLists = (userId) => {
   const defaultLists = [
@@ -292,7 +309,7 @@ const createDefaultLists = (userId) => {
   ];
 
   defaultLists.forEach((list) => {
-    Meteor.call('list.create', { userId, title: list.title, listType: list.listType, content: [] }, (error) => {
+    Meteor.call('list.create', { userId, title: list.title, listType: list.listType, content: [], listUrl: "" }, (error) => {
       if (error) {
         console.error('Error creating default list:', error.reason);
       }
