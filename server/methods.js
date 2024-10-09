@@ -642,7 +642,11 @@ Meteor.methods({
       }
 
       return {
-        user: user,
+        user: {
+          _id: user._id,
+            avatarUrl: user.avatarUrl,
+            username: user.username
+          },
         matchScore: matchScore
       };
     });
