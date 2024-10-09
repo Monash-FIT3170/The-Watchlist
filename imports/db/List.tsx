@@ -111,10 +111,12 @@ const List = Class.create({
         userId: String,
         userName: String,
         title: String,
+        listUrl: String,
         description: {
             type: String,
             optional: true,
         },
+
         listType: {
             type: String,
             validators: [{
@@ -143,7 +145,6 @@ const List = Class.create({
             default: function() {
                 return 'PUBLIC';
             }
-
         }
     },
     behaviors: {
@@ -158,7 +159,7 @@ const List = Class.create({
         listIndex: {
             fields: {
                 userId: 1,
-                title: 1 
+                title: 1
             },
             options: {
                 name: "list_unique_userid_title",
