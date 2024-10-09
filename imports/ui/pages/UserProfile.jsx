@@ -53,7 +53,7 @@ const UserProfile = ({ currentUser }) => {
 
   // Handle follow/unfollow actions (only for other users)
   const toggleFollow = () => {
-    if (isFollowing) {
+    if (isFollowing || isRequested) {
       Meteor.call('unfollowUser', profileUser._id, (error) => {
         if (!error) {
           // No need to manually set isFollowing; it's reactive
