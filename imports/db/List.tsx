@@ -111,12 +111,14 @@ const List = Class.create({
         userId: String,
         userName: String,
         title: String,
-        listUrl: String,
         description: {
             type: String,
             optional: true,
         },
-
+        listUrl: {  
+            type: String,
+            optional: true, 
+        },
         listType: {
             type: String,
             validators: [{
