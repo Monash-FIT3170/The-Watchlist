@@ -3,7 +3,6 @@ import { check } from 'meteor/check';
 import { Accounts } from 'meteor/accounts-base';
 import { Rating } from '../imports/db/Rating';
 import { RatingCollection } from '../imports/db/Rating';
-import Lists from '../imports/db/List';
 import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { ListCollection } from '../imports/db/List';
 import { MovieCollection, TVCollection } from '../imports/db/Content';
@@ -283,21 +282,27 @@ Meteor.methods({
     // Finally, remove the user
     Meteor.users.remove(userId);
   },
-  updateList(userId, avatarUrl) {
+  updateList(userId, avatarUrl, listName) {
     check(userId, String);
     check(avatarUrl, String);
-  
+    check(listName, String); 
+
     if (!this.userId) {
-      throw new Meteor.Error('not-authorized');
+        throw new Meteor.Error('not-authorized');
     }
-  
+
     if (this.userId !== userId) {
-      throw new Meteor.Error('not-authorized', 'You can only update your own avatar');
+        throw new Meteor.Error('not-authorized', 'You can only update your own avatar');
     }
-    Lists.update({ userId: this.userId }, {
-      $set: { listUrl: avatarUrl }
-    });
-  }
+
+    const result = ListCollection.update(
+        { userId: this.userId, title: listName }, 
+        { $set: { listUrl: avatarUrl } }
+    );
+
+    console.log(`Updated avatar URL for list "${listName}" of user "${userId}"`); // Debug: Log update
+}
+
 });
 
 
@@ -309,7 +314,7 @@ const createDefaultLists = (userId) => {
   ];
 
   defaultLists.forEach((list) => {
-    Meteor.call('list.create', { userId, title: list.title, listType: list.listType, content: [], listUrl: "" }, (error) => {
+    Meteor.call('list.create', { userId, title: list.title, listType: list.listType, content: [] }, (error) => {
       if (error) {
         console.error('Error creating default list:', error.reason);
       }

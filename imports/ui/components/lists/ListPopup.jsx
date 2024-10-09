@@ -81,7 +81,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
           reader.onloadend = () => {
             setNewAvatar(reader.result);
             console.log('List URL:', list); 
-            Meteor.call('updateList', list.userId, reader.result, (error) => {
+            Meteor.call('updateList', list.userId, reader.result, list.title, (error) => {
               if (error) {
                 console.error('Error updating avatar:', error);
               } else {
@@ -94,8 +94,6 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
       };
 
     
-      
-      
       
 
     useEffect(() => {
