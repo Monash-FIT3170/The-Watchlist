@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-route
 import { FaRegUserCircle } from "react-icons/fa";
 import { BsStars } from "react-icons/bs";
 import { AiOutlineHome, AiOutlineSearch } from "react-icons/ai";
+import { GiPodium } from "react-icons/gi";
 import { useTracker } from 'meteor/react-meteor-data';
 import { ListCollection } from '../db/List';
 import { Counts } from 'meteor/tmeasday:publish-counts';
@@ -26,7 +27,9 @@ import Loading from "./pages/Loading.jsx";
 import Settings from "./pages/Settings.jsx";
 import FollowRequests from "./pages/FollowRequests.jsx";
 import { useEffect } from "react";
-import { SearchProvider } from "./contexts/SearchContext.js";
+import RootProvider from "./contexts/RootProvider.jsx";
+import TopRated from "./pages/TopRated.jsx";
+import LoadingNoAnimation from "./pages/LoadingNoAnimation.jsx";
 
 // Create a Context for User Data (if needed)
 export const UserContext = React.createContext();
@@ -36,6 +39,9 @@ export const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation(); // Use to check the current route
   const [loggedIn, setLoggedIn] = useState(false);
+  const [previousPath, setPreviousPath] = useState('');
+  const [previousPreviousPath, setPreviousPreviousPath] = useState('');
+  const [loadingComplete, setLoadingComplete] = useState(false);
 
   // Define static navbar data
   const staticNavbarData = useMemo(() => [
@@ -43,7 +49,16 @@ export const App = () => {
     { title: "Search", path: "/search", icon: <AiOutlineSearch />, cName: "flex text-light hover-text-magenta" },
     { title: "Profile", path: "/profile", icon: <FaRegUserCircle />, cName: "flex" },
     { title: "AI Picks", path: "/ai-picks", icon: <BsStars />, cName: "flex" },
+    {title: "Top Rated", path: "/top-rated", icon: <GiPodium />, cName: "flex"},
   ], []);
+
+
+  //track the previous path for loading purposes
+  useEffect(() => {
+    setPreviousPreviousPath(previousPath);
+    setPreviousPath(location.pathname);
+  
+  }, [location]);
 
   // Track currentUser reactively from Meteor.users collection
   const currentUser = useTracker(() => {
@@ -67,7 +82,7 @@ export const App = () => {
     }
     return { ready: () => true };
   }, [currentUser]);
-
+ 
   // Track userLists reactively
   const userLists = useTracker(() => {
     if (currentUser) {
@@ -82,8 +97,15 @@ export const App = () => {
   // Determine loading state
   const loading = (!userProfileHandle.ready() || !userListsHandle.ready() || !currentUser);
 
-  if (loading && loggedIn) {
-    return <Loading />;
+  //check if we are coming from the login page
+  const cameFromLoginPage = previousPreviousPath === '/login';
+
+
+  if (loading && loggedIn || !loadingComplete) {
+    return !cameFromLoginPage ?(
+    <Loading pageName="The Watchlist" onComplete={() => setLoadingComplete(true)} />) :( 
+
+    <LoadingNoAnimation pageName="The Watchlist" pageDesc="Logging in..."/>);
   }
 
   if (!currentUser) {
@@ -96,7 +118,7 @@ export const App = () => {
   }
 
   return (
-    <SearchProvider>
+    <RootProvider>
       <div className="app flex h-screen overflow-hidden bg-darkest text-white">
         <div className="flex-none">
           <Navbar staticNavData={staticNavbarData} currentUser={currentUser}/>
@@ -108,8 +130,8 @@ export const App = () => {
                 <Route path="/search" element={<SearchBar currentUser={currentUser} />} />
                 <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
                 {/* Unified UserProfile for both own and others' profiles */}
-                <Route path="/profile" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount} loading={loading} />} />
-                <Route path="/user/:userId" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount} loading={loading} />} />
+                <Route path="/profile" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount}/>} />
+                <Route path="/user/:userId" element={<UserProfile currentUser={currentUser} ratingsCount={ratingsCount}/>} />
                 <Route path="/ai-picks" element={<AIPicks currentUser={currentUser} />} />
                 <Route path="/user-discovery" element={<UserDiscovery currentUser={currentUser} />} />
                 <Route path="/followers-following/:userId/:type" element={<FollowersFollowingPage currentUser={currentUser} />} />
@@ -119,17 +141,20 @@ export const App = () => {
                 <Route path="/settings" element={<Settings currentUser={currentUser} />} />
                 <Route path="/follow-requests" element={<FollowRequests currentUser={currentUser} />} />
                 <Route path="/list/:listId" element={<SharedWatchlistPage currentUser={currentUser}/>} />
+                <Route path="/top-rated" element={<TopRated currentUser={currentUser} />} />
               </Routes>
             </Scrollbar>
           ) : (
+            <Scrollbar className="h-custom">
             <Routes>
               <Route path="/home" element={<Home currentUser={currentUser} userLists={userLists} />} />
             </Routes>
+            </Scrollbar>
           )}
         </div>
         {currentUser && <NewListModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />}
       </div>
-    </SearchProvider>
+    </RootProvider>
   );
 };
 

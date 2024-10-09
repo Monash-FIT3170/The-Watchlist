@@ -6,7 +6,7 @@ import ListCard from './ListCard';
 const ListCardDisplay = ({ lists }) => {
   return (
     <div className="flex">
-      <div className="w-full px-4 py-4">
+      <div className="w-full">
       <div
                     className="grid gap-6"
                     style={{

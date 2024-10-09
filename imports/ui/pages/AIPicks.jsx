@@ -1,58 +1,125 @@
-// AIPicks.jsx
-
 import React, { useState, useEffect } from 'react';
-import ContentListAI from '../components/lists/ContentListAI.jsx';
 import Scrollbar from '../components/scrollbar/ScrollBar.jsx';
 import { Meteor } from 'meteor/meteor';
 import AIPicksHeader from '../components/headers/AIPicksHeader.jsx';
 import { useTracker } from 'meteor/react-meteor-data';
+import ContentList from '../components/lists/ContentList.jsx';
+import { RatingCollection } from '../../db/Rating.tsx';
+import LoadingNoAnimation from './LoadingNoAnimation';
 
-export default function AIPicks() {
+const AIPicks = ({ currentUser }) => {
   const DISPLAY_MOVIES = "Display Movie";
   const DISPLAY_SHOWS = "Display Show";
-  const NUM_LIST_SLOTS = 5;
+  const DISPLAY_TRENDING = "Display Trending";
+  const DISPLAY_GENRES = "Display Genres";
+  const NUM_LIST_SLOTS = 8;
 
   const [display, setDisplay] = useState(DISPLAY_MOVIES);
-  const [globalRatings, setGlobalRatings] = useState({});
   const [loading, setLoading] = useState(true);
   const [displayRecommendations, setDisplayRecommendations] = useState({ movies: [], shows: [] });
+  const [trendingContent, setTrendingContent] = useState({ movies: [], shows: [] });
   const [contentMovieNone, setContentMovieNone] = useState(true);
   const [contentTVNone, setContentTVNone] = useState(true);
+  const [genreStatistics, setGenreStatistics] = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState(null);
+  const [genreRecommendations, setGenreRecommendations] = useState({ movies: [], shows: [] });
 
-  const currentUser = useTracker(() => Meteor.user(), []);
+  const [trendingContentFetched, setTrendingContentFetched] = useState(false);
+  const [recommendationsFetched, setRecommendationsFetched] = useState(false);
+  const [genreStatisticsFetched, setGenreStatisticsFetched] = useState(false);
+
+  // Use useTracker to reactively fetch global ratings
+  const globalRatings = useTracker(() => {
+    const ratingsHandle = Meteor.subscribe('ratings'); // Subscribe to ratings collection
+    if (!ratingsHandle.ready()) {
+      return {}; // Return an empty object while subscription is loading
+    }
+    const ratings = RatingCollection.find().fetch(); // Fetch all ratings
+    const ratingMap = ratings.reduce((acc, rating) => {
+      if (!acc[rating.contentId]) {
+        acc[rating.contentId] = {
+          count: 0,
+          total: 0,
+        };
+      }
+      acc[rating.contentId].count += 1;
+      acc[rating.contentId].total += rating.rating;
+      return acc;
+    }, {});
+
+    for (const id in ratingMap) {
+      ratingMap[id].average = (ratingMap[id].total / ratingMap[id].count).toFixed(2);
+    }
+
+    return ratingMap;
+  }, []); // No dependencies needed; reactivity is handled by the subscription
 
   useEffect(() => {
-    Meteor.call('ratings.getGlobalAverages', (error, result) => {
-      if (!error) {
-        console.log('Global Ratings:', result);
-        setGlobalRatings(result);
+    if (display === DISPLAY_TRENDING && !trendingContentFetched) {
+      fetchTrendingContent();
+    } else if (display !== DISPLAY_TRENDING && !recommendationsFetched) {
+      fetchRecommendations();
+    }
+  }, [display]);
+
+  useEffect(() => {
+    if (display === DISPLAY_GENRES && !genreStatisticsFetched) {
+      setLoading(true);
+      Meteor.call('getUserGenreStatistics', (error, result) => {
+        if (error) {
+          console.error('Error fetching genre statistics:', error);
+          setLoading(false);
+        } else {
+          setGenreStatistics(result);
+          setGenreStatisticsFetched(true); // Mark as fetched
+          setLoading(false);
+        }
+      });
+    }
+  }, [display]);
+
+  const fetchTrendingContent = () => {
+    setLoading(true);
+    Meteor.call('getTrendingContent', (error, result) => {
+      if (error) {
+        console.error("Error fetching trending content:", error);
+        setLoading(false);
       } else {
-        console.error("Error fetching global ratings:", error);
+        setTrendingContent(result);
+        setTrendingContentFetched(true); // Mark as fetched
+        setLoading(false);
       }
     });
-  }, []);
-
-  useEffect(() => {
-    fetchRecommendations();
-  }, []);
+  };
 
   const fetchRecommendations = () => {
-    console.log('Fetching recommendations...');
     setLoading(true);
     Meteor.call('getRecommendations', (error, result) => {
       if (error) {
         console.error("Error fetching recommendations:", error);
         setLoading(false);
       } else {
-        console.log('Received recommendations:', result);
         processRecommendations(result);
+        setRecommendationsFetched(true); // Mark as fetched
+        setLoading(false);
+      }
+    });
+  };
+
+  const fetchRecommendationsByGenre = (genreName) => {
+    setLoading(true);
+    Meteor.call('getRecommendationsByGenre', genreName, (error, result) => {
+      if (error) {
+        console.error('Error fetching recommendations by genre:', error);
+        setLoading(false);
+      } else {
+        setGenreRecommendations(result);
+        setLoading(false);
       }
     });
   };
 
   const processRecommendations = ({ movies, shows }) => {
-    console.log('Processing recommendations:', { movies, shows });
-
     setContentMovieNone(movies.length === 0);
     setContentTVNone(shows.length === 0);
 
@@ -76,11 +143,7 @@ export default function AIPicks() {
       })),
     }));
 
-    console.log('Updated Movies:', updatedMovies);
-    console.log('Updated Shows:', updatedShows);
-
     setDisplayRecommendations({ movies: updatedMovies, shows: updatedShows });
-    setLoading(false);
   };
 
   const selectRandomItems = (array, numItems) => {
@@ -107,45 +170,57 @@ export default function AIPicks() {
   };
 
   const refreshRecommendations = () => {
-    console.log('Refreshing recommendations...');
-    fetchRecommendations();
+    if (display === DISPLAY_TRENDING) {
+      fetchTrendingContent();
+    } else {
+      fetchRecommendations();
+    }
   };
 
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-darker">
         <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-          <div className="-mt-52 animate-spin rounded-full h-32 w-32 border-t-4 border-blue-500 mb-4"></div>
-          <p className="text-xl font-semibold">Loading Updated AI Recommendations...</p>
-          <p className="text-gray-400 mt-2">Please wait a moment while we fetch your content.</p>
-        </div>
-      </div>
+        <LoadingNoAnimation pageName="The Watchlist" pageDesc="Loading Updated AI Recommendations
+..." upperScreen={true}/>
+</div>
+
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-darker">
+    <div className="flex flex-col min-h-screen bg-darker pb-10">
       <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
       <button
-        className="mx-4 px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
-          focus:outline-none focus:ring-4 focus:ring-purple-300 transform active:scale-95 transition-transform duration-200"
+        className="mx-4 my-2 px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
+          focus:outline-none focus:ring-4 focus:ring-magenta transform active:scale-95 transition-transform duration-300"
         onClick={refreshRecommendations}
       >
         Refresh AI Recommendations
       </button>
       <Scrollbar className="w-full overflow-y-auto">
+        {display === DISPLAY_TRENDING && (
+          <div>
+            <div className="px-6 py-2">
+              <ContentList list={{ title: 'Trending Movies', content: trendingContent.movies }} isUserOwned={false} globalRatings={globalRatings} hideShowAllButton={true} />
+            </div>
+            <div className="px-6 py-2">
+              <ContentList list={{ title: 'Trending TV Shows', content: trendingContent.shows }} isUserOwned={false} globalRatings={globalRatings} hideShowAllButton={true} />
+            </div>
+          </div>
+        )}
         {display === DISPLAY_MOVIES && (
           contentMovieNone ? (
-            <div className="px-8 py-2 mt-10 text-white text-3xl">
-              Not enough Movies yet. Add some to your favourites or watchlist to get started!
+            <div className="flex flex-col items-center justify-center mt-10 p-6 rounded-lg shadow-lg">
+              <p className="text-white text-2xl font-semibold mb-2">Not enough Movies yet.</p>
+              <p className="text-gray-400 text-lg">Add some to your favourites or watchlist to get started!</p>
             </div>
           ) : (
             displayRecommendations.movies.map(list => {
               console.log('Rendering Movie List:', list);
               return (
-                <div key={list.listId} className="px-8 py-2">
-                  <ContentListAI list={list} isUserOwned={false} />
+                <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg p-4 mr-4">
+                  <ContentList list={list} isUserOwned={false} hideShowAllButton={true} globalRatings={globalRatings} />
                 </div>
               );
             })
@@ -153,21 +228,91 @@ export default function AIPicks() {
         )}
         {display === DISPLAY_SHOWS && (
           contentTVNone ? (
-            <div className="px-8 py-2 mt-10 text-white text-3xl">
-              Not enough Shows yet. Add some to your favourites or watchlist to get started!
+            <div className="flex flex-col items-center justify-center mt-10 p-6 rounded-lg shadow-lg">
+              <p className="text-white text-2xl font-semibold mb-2">Not enough Shows yet.</p>
+              <p className="text-gray-400 text-lg">Add some to your favourites or watchlist to get started!</p>
             </div>
           ) : (
             displayRecommendations.shows.map(list => {
               console.log('Rendering Show List:', list);
               return (
-                <div key={list.listId} className="px-8 py-2">
-                  <ContentListAI list={list} isUserOwned={false} />
+                <div key={list.listId} className="bg-darker-light shadow-lg rounded-lg mb-6 p-4 mr-4">
+                  <ContentList list={list} isUserOwned={false} hideShowAllButton={true} globalRatings={globalRatings} />
                 </div>
               );
             })
           )
         )}
+        {display === DISPLAY_GENRES && (
+          <Scrollbar className="w-full overflow-y-auto">
+            <div className="px-8 py-4">
+              {/* Explanation Alert Box */}
+              <div className="bg-blue-500 bg-opacity-10 border border-blue-500 text-blue-300 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong className="font-bold">Understanding Your Top Genres:</strong>
+                <span className="block sm:inline ml-1">
+                  The numbers next to each genre indicate how many times you've interacted with content from that genre through ratings or adding to your lists. Select a genre to see personalised recommendations!
+                </span>
+              </div>
+              <h2 className="text-white text-2xl font-bold mb-4">Your Top Genres</h2>
+              {genreStatistics.length > 0 ? (
+                <div className="flex flex-wrap">
+                  {genreStatistics.map((genreStat) => (
+                    <button
+                      key={genreStat.genre}
+                      className={`m-2 px-4 py-2 rounded-full border ${selectedGenre === genreStat.genre
+                          ? 'bg-magenta text-white border-magenta'
+                          : 'bg-dark text-white border-gray-300'
+                        }`}
+                      onClick={() => {
+                        setSelectedGenre(genreStat.genre);
+                        fetchRecommendationsByGenre(genreStat.genre);
+                      }}
+                    >
+                      {genreStat.genre} ({genreStat.count})
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400">
+                  You haven't interacted with any genres yet. Start rating or adding content to see recommendations here!
+                </p>
+              )}
+              {selectedGenre && (
+                <div className="mt-6">
+                  <h2 className="text-white text-2xl font-bold mb-4">Recommendations for "{selectedGenre}"</h2>
+                  <div className="py-2">
+                    {genreRecommendations.movies.length > 0 ? (
+                      <ContentList
+                        list={{ title: 'Movies You Might Like', content: genreRecommendations.movies }}
+                        isUserOwned={false}
+                        globalRatings={globalRatings}
+                        hideShowAllButton={true}
+                      />
+                    ) : (
+                      <p className="text-gray-400">No movie recommendations available for this genre.</p>
+                    )}
+                  </div>
+                  <div className="py-2">
+                    {genreRecommendations.shows.length > 0 ? (
+                      <ContentList
+                        list={{ title: 'TV Shows You Might Like', content: genreRecommendations.shows }}
+                        isUserOwned={false}
+                        globalRatings={globalRatings}
+                        hideShowAllButton={true}
+                      />
+                    ) : (
+                      <p className="text-gray-400">No TV show recommendations available for this genre.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </Scrollbar>
+        )}
+
       </Scrollbar>
     </div>
   );
 }
+
+export default AIPicks;

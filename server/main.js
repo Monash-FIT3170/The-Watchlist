@@ -12,6 +12,7 @@ import './methods.js';
 import './publications.js';
 import { ServiceConfiguration } from 'meteor/service-configuration';
 import '../imports/startup/server/indexes';
+import setAllListsPublic from './migrations/setAllListsPublic.js';
 
 dotenv.config();
 
@@ -66,6 +67,8 @@ Meteor.startup(() => {
             },
         }
     );
+
+    // setAllListsPublic();
 
     // Migration script to update followers and following arrays
     // Meteor.users.find({}).forEach((user) => {
