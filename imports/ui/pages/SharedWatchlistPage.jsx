@@ -1,7 +1,5 @@
 // imports/ui/pages/SharedWatchlistPage.jsx
 
-// imports/ui/pages/SharedWatchlistPage.jsx
-
 import { Meteor } from 'meteor/meteor';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -12,6 +10,8 @@ import Loading from './Loading';
 import { AiOutlineSearch } from 'react-icons/ai';  // Import search icon
 import DropdownMenu from '../components/dropdowns/DropdownMenu';
 import { FaTimesCircle } from 'react-icons/fa';
+import { useTracker } from 'meteor/react-meteor-data';
+import { RatingCollection } from '../../db/Rating';
 
 const SharedWatchlistPage = ({  currentUser  }) => {
   const { listId } = useParams();
@@ -22,7 +22,29 @@ const SharedWatchlistPage = ({  currentUser  }) => {
   const [searchTerm, setSearchTerm] = useState(''); // Add searchTerm state
   const [selectedGenre, setSelectedGenre] = useState('');
   const [selectedSortOption, setSelectedSortOption] = useState('');
-  const navigate = useNavigate();
+
+  const globalRatings = useTracker(() => {
+    const ratingsHandle = Meteor.subscribe("ratings");
+    if (!ratingsHandle.ready()) return {};
+
+    const ratings = RatingCollection.find().fetch();
+    const ratingMap = ratings.reduce((acc, rating) => {
+      if (!acc[rating.contentId]) {
+        acc[rating.contentId] = { count: 0, total: 0 };
+      }
+      acc[rating.contentId].count += 1;
+      acc[rating.contentId].total += rating.rating;
+      return acc;
+    }, {});
+
+    Object.keys(ratingMap).forEach((id) => {
+      ratingMap[id].average = (ratingMap[id].total / ratingMap[id].count).toFixed(2);
+    });
+
+    return ratingMap;
+  }, []);
+
+  console.log("globalRatings: ", globalRatings)
 
   const tabMapping = {
     All: 'All',
@@ -193,8 +215,8 @@ const SharedWatchlistPage = ({  currentUser  }) => {
             </div>
 
             {/* Movie List Section */}
-            <Scrollbar className="search-results-container flex-grow overflow-auto px-6 mt-4"> {/* Added margin-top */}
-                <div className="grid gap-4 grid-cols-[repeat(auto-fill,_200px)] justify-between items-center">
+            <Scrollbar className="search-results-container flex-grow overflow-auto px-6 mt-4 mr-2"> {/* Added margin-top */}
+                <div className="grid gap-4 grid-cols-[repeat(auto-fill,_200px)] justify-between items-center px-2 py-2">
                     {filteredContent.length > 0 ? (
                         filteredContent.map((content, index) => (
                             <ContentItem
@@ -202,6 +224,7 @@ const SharedWatchlistPage = ({  currentUser  }) => {
                                 content={content}
                                 isUserSpecificRating={false}
                                 contentType={content.contentType}
+                                globalRating={globalRatings[content.contentId]?.average || 0}
                             />
                         ))
                     ) : (
