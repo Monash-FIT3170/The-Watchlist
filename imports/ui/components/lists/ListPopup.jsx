@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTracker } from 'meteor/react-meteor-data';
 import RatingStar from "../ratings/RatingStar";
-import { FiEdit, FiTrash2, FiGrid, FiList, FiLink, FiShare2 } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiGrid, FiList, FiLink, FiShare2, FiUpload } from "react-icons/fi";
 import RenameListModal from "../../modals/RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import Scrollbar from '../scrollbar/ScrollBar';
@@ -27,6 +27,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [selectedTab, setSelectedTab] = useState('all');
     const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
+    const [newAvatar, setNewAvatar] = useState(null);
+    const [showAvatarModal, setShowAvatarModal] = useState(false);
     const [getVisibility, setVisibility] = useState('PUBLIC')
     const popupRef = useRef(null);
     const contentInfoModalRef = useRef(null); // Ref for ContentInfoModal
@@ -73,6 +75,28 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     }, [listId]);
 
     const isCurrentUserList = list && list.userId === Meteor.userId();
+
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setNewAvatar(reader.result);
+            console.log('List URL:', list); 
+            Meteor.call('updateList', list.userId, reader.result, list.title, (error) => {
+              if (error) {
+                console.error('Error updating avatar:', error);
+              } else {
+                setShowAvatarModal(false);
+              }
+            });
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+
+    
+      
 
     useEffect(() => {
         if (list?.subscribers && Array.isArray(list.subscribers)) {
@@ -385,7 +409,18 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
 
                         <div className="pb-2 pt-2 flex space-x-3 items-center">
 
-
+                            <label
+                                className={`font-bold rounded-full flex items-center justify-center cursor-pointer ${isCurrentUserList ? 'bg-green-500 hover:bg-green-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
+                                style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                                title="Upload Image"
+                                >
+                               <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarChange}
+                                    className="hidden"                                 />
+                                <FiUpload size="24" /> 
+                            </label>
                             <button
                                 onClick={isCurrentUserList ? handleRenameListClick : null}
                                 disabled={!isCurrentUserList}

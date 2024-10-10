@@ -104,7 +104,7 @@ export default function Navbar({ staticNavData, currentUser }) {
                         onClick={() => handleItemClick(list)}
                         className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-5'} w-full text-left`}
                       >
-                        <img src={list.content[0]?.image_url || popcornUrl} alt={list.title} className={`${isCollapsed ? 'my-2.5 ml-2 w-14 h-10 ' : 'w-10 h-10 '} rounded-lg`} />
+                        <img src={list.listUrl || list.content[0]?.image_url || popcornUrl} alt={list.title} className={`${isCollapsed ? 'my-2.5 ml-2 w-14 h-10 ' : 'w-10 h-10 '} rounded-lg`} />
                         {!isCollapsed && (
                           <div className="flex flex-col justify-center">
                             <span className="truncate max-w-40" title={list.title}>

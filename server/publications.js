@@ -115,7 +115,8 @@ Meteor.publish('subscribedLists', function (viewedUserId) {
       content: 1,
       createdAt: 1,
       updatedAt: 1,
-      subscribers: 1  // Ensure to publish the subscribers field
+      subscribers: 1,
+      listUrl: 1 // Ensure to publish the subscribers field
     }
   });
 });
@@ -177,7 +178,8 @@ Meteor.publish('allLists', function () {
       createdAt: 1,
       updatedAt: 1,
       visibility: 1,
-      subscribers: 1 
+      subscribers: 1,
+      listUrl: 1
     }
   });
 });

@@ -13,6 +13,37 @@ const ListCard = ({ list }) => {
     handleClosePopup,
   } = usePopup();
 
+
+const handleAvatarChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewAvatar(reader.result);
+      Meteor.call('updateAvatar', user._id, reader.result, (error) => {
+        if (error) {
+          console.error('Error updating avatar:', error);
+        } else {
+          setShowAvatarModal(false);
+        }
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+const handlePresetAvatarSelect = (avatarUrl) => {
+  Meteor.call('updateAvatar', user._id, avatarUrl, (error) => {
+    if (error) {
+      console.error('Error updating avatar:', error);
+    } else {
+      setNewAvatar(avatarUrl);
+      setShowAvatarModal(false);
+    }
+  });
+};
+
+
   return (
     <div
       className="bg-darker border border-transparent rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:border-dark hover:bg-dark"
