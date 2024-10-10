@@ -19,14 +19,14 @@ const SharedWatchlistHeader = ({ list, tabMapping, selectedTab, setSelectedTab, 
                 <div>
                     <h1 className="text-7xl text-white font-bold mb-2">{`${list.title}`}</h1>
                     <a onClick={handleUserRedirect} className="text-white hover:underline">
-                        <span className="text-white hover:underline">{list.userName}</span>
+                        <span className="text-2xl text-white font-semibold hover:underline block mt-1 ml-1">{list.userName}</span>
                     </a>
                 </div>
             ) : (
                 <h1 className="text-7xl text-white font-bold mb-2">No List Found</h1>
             )
             }
-            
+
             <div className="flex gap-4 mb-4">
                 <div>
                     {Object.keys(tabMapping).map((tab) => (
