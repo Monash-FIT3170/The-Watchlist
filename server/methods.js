@@ -664,7 +664,7 @@ Meteor.methods({
         return b.matchScore - a.matchScore;
       }
       return a.user.username.localeCompare(b.user.username);
-    });
+    }).slice(0, 10);;
 
   return userScores;
   }
