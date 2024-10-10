@@ -599,12 +599,17 @@ Meteor.methods({
   }
 });
 Meteor.methods({
-  'users.getSimilarUsers'() {
+  async 'users.getSimilarUsers'() {
     if (!this.userId) {
-      throw new Meteor.Error('not-authorized', 'You must be logged in to find similar users.');
+      throw new Meteor.Error('not-authorised', 'You must be logged in to find similar users.');
     }
 
-    const currentUser = Meteor.users.findOne(this.userId);
+    const currentUser = Meteor.users.findOne(
+      { _id: this.userId },
+      { fields: { _id: 1 } } 
+    );
+
+
     if (!currentUser) {
       throw new Meteor.Error('user-not-found', 'User not found.');
     }
@@ -614,50 +619,53 @@ Meteor.methods({
       listType: 'Favourite'
     });
 
-    if (!currentUserFavourites || currentUserFavourites.content.length === 0) {
+    if (!currentUserFavourites || currentUserFavourites.content.length === 0 ||  !currentUserFavourites.content) {
       throw new Meteor.Error('no-favourites', 'You do not have any favourites.');
     }
 
-    const currentUserFavouritesSet = new Set(currentUserFavourites.content);
+    const currentUserFavouritesSet = new Set(
+      currentUserFavourites.content.map(item => item.contentId)
+    );
 
-    const randomUsers = Meteor.users.rawCollection().aggregate([
-      { $sample: { size: 100 } }
-    ]).toArray();
+    const randomUsersCursor = Meteor.users.rawCollection().aggregate([
+      { $match: { _id: { $ne: this.userId } } }, 
+      { $sample: { size: 50 } },
+      { $project: { _id: 1, avatarUrl: 1, username: 1 } } 
+    ]);
 
-    const randomUsersPromise = Meteor.wrapAsync((cb) => randomUsers.then((res) => cb(null, res)).catch(cb));
+    const randomUsers = await randomUsersCursor.toArray();
 
-    const users = randomUsersPromise();
+    const userIds = randomUsers.map(user => user._id);
 
-    const userScores = users.map(user => {
-      if (user._id === this.userId) {
-        return null;
-      }
+    const allUserFavourites = ListCollection.find({
+      userId: { $in: userIds },
+      listType: 'Favourite'
+    }).fetch();
 
-      const userFavourites = ListCollection.findOne({
-        userId: user._id,
-        listType: 'Favourite'
-      });
+    const userFavouritesMap = {};
+    allUserFavourites.forEach(fav => {
+      userFavouritesMap[fav.userId] = fav.content.map(item => item.contentId);
+    });
 
-      if (!userFavourites || !userFavourites.content) {
-        return null;
-      }
+    const userScores = randomUsers
+    .map(user => {
+      const userFavouritesArray = userFavouritesMap[user._id];
+      if (!userFavouritesArray || userFavouritesArray.length === 0) return null;
 
-      const userFavouritesSet = new Set(userFavourites.content);
+      const userFavouritesSet = new Set(userFavouritesArray);
 
-      const userFavouritesArray = Array.from(userFavouritesSet);
-      const currentUserFavouritesArray = Array.from(currentUserFavouritesSet);
 
-      const commonFavourites = userFavouritesArray.filter(favourite =>
-        currentUserFavouritesArray.some(currentFavourite => currentFavourite.contentId === favourite.contentId)
+      const commonFavourites = [...currentUserFavouritesSet].filter(contentId =>
+        userFavouritesSet.has(contentId)
       );
 
       if (commonFavourites.size === 0) {
         return null;
       }
 
-      const avgListLength = (userFavouritesArray.length + currentUserFavouritesArray.length) / 2;
+      const avgListLength = (currentUserFavouritesSet.size + userFavouritesSet.size) / 2;
 
-      matchScore = commonFavourites.length / avgListLength * 100 * 1.5;
+      let matchScore = commonFavourites.length / avgListLength * 100 * 1.5;
 
       if (matchScore > 100) {
         matchScore = 100;
@@ -666,23 +674,21 @@ Meteor.methods({
       return {
         user: {
           _id: user._id,
-            avatarUrl: user.avatarUrl,
-            username: user.username
-          },
+          avatarUrl: user.avatarUrl,
+          username: user.username
+        },
         matchScore: matchScore
       };
-    });
+    })
+    .filter(Boolean) 
+    .sort((a, b) => {
+      if (b.matchScore !== a.matchScore) {
+        return b.matchScore - a.matchScore;
+      }
+      return a.user.username.localeCompare(b.user.username);
+    }).slice(0, 10);;
 
-    // Filter out null values and sort by matchScore in descending order
-    const sortedUserScores = userScores.filter(Boolean).sort((a, b) => b.matchScore - a.matchScore);
-
-    // set top user as 100 match, etc
-    sortedUserScores.forEach((user, index) => {
-      user.matchScore = Math.floor(user.matchScore);
-    });
-
-    // Return the top 10 users with the highest match score
-    return sortedUserScores.slice(0, 10);
+  return userScores;
   }
 });
 Meteor.methods({

@@ -24,15 +24,7 @@ const TopRated = ({currentUser}) => {
 
 
     const handleTypeChange = (isItMovie) => {
-      setLoading(true);
       setIsMovie(isItMovie);
-      
-
-      setTimeout(() => {
-        if (!loading) {
-          setLoading(false);
-        }
-      }, 2000);
     };
 
 
@@ -44,6 +36,7 @@ const TopRated = ({currentUser}) => {
     //get the top rated content for the user.
     useEffect(() => {
       // Fetch based on the is movie type
+      setTopRatedContent([]);
       setLoading(true);
       const contentType = isMovie ? 'Movie' : 'TV Show';
       Meteor.call('ratings.getTopRated', contentType, (error, result) => {
@@ -59,28 +52,30 @@ const TopRated = ({currentUser}) => {
 
 
   if (loading) {
-    return(
+    return (
       <>
-    <div className="flex flex-col justify-end items-start w-full h-72 p-4 bg-gradient-to-tl from-zinc-900 via-zinc-700 to-zinc-600 rounded-t-lg shadow-md mb-4">
-      <div className="absolute top-4 right-6">
-        <ProfileDropdown user={currentUser} />
-      </div>
-      <h1 className="text-7xl text-white font-bold mb-8">Top Rated Content</h1>
-      <div className="flex gap-4 mb-4">
-        <button
-          className={`text-lg text-white py-2 px-6 rounded-full shadow ${isMovie  ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'}`}
-        >
-          Movies
-        </button>
-        <button
-          className={`text-lg text-white py-2 px-6 rounded-full shadow ${isMovie === false  ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'} border-transparent border`}
-        >
-          TV Shows
-        </button>
-      </div>
-    </div>
-     <LoadingNoAnimation pageName="The Watchlist" pageDesc="Switching your Top Rated Content..." upperScreen={true}/>);
-     </>
+        <div className="flex flex-col justify-end items-start w-full h-72 p-4 bg-gradient-to-tl from-zinc-900 via-zinc-700 to-zinc-600 rounded-t-lg shadow-md mb-4">
+          <div className="absolute top-4 right-6">
+            <ProfileDropdown user={currentUser} />
+          </div>
+          <h1 className="text-7xl text-white font-bold mb-8">Top Rated Content</h1>
+          <div className="flex gap-4 mb-4">
+            <button
+              className={`text-lg text-white py-2 px-6 rounded-full shadow ${isMovie ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'}`}
+              onClick={() => handleTypeChange(true)}
+            >
+              Movies
+            </button>
+            <button
+              className={`text-lg text-white py-2 px-6 rounded-full shadow ${isMovie === false ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'} border-transparent border`}
+              onClick={() => handleTypeChange(false)}
+            >
+              TV Shows
+            </button>
+          </div>
+        </div>
+        <LoadingNoAnimation pageName="The Watchlist" pageDesc="Switching your Top Rated Content..." upperScreen={true} />
+      </>
     );
   }
 

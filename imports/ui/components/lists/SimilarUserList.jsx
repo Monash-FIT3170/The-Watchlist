@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
-import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
+import { GiPopcorn } from 'react-icons/gi';
 
 const SimilarUserList = React.memo(({ currentUser }) => {
   const [similarUsers, setSimilarUsers] = useState([]);
@@ -73,9 +73,13 @@ const SimilarUserList = React.memo(({ currentUser }) => {
         <h2 className="text-white text-2xl font-semibold">Discover similar users</h2>
       </div>
       {loading ? (
-        <div className="flex justify-center items-center py-4">
-          <div className="loader"></div>
-          <p className="text-white text-lg">Loading...</p>
+        <div className="flex flex-col justify-center items-center py-4">
+          <div className="flex justify-center mb-2 mt-14">
+        <GiPopcorn className="text-9xl text-yellow-500 animate-jiggle"/>
+      </div>
+      <p className="text-2xl font-bold font-anton text-center">
+        Updating similar Users
+      </p>
         </div>
       ) : (
         <>

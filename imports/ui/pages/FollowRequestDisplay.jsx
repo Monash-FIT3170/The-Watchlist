@@ -45,9 +45,6 @@ const FollowRequestDisplay = ({ users: propUsers, currentUser }) => {
     user.username.toLowerCase().includes(searchTerm)
   );
 
-  useEffect(() => {
-    console.log('AllUsersPage loaded with users:', users);
-  }, [users]);
 
   return (
     <div className="bg-darker min-h-screen p-4">

@@ -140,15 +140,19 @@ const AllUsersPage = ({ users: propUsers, currentUser }) => {
         {/* Sorting Dropdown */}
         <div className="relative mb-4">
           <select
-            id="sort-select"
-            name="sort"
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
-            className="block w-50 bg-dark text-white py-2 pl-3 pr-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[#5a0e3c] focus:border-transparent"
-          >
+            className="inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out bg-[#282525] text-white border-transparent border appearance-none pr-8 w-auto" // Changed pr-8 and added w-auto
+            style={{
+                backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="white" d="M7 7l3-3 3 3m-6 4l3 3 3-3" /%3E%3C/svg%3E')`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.75rem center',
+                backgroundSize: '1rem 1rem',
+            }}
+        >
             <option value="recentlyAdded">Recently Added</option>
             <option value="alphabetical">Alphabetical Order</option>
-          </select>
+        </select>
         </div>
 
         {/* Users List */}
