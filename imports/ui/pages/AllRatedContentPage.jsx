@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Meteor } from 'meteor/meteor';
-import { useTracker } from 'meteor/react-meteor-data';
-import Scrollbar from '../components/scrollbar/ScrollBar';
-import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
-import ContentItem from '../components/contentItems/ContentItem';
-import { RatingCollection } from '../../db/Rating';
-import { MovieCollection, TVCollection } from '../../db/Content';
-import { AiOutlineSearch } from 'react-icons/ai';
-import { FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react'; // Import React and hooks
+import { useParams } from 'react-router-dom'; // Import hook for accessing route parameters
+import { Meteor } from 'meteor/meteor'; // Import Meteor for server calls
+import { useTracker } from 'meteor/react-meteor-data'; // Import hook to reactively fetch data from Meteor
+import Scrollbar from '../components/scrollbar/ScrollBar'; // Import custom scrollbar component
+import ProfileDropdown from '../components/profileDropdown/ProfileDropdown'; // Import ProfileDropdown component
+import ContentItem from '../components/contentItems/ContentItem'; // Import ContentItem component
+import { RatingCollection } from '../../db/Rating'; // Import Rating Collection from the database
+import { MovieCollection, TVCollection } from '../../db/Content'; // Import content collections
+import { AiOutlineSearch } from 'react-icons/ai'; // Import search icon from react-icons
+import { FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa'; // Import sort icons
 
 const AllRatedContentPage = ({ currentUser }) => {
   const { userId } = useParams();
