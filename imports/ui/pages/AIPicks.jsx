@@ -130,10 +130,12 @@ const AIPicks = ({ currentUser }) => {
     });
   };
 
+  // Process the recommendations and update the state
   const processRecommendations = ({ movies, shows }) => {
-    setContentMovieNone(movies.length === 0);
-    setContentTVNone(shows.length === 0);
+    setContentMovieNone(movies.length === 0);  // Check if there are no movie recommendations
+    setContentTVNone(shows.length === 0);  // Check if there are no show recommendations
 
+    // Select random movies and shows
     const selectedMovies = selectRandomItems(movies, MOVIE_COUNT);
     const movieRecommendations = selectedMovies.map((movie) => ({
       movieTitle: getRandomIntro(movie.title),
@@ -143,7 +145,6 @@ const AIPicks = ({ currentUser }) => {
         contentType: "Movie",
       })),
     }));
-
 
     const selectedShows = selectRandomItems(shows, MOVIE_COUNT);
   const showRecommendations = selectedShows.map((show) => ({
@@ -155,10 +156,7 @@ const AIPicks = ({ currentUser }) => {
     })),
   }));
 
-
-  
-
-
+    // Update the state with recommendations and initialize pagination
     setDisplayRecommendations({ movies: movieRecommendations, shows: showRecommendations });
     setCurrentPages({
       movies: Array(movieRecommendations.length).fill(0),
@@ -166,9 +164,10 @@ const AIPicks = ({ currentUser }) => {
     });
   };
 
+  // Utility function to randomly select items from an array
   const selectRandomItems = (array, numItems) => {
     const selectedItems = [];
-    const arrayCopy = [...array];
+    const arrayCopy = [...array];  // Create a copy of the array
 
     while (selectedItems.length < numItems && arrayCopy.length > 0) {
       const randomIndex = Math.floor(Math.random() * arrayCopy.length);
@@ -177,6 +176,7 @@ const AIPicks = ({ currentUser }) => {
     return selectedItems;
   };
 
+  // Generate random intro message for a title
   const getRandomIntro = (title) => {
     const randomIntros = [
       `Because you liked ${title}, you'll love these:`,
@@ -189,13 +189,15 @@ const AIPicks = ({ currentUser }) => {
     return randomIntros[randomIndex];
   };
 
+  // Navigate to the next page for a list of movies/shows
   const nextPage = (type, index) => {
     setCurrentPages((prev) => ({
       ...prev,
       [type]: prev[type].map((page, idx) => (idx === index ? page + 1 : page)),
     }));
   };
-  
+
+  // Navigate to the previous page for a list of movies/shows
   const prevPage = (type, index) => {
     setCurrentPages((prev) => ({
       ...prev,
