@@ -9,13 +9,15 @@ import LoadingNoAnimation from "./LoadingNoAnimation";
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 
+// Main component to render AI Picks, takes currentUser as a prop
 const AIPicks = ({ currentUser }) => {
+  // Constants for display modes and pagination
   const DISPLAY_MOVIES = "Display Movie";
   const DISPLAY_SHOWS = "Display Show";
   const DISPLAY_TRENDING = "Display Trending";
   const DISPLAY_GENRES = "Display Genres";
-  const MOVIES_PER_PAGE = 6;
-  const MOVIE_COUNT = 5;
+  const MOVIES_PER_PAGE = 6; // Number of movies/shows per page
+  const MOVIE_COUNT = 5; // Number of movie/show recommendations to show
 
   const [display, setDisplay] = useState(DISPLAY_MOVIES);
   const [loading, setLoading] = useState(true);
