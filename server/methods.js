@@ -665,7 +665,7 @@ Meteor.methods({
 
       const avgListLength = (currentUserFavouritesSet.size + userFavouritesSet.size) / 2;
 
-      let matchScore = commonFavourites.length / avgListLength * 100 * 1.5;
+      let matchScore = Math.round(commonFavourites.length / avgListLength * 100 * 1.5);
 
       if (matchScore > 100) {
         matchScore = 100;
