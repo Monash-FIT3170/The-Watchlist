@@ -74,7 +74,7 @@ const TopRated = ({currentUser}) => {
             </button>
           </div>
         </div>
-        <LoadingNoAnimation pageName="The Watchlist" pageDesc="Switching your Top Rated Content..." upperScreen={true} />
+        <LoadingNoAnimation pageName="The Watchlist" pageDesc="Loading your Top Rated Content..." upperScreen={true} />
       </>
     );
   }
