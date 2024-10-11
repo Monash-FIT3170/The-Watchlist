@@ -9,33 +9,39 @@ import LoadingNoAnimation from "./LoadingNoAnimation";
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 
+// Main component to render AI Picks, takes currentUser as a prop
 const AIPicks = ({ currentUser }) => {
+  // Constants for display modes and pagination
   const DISPLAY_MOVIES = "Display Movie";
   const DISPLAY_SHOWS = "Display Show";
   const DISPLAY_TRENDING = "Display Trending";
   const DISPLAY_GENRES = "Display Genres";
-  const MOVIES_PER_PAGE = 6;
-  const MOVIE_COUNT = 5;
+  const MOVIES_PER_PAGE = 6; // Number of movies/shows per page
+  const MOVIE_COUNT = 5; // Number of movie/show recommendations to show
 
-  const [display, setDisplay] = useState(DISPLAY_MOVIES);
-  const [loading, setLoading] = useState(true);
-  const [displayRecommendations, setDisplayRecommendations] = useState({ movies: [], shows: [] });
-  const [trendingContent, setTrendingContent] = useState({ movies: [], shows: [] });
-  const [contentMovieNone, setContentMovieNone] = useState(true);
-  const [contentTVNone, setContentTVNone] = useState(true);
-  const [genreStatistics, setGenreStatistics] = useState([]);
-  const [selectedGenre, setSelectedGenre] = useState(null);
-  const [genreRecommendations, setGenreRecommendations] = useState({ movies: [], shows: [] });
-  const [currentPages, setCurrentPages] = useState({ movies: [], shows: [] }); // Track current page for each of the 5 movies
+  // State variables to track different states of the component
+  const [display, setDisplay] = useState(DISPLAY_MOVIES); // Tracks current display mode
+  const [loading, setLoading] = useState(true); // Tracks loading state
+  const [displayRecommendations, setDisplayRecommendations] = useState({ movies: [], shows: [] }); // Holds recommendations
+  const [trendingContent, setTrendingContent] = useState({ movies: [], shows: [] }); // Holds trending content
+  const [contentMovieNone, setContentMovieNone] = useState(true); // Tracks if there are no movie recommendations
+  const [contentTVNone, setContentTVNone] = useState(true); // Tracks if there are no show recommendations
+  const [genreStatistics, setGenreStatistics] = useState([]); // Holds user's genre statistics
+  const [selectedGenre, setSelectedGenre] = useState(null); // Tracks selected genre for recommendations
+  const [genreRecommendations, setGenreRecommendations] = useState({ movies: [], shows: [] }); // Holds recommendations by genre
+  const [currentPages, setCurrentPages] = useState({ movies: [], shows: [] }); // Tracks current pagination for movies/shows
 
+  // Flags to check if data has been fetched to avoid duplicate calls
   const [trendingContentFetched, setTrendingContentFetched] = useState(false);
   const [recommendationsFetched, setRecommendationsFetched] = useState(false);
   const [genreStatisticsFetched, setGenreStatisticsFetched] = useState(false);
 
+  // Tracker to retrieve global ratings from the Rating collection
   const globalRatings = useTracker(() => {
-    const ratingsHandle = Meteor.subscribe("ratings");
-    if (!ratingsHandle.ready()) return {};
+    const ratingsHandle = Meteor.subscribe("ratings"); // Subscribe to ratings publication
+    if (!ratingsHandle.ready()) return {}; // Return empty if data is not ready
 
+    // Fetch ratings and map them to content IDs
     const ratings = RatingCollection.find().fetch();
     const ratingMap = ratings.reduce((acc, rating) => {
       if (!acc[rating.contentId]) {
@@ -46,6 +52,7 @@ const AIPicks = ({ currentUser }) => {
       return acc;
     }, {});
 
+    // Calculate average ratings for each content
     Object.keys(ratingMap).forEach((id) => {
       ratingMap[id].average = (ratingMap[id].total / ratingMap[id].count).toFixed(2);
     });
@@ -53,14 +60,16 @@ const AIPicks = ({ currentUser }) => {
     return ratingMap;
   }, []);
 
+  // Fetch trending content when DISPLAY_TRENDING is active
   useEffect(() => {
     if (display === DISPLAY_TRENDING && !trendingContentFetched) {
       fetchTrendingContent();
     } else if (display !== DISPLAY_TRENDING && !recommendationsFetched) {
       fetchRecommendations();
     }
-  }, [display]);
+  }, [display]); // Run effect when display changes
 
+  // Fetch genre statistics when DISPLAY_GENRES is active
   useEffect(() => {
     if (display === DISPLAY_GENRES && !genreStatisticsFetched) {
       setLoading(true);
@@ -77,6 +86,7 @@ const AIPicks = ({ currentUser }) => {
     }
   }, [display]);
 
+  // Function to fetch trending content from the server
   const fetchTrendingContent = () => {
     setLoading(true);
     Meteor.call("getTrendingContent", (error, result) => {
@@ -91,6 +101,7 @@ const AIPicks = ({ currentUser }) => {
     });
   };
 
+  // Function to fetch AI recommendations from the server
   const fetchRecommendations = () => {
     setLoading(true);
     Meteor.call("getRecommendations", (error, result) => {
@@ -105,6 +116,7 @@ const AIPicks = ({ currentUser }) => {
     });
   };
 
+  // Fetch recommendations for a selected genre
   const fetchRecommendationsByGenre = (genreName) => {
     setLoading(true);
     Meteor.call("getRecommendationsByGenre", genreName, (error, result) => {
@@ -118,10 +130,12 @@ const AIPicks = ({ currentUser }) => {
     });
   };
 
+  // Process the recommendations and update the state
   const processRecommendations = ({ movies, shows }) => {
-    setContentMovieNone(movies.length === 0);
-    setContentTVNone(shows.length === 0);
+    setContentMovieNone(movies.length === 0);  // Check if there are no movie recommendations
+    setContentTVNone(shows.length === 0);  // Check if there are no show recommendations
 
+    // Select random movies and shows
     const selectedMovies = selectRandomItems(movies, MOVIE_COUNT);
     const movieRecommendations = selectedMovies.map((movie) => ({
       movieTitle: getRandomIntro(movie.title),
@@ -131,7 +145,6 @@ const AIPicks = ({ currentUser }) => {
         contentType: "Movie",
       })),
     }));
-
 
     const selectedShows = selectRandomItems(shows, MOVIE_COUNT);
   const showRecommendations = selectedShows.map((show) => ({
@@ -143,10 +156,7 @@ const AIPicks = ({ currentUser }) => {
     })),
   }));
 
-
-  
-
-
+    // Update the state with recommendations and initialize pagination
     setDisplayRecommendations({ movies: movieRecommendations, shows: showRecommendations });
     setCurrentPages({
       movies: Array(movieRecommendations.length).fill(0),
@@ -154,9 +164,10 @@ const AIPicks = ({ currentUser }) => {
     });
   };
 
+  // Utility function to randomly select items from an array
   const selectRandomItems = (array, numItems) => {
     const selectedItems = [];
-    const arrayCopy = [...array];
+    const arrayCopy = [...array];  // Create a copy of the array
 
     while (selectedItems.length < numItems && arrayCopy.length > 0) {
       const randomIndex = Math.floor(Math.random() * arrayCopy.length);
@@ -165,6 +176,7 @@ const AIPicks = ({ currentUser }) => {
     return selectedItems;
   };
 
+  // Generate random intro message for a title
   const getRandomIntro = (title) => {
     const randomIntros = [
       `Because you liked ${title}, you'll love these:`,
@@ -177,13 +189,15 @@ const AIPicks = ({ currentUser }) => {
     return randomIntros[randomIndex];
   };
 
+  // Navigate to the next page for a list of movies/shows
   const nextPage = (type, index) => {
     setCurrentPages((prev) => ({
       ...prev,
       [type]: prev[type].map((page, idx) => (idx === index ? page + 1 : page)),
     }));
   };
-  
+
+  // Navigate to the previous page for a list of movies/shows
   const prevPage = (type, index) => {
     setCurrentPages((prev) => ({
       ...prev,
@@ -191,6 +205,7 @@ const AIPicks = ({ currentUser }) => {
     }));
   };
 
+  // Display loading animation if data is still being fetched
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-darker">
@@ -204,6 +219,7 @@ const AIPicks = ({ currentUser }) => {
     );
   }
 
+  // Main component rendering based on the display mode
   return (
     <div className="flex flex-col min-h-screen bg-darker pb-10">
       <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
@@ -402,4 +418,4 @@ const AIPicks = ({ currentUser }) => {
   );
 };
 
-export default AIPicks;
+export default AIPicks; // Export the component for use in other parts of the application
