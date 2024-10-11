@@ -1,24 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Meteor } from 'meteor/meteor';
-import { useTracker } from 'meteor/react-meteor-data';
-import Scrollbar from '../components/scrollbar/ScrollBar';
-import ProfileDropdown from '../components/profileDropdown/ProfileDropdown';
-import ContentItem from '../components/contentItems/ContentItem';
-import { RatingCollection } from '../../db/Rating';
-import { MovieCollection, TVCollection } from '../../db/Content';
-import { AiOutlineSearch } from 'react-icons/ai';
-import { FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react'; // Import React and hooks
+import { useParams } from 'react-router-dom'; // Import hook for accessing route parameters
+import { Meteor } from 'meteor/meteor'; // Import Meteor for server calls
+import { useTracker } from 'meteor/react-meteor-data'; // Import hook to reactively fetch data from Meteor
+import Scrollbar from '../components/scrollbar/ScrollBar'; // Import custom scrollbar component
+import ProfileDropdown from '../components/profileDropdown/ProfileDropdown'; // Import ProfileDropdown component
+import ContentItem from '../components/contentItems/ContentItem'; // Import ContentItem component
+import { RatingCollection } from '../../db/Rating'; // Import Rating Collection from the database
+import { MovieCollection, TVCollection } from '../../db/Content'; // Import content collections
+import { AiOutlineSearch } from 'react-icons/ai'; // Import search icon from react-icons
+import { FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa'; // Import sort icons
 
 const AllRatedContentPage = ({ currentUser }) => {
+  // Extract userId from the URL parameters
   const { userId } = useParams();
+
+  // State for managing search term, tab selection, content filtering, and sort order
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('All');
   const [filteredContent, setFilteredContent] = useState([]);
-  const [sortOrder, setSortOrder] = useState('descending'); // Default to descending
+  const [sortOrder, setSortOrder] = useState('descending'); // Default to descending sort order
+
+  // Use search parameters to determine if it's user-specific
   const searchParams = new URLSearchParams(window.location.search);
   const userSpecific = searchParams.get('userSpecific') === 'true';
 
+  // Mapping tabs to their respective content types
   const tabMapping = {
     All: 'All',
     Movies: 'Movie',
@@ -26,8 +32,9 @@ const AllRatedContentPage = ({ currentUser }) => {
     Seasons: 'Season',
   };
 
+  // Reactive Tracker to fetch the rated content based on user
   const { ratedContent, isLoading } = useTracker(() => {
-    const ratingsHandle = Meteor.subscribe('userRatings', userId);
+    const ratingsHandle = Meteor.subscribe('userRatings', userId); // Subscribe to user's ratings
 
     // Log subscription readiness
     console.log("ratingsHandle.ready():", ratingsHandle.ready());
@@ -37,6 +44,7 @@ const AllRatedContentPage = ({ currentUser }) => {
     console.log("userSpecific:", userSpecific);
     console.log("currentUser._id:", currentUser._id);
 
+    // Fetch ratings based on whether the page is user-specific or not
     const ratings = userSpecific
       ? RatingCollection.find({ userId: currentUser._id }).fetch()
       : RatingCollection.find({ userId }).fetch();
@@ -65,6 +73,7 @@ const AllRatedContentPage = ({ currentUser }) => {
       return subscription;
     });
 
+    // Map the ratings to corresponding content
     const contentDetails = ratings.map(rating => {
       let content = null;
       if (rating.contentType === 'Movie') {
@@ -73,6 +82,7 @@ const AllRatedContentPage = ({ currentUser }) => {
         content = TVCollection.findOne({ contentId: rating.contentId });
       }
 
+      // If the content is a season, adjust the title and structure
       if (content && rating.contentType === 'Season') {
         content = {
           ...content,
@@ -82,22 +92,25 @@ const AllRatedContentPage = ({ currentUser }) => {
           seasonId: rating.seasonId, // Include seasonId for unique key
         };
       }
+      // Ensure contentType is set for non-season content
       else if (content) {
         content.contentType = rating.contentType; // Ensure contentType is set
         content.originalContentType = rating.contentType;
       }
 
+      // Return content with rating, filtered by valid title
       return content ? {
         ...content,
         rating: Number(rating.rating), // Ensure rating is a number
         contentType: content.contentType || rating.contentType,
         originalContentType: content.originalContentType || rating.contentType,
       } : null;
-    }).filter(content => content && content.title);
+    }).filter(content => content && content.title);  // Filter out content without titles
 
     // Log content details
     console.log("contentDetails:", contentDetails);
 
+    // Check if all subscriptions are ready
     const allSubscriptionsReady = ratingsHandle.ready() && contentSubscriptions.every(sub => sub.ready());
 
     // Log if all subscriptions are ready
@@ -105,39 +118,42 @@ const AllRatedContentPage = ({ currentUser }) => {
 
     return {
       ratedContent: contentDetails,
-      isLoading: !allSubscriptionsReady,
+      isLoading: !allSubscriptionsReady,  // Indicate loading state
     };
   }, [userId, currentUser._id, userSpecific]);
 
+  // Filter and sort content whenever search term, tab, or rated content changes
   useEffect(() => {
     const filtered = ratedContent.filter(content => {
-      const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase());  // Search by title
       const matchesTab = selectedTab === 'All'
-        ? content.contentType === 'Movie' || content.originalContentType === 'TV Show'
-        : content.originalContentType === tabMapping[selectedTab];
+        ? content.contentType === 'Movie' || content.originalContentType === 'TV Show'  // Show movies and shows for "All"
+        : content.originalContentType === tabMapping[selectedTab];  // Match selected tab content type
       return matchesSearch && matchesTab;
     });
 
     // Log ratings for debugging
     console.log('Before sorting, ratings are:', filtered.map(c => ({ title: c.title, rating: c.rating })));
 
-
+    // Sort content by rating based on sortOrder
     const sorted = filtered.sort((a, b) => {
       return sortOrder === 'ascending' ? a.rating - b.rating : b.rating - a.rating;
     });
 
-    setFilteredContent(sorted);
+    setFilteredContent(sorted);  // Update filtered content
   }, [searchTerm, selectedTab, ratedContent, sortOrder]);
 
-
+  // Handle changes in search input
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
+  // Toggle sort order between ascending and descending
   const toggleSortOrder = () => {
     setSortOrder(prevOrder => prevOrder === 'ascending' ? 'descending' : 'ascending');
   };
 
+  // Prevent form submission default behavior
   const handleFormSubmit = (e) => {
     e.preventDefault();
   };
