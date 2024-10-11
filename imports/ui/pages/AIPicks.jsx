@@ -52,6 +52,7 @@ const AIPicks = ({ currentUser }) => {
       return acc;
     }, {});
 
+    // Calculate average ratings for each content
     Object.keys(ratingMap).forEach((id) => {
       ratingMap[id].average = (ratingMap[id].total / ratingMap[id].count).toFixed(2);
     });
@@ -59,14 +60,16 @@ const AIPicks = ({ currentUser }) => {
     return ratingMap;
   }, []);
 
+  // Fetch trending content when DISPLAY_TRENDING is active
   useEffect(() => {
     if (display === DISPLAY_TRENDING && !trendingContentFetched) {
       fetchTrendingContent();
     } else if (display !== DISPLAY_TRENDING && !recommendationsFetched) {
       fetchRecommendations();
     }
-  }, [display]);
+  }, [display]); // Run effect when display changes
 
+  // Fetch genre statistics when DISPLAY_GENRES is active
   useEffect(() => {
     if (display === DISPLAY_GENRES && !genreStatisticsFetched) {
       setLoading(true);
@@ -83,6 +86,7 @@ const AIPicks = ({ currentUser }) => {
     }
   }, [display]);
 
+  // Function to fetch trending content from the server
   const fetchTrendingContent = () => {
     setLoading(true);
     Meteor.call("getTrendingContent", (error, result) => {
@@ -97,6 +101,7 @@ const AIPicks = ({ currentUser }) => {
     });
   };
 
+  // Function to fetch AI recommendations from the server
   const fetchRecommendations = () => {
     setLoading(true);
     Meteor.call("getRecommendations", (error, result) => {
@@ -111,6 +116,7 @@ const AIPicks = ({ currentUser }) => {
     });
   };
 
+  // Fetch recommendations for a selected genre
   const fetchRecommendationsByGenre = (genreName) => {
     setLoading(true);
     Meteor.call("getRecommendationsByGenre", genreName, (error, result) => {
