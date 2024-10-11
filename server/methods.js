@@ -828,7 +828,7 @@ Meteor.methods({
         }
       },
   
-      {$sort: { averageRating: -1 }},
+      
       {$limit: 50},
   
       {$lookup:{
@@ -839,6 +839,8 @@ Meteor.methods({
       }},
   
       {$unwind: '$contentDetails'},
+
+      {$sort: { averageRating: -1, 'contentDetails.popularity': 1 }},
   
       {$project: {
         averageRating: 1, 
