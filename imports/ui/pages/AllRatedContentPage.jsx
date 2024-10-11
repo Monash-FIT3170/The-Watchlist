@@ -11,14 +11,20 @@ import { AiOutlineSearch } from 'react-icons/ai'; // Import search icon from rea
 import { FaSortAmountUp, FaSortAmountDown } from 'react-icons/fa'; // Import sort icons
 
 const AllRatedContentPage = ({ currentUser }) => {
+  // Extract userId from the URL parameters
   const { userId } = useParams();
+
+  // State for managing search term, tab selection, content filtering, and sort order
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('All');
   const [filteredContent, setFilteredContent] = useState([]);
-  const [sortOrder, setSortOrder] = useState('descending'); // Default to descending
+  const [sortOrder, setSortOrder] = useState('descending'); // Default to descending sort order
+
+  // Use search parameters to determine if it's user-specific
   const searchParams = new URLSearchParams(window.location.search);
   const userSpecific = searchParams.get('userSpecific') === 'true';
 
+  // Mapping tabs to their respective content types
   const tabMapping = {
     All: 'All',
     Movies: 'Movie',
