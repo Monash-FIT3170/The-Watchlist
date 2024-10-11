@@ -205,6 +205,7 @@ const AIPicks = ({ currentUser }) => {
     }));
   };
 
+  // Display loading animation if data is still being fetched
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-darker">
@@ -218,6 +219,7 @@ const AIPicks = ({ currentUser }) => {
     );
   }
 
+  // Main component rendering based on the display mode
   return (
     <div className="flex flex-col min-h-screen bg-darker pb-10">
       <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
@@ -416,4 +418,4 @@ const AIPicks = ({ currentUser }) => {
   );
 };
 
-export default AIPicks;
+export default AIPicks; // Export the component for use in other parts of the application
