@@ -19,25 +19,29 @@ const AIPicks = ({ currentUser }) => {
   const MOVIES_PER_PAGE = 6; // Number of movies/shows per page
   const MOVIE_COUNT = 5; // Number of movie/show recommendations to show
 
-  const [display, setDisplay] = useState(DISPLAY_MOVIES);
-  const [loading, setLoading] = useState(true);
-  const [displayRecommendations, setDisplayRecommendations] = useState({ movies: [], shows: [] });
-  const [trendingContent, setTrendingContent] = useState({ movies: [], shows: [] });
-  const [contentMovieNone, setContentMovieNone] = useState(true);
-  const [contentTVNone, setContentTVNone] = useState(true);
-  const [genreStatistics, setGenreStatistics] = useState([]);
-  const [selectedGenre, setSelectedGenre] = useState(null);
-  const [genreRecommendations, setGenreRecommendations] = useState({ movies: [], shows: [] });
-  const [currentPages, setCurrentPages] = useState({ movies: [], shows: [] }); // Track current page for each of the 5 movies
+  // State variables to track different states of the component
+  const [display, setDisplay] = useState(DISPLAY_MOVIES); // Tracks current display mode
+  const [loading, setLoading] = useState(true); // Tracks loading state
+  const [displayRecommendations, setDisplayRecommendations] = useState({ movies: [], shows: [] }); // Holds recommendations
+  const [trendingContent, setTrendingContent] = useState({ movies: [], shows: [] }); // Holds trending content
+  const [contentMovieNone, setContentMovieNone] = useState(true); // Tracks if there are no movie recommendations
+  const [contentTVNone, setContentTVNone] = useState(true); // Tracks if there are no show recommendations
+  const [genreStatistics, setGenreStatistics] = useState([]); // Holds user's genre statistics
+  const [selectedGenre, setSelectedGenre] = useState(null); // Tracks selected genre for recommendations
+  const [genreRecommendations, setGenreRecommendations] = useState({ movies: [], shows: [] }); // Holds recommendations by genre
+  const [currentPages, setCurrentPages] = useState({ movies: [], shows: [] }); // Tracks current pagination for movies/shows
 
+  // Flags to check if data has been fetched to avoid duplicate calls
   const [trendingContentFetched, setTrendingContentFetched] = useState(false);
   const [recommendationsFetched, setRecommendationsFetched] = useState(false);
   const [genreStatisticsFetched, setGenreStatisticsFetched] = useState(false);
 
+  // Tracker to retrieve global ratings from the Rating collection
   const globalRatings = useTracker(() => {
-    const ratingsHandle = Meteor.subscribe("ratings");
-    if (!ratingsHandle.ready()) return {};
+    const ratingsHandle = Meteor.subscribe("ratings"); // Subscribe to ratings publication
+    if (!ratingsHandle.ready()) return {}; // Return empty if data is not ready
 
+    // Fetch ratings and map them to content IDs
     const ratings = RatingCollection.find().fetch();
     const ratingMap = ratings.reduce((acc, rating) => {
       if (!acc[rating.contentId]) {
