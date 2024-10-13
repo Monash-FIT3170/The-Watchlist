@@ -37,7 +37,7 @@ const Home = ({ currentUser }) => {
   if (trendingLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-darker z-0">
-        <div className="absolute top-4 right-6 z-20">
+        <div className="absolute top-4 right-4 z-20">
           <ProfileDropdown user={currentUser} />
         </div>
 
@@ -53,7 +53,7 @@ const Home = ({ currentUser }) => {
 
   return (
     <div className="flex flex-col min-h-screen bg-darker z-0">
-      <div className="absolute top-4 right-6 z-20">
+      <div className="absolute top-4 right-4 z-20">
         <ProfileDropdown user={currentUser} />
       </div>
 

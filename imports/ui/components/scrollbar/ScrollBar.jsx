@@ -30,13 +30,14 @@ const Scrollbar = ({ children, className = '', backgroundColor = '#FFFFFF', hori
       ref={scrollRef}
       className={`${className} relative overflow-${horizontal ? 'x-auto' : 'y-auto'} scrollbar-webkit`}
       style={{
-        overflowY: horizontal ? 'hidden' : 'overlay',
+        overflowY: horizontal ? 'hidden' : 'auto',
         overflowX: horizontal ? 'auto' : 'hidden',
-        paddingRight: horizontal ? '0' : '8px',
-        boxSizing: 'content-box',
-        '--scrollbar-thumb-color': isScrolling ? "#808080" : "#101010", // Change color to match background when scrolling
-        '--scrollbar-thumb-bg': backgroundColor
+        paddingRight: '0',
+        boxSizing: 'border-box', // Changed to 'border-box'
+        '--scrollbar-thumb-color': isScrolling ? "#808080" : "#101010",
+        '--scrollbar-thumb-bg': backgroundColor,
       }}
+      
     >
       {children}
       <style>{`

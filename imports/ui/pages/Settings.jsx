@@ -126,7 +126,7 @@ const Settings = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-darker p-6 text-white">
-      <div className="absolute top-4 right-8">
+      <div className="absolute top-4 right-4">
         <ProfileDropdown user={currentUser} />
       </div>
       <h1 className="text-3xl font-bold mb-1">Account Settings</h1>
