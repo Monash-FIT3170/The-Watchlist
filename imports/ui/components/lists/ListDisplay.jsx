@@ -35,7 +35,7 @@ const ListDisplay = ({ listData, heading }) => {
                             className="flex-1 bg-dark min-w-[24%] max-w-[24%] flex items-center rounded-lg hover:bg-less-dark transition-colors duration-150 cursor-pointer"
                         >
                             <img
-                                src={list.content[0]?.image_url || popcornUrl}
+                                src={list.listUrl || list.content[0]?.image_url || popcornUrl}
                                 alt={list.title}
                                 className="w-16 h-16 rounded-lg mr-2"
                             />
