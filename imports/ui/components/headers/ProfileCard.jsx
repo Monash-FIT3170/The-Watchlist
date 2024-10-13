@@ -128,15 +128,16 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
         </div>
 
         <div className="flex flex-col gap-2">
-          <h2 className="pl-1 text-8xl font-bold truncate">
+          <h2 className="pl-1 text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold truncate">
             {user.userName || 'Loading...'}
           </h2>
+
           <div className="flex flex-col gap-2 pl-2">
             <div className="flex gap-2 items-center">
               <button
                 className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
-                    ? 'hover:underline'
-                    : 'text-gray-500 cursor-not-allowed'
+                  ? 'hover:underline'
+                  : 'text-gray-500 cursor-not-allowed'
                   }`}
                 onClick={
                   user.userPrivacy === 'Public' || isCurrentUser || isFollowing
@@ -154,8 +155,8 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
               <span className="text-lg">•</span>
               <button
                 className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
-                    ? 'hover:underline'
-                    : 'text-gray-500 cursor-not-allowed'
+                  ? 'hover:underline'
+                  : 'text-gray-500 cursor-not-allowed'
                   }`}
                 onClick={
                   user.userPrivacy === 'Public' || isCurrentUser || isFollowing
@@ -173,8 +174,8 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
               <span className="text-lg">•</span>
               <button
                 className={`p-1 text-lg flex-initial ${user.userPrivacy === 'Public' || isCurrentUser || isFollowing
-                    ? 'hover:underline'
-                    : 'text-gray-500 cursor-not-allowed'
+                  ? 'hover:underline'
+                  : 'text-gray-500 cursor-not-allowed'
                   }`}
                 onClick={() => {
                   if (
@@ -204,10 +205,10 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
                   <button
                     onClick={toggleFollow}
                     className={`mt-2 px-6 py-2 ${isFollowing
-                        ? 'bg-blue-600'
-                        : isRequested
-                          ? 'bg-gray-600'
-                          : 'bg-fuchsia-600'
+                      ? 'bg-blue-600'
+                      : isRequested
+                        ? 'bg-gray-600'
+                        : 'bg-fuchsia-600'
                       } text-white rounded-full`}
                   >
                     {isFollowing ? 'Unfollow' : isRequested ? 'Requested' : 'Follow'}
@@ -228,50 +229,50 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
       {/* Avatar Modal */}
       {showAvatarModal && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full mt-20 z-50">
+          <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full mt-20 z-50">
             <h3 className="text-lg font-bold mb-4 text-center">
-            Change Profile Picture
+              Change Profile Picture
             </h3>
             <input
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarChange}
-            className="mb-4 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="mb-4 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
             />
             <div className="grid grid-cols-5 gap-4 mb-4">
-            {presetAvatars.slice(0, 5).map((avatarUrl, index) => (
+              {presetAvatars.slice(0, 5).map((avatarUrl, index) => (
                 <img
-                key={index}
-                src={avatarUrl}
-                alt="preset avatar"
-                className="w-16 h-16 object-cover rounded-full cursor-pointer transition-transform transform hover:scale-110"
-                onClick={() => handlePresetAvatarSelect(avatarUrl)}
+                  key={index}
+                  src={avatarUrl}
+                  alt="preset avatar"
+                  className="w-16 h-16 object-cover rounded-full cursor-pointer transition-transform transform hover:scale-110"
+                  onClick={() => handlePresetAvatarSelect(avatarUrl)}
                 />
-            ))}
+              ))}
             </div>
             <div className="flex justify-center">
-            <div
+              <div
                 className="grid grid-cols-4 gap-4 mb-4"
                 style={{ marginLeft: "0%" }}
-            >
+              >
                 {presetAvatars.slice(5).map((avatarUrl, index) => (
-                <img
+                  <img
                     key={index}
                     src={avatarUrl}
                     alt="preset avatar"
                     className="w-16 h-16 object-cover rounded-full cursor-pointer transition-transform transform hover:scale-110"
                     onClick={() => handlePresetAvatarSelect(avatarUrl)}
-                />
+                  />
                 ))}
-            </div>
+              </div>
             </div>
             <div className="flex justify-end">
-            <button
+              <button
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                 onClick={() => setShowAvatarModal(false)}
-            >
+              >
                 Cancel
-            </button>
+              </button>
             </div>
           </div>
         </div>
