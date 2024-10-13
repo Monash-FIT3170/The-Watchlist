@@ -52,7 +52,7 @@ const handlePresetAvatarSelect = (avatarUrl) => {
       {/* Image section with square aspect ratio */}
       <div className="w-full aspect-w-1 aspect-h-1 bg-gray-200">
         <img
-          src={list.content[0]?.image_url || popcornUrl}
+          src={list.listUrl || list.content[0]?.image_url || popcornUrl}
           alt={list.title}
           className="w-full h-full object-cover"
         />
