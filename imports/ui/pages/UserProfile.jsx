@@ -213,6 +213,7 @@ const UserProfile = ({ currentUser }) => {
                   })),
                 }}
                 globalRatings = {globalRatings}
+                showScrollArrows={false}
               />
             )}
             {toWatchList && (
@@ -226,6 +227,7 @@ const UserProfile = ({ currentUser }) => {
                   })),
                 }}
                 globalRatings = {globalRatings}
+                showScrollArrows={false}
               />
             )}
             <h2 className="text-white text-2xl font-semibold mb-4">{"Custom Watchlists"}</h2>
