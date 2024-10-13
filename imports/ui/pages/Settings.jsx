@@ -165,6 +165,7 @@ const Settings = () => {
 
       {/* Change Password Section */}
       {showChangePassword && (
+        <>
         <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
           <div>
             <label className="block text-lg font-semibold text-white">
@@ -259,9 +260,9 @@ const Settings = () => {
             )}
           </div>
         </div>
+        <hr className="border-t border-gray-700 my-4" />
+        </>
       )}
-
-      <hr className="border-t border-gray-700 my-4" />
 
       {/* Privacy Settings */}
       <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
