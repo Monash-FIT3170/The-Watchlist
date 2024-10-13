@@ -223,24 +223,36 @@ Meteor.methods({
       $set: { avatarUrl: avatarUrl }
     });
   },
-  
+
   'users.updateProfile'(username) {
-    // Ensure the user is logged in
     if (!this.userId) {
       throw new Meteor.Error('not-authorized', 'You must be logged in to update your profile.');
     }
 
-    // Update user profile
+    check(username, {
+      username: String,
+    });
+
     try {
-      // Update the user's username
       if (username.username) {
         Accounts.setUsername(this.userId, username.username);
+
+        const updateResult = ListCollection.update(
+          { userId: this.userId },
+          { $set: { userName: username.username } },
+          { multi: true }
+        );
+
+        if (updateResult === 0) {
+          console.warn('No lists were updated for user:', this.userId);
+        }
       }
       return 'Profile updated successfully';
     } catch (error) {
       throw new Meteor.Error('update-failed', error.message);
     }
   },
+
 
   'users.deleteUser'() {
     if (!this.userId) {
@@ -287,23 +299,23 @@ Meteor.methods({
   updateList(userId, avatarUrl, listName) {
     check(userId, String);
     check(avatarUrl, String);
-    check(listName, String); 
+    check(listName, String);
 
     if (!this.userId) {
-        throw new Meteor.Error('not-authorized');
+      throw new Meteor.Error('not-authorized');
     }
 
     if (this.userId !== userId) {
-        throw new Meteor.Error('not-authorized', 'You can only update your own avatar');
+      throw new Meteor.Error('not-authorized', 'You can only update your own avatar');
     }
 
     const result = ListCollection.update(
-        { userId: this.userId, title: listName }, 
-        { $set: { listUrl: avatarUrl } }
+      { userId: this.userId, title: listName },
+      { $set: { listUrl: avatarUrl } }
     );
 
     console.log(`Updated avatar URL for list "${listName}" of user "${userId}"`); // Debug: Log update
-}
+  }
 
 });
 
@@ -434,9 +446,9 @@ Meteor.methods({
       // set all PUBLIC list visibilities to FOLLOWERS when profile changed to private
       ListCollection.update(
         {
-          userId: this.userId, 
+          userId: this.userId,
           visibility: "PUBLIC"
-        }, 
+        },
         {
           $set: {
             visibility: "FOLLOWERS"
@@ -512,7 +524,7 @@ Meteor.methods({
 });
 
 Meteor.methods({
-  'list.setVisibility'({listId, visibleType}) {
+  'list.setVisibility'({ listId, visibleType }) {
     check(listId, String);
     check(visibleType, String);
 
@@ -606,7 +618,7 @@ Meteor.methods({
 
     const currentUser = Meteor.users.findOne(
       { _id: this.userId },
-      { fields: { _id: 1 } } 
+      { fields: { _id: 1 } }
     );
 
 
@@ -619,7 +631,7 @@ Meteor.methods({
       listType: 'Favourite'
     });
 
-    if (!currentUserFavourites || currentUserFavourites.content.length === 0 ||  !currentUserFavourites.content) {
+    if (!currentUserFavourites || currentUserFavourites.content.length === 0 || !currentUserFavourites.content) {
       throw new Meteor.Error('no-favourites', 'You do not have any favourites.');
     }
 
@@ -628,9 +640,9 @@ Meteor.methods({
     );
 
     const randomUsersCursor = Meteor.users.rawCollection().aggregate([
-      { $match: { _id: { $ne: this.userId } } }, 
+      { $match: { _id: { $ne: this.userId } } },
       { $sample: { size: 50 } },
-      { $project: { _id: 1, avatarUrl: 1, username: 1 } } 
+      { $project: { _id: 1, avatarUrl: 1, username: 1 } }
     ]);
 
     const randomUsers = await randomUsersCursor.toArray();
@@ -648,47 +660,47 @@ Meteor.methods({
     });
 
     const userScores = randomUsers
-    .map(user => {
-      const userFavouritesArray = userFavouritesMap[user._id];
-      if (!userFavouritesArray || userFavouritesArray.length === 0) return null;
+      .map(user => {
+        const userFavouritesArray = userFavouritesMap[user._id];
+        if (!userFavouritesArray || userFavouritesArray.length === 0) return null;
 
-      const userFavouritesSet = new Set(userFavouritesArray);
+        const userFavouritesSet = new Set(userFavouritesArray);
 
 
-      const commonFavourites = [...currentUserFavouritesSet].filter(contentId =>
-        userFavouritesSet.has(contentId)
-      );
+        const commonFavourites = [...currentUserFavouritesSet].filter(contentId =>
+          userFavouritesSet.has(contentId)
+        );
 
-      if (commonFavourites.size === 0) {
-        return null;
-      }
+        if (commonFavourites.size === 0) {
+          return null;
+        }
 
-      const avgListLength = (currentUserFavouritesSet.size + userFavouritesSet.size) / 2;
+        const avgListLength = (currentUserFavouritesSet.size + userFavouritesSet.size) / 2;
 
-      let matchScore = Math.round(commonFavourites.length / avgListLength * 100 * 1.5);
+        let matchScore = Math.round(commonFavourites.length / avgListLength * 100 * 1.5);
 
-      if (matchScore > 100) {
-        matchScore = 100;
-      }
+        if (matchScore > 100) {
+          matchScore = 100;
+        }
 
-      return {
-        user: {
-          _id: user._id,
-          avatarUrl: user.avatarUrl,
-          username: user.username
-        },
-        matchScore: matchScore
-      };
-    })
-    .filter(Boolean) 
-    .sort((a, b) => {
-      if (b.matchScore !== a.matchScore) {
-        return b.matchScore - a.matchScore;
-      }
-      return a.user.username.localeCompare(b.user.username);
-    }).slice(0, 10);;
+        return {
+          user: {
+            _id: user._id,
+            avatarUrl: user.avatarUrl,
+            username: user.username
+          },
+          matchScore: matchScore
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => {
+        if (b.matchScore !== a.matchScore) {
+          return b.matchScore - a.matchScore;
+        }
+        return a.user.username.localeCompare(b.user.username);
+      }).slice(0, 10);;
 
-  return userScores;
+    return userScores;
   }
 });
 Meteor.methods({
@@ -806,62 +818,64 @@ Meteor.methods({
 });
 
 Meteor.methods({
-  async 'ratings.getTopRated'(contentType ){
-  
+  async 'ratings.getTopRated'(contentType) {
     if (!["Movie", "TV Show"].includes(contentType)) {
       throw new Meteor.Error('invalid-content-type', 'Content type must be either "Movie" or "TV Show"');
     }
-  
+
     const pipeline = [
-  
       {
         $match: {
           contentType: contentType
         }
       },
-  
       {
-        $group:{
+        $group: {
           _id: "$contentId",
           averageRating: { $avg: "$rating" },
           count: { $sum: 1 }
         }
       },
-  
-      
-      {$limit: 50},
-  
-      {$lookup:{
-        from: contentType === 'Movie' ? 'movie' : 'tv',
-        localField: "_id",
-        foreignField: "contentId",
-        as: "contentDetails"
-      }},
-  
-      {$unwind: '$contentDetails'},
-
-      {$sort: { averageRating: -1, 'contentDetails.popularity': 1 }},
-  
-      {$project: {
-        averageRating: 1, 
-        count: 1,
-        contentDetails: 1
-      }}
+      // **Move $sort before $limit and sort by averageRating and count**
+      {
+        $sort: { 
+          averageRating: -1, // First sort by averageRating descending
+          count: -1          // Then sort by count descending
+        }
+      },
+      { 
+        $limit: 50 // Limit after sorting
+      },
+      {
+        $lookup: {
+          from: contentType === 'Movie' ? 'movie' : 'tv',
+          localField: "_id",
+          foreignField: "contentId",
+          as: "contentDetails"
+        }
+      },
+      { $unwind: '$contentDetails' },
+      {
+        $project: {
+          averageRating: 1,
+          count: 1,
+          contentDetails: 1
+        }
+      }
     ];
-  
+
     const rawCollection = RatingCollection.rawCollection();
-  
-    try{
-  
+
+    try {
       const aggregateResult = await rawCollection.aggregate(pipeline).toArray();
-  
       return aggregateResult;
-    }catch (error){
+    } catch (error) {
       console.error('Error fetching top rated content:', error);
       throw new Meteor.Error('fetch-failed', 'Failed to fetch top rated content');
     }
   }
-  });
+});
+
 
 // Helper function to select random content
 function selectRandomContent(contentList, maxItems) {
@@ -952,7 +966,7 @@ Meteor.startup(() => {
 function processTMDbData(items, contentType) {
 
   const genreMap = contentType === 'Movie' ? genreMappings.movies : genreMappings.tv;
-  
+
   return items.map(item => ({
     contentId: item.id,
     title: item.title || item.name,

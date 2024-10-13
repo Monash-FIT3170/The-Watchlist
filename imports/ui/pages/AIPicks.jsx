@@ -273,6 +273,7 @@ const AIPicks = ({ currentUser }) => {
                     isUserOwned={false}
                     globalRatings={globalRatings}
                     hideShowAllButton={true}
+                    showScrollArrows={false}
                   />
 
                   {currentPages.movies[movieIndex] > 0 && (
@@ -321,6 +322,7 @@ const AIPicks = ({ currentUser }) => {
                     isUserOwned={false}
                     globalRatings={globalRatings}
                     hideShowAllButton={true}
+                    showScrollArrows = {false}
                   />
         
         {currentPages.shows[showIndex] > 0 && (

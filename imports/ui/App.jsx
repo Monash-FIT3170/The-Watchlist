@@ -74,14 +74,14 @@ export const App = () => {
       return Meteor.subscribe('userProfileData', currentUser._id);
     }
     return { ready: () => true };
-  }, [currentUser]);
-
+  }, [currentUser?._id]);
+  
   const userListsHandle = useTracker(() => {
     if (currentUser) {
       return Meteor.subscribe('userLists', currentUser._id);
     }
     return { ready: () => true };
-  }, [currentUser]);
+  }, [currentUser?._id]);
  
   // Track userLists reactively
   const userLists = useTracker(() => {

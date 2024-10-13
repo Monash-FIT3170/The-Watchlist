@@ -13,6 +13,8 @@ import './publications.js';
 import { ServiceConfiguration } from 'meteor/service-configuration';
 import '../imports/startup/server/indexes';
 import setAllListsPublic from './migrations/setAllListsPublic.js';
+import '/imports/db/Migrations.js';
+import { fixFollowingFollowersStructure, removeDuplicateFollowingFollowers } from '/imports/db/Migrations.js';
 
 dotenv.config();
 
@@ -67,6 +69,9 @@ Meteor.startup(() => {
             },
         }
     );
+
+    // fixFollowingFollowersStructure();
+    // removeDuplicateFollowingFollowers();
 
     // setAllListsPublic();
 

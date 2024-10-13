@@ -1,89 +1,45 @@
-// imports/ui/components/carousel/Carousel.jsx
+// Carousel.jsx
 
 import React, { useState, useEffect } from 'react';
 import { Meteor } from 'meteor/meteor';
 import ContentInfoModal from '../../modals/ContentInfoModal';
-import PropTypes from 'prop-types';
 
 const Carousel = ({ items }) => {
-  console.log(items)
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [filter, setFilter] = useState('Movies'); // 'Movies' or 'TV Shows'
   const [isOpen, setIsOpen] = useState(false);
   const [fullContent, setFullContent] = useState(null);
 
-  // Log initial render
-  console.log('Carousel Rendered');
-
-  // Log state changes using useEffect
-  useEffect(() => {
-    console.log(`State Change - selectedIndex: ${selectedIndex}`);
-  }, [selectedIndex]);
-
-  useEffect(() => {
-    console.log(`State Change - hoveredIndex: ${hoveredIndex}`);
-  }, [hoveredIndex]);
-
-  useEffect(() => {
-    console.log(`State Change - filter: ${filter}`);
-  }, [filter]);
-
-  useEffect(() => {
-    console.log(`State Change - isOpen: ${isOpen}`);
-  }, [isOpen]);
-
-  useEffect(() => {
-    console.log(`State Change - fullContent: ${fullContent}`);
-  }, [fullContent]);
-
   // Filter items based on the selected filter
   const filteredItems = items.filter(
     (item) => item.contentType === (filter === 'Movies' ? 'Movie' : 'TV Show')
   );
 
-  // Log filtered items
-  useEffect(() => {
-    console.log(`Filtered Items (${filter}):`, filteredItems);
-  }, [filteredItems, filter]);
-
   const handleMouseEnter = (index) => {
-    console.log(`handleMouseEnter called with index: ${index}`);
     if (index !== selectedIndex) {
       setHoveredIndex(index);
-      console.log(`Hovered Index set to: ${index}`);
-    } else {
-      console.log(`Hovered Index not changed because index ${index} is selected`);
     }
   };
 
   const handleMouseLeave = () => {
-    console.log('handleMouseLeave called');
     setHoveredIndex(null);
-    console.log('Hovered Index reset to null');
   };
 
   const handleClick = (index) => {
-    console.log(`handleClick called with index: ${index}`);
     setSelectedIndex(index);
     setHoveredIndex(null); // Reset hover state when selecting an item
-    console.log(`Selected Index set to: ${index}, Hovered Index reset to null`);
   };
 
   const handleFilterChange = (newFilter) => {
-    console.log(`handleFilterChange called with newFilter: ${newFilter}`);
     setFilter(newFilter);
     setSelectedIndex(0);
     setHoveredIndex(null);
-    console.log(`Filter set to: ${newFilter}, Selected Index reset to 0, Hovered Index reset to null`);
   };
 
-  const selectedItem = filteredItems[selectedIndex];
-  console.log(`Currently Selected Item:`, selectedItem);
-
   const openModal = () => {
-    console.log('openModal called');
     // Always fetch full content details when opening the modal
+    const selectedItem = filteredItems[selectedIndex];
     Meteor.call(
       'content.read',
       { id: selectedItem.contentId, contentType: selectedItem.contentType },
@@ -91,7 +47,6 @@ const Carousel = ({ items }) => {
         if (!error && result.content?.length > 0) {
           setFullContent(result.content[0]);
           setIsOpen(true);
-          console.log('Modal opened with content:', result.content[0]);
         } else {
           console.error('Error fetching content details:', error);
         }
@@ -100,24 +55,19 @@ const Carousel = ({ items }) => {
   };
 
   const closeModal = () => {
-    console.log('closeModal called');
     setIsOpen(false);
     setFullContent(null); // Reset fullContent when closing the modal
-    console.log('Modal closed and fullContent reset to null');
   };
 
-  // Calculate widths based on state
-  const calculateWidth = (index) => {
+  // Calculate flexGrow based on state
+  const calculateFlexGrow = (index) => {
     if (index === selectedIndex) {
-      return '60%';
+      return 10; // Selected item grows the most
     }
-    if (hoveredIndex !== null) {
-      if (index === hoveredIndex) {
-        return '15%';
-      }
-      return '3%';
+    if (index === hoveredIndex) {
+      return 4; // Hovered item grows slightly less
     }
-    return '4.5%';
+    return 1; // Default size for other items
   };
 
   // Calculate zIndex based on state
@@ -164,20 +114,19 @@ const Carousel = ({ items }) => {
           const isSelected = index === selectedIndex;
           const isHovered = index === hoveredIndex;
 
-          const width = calculateWidth(index);
+          const flexGrow = calculateFlexGrow(index);
           const zIndex = calculateZIndex(index);
-
-          console.log(
-            `Rendering Item - Index: ${index}, Title: ${item.title}, isSelected: ${isSelected}, isHovered: ${isHovered}, Width: ${width}, zIndex: ${zIndex}`
-          );
 
           return (
             <div
               key={index}
-              className="relative flex-shrink-0 transition-all duration-300 ease-in-out"
+              className="relative transition-all duration-300 ease-in-out"
               style={{
-                width: width,
+                flexGrow: flexGrow,
+                flexShrink: 1,
+                flexBasis: '0%',
                 zIndex: zIndex,
+                transition: 'flex-grow 0.3s ease-in-out',
               }}
               onClick={() => handleClick(index)}
               onMouseEnter={() => handleMouseEnter(index)}
@@ -216,12 +165,6 @@ const Carousel = ({ items }) => {
                 src={item.banner_url || item.background_url}
                 alt={item.title}
                 className="w-full h-full object-cover shadow-lg cursor-pointer"
-                onLoad={() => {
-                  console.log(`Image loaded for item ${index}: ${item.title}`);
-                }}
-                onError={(e) => {
-                  console.error(`Image failed to load for item ${index}: ${item.title}`, e);
-                }}
               />
 
               {/* Overlay Shadow for Unselected and Unhovered Items */}
@@ -264,26 +207,11 @@ const Carousel = ({ items }) => {
           onClose={closeModal}
           onRatingUpdate={() => {
             // Handle rating updates if necessary
-            console.log('Rating updated for content:', fullContent);
           }}
         />
       )}
     </div>
   );
-};
-
-// Define PropTypes for better type checking
-Carousel.propTypes = {
-  items: PropTypes.arrayOf(
-    PropTypes.shape({
-      contentId: PropTypes.string.isRequired,
-      contentType: PropTypes.oneOf(['Movie', 'TV Show']).isRequired,
-      banner_url: PropTypes.string,
-      background_url: PropTypes.string,
-      title: PropTypes.string.isRequired,
-      // Add other necessary fields
-    })
-  ).isRequired,
 };
 
 export default Carousel;
