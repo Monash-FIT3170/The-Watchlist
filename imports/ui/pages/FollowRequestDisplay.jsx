@@ -16,12 +16,12 @@ const FollowRequestDisplay = ({ users: propUsers, currentUser }) => {
 
   const handleAcceptRequest = (userID) => {
     Meteor.call('acceptRequest', userID, (error, result) => {
-        if (error) {
-          console.error('Error accepting follow request:', error);
-        } else {
-          console.log('Follow request accepted');
-        }
-      });
+      if (error) {
+        console.error('Error accepting follow request:', error);
+      } else {
+        console.log('Follow request accepted');
+      }
+    });
   }
 
   const handleDeclineRequest = (userID) => {
@@ -67,47 +67,47 @@ const FollowRequestDisplay = ({ users: propUsers, currentUser }) => {
           </div>
         </div>
         <Scrollbar className="w-full">
-  <div className="flex flex-wrap justify-start items-start gap-8 p-4">
-    {filteredUsers.map((user, index) => (
-      <div
-        key={index}
-        className="min-w-[200px] max-w-[200px] flex flex-col items-center p-2 rounded-lg hover:bg-gray-700 transition-colors duration-300"
-        onClick={() => navigate(`/user/${user._id}`)}
-      >
-        <div className="flex flex-col items-center cursor-pointer">
-          <img src={user.avatarUrl || './default-avatar.png'} alt={user.username} className="w-full h-auto rounded-full" />
-          <p className="text-white mt-2 text-xl text-center">{user.username}</p>
-        </div>
+          <div className="flex flex-wrap justify-start items-start gap-8 p-4">
+            {filteredUsers.map((user, index) => (
+              <div
+                key={index}
+                className="min-w-[200px] max-w-[200px] flex flex-col items-center p-2 rounded-lg hover:bg-gray-700 transition-colors duration-300"
+                onClick={() => navigate(`/user/${user._id}`)}
+              >
+                <div className="flex flex-col items-center cursor-pointer">
+                  <img src={user.avatarUrl || './default-avatar.png'} alt={user.username} className="w-full h-auto rounded-full" />
+                  <p className="text-white mt-2 text-xl text-center">{user.username}</p>
+                </div>
 
-        {currentUserId !== user._id && (
-          <div className="mt-2 flex space-x-4">
+                {currentUserId !== user._id && (
+                  <div className="mt-2 flex space-x-4">
 
-            <button
-              className="bg-green-600 p-2 rounded-full"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleAcceptRequest(user._id); 
-              }}
-            >
-              <FaCheck className="text-white" />
-            </button>
+                    <button
+                      className="bg-green-600 p-2 rounded-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAcceptRequest(user._id);
+                      }}
+                    >
+                      <FaCheck className="text-white" />
+                    </button>
 
-            
-            <button
-              className="bg-red-600 p-2 rounded-full"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeclineRequest(user._id); 
-              }}
-            >
-              <FaTimes className="text-white" />
-            </button>
+
+                    <button
+                      className="bg-red-600 p-2 rounded-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeclineRequest(user._id);
+                      }}
+                    >
+                      <FaTimes className="text-white" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        )}
-      </div>
-    ))}
-  </div>
-</Scrollbar>
+        </Scrollbar>
       </div>
     </div>
   );
