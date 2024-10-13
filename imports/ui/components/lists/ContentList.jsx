@@ -63,6 +63,9 @@ const ContentList = React.memo(({
     }
   };
 
+  // Determine whether to show scroll arrows
+  const shouldShowArrows = showScrollArrows && list.content.length >= 4;
+
   return (
     <div className="flex flex-col mb-2 bg-transparent overflow-hidden shadow-none py-0 px-0">
       {/* Header Section */}
@@ -96,8 +99,8 @@ const ContentList = React.memo(({
         </div>
       )}
 
-      {/* Items Container with Optional Scroll Arrows */}
-      {showScrollArrows ? (
+      {/* Items Container with Conditional Scroll Arrows */}
+      {shouldShowArrows ? (
         <div className="relative">
           <div
             ref={containerRef}
