@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUserPlus, FaPencilAlt } from 'react-icons/fa';
 import ProfileDropdown from '../profileDropdown/ProfileDropdown';
+import AvatarModal from '../../modals/AvatarModal';
 
 const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowing, isRequested, toggleFollow }) => {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
@@ -32,8 +33,7 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
     setShowAvatarModal(true);
   };
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
+  const handleAvatarChange = (file) => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -46,9 +46,10 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
           }
         });
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); 
     }
   };
+  
 
   const handlePresetAvatarSelect = (avatarUrl) => {
     Meteor.call("updateAvatar", user._id, avatarUrl, (error) => {
@@ -88,18 +89,6 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
       }
     });
   };
-
-  const presetAvatars = [
-    'https://randomuser.me/api/portraits/lego/1.jpg',
-    'https://randomuser.me/api/portraits/lego/2.jpg',
-    'https://randomuser.me/api/portraits/lego/3.jpg',
-    "https://randomuser.me/api/portraits/lego/4.jpg",
-    "https://randomuser.me/api/portraits/lego/5.jpg",
-    "https://randomuser.me/api/portraits/lego/6.jpg",
-    "https://randomuser.me/api/portraits/lego/7.jpg",
-    "https://randomuser.me/api/portraits/lego/8.jpg",
-    "https://randomuser.me/api/portraits/lego/9.jpg",
-  ];
 
   return (
     <div className="relative flex items-center h-72 p-4 bg-gradient-to-tl from-zinc-900 via-zinc-700 to-zinc-600 rounded-t-lg shadow-md">
@@ -227,53 +216,12 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
 
       {/* Avatar Modal */}
       {showAvatarModal && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-zinc-700 p-6 rounded-lg shadow-lg max-w-md w-full mt-20 z-50">
-            <h3 className="text-lg font-bold mb-4 text-center">
-            Change Profile Picture
-            </h3>
-            <input
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarChange}
-            className="mb-4 block w-full text-sm text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
-            />
-            <div className="grid grid-cols-5 gap-4 mb-4">
-            {presetAvatars.slice(0, 5).map((avatarUrl, index) => (
-                <img
-                key={index}
-                src={avatarUrl}
-                alt="preset avatar"
-                className="w-16 h-16 object-cover rounded-full cursor-pointer transition-transform transform hover:scale-110"
-                onClick={() => handlePresetAvatarSelect(avatarUrl)}
-                />
-            ))}
-            </div>
-            <div className="flex justify-center">
-            <div
-                className="grid grid-cols-4 gap-4 mb-4"
-                style={{ marginLeft: "0%" }}
-            >
-                {presetAvatars.slice(5).map((avatarUrl, index) => (
-                <img
-                    key={index}
-                    src={avatarUrl}
-                    alt="preset avatar"
-                    className="w-16 h-16 object-cover rounded-full cursor-pointer transition-transform transform hover:scale-110"
-                    onClick={() => handlePresetAvatarSelect(avatarUrl)}
-                />
-                ))}
-            </div>
-            </div>
-            <div className="flex justify-end">
-            <button
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                onClick={() => setShowAvatarModal(false)}
-            >
-                Cancel
-            </button>
-            </div>
-          </div>
+        <div style={{ zIndex: 1000, position: 'relative' }}>
+          <AvatarModal
+            handleAvatarChange={handleAvatarChange}
+            handlePresetAvatarSelect={handlePresetAvatarSelect}
+            setShowAvatarModal={setShowAvatarModal}
+          />
         </div>
       )}
     </div>
