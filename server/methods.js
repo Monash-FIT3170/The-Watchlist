@@ -819,19 +819,16 @@ Meteor.methods({
 
 Meteor.methods({
   async 'ratings.getTopRated'(contentType) {
-
     if (!["Movie", "TV Show"].includes(contentType)) {
       throw new Meteor.Error('invalid-content-type', 'Content type must be either "Movie" or "TV Show"');
     }
 
     const pipeline = [
-
       {
         $match: {
           contentType: contentType
         }
       },
-
       {
         $group: {
           _id: "$contentId",
@@ -839,10 +836,16 @@ Meteor.methods({
           count: { $sum: 1 }
         }
       },
-
-
-      { $limit: 50 },
-
+      // **Move $sort before $limit and sort by averageRating and count**
+      {
+        $sort: { 
+          averageRating: -1, // First sort by averageRating descending
+          count: -1          // Then sort by count descending
+        }
+      },
+      { 
+        $limit: 50 // Limit after sorting
+      },
       {
         $lookup: {
           from: contentType === 'Movie' ? 'movie' : 'tv',
@@ -851,11 +854,7 @@ Meteor.methods({
           as: "contentDetails"
         }
       },
-
       { $unwind: '$contentDetails' },
-
-      { $sort: { averageRating: -1, 'contentDetails.popularity': 1 } },
-
       {
         $project: {
           averageRating: 1,
@@ -868,9 +867,7 @@ Meteor.methods({
     const rawCollection = RatingCollection.rawCollection();
 
     try {
-
       const aggregateResult = await rawCollection.aggregate(pipeline).toArray();
-
       return aggregateResult;
     } catch (error) {
       console.error('Error fetching top rated content:', error);
@@ -878,6 +875,7 @@ Meteor.methods({
     }
   }
 });
+
 
 // Helper function to select random content
 function selectRandomContent(contentList, maxItems) {
