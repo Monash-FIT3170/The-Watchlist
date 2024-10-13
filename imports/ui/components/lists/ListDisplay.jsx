@@ -2,7 +2,7 @@ import React from 'react';
 import ListPopup from './ListPopup';
 import usePopup from '../../modals/usePopup';
 
-export default function ListDisplay({ listData, heading }) { // Added heading as a prop
+const ListDisplay = ({ listData, heading }) => {
     const { 
         isPopupOpen, 
         selectedList, 
@@ -18,7 +18,7 @@ export default function ListDisplay({ listData, heading }) { // Added heading as
         rows.push(listData.slice(i, i + itemsPerRow));
     }
 
-    const popcornUrl = "./ExampleResources/popcorn.png";
+    const popcornUrl = "./images/popcorn.png";
 
     return (
         <div className="w-full bg-darker px-2 py-5 rounded-lg">
@@ -55,3 +55,5 @@ export default function ListDisplay({ listData, heading }) { // Added heading as
         </div>
     );
 }
+
+export default ListDisplay;

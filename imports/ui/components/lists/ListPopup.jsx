@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTracker } from 'meteor/react-meteor-data';
 import RatingStar from "../ratings/RatingStar";
-import { FiEdit, FiTrash2, FiGrid, FiList } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiGrid, FiList, FiLink, FiShare2, FiUpload } from "react-icons/fi";
 import RenameListModal from "../../modals/RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import Scrollbar from '../scrollbar/ScrollBar';
@@ -12,6 +12,9 @@ import ContentItem from "../contentItems/ContentItem";
 import ContentInfoModal from "../../modals/ContentInfoModal";  // Import the modal component
 import { FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
+import { EmailShareButton, FacebookShareButton, TwitterShareButton, WhatsappShareButton, EmailIcon, FacebookIcon, TwitterIcon, WhatsappIcon } from "react-share";
+import VisibilityDropdown from "../dropdowns/VisibilityDropdown";
+import { useNavigate } from "react-router-dom";
 
 const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [list, setList] = useState(null);
@@ -24,6 +27,9 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [selectedTab, setSelectedTab] = useState('all');
     const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
+    const [newAvatar, setNewAvatar] = useState(null);
+    const [showAvatarModal, setShowAvatarModal] = useState(false);
+    const [getVisibility, setVisibility] = useState('PUBLIC')
     const popupRef = useRef(null);
     const contentInfoModalRef = useRef(null); // Ref for ContentInfoModal
     const modalRef = useRef(null) // Ref for Modal
@@ -35,6 +41,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const confirmDialogRef = useRef(null);
     const renameListRef = useRef(null); // Ref for RenameListModal
     const [contentToDelete, setContentToDelete] = useState(null);
+    const [shareUrl, setShareUrl] = useState();
+    const [isShareDropdownOpen, setShareDropdown] = useState(false);
+    const shareQuote = "Check out this watchlist!";
+    const iconSize = 44;
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (listId) {
@@ -45,6 +56,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     setList(null);
                 } else {
                     setList(result);
+                    const localhost = "http://localhost:3000";
+                    const domain = "https://www.thewatchlist.xyz"
+                    // Change to domain before merging with main
+                    setShareUrl(`${domain}/list/${result._id}`);
+                    // setShareUrl(`${Meteor.absoluteUrl.defaultOptions.rootUrl}/list/${result._id}`); // For some reason the production link doesn't have www.
                 }
             });
         }
@@ -58,12 +74,42 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         });
     }, [listId]);
 
+    const isCurrentUserList = list && list.userId === Meteor.userId();
+
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setNewAvatar(reader.result);
+            console.log('List URL:', list); 
+            Meteor.call('updateList', list.userId, reader.result, list.title, (error) => {
+              if (error) {
+                console.error('Error updating avatar:', error);
+              } else {
+                setShowAvatarModal(false);
+              }
+            });
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+
+    
+      
+
     useEffect(() => {
         if (list?.subscribers && Array.isArray(list.subscribers)) {
             const isSubscribed = list.subscribers.includes(Meteor.userId());
             setIsSubscribed(isSubscribed);
         }
     }, [list?.subscribers]);
+
+    useEffect(() => {
+        if (list?.visibility) {
+            setVisibility(list.visibility)
+        }
+    }, [list?.visibility]);
 
     useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside);
@@ -109,26 +155,34 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     };
 
     const sortContent = (content) => {
-        return content.sort((a, b) => {
-            if (sortOrder === 'ascending') {
-                if (sortCriterion === 'title') {
-                    return a.title.localeCompare(b.title);
-                } else if (sortCriterion === 'release_year') {
-                    return a.release_year - b.release_year;
-                } else if (sortCriterion === 'popularity') {
-                    return a.popularity - b.popularity; // Sorting by popularity
+        return [...content].sort((a, b) => {
+            let aYear, bYear;
+
+            if (sortCriterion === 'release_year') {
+                aYear = a.contentType === 'Movie'
+                    ? a.release_year
+                    : (a.first_aired ? new Date(a.first_aired).getFullYear() : 0);
+                bYear = b.contentType === 'Movie'
+                    ? b.release_year
+                    : (b.first_aired ? new Date(b.first_aired).getFullYear() : 0);
+
+                if (sortOrder === 'ascending') {
+                    return aYear - bYear;
+                } else {
+                    return bYear - aYear;
                 }
-            } else {
-                if (sortCriterion === 'title') {
-                    return b.title.localeCompare(a.title);
-                } else if (sortCriterion === 'release_year') {
-                    return b.release_year - a.release_year;
-                } else if (sortCriterion === 'popularity') {
-                    return b.popularity - a.popularity; // Sorting by popularity
-                }
+            } else if (sortCriterion === 'title') {
+                return sortOrder === 'ascending'
+                    ? a.title.localeCompare(b.title)
+                    : b.title.localeCompare(a.title);
+            } else if (sortCriterion === 'popularity') {
+                return sortOrder === 'ascending'
+                    ? a.popularity - b.popularity
+                    : b.popularity - a.popularity;
             }
         });
     };
+
 
     const getRatingForContent = (contentId) => {
         const userRating = ratings.find(r => r.contentId === contentId);
@@ -144,10 +198,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         setModalOpen(true); // Open ContentInfoModal
     };
 
-    const closeModal = () => {
+    const goToSearch = () => {
         setModalOpen(false);
-        setSelectedContent(null);
-    };
+        onClose();
+        navigate("/search");
+    }
 
     // Separate close handlers for each modal
     const closeContentInfoModal = () => {
@@ -183,6 +238,24 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         });
     };
 
+    const handleVisibilityChange = () => {
+        choices = ["PUBLIC", "FOLLOWERS", "ONLY_ME"]
+        index = choices.indexOf(getVisibility)
+
+        index = ++index % choices.length;
+
+        Meteor.call('list.setVisibility', {
+            listId: listId,
+            visibleType: choices[index]
+        }, (err) => {
+            if (err) {
+                console.error('Set visibility error:', err);
+            } else {
+                setVisibility(choices[index]);
+            }
+        });
+    };
+
     const handleImageLoad = (event, id) => {
         const { naturalWidth, naturalHeight } = event.target;
         if (naturalHeight > naturalWidth) {
@@ -208,11 +281,11 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     console.log("Content removed successfully");
                     toast.success("Content removed successfully!");
                     const updatedContent = list.content.filter(item => item.contentId !== contentId);
-                    setList({...list, content: updatedContent});
+                    setList({ ...list, content: updatedContent });
                 }
             });
         }
-    };    
+    };
 
     const confirmDeleteList = (listId) => {
         if (list.userId !== Meteor.userId()) {
@@ -228,13 +301,14 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         setListToDelete(listId);
         setShowConfirmDialog(true);
     };
-    
+
+
 
     const resetConfirmationState = () => {
         setShowConfirmDialog(false);
         setContentToDelete(null);
         setListToDelete(null);
-      };
+    };
 
     const handleDeleteConfirmed = () => {
         if (contentToDelete !== null) {
@@ -251,6 +325,16 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         resetConfirmationState();
     };
 
+    const handleCopy = async (text) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            console.log('Copied to clipboard: ', text);
+            toast.success('Link copied to clipboard');
+        } catch (error) {
+            console.error('Unable to copy to clipboard:', error);
+        }
+    };
+
     const filteredContent = list?.content?.filter(item =>
         selectedTab === 'all' ||
         (selectedTab === 'movies' && item.contentType === 'Movie') ||
@@ -262,6 +346,10 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     if (loading) return <div>Loading...</div>;
     if (!list) return <div>No list found.</div>;
 
+    const toggleShareDropdown = () => {
+        setShareDropdown(!isShareDropdownOpen);
+    }
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
             <div
@@ -269,47 +357,124 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                 className="list-popup bg-darker p-6 rounded-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-3/4 overflow-y-auto relative"
             >
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold">{list.title}</h2>
-                    <div className="flex space-x-2">
-                        <button
-                            onClick={handleRenameListClick}
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold rounded-full flex items-center justify-center"
-                            title="Rename List"
-                            style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
-                        >
-                            <FiEdit size="24" />
-                        </button>
-                        <button
-                            onClick={() => confirmDeleteList(list._id)}
-                            className="bg-red-500 hover:bg-red-700 text-white font-bold rounded-full flex items-center justify-center"
-                            title="Delete List"
-                            style={{ width: 44, height: 44 }} // Ensuring the button has a fixed size
-                        >
-                            <FiTrash2 size="24" />
-                        </button>
-                        <button
-                            onClick={() => setIsGridView(!isGridView)}
-                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
-                            title={isGridView ? "Switch to List View" : "Switch to Grid View"}
-                            style={{ width: 44, height: 44 }}
-                        >
-                            {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
-                        </button>
-                        {/* Conditionally render subscribe/unsubscribe button */}
-                        {list.userId !== Meteor.userId() && (
+                    <h2 className="text-2xl font-bold truncate max-w-full" title={list.title}>
+                        {list.title.length > 30 ? `${list.title.slice(0, 30)}...` : list.title}
+                    </h2>
+                    <div className="flex space-x-1">
+
+                        <div className={`flex space-x-3 px-2 pt-2 rounded-full ${isShareDropdownOpen ? "bg-[#282525]" : "bg-inherit"}`}>
+                            {/* Actual Dropdown */}
+                            {isShareDropdownOpen && (
+                                <div className="flex flex-row space-x-3">
+                                    <button
+                                        onClick={() => handleCopy(shareUrl)}
+                                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                                        title="Copy Link"
+                                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                                    >
+                                        <FiLink size="24" />
+                                    </button>
+                                    <button title="Share to Facebook">
+                                        <FacebookShareButton url={shareUrl} quote={shareQuote}>
+                                            <FacebookIcon size={iconSize} round />
+                                        </FacebookShareButton>
+                                    </button>
+                                    <button title="Share to Twitter">
+                                        <TwitterShareButton url={shareUrl} title={shareQuote}>
+                                            <TwitterIcon size={iconSize} round />
+                                        </TwitterShareButton>
+                                    </button>
+                                    <button title="Share to Whatsapp">
+                                        <WhatsappShareButton url={shareUrl} title={shareQuote}>
+                                            <WhatsappIcon size={iconSize} round />
+                                        </WhatsappShareButton>
+                                    </button>
+                                    <button title="Send in Email">
+                                        <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
+                                            <EmailIcon size={iconSize} round />
+                                        </EmailShareButton>
+                                    </button>
+                                </div>
+                            )}
+                            {/* Dropdown Toggle Button */}
                             <button
-                                onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
-                                className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
+                                onClick={() => toggleShareDropdown()}
+                                className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                                title="Share Options"
+                                style={{ width: iconSize, height: iconSize }}
                             >
-                                {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                                <FiShare2 size="24" />
                             </button>
-                        )}
-                        <button
-                            className="text-2xl font-bold text-gray-500 hover:text-gray-800"
-                            onClick={onClose}
-                        >
-                            &times;
-                        </button>
+                        </div>
+
+                        <div className="pb-2 pt-2 flex space-x-3 items-center">
+
+                            <label
+                                className={`font-bold rounded-full flex items-center justify-center cursor-pointer ${isCurrentUserList ? 'bg-green-500 hover:bg-green-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
+                                style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                                title="Upload Image"
+                                >
+                               <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarChange}
+                                    className="hidden"                                 />
+                                <FiUpload size="24" /> 
+                            </label>
+                            <button
+                                onClick={isCurrentUserList ? handleRenameListClick : null}
+                                disabled={!isCurrentUserList}
+                                className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
+                                title="Rename List"
+                                style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                            >
+                                <FiEdit size="24" />
+                            </button>
+                            <button
+                                onClick={() => isCurrentUserList && confirmDeleteList(list._id)}
+                                disabled={!isCurrentUserList}
+                                className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-red-500 hover:bg-red-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
+                                title="Delete List"
+                                style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                            >
+                                <FiTrash2 size="24" />
+                            </button>
+                            <button
+                                onClick={() => setIsGridView(!isGridView)}
+                                className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                                title={isGridView ? "Switch to List View" : "Switch to Grid View"}
+                                style={{ width: iconSize, height: iconSize }}
+                            >
+                                {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
+                            </button>
+                            {/* Conditionally render subscribe/unsubscribe button */}
+                            {list.userId !== Meteor.userId() && (
+                                <button
+                                    onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
+                                    className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
+                                >
+                                    {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                                </button>
+                            )}
+
+                            {/* Conditionally render visibility settings */}
+                            {list.userId === Meteor.userId() && (
+                                <VisibilityDropdown
+                                    list={list}
+                                    setVisibility={setVisibility}
+                                    listId={listId}
+                                    currentVisibility={getVisibility}
+                                    defaultText={<FaGlobe size={24} />}
+                                />
+                            )}
+
+                            <button
+                                className="text-2xl font-bold text-gray-500 hover:text-gray-800"
+                                onClick={onClose}
+                            >
+                                &times;
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div className="flex justify-between items-center mb-4">
@@ -357,7 +522,21 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
 
                 </div>
                 <Scrollbar className={`max-h-[calc(100vh-10rem)] overflow-y-auto ${isGridView ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-8'}`}>
-                    {sortedContent.map((item) => {
+                    {sortedContent.length === 0 ? (<div className="flex flex-col items-center justify-center py-8">
+                        <p className="text-lg font-semibold text-gray-600 mb-4">
+                            Your list is currently empty.
+                        </p>
+                        <p className="text-md text-gray-500 mb-6">
+                            Start adding some great movies and shows to enjoy later!
+                        </p>
+                        <button
+                            className="px-6 py-2 bg-magenta text-white rounded hover:bg-pink-700 transition-colors"
+                            onClick={() => goToSearch()}
+                        >
+                            Browse Movies and Shows
+                        </button>
+                    </div>
+                    ) : (sortedContent.map((item) => {
                         const { rating = 0, isUserSpecificRating = false } = getRatingForContent(item.contentId);
                         return (
                             <div key={item.contentId} className={isGridView ? '' : 'block relative'}>
@@ -392,12 +571,15 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                                     </div>
                                                 </div>
                                                 <button
-                                                    className="absolute top-4 right-4 text-white bg-red-500 hover:bg-red-700 rounded-full p-2"
+                                                    className={`absolute top-4 right-4 rounded-full p-2 ${isCurrentUserList ? 'text-white bg-red-500 hover:bg-red-700' : 'text-gray-500 bg-gray-300 cursor-not-allowed'}`}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        confirmRemoveContent(item.contentId);
+                                                        if (isCurrentUserList) {
+                                                            confirmRemoveContent(item.contentId);
+                                                        }
                                                     }}
                                                     title="Remove from List"
+                                                    disabled={!isCurrentUserList}
                                                 >
                                                     <FiTrash2 />
                                                 </button>
@@ -407,7 +589,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                 )}
                             </div>
                         );
-                    })}
+                    }))}
                 </Scrollbar>
             </div>
 
@@ -469,6 +651,6 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
             <ToastContainer />
         </div>
     );
-};
+}
 
 export default ListPopup;

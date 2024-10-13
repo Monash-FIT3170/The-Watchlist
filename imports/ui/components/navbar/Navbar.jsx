@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { IconContext } from "react-icons";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { MdMovieFilter, MdChevronRight, MdChevronLeft } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useTracker } from 'meteor/react-meteor-data';
@@ -12,12 +12,14 @@ import Scrollbar from '../scrollbar/ScrollBar';
 import { FaAngleDoubleLeft } from "react-icons/fa";
 import { RxHamburgerMenu } from "react-icons/rx";
 
-const popcornUrl = "./images/popcorn.png";
+const popcornUrl = "/images/popcorn.png";
 
 export default function Navbar({ staticNavData, currentUser }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { isPopupOpen, selectedList, handleItemClick, handleClosePopup } = usePopup();
   const [isAddListModalOpen, setIsAddListModalOpen] = useState(false);
+
+  const location = useLocation(); // Get current path
 
   const { lists, subscribedLists, loading } = useTracker(() => {
     const userId = Meteor.userId();
@@ -44,7 +46,7 @@ export default function Navbar({ staticNavData, currentUser }) {
     <div className="flex flex-col h-screen">
       <IconContext.Provider value={{ size: "20px" }}>
         <div className={`flex flex-col ${isCollapsed ? 'w-16' : 'w-66'} p-0 mx-2 my-4 h-custom transition-all duration-300 ease-in-out`}>
-          <div className="bg-darker rounded-lg shadow-lg pt-4 px-1 mb-4 flex-none"> 
+          <div className="bg-darker rounded-lg shadow-lg pt-4 px-1 mb-4 flex-none">
             <nav>
               <div className="px-2">
                 <div className="flex items-center justify-between">
@@ -64,17 +66,22 @@ export default function Navbar({ staticNavData, currentUser }) {
                 </div>
               </div>
               <ul className="flex flex-col w-full">
-                {staticNavData.map((item, index) => (
-                  <li key={index} className={item.cName}>
-                    <Link
-                      to={item.path}
-                      className="flex items-center space-x-5 ml-0.5 w-full px-4 py-2 mb-2 font-bold text-grey text-lg hover:text-white"
-                    >
-                      {item.icon}
-                      {!isCollapsed && <span>{item.title}</span>}
-                    </Link>
-                  </li>
-                ))}
+                {staticNavData.map((item, index) => {
+                  const isActive = location.pathname === item.path; // Check if active
+                  return (
+                    <li key={index} className={item.cName}>
+                      <Link
+                        to={item.path}
+                        className={`flex items-center space-x-5 ml-0.5 w-full px-4 py-2 mb-2 font-bold text-lg transition-colors duration-300 ${
+                          isActive ? "text-white" : "text-grey hover:text-white"
+                        }`}
+                      >
+                        {item.icon}
+                        {!isCollapsed && <span>{item.title}</span>}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </nav>
           </div>
@@ -97,10 +104,12 @@ export default function Navbar({ staticNavData, currentUser }) {
                         onClick={() => handleItemClick(list)}
                         className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-5'} w-full text-left`}
                       >
-                        <img src={list.content[0]?.image_url || popcornUrl} alt={list.title} className={`${isCollapsed ? 'my-2.5 ml-2 w-14 h-10 ' : 'w-10 h-10 '} rounded-lg`} />
+                        <img src={list.listUrl || list.content[0]?.image_url || popcornUrl} alt={list.title} className={`${isCollapsed ? 'my-2.5 ml-2 w-14 h-10 ' : 'w-10 h-10 '} rounded-lg`} />
                         {!isCollapsed && (
                           <div className="flex flex-col justify-center">
-                            <span className="font-bold">{list.title}</span>
+                            <span className="truncate max-w-40" title={list.title}>
+                              {list.title.length > 20 ? `${list.title.slice(0, 20)}...` : list.title}
+                            </span>
                             <span className="text-xs text-gray-400">{list.userName}</span>
                           </div>
                         )}

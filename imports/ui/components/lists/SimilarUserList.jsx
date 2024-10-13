@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Meteor } from 'meteor/meteor';
-import { handleFollow, handleUnfollow } from '/imports/api/userMethods';
+import { GiPopcorn } from 'react-icons/gi';
 
-const SimilarUserList = () => {
+const SimilarUserList = React.memo(({ currentUser }) => {
   const [similarUsers, setSimilarUsers] = useState([]);
   const [containerWidth, setContainerWidth] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ const SimilarUserList = () => {
     Meteor.call('users.getSimilarUsers', (error, result) => {
       if (error) {
         console.error('Error fetching similar users:', error);
-        setLoading(false); 
+        setLoading(false);
       } else {
         console.log('Similar Users:', result);
 
@@ -32,6 +32,22 @@ const SimilarUserList = () => {
       }
     });
   }, []);
+
+  // Function to check if the current user is following the given userId
+  const isFollowing = (userId) => {
+    return (
+      currentUser &&
+      Array.isArray(currentUser.following) &&
+      currentUser.following.some((f) => f.userId === userId)
+    );
+  };
+
+  const isRequested = (userId) => {
+    return (
+      currentUser.followingRequests &&
+      currentUser.followingRequests.includes(userId)
+    );
+  };
 
   useEffect(() => {
     const updateContainerWidth = () => {
@@ -57,9 +73,13 @@ const SimilarUserList = () => {
         <h2 className="text-white text-2xl font-semibold">Discover similar users</h2>
       </div>
       {loading ? (
-        <div className="flex justify-center items-center py-4">
-          <div className="loader"></div> 
-          <p className="text-white text-lg">Loading...</p>
+        <div className="flex flex-col justify-center items-center py-4">
+          <div className="flex justify-center mb-2 mt-14">
+        <GiPopcorn className="text-9xl text-yellow-500 animate-jiggle"/>
+      </div>
+      <p className="text-2xl font-bold font-anton text-center">
+        Updating similar Users
+      </p>
         </div>
       ) : (
         <>
@@ -81,14 +101,29 @@ const SimilarUserList = () => {
                   </div>
                   {currentUserId !== match.user._id && (
                     <button
-                      className={`mt-2 px-4 py-1 bg-fuchsia-600 text-white rounded-full`}
+                      type="button" // Add this line
+                      className={`mt-2 px-4 py-1 ${isFollowing(match.user._id)
+                          ? 'bg-blue-600'
+                          : isRequested(match.user._id)
+                            ? 'bg-gray-600'
+                            : 'bg-fuchsia-600'
+                        } text-white rounded-full`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleFollow(match.user._id);
+                        if (isFollowing(match.user._id) || isRequested(match.user._id)) {
+                          Meteor.call('unfollowUser', match.user._id);
+                        } else {
+                          Meteor.call('followUser', match.user._id);
+                        }
                       }}
                     >
-                      Follow
+                      {isFollowing(match.user._id)
+                        ? 'Unfollow'
+                        : isRequested(match.user._id)
+                          ? 'Requested'
+                          : 'Follow'}
                     </button>
+
                   )}
                 </div>
               ))}
@@ -98,6 +133,6 @@ const SimilarUserList = () => {
       )}
     </div>
   );
-};
+});
 
 export default SimilarUserList;

@@ -115,6 +115,10 @@ const List = Class.create({
             type: String,
             optional: true,
         },
+        listUrl: {  
+            type: String,
+            optional: true, 
+        },
         listType: {
             type: String,
             validators: [{
@@ -133,6 +137,16 @@ const List = Class.create({
             default: function() {
                 return [];
             }
+        },
+        visibility: {
+            type: String,
+            validators: [{
+                type: 'choice',
+                param: ['PUBLIC','FOLLOWERS','ONLY_ME']
+            }],
+            default: function() {
+                return 'PUBLIC';
+            }
         }
     },
     behaviors: {
@@ -147,7 +161,7 @@ const List = Class.create({
         listIndex: {
             fields: {
                 userId: 1,
-                title: 1 
+                title: 1
             },
             options: {
                 name: "list_unique_userid_title",

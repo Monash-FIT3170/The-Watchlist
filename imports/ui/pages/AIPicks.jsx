@@ -1,413 +1,421 @@
-import React, { useState, useEffect, useRef } from 'react';
-import ContentListAI from '../components/lists/ContentListAI.jsx';
-import Scrollbar from '../components/scrollbar/ScrollBar.jsx';
-import { Meteor } from 'meteor/meteor';
-import AIPicksHeader from '../components/headers/AIPicksHeader.jsx';
-import { useTracker } from 'meteor/react-meteor-data';
-import { ListCollection } from '../../db/List.tsx';
-import { RatingCollection } from '../../db/Rating.tsx'; 
+import React, { useState, useEffect } from "react";
+import Scrollbar from "../components/scrollbar/ScrollBar.jsx";
+import { Meteor } from "meteor/meteor";
+import AIPicksHeader from "../components/headers/AIPicksHeader.jsx";
+import { useTracker } from "meteor/react-meteor-data";
+import ContentList from "../components/lists/ContentList.jsx";
+import { RatingCollection } from "../../db/Rating.tsx";
+import LoadingNoAnimation from "./LoadingNoAnimation";
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 
+// Main component to render AI Picks, takes currentUser as a prop
+const AIPicks = ({ currentUser }) => {
+  // Constants for display modes and pagination
+  const DISPLAY_MOVIES = "Display Movie";
+  const DISPLAY_SHOWS = "Display Show";
+  const DISPLAY_TRENDING = "Display Trending";
+  const DISPLAY_GENRES = "Display Genres";
+  const MOVIES_PER_PAGE = 6; // Number of movies/shows per page
+  const MOVIE_COUNT = 5; // Number of movie/show recommendations to show
 
-export default function AIPicks() {
-    const DISPLAY_MOVIES = "Display Movie";
-    const DISPLAY_SHOWS = "Display Show";
-    // the number of recommendations collected for each movie/show. The onscreen display will be a selection from this pool
-    const NUM_RECOMMENDATIONS = 35;
-    // the number of slots to fill on the screen
-    const NUM_LIST_SLOTS = 5;
-    const [display, setDisplay] = useState(DISPLAY_MOVIES);
-    const [globalRatings, setGlobalRatings] = useState({});
-    const [loading, setLoading] = useState(false);
+  // State variables to track different states of the component
+  const [display, setDisplay] = useState(DISPLAY_MOVIES); // Tracks current display mode
+  const [loading, setLoading] = useState(true); // Tracks loading state
+  const [displayRecommendations, setDisplayRecommendations] = useState({ movies: [], shows: [] }); // Holds recommendations
+  const [trendingContent, setTrendingContent] = useState({ movies: [], shows: [] }); // Holds trending content
+  const [contentMovieNone, setContentMovieNone] = useState(true); // Tracks if there are no movie recommendations
+  const [contentTVNone, setContentTVNone] = useState(true); // Tracks if there are no show recommendations
+  const [genreStatistics, setGenreStatistics] = useState([]); // Holds user's genre statistics
+  const [selectedGenre, setSelectedGenre] = useState(null); // Tracks selected genre for recommendations
+  const [genreRecommendations, setGenreRecommendations] = useState({ movies: [], shows: [] }); // Holds recommendations by genre
+  const [currentPages, setCurrentPages] = useState({ movies: [], shows: [] }); // Tracks current pagination for movies/shows
 
-    // recommendedMovies and recommendedShows are a POOL of movies / shows associated with their assigned target movies / shows.
-    // Each target movie / show will have a pool of movies corresponding to NUM_RECOMMENDATIONS
-    const [recommendedMovies, setRecommendedMovies] = useState([]);
-    const [recommendedShows, setRecommendedShows] = useState([]);
+  // Flags to check if data has been fetched to avoid duplicate calls
+  const [trendingContentFetched, setTrendingContentFetched] = useState(false);
+  const [recommendationsFetched, setRecommendationsFetched] = useState(false);
+  const [genreStatisticsFetched, setGenreStatisticsFetched] = useState(false);
 
-    const [randomMovieNames, setRandomMovieNames] = useState([]);
-    const [contentMovieNone, setContentMovieNone] = useState(true);
-    const [contentTVNone, setContentTVNone] = useState(true);
-    const [movieIntros, setMovieIntros] = useState([]);
-    const [tvIntros, setTvIntros] = useState([]);
-    const [refreshToggle, setRefreshToggle] = useState(false);
-    const [prevRandNum, setPrevRandNum] = useState([]);
-    
+  // Tracker to retrieve global ratings from the Rating collection
+  const globalRatings = useTracker(() => {
+    const ratingsHandle = Meteor.subscribe("ratings"); // Subscribe to ratings publication
+    if (!ratingsHandle.ready()) return {}; // Return empty if data is not ready
 
+    // Fetch ratings and map them to content IDs
+    const ratings = RatingCollection.find().fetch();
+    const ratingMap = ratings.reduce((acc, rating) => {
+      if (!acc[rating.contentId]) {
+        acc[rating.contentId] = { count: 0, total: 0 };
+      }
+      acc[rating.contentId].count += 1;
+      acc[rating.contentId].total += rating.rating;
+      return acc;
+    }, {});
 
-    // useRefs are similar to useState, except that a rerender will NOT be triggered when their value is updated
-    //      The following useRefs hold the array of movies, and their corresponding recommendations TO BE DISPLAYED.
-    //      IE. only a selection of 6 movies from the larger pool of the associated recommendedMovies 
-    movieDisplayRef = useRef(new Array());
-    tvDisplayRef = useRef(new Array());
+    // Calculate average ratings for each content
+    Object.keys(ratingMap).forEach((id) => {
+      ratingMap[id].average = (ratingMap[id].total / ratingMap[id].count).toFixed(2);
+    });
 
+    return ratingMap;
+  }, []);
 
-    const currentUser = useTracker(() => {
-        const handler = Meteor.subscribe('userData', Meteor.userId());
-        if (handler.ready()) {
-          return Meteor.user();
-        }
-        return null;
-      }, []);
-
-
-    const { lists, loading2 } = useTracker(() => {
-        const listsHandler = Meteor.subscribe('userLists', Meteor.userId());
-        const subscribedHandler = Meteor.subscribe('subscribedLists', Meteor.userId());
-        const ratingsHandler = Meteor.subscribe('userRatings', Meteor.userId());
-    
-        const lists = ListCollection.find({ userId: Meteor.userId() }).fetch();
-        const subscribedLists = ListCollection.find({
-          subscribers: { $in: [Meteor.userId()] }
-        }).fetch();
-        const ratings = RatingCollection.find({ userId: Meteor.userId() }).fetch();
-    
-        return {
-          lists,
-          subscribedLists,
-          ratings,
-          loading2: !listsHandler.ready() || !subscribedHandler.ready() || !ratingsHandler.ready(),
-        };
-      }, []);
-
-    // runs whenever the page is loaded
-    useEffect(() => {
-
-        // Fetch global ratings using the Meteor method
-        Meteor.call('ratings.getGlobalAverages', (error, result) => {
-            if (!error) {
-                setGlobalRatings(result);
-            } else {
-                console.error("Error fetching global ratings:", error);
-            }
-        });
-    }, []);
-
-    // runs whenever the user's favourites / towatch lists are changed
-    // will grab a new selection of movies from these lists and then fetch a new pool of recommendations, stored in recommendedMovies / Shows
-    useEffect(() => {
-        const fetchRecommendations = async () => {
-            try {
-                if (loading2) return;
-
-                // Select up to 5 random movies or TV shows from the lists
-                const selectRandomContent = (list, maxItems) => {
-                    const selectedItems = [];
-                    const listCopy = [...list.content];
-                    
-                    while (selectedItems.length < maxItems && listCopy.length > 0) {
-                        const randomIndex = Math.floor(Math.random() * listCopy.length);
-                        selectedItems.push(listCopy.splice(randomIndex, 1)[0]);
-                        
-                    }
-                    return selectedItems;
-                };
-
-
-                const favouritesList = lists.find(list => list.listType === 'Favourite');
-                const toWatchList = lists.find(list => list.listType === 'To Watch');
-                
-
-                const randomSelections = []
-                //ensure we actually have content in the list before selecting random content   
-                if (favouritesList.content.length !=0) {
-                    randomSelections.push(selectRandomContent(favouritesList, 5));
-                    
-                }
-                if (toWatchList.content.length !=0) {
-                    randomSelections.push(selectRandomContent(toWatchList, 5));
-                }
-
-                
-
-               
-                //map the titles of the selections and set them
-                const titles = []
-                for (const selection of randomSelections) {
-                    for (const item of selection) {
-                        titles.push(item.title);
-                    }
-                }
-                
-                setRandomMovieNames(titles);
-                
-                const movieTitles = [];
-                const tvTitles = [];
-
-            
-                // Separate selected items into movies and TV shows
-                for (const selection of randomSelections) {
-                    for (const item of selection) {
-                    if (item.contentType === 'Movie') {
-                        movieTitles.push(item.title);
-                    } else if (item.contentType === 'TV Show') {
-                        tvTitles.push(item.title);
-                    }
-                }
-                }
-
-                
-                setContentMovieNone(movieTitles.length === 0);
-                setContentTVNone(tvTitles.length === 0);
-
-                
-                // Fetch recommendations for movies
-                if (movieTitles.length > 0) {
-                    const recommendedMov = await fetchMovies(movieTitles);
-                    setRecommendedMovies(recommendedMov);
-
-                }
-
-                // Fetch recommendations for TV shows
-                if (tvTitles.length > 0) {
-                    const recommendedTvs = await fetchTvs(tvTitles);
-                    setRecommendedShows(recommendedTvs);
-                }
-            } catch (error) {
-                console.error("Error during recommendations fetching:", error);
-                setLoading(false);
-            }
-        };
-
-        if (!recommendedMovies.length && !recommendedShows.length) {
-            fetchRecommendations();
-        }
-    }, [lists, loading2]);
-
-    // Will run whenever 'recommendedMovies' or 'recommendedShows' is changed. 
-    // Main occurence is when the page first loads, or when the users lists are updated
-    useEffect(() => {
-        if (recommendedMovies.length > 0 || recommendedShows.length > 0) {
-            let updatedMovieIntros = movieIntros;
-            let updatedTvIntros = tvIntros;
-    
-            // Generate intros if not already generated
-            if (recommendedMovies.length > 0 && movieIntros.length === 0) {
-                updatedMovieIntros = recommendedMovies.map(result => getRandomIntro(result.title));
-                setMovieIntros(updatedMovieIntros);
-            }
-    
-            if (recommendedShows.length > 0 && tvIntros.length === 0) {
-                updatedTvIntros = recommendedShows.map(result => getRandomIntro(result.title));
-                setTvIntros(updatedTvIntros);
-            }
-    
-            // Map random movie names to their corresponding recommended movies
-            let movieContentLists = recommendedMovies.map((result, index) => ({
-                listId: `RecommendedMovies${index}`,
-                title: updatedMovieIntros[index],
-                content: result.movie.map(movie => ({
-                    ...movie,
-                    rating: globalRatings[movie.contentId]?.average || 0,
-                    contentType: "Movie"
-                }))
-            }));
-                
-            // Map random TV show names to their corresponding recommended shows
-            let tvContentLists = recommendedShows.map((result, index) => ({
-                listId: `RecommendedShows${index}`,
-                title: updatedTvIntros[index],
-                content: result.tv.map(show => ({
-                    ...show,
-                    rating: globalRatings[show.contentId]?.average || 0,
-                    contentType: "TV Show"
-                }))
-            }));
-            
-            // Ensure the lists only have NUM_LIST_SLOTS items
-            movieContentLists.forEach((element) => {
-                element["content"] = element["content"].filter((_, index) => index < NUM_LIST_SLOTS);
-            });
-            tvContentLists.forEach((element) => {
-                element["content"] = element["content"].filter((_, index) => index < NUM_LIST_SLOTS);
-            });
-    
-            // Update the display refs
-            movieDisplayRef.current = movieContentLists;
-            tvDisplayRef.current = tvContentLists;
-        }
-    }, [recommendedMovies, recommendedShows, movieIntros, tvIntros, globalRatings]);
-
-    // Runs whenever the refreshToggle is set.
-    // Will grab a random selection of movies / shows to display from the pool stored in recommendedMovies and recommendedShows.
-    //! Bug introduced where the user must click refresh twice before the display is actually refreshed. 
-    //! Believe this occurs due to the fact that useEffect triggers AFTER rendering has already occurred. IE. the display is the useRef's value from just BEFORE the refresh toggle is clicked
-    useEffect(() => {
-        if (!refreshToggle) return;
-
-        setLoading(true);
-    
-        setTimeout(() => {
-            const movieContentLists = recommendedMovies.map((result, index) => ({
-                listId: `RecommendedMovies${index}`,
-                title: movieIntros[index],
-                content: result.movie.map(movie => ({
-                    ...movie,
-                    rating: globalRatings[movie.contentId]?.average || 0,
-                    contentType: "Movie"
-                }))
-            }));
-
-            const tvContentLists = recommendedShows.map((result, index) => ({
-                listId: `RecommendedShows${index}`,
-                title: tvIntros[index],
-                content: result.tv.map(show => ({
-                    ...show,
-                    rating: globalRatings[show.contentId]?.average || 0,
-                    contentType: "TV Show"
-                }))
-            }));
-            
-            let rand = [];
-
-            while (rand.length < NUM_LIST_SLOTS) {
-                let randomIndex = Math.floor(Math.random() * NUM_RECOMMENDATIONS);
-                if (!rand.includes(randomIndex) && !prevRandNum.includes(randomIndex)) {    
-                    rand.push(randomIndex);
-                }
-            }
-            setPrevRandNum(rand);
-            
-            movieContentLists.forEach(element => {
-                element.content = element.content.filter((_, index) => rand.includes(index));
-            });
-            tvContentLists.forEach(element => {
-                element.content = element.content.filter((_, index) => rand.includes(index));
-            });
-
-            movieDisplayRef.current = movieContentLists;
-            tvDisplayRef.current = tvContentLists;
-
-            setLoading(false); // Hide loading animation
-            setRefreshToggle(false); // Reset the refresh toggle
-        }, 2000); // Simulate a 2-second loading time
-    }, [refreshToggle]);
-
-
-    const getRandomIntro = (title) => {
-        const randomIntros = [
-            `Because you liked ${title}, you'll love these:`,
-            `Based on your love for ${title}, we recommend:`,
-            `${title} was a great choice! Here are more:`,
-            `If you enjoyed ${title}, check out these:`,
-            `We also loved ${title}, and here are the AI's other favourites:`,
-        ];
-        const randomIndex = Math.floor(Math.random() * randomIntros.length);
-        return randomIntros[randomIndex];
-    };
-
-    //TODO: condense fetchMovies and fetchTvs into one function
-    const fetchMovies = async (movieTitles) => {
-        const movieResponse = await fetch('/ml_matrices/similar_movies_titles.json');
-        const movieRecommendationsJson = await movieResponse.json();
-        
-        const recommendedMoviePromises = movieTitles.map(title => {
-            //! bug causing less than 6 items to appear on refresh could be happening due to following line? Although, quite unlikely
-            const recommendedMovieIds = movieRecommendationsJson.find(rec => rec.Title === title)?.similar_movies.slice(0, NUM_RECOMMENDATIONS) || [];
-            return new Promise((resolve, reject) => {
-                Meteor.call('content.search', { ids: recommendedMovieIds, title }, (err, result) => {
-                    if (err) {
-                        console.error("Error fetching recommended movies:", err);
-                        reject(err);
-                    } else {
-                        resolve(result);
-                    }
-                });
-            });
-        });
-        
-        const recommended = await Promise.all(recommendedMoviePromises);
-        return recommended;
-    };
-
-    const fetchTvs = async (tvTitles) => {
-        
-        const tvResponse = await fetch('/ml_matrices/similar_tvs_title.json');
-        const tvRecommendationsJson = await tvResponse.json();
-        
-        const recommendedTvPromises = tvTitles.map(title => {
-            //! bug causing less than 6 items to appear on refresh could be happening due to following line? Although, quite unlikely
-            const recommendedTvIds = tvRecommendationsJson.find(rec => rec.Title === title)?.similar_tvs.slice(0, NUM_RECOMMENDATIONS) || [];
-            return new Promise((resolve, reject) => {
-                Meteor.call('content.search', { ids: recommendedTvIds, title }, (err, result) => {
-                    if (err) {
-                        console.error("Error fetching recommended movies:", err);
-                        reject(err);
-                    } else {
-                        resolve(result);
-                    }
-                });
-            });
-        });
-        
-        return await Promise.all(recommendedTvPromises);
+  // Fetch trending content when DISPLAY_TRENDING is active
+  useEffect(() => {
+    if (display === DISPLAY_TRENDING && !trendingContentFetched) {
+      fetchTrendingContent();
+    } else if (display !== DISPLAY_TRENDING && !recommendationsFetched) {
+      fetchRecommendations();
     }
-    
-    // the value of the refreshToggle state doesn't matter
-    // the change in value is used to trigger a useEffect that changes the display of movies / tv from the pool
-    const toggleRefresh = () => {
-        setRefreshToggle(prevToggle => !prevToggle);
-    };
-    
-    
-    if (loading2) return <div className="flex flex-col min-h-screen bg-darker">
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-4 border-blue-500 mb-4"></div>
-        <p className="text-xl font-semibold">Loading Updated AI Recommendations...</p>
-        <p className="text-gray-400 mt-2">Please wait a moment while we fetch your content.</p>
-    </div>
-</div>;
+  }, [display]); // Run effect when display changes
 
-    if (loading) {
-        return (
-            <div className="flex flex-col min-h-screen bg-darker">
-                <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
-                <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-                    <div className="-mt-52 animate-spin rounded-full h-32 w-32 border-t-4 border-blue-500 mb-4"></div>
-                    <p className="text-xl font-semibold">Loading Updated AI Recommendations...</p>
-                    <p className="text-gray-400 mt-2">Please wait a moment while we fetch your content.</p>
-                </div>
-            </div>
-        );
+  // Fetch genre statistics when DISPLAY_GENRES is active
+  useEffect(() => {
+    if (display === DISPLAY_GENRES && !genreStatisticsFetched) {
+      setLoading(true);
+      Meteor.call("getUserGenreStatistics", (error, result) => {
+        if (error) {
+          console.error("Error fetching genre statistics:", error);
+          setLoading(false);
+        } else {
+          setGenreStatistics(result);
+          setGenreStatisticsFetched(true);
+          setLoading(false);
+        }
+      });
     }
-    
-return (
-    <div className="flex flex-col min-h-screen bg-darker">
+  }, [display]);
+
+  // Function to fetch trending content from the server
+  const fetchTrendingContent = () => {
+    setLoading(true);
+    Meteor.call("getTrendingContent", (error, result) => {
+      if (error) {
+        console.error("Error fetching trending content:", error);
+        setLoading(false);
+      } else {
+        setTrendingContent(result);
+        setTrendingContentFetched(true);
+        setLoading(false);
+      }
+    });
+  };
+
+  // Function to fetch AI recommendations from the server
+  const fetchRecommendations = () => {
+    setLoading(true);
+    Meteor.call("getRecommendations", (error, result) => {
+      if (error) {
+        console.error("Error fetching recommendations:", error);
+        setLoading(false);
+      } else {
+        processRecommendations(result);
+        setRecommendationsFetched(true);
+        setLoading(false);
+      }
+    });
+  };
+
+  // Fetch recommendations for a selected genre
+  const fetchRecommendationsByGenre = (genreName) => {
+    setLoading(true);
+    Meteor.call("getRecommendationsByGenre", genreName, (error, result) => {
+      if (error) {
+        console.error("Error fetching recommendations by genre:", error);
+        setLoading(false);
+      } else {
+        setGenreRecommendations(result);
+        setLoading(false);
+      }
+    });
+  };
+
+  // Process the recommendations and update the state
+  const processRecommendations = ({ movies, shows }) => {
+    setContentMovieNone(movies.length === 0);  // Check if there are no movie recommendations
+    setContentTVNone(shows.length === 0);  // Check if there are no show recommendations
+
+    // Select random movies and shows
+    const selectedMovies = selectRandomItems(movies, MOVIE_COUNT);
+    const movieRecommendations = selectedMovies.map((movie) => ({
+      movieTitle: getRandomIntro(movie.title),
+      recommendations: movie.recommendations.map((item) => ({
+        ...item,
+        rating: globalRatings[item.contentId]?.average || 0,
+        contentType: "Movie",
+      })),
+    }));
+
+    const selectedShows = selectRandomItems(shows, MOVIE_COUNT);
+  const showRecommendations = selectedShows.map((show) => ({
+    showTitle: getRandomIntro(show.title),
+    recommendations: show.recommendations.map((item) => ({
+      ...item,
+      rating: globalRatings[item.contentId]?.average || 0,
+      contentType: "TV Show",
+    })),
+  }));
+
+    // Update the state with recommendations and initialize pagination
+    setDisplayRecommendations({ movies: movieRecommendations, shows: showRecommendations });
+    setCurrentPages({
+      movies: Array(movieRecommendations.length).fill(0),
+      shows: Array(showRecommendations.length).fill(0),
+    });
+  };
+
+  // Utility function to randomly select items from an array
+  const selectRandomItems = (array, numItems) => {
+    const selectedItems = [];
+    const arrayCopy = [...array];  // Create a copy of the array
+
+    while (selectedItems.length < numItems && arrayCopy.length > 0) {
+      const randomIndex = Math.floor(Math.random() * arrayCopy.length);
+      selectedItems.push(arrayCopy.splice(randomIndex, 1)[0]);
+    }
+    return selectedItems;
+  };
+
+  // Generate random intro message for a title
+  const getRandomIntro = (title) => {
+    const randomIntros = [
+      `Because you liked ${title}, you'll love these:`,
+      `Based on your love for ${title}, we recommend:`,
+      `${title} was a great choice! Here are more:`,
+      `If you enjoyed ${title}, check out these:`,
+      `We also loved ${title}, and here are the AI's other favourites:`,
+    ];
+    const randomIndex = Math.floor(Math.random() * randomIntros.length);
+    return randomIntros[randomIndex];
+  };
+
+  // Navigate to the next page for a list of movies/shows
+  const nextPage = (type, index) => {
+    setCurrentPages((prev) => ({
+      ...prev,
+      [type]: prev[type].map((page, idx) => (idx === index ? page + 1 : page)),
+    }));
+  };
+
+  // Navigate to the previous page for a list of movies/shows
+  const prevPage = (type, index) => {
+    setCurrentPages((prev) => ({
+      ...prev,
+      [type]: prev[type].map((page, idx) => (idx === index ? page - 1 : page)),
+    }));
+  };
+
+  // Display loading animation if data is still being fetched
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-darker">
         <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
-        <button className="mx-4 px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
-         focus:outline-none focus:ring-4 focus:ring-purple-300 transform active:scale-95 transition-transform duration-200" 
-        onClick={() => toggleRefresh()}>Refresh AI Recommendations</button>
-        <Scrollbar className="w-full overflow-y-auto">
-            {display === DISPLAY_MOVIES && (
-                contentMovieNone ? (
-                    <div className="px-8 py-2 mt-10 text-white text-3xl">
-                        Not enough Movies yet. Add some to your favourites or watchlist to get started!
-                    </div>
-                ) : (
-                    movieDisplayRef.current.map(list => (
-                        <div key={list.listId} className="px-8 py-2">
-                            <ContentListAI list={list} isUserOwned={false} />
-                        </div>
-                    )
-                )
-                
-            )
-            )}
-            {display === DISPLAY_SHOWS && (
-                contentTVNone ? (
-                    <div className="px-8 py-2 mt-10 text-white text-3xl">
-                        Not enough Shows yet. Add some to your favourites or watchlist to get started!
-                    </div>
-                ) : (
-                    tvDisplayRef.current.map(list => (
-                        <div key={list.listId} className="px-8 py-2">
-                            <ContentListAI list={list} isUserOwned={false} />
-                        </div>
-                    )
-                )
-                )
-            )}
-        </Scrollbar>
+        <LoadingNoAnimation
+          pageName="The Watchlist"
+          pageDesc="Loading Updated AI Recommendations..."
+          upperScreen={true}
+        />
+      </div>
+    );
+  }
+
+  // Main component rendering based on the display mode
+  return (
+    <div className="flex flex-col min-h-screen bg-darker pb-10">
+      <AIPicksHeader setDisplay={setDisplay} currentDisplay={display} currentUser={currentUser} />
+      <button
+        className="mx-4 my-2 mb-6 px-6 py-3 font-bold text-white bg-gradient-to-r from-magenta to-less-dark rounded-full shadow-lg hover:from-less-dark hover:to-magenta
+    focus:outline-none focus:ring-4 focus:ring-magenta transform active:scale-95 transition-transform duration-300"
+        onClick={fetchRecommendations}
+      >
+        Refresh AI Recommendations
+      </button>
+
+      <Scrollbar className="w-full overflow-y-auto">
+        {display === DISPLAY_TRENDING && (
+          <div>
+            <div className="px-6 py-2">
+              <ContentList
+                list={{ title: "Trending Movies", content: trendingContent.movies }}
+                isUserOwned={false}
+                globalRatings={globalRatings}
+                hideShowAllButton={true}
+              />
+            </div>
+            <div className="px-6 py-2">
+              <ContentList
+                list={{ title: "Trending TV Shows", content: trendingContent.shows }}
+                isUserOwned={false}
+                globalRatings={globalRatings}
+                hideShowAllButton={true}
+              />
+            </div>
+          </div>
+        )}
+        {display === DISPLAY_MOVIES && (
+          contentMovieNone ? (
+            <div className="flex flex-col items-center justify-center mt-10 p-6 rounded-lg shadow-lg">
+              <p className="text-white text-2xl font-semibold mb-2">Not enough Movies yet.</p>
+              <p className="text-gray-400 text-lg">Add some to your favourites or watchlist to get started!</p>
+            </div>
+          ) : (
+            displayRecommendations.movies.map((movie, movieIndex) => {
+              const startIndex = currentPages.movies[movieIndex] * MOVIES_PER_PAGE;
+              const currentRecommendations = movie.recommendations.slice(
+                startIndex,
+                startIndex + MOVIES_PER_PAGE
+              );
+
+              return (
+                <div key={movieIndex} className="relative px-6 py-2">
+                  <ContentList
+                    list={{ content: currentRecommendations, title: movie.movieTitle }}
+                    isUserOwned={false}
+                    globalRatings={globalRatings}
+                    hideShowAllButton={true}
+                  />
+
+                  {currentPages.movies[movieIndex] > 0 && (
+                          <button
+                            onClick={() => prevPage('movies', movieIndex)}
+                            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10 hover:scale-110"
+                            aria-label="Previous"
+                          >
+                            <ChevronLeftIcon className="h-20 w-20 text-white opacity-75 hover:opacity-100 drop-shadow-lg"
+                            style={{ mixBlendMode: 'difference' }} />
+                          </button>
+                        )}
+                    {(currentPages.movies[movieIndex] + 1) * MOVIES_PER_PAGE < movie.recommendations.length && (
+                      <button
+                        onClick={() => nextPage('movies', movieIndex)}
+                        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10 hover:scale-110"
+                        aria-label="Next"
+                      >
+                        <ChevronRightIcon className="h-20 w-20 text-white opacity-75 hover:opacity-100 drop-shadow-lg"
+                        style={{ mixBlendMode: 'difference' }} />
+                      </button>
+                    )}
+                </div>
+              );
+            })
+          )
+        )}
+        {display === DISPLAY_SHOWS && (
+          contentTVNone ? (
+            <div className="flex flex-col items-center justify-center mt-10 p-6 rounded-lg shadow-lg">
+              <p className="text-white text-2xl font-semibold mb-2">Not enough Shows yet.</p>
+              <p className="text-gray-400 text-lg">Add some to your favourites or watchlist to get started!</p>
+            </div>
+          ) : (
+            displayRecommendations.shows.map((show, showIndex) => {
+              const startIndex = currentPages.shows[showIndex] * MOVIES_PER_PAGE;
+              const currentRecommendations = show.recommendations.slice(
+                startIndex,
+                startIndex + MOVIES_PER_PAGE
+              );
+        
+              return (
+                <div key={showIndex} className="relative px-6 py-2">
+                  <ContentList
+                    list={{ content: currentRecommendations, title: show.showTitle }}
+                    isUserOwned={false}
+                    globalRatings={globalRatings}
+                    hideShowAllButton={true}
+                  />
+        
+        {currentPages.shows[showIndex] > 0 && (
+                          <button
+                            onClick={() => prevPage('shows', showIndex)}
+                            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10  hover:scale-110"
+                            aria-label="Previous"
+                          >
+                            <ChevronLeftIcon className="h-20 w-20 text-white opacity-75 hover:opacity-100 drop-shadow-lg"
+                            style={{ mixBlendMode: 'difference' }} />
+                          </button>
+                        )}
+                    {(currentPages.shows[showIndex] + 1) * MOVIES_PER_PAGE < show.recommendations.length && (
+                      <button
+                        onClick={() => nextPage('shows', showIndex)}
+                        className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-transparent p-2 focus:outline-none z-10  hover:scale-110"
+                        aria-label="Next"
+                      >
+                        <ChevronRightIcon className="h-20 w-20 text-white opacity-75 hover:opacity-100 drop-shadow-lg"
+                        style={{ mixBlendMode: 'difference' }} />
+                      </button>
+                    )}
+                </div>
+              );
+            })
+          )
+        )}
+        {display === DISPLAY_GENRES && (
+          <Scrollbar className="w-full overflow-y-auto">
+            <div className="px-8 py-4">
+              <div className="bg-blue-500 bg-opacity-10 border border-blue-500 text-blue-300 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong className="font-bold">Understanding Your Top Genres:</strong>
+                <span className="block sm:inline ml-1">
+                  The numbers next to each genre indicate how many times you've interacted with content from that genre through ratings or adding to your lists. Select a genre to see personalised recommendations!
+                </span>
+              </div>
+              <h2 className="text-white text-2xl font-bold mb-4">Your Top Genres</h2>
+              {genreStatistics.length > 0 ? (
+                <div className="flex flex-wrap">
+                  {genreStatistics.map((genreStat) => (
+                    <button
+                      key={genreStat.genre}
+                      className={`m-2 px-4 py-2 rounded-full border ${selectedGenre === genreStat.genre
+                          ? "bg-magenta text-white border-magenta"
+                          : "bg-dark text-white border-gray-300"
+                        }`}
+                      onClick={() => {
+                        setSelectedGenre(genreStat.genre);
+                        fetchRecommendationsByGenre(genreStat.genre);
+                      }}
+                    >
+                      {genreStat.genre} ({genreStat.count})
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400">
+                  You haven't interacted with any genres yet. Start rating or adding content to see recommendations here!
+                </p>
+              )}
+              {selectedGenre && (
+                <div className="mt-6">
+                  <h2 className="text-white text-2xl font-bold mb-4">Recommendations for "{selectedGenre}"</h2>
+                  <div className="py-2">
+                    {genreRecommendations.movies.length > 0 ? (
+                      <ContentList
+                        list={{ title: "Movies You Might Like", content: genreRecommendations.movies }}
+                        isUserOwned={false}
+                        globalRatings={globalRatings}
+                        hideShowAllButton={true}
+                      />
+                    ) : (
+                      <p className="text-gray-400">No movie recommendations available for this genre.</p>
+                    )}
+                  </div>
+                  <div className="py-2">
+                    {genreRecommendations.shows.length > 0 ? (
+                      <ContentList
+                        list={{ title: "TV Shows You Might Like", content: genreRecommendations.shows }}
+                        isUserOwned={false}
+                        globalRatings={globalRatings}
+                        hideShowAllButton={true}
+                      />
+                    ) : (
+                      <p className="text-gray-400">No TV show recommendations available for this genre.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </Scrollbar>
+        )}
+      </Scrollbar>
     </div>
-);
-}
+  );
+};
+
+export default AIPicks; // Export the component for use in other parts of the application
