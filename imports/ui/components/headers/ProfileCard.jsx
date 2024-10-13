@@ -216,11 +216,13 @@ const ProfileCard = React.memo(({ user, showFollowButton, currentUser, isFollowi
 
       {/* Avatar Modal */}
       {showAvatarModal && (
-        <AvatarModal
-          handleAvatarChange={handleAvatarChange}
-          handlePresetAvatarSelect={handlePresetAvatarSelect}
-          setShowAvatarModal={setShowAvatarModal}
-        />
+        <div style={{ zIndex: 1000, position: 'relative' }}>
+          <AvatarModal
+            handleAvatarChange={handleAvatarChange}
+            handlePresetAvatarSelect={handlePresetAvatarSelect}
+            setShowAvatarModal={setShowAvatarModal}
+          />
+        </div>
       )}
     </div>
   );
