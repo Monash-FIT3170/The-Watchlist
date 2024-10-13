@@ -170,24 +170,4 @@ const ContentList = React.memo(({
   );
 });
 
-// Define PropTypes for better type-checking and documentation
-ContentList.propTypes = {
-  list: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-    content: PropTypes.arrayOf(PropTypes.object).isRequired,
-  }).isRequired,
-  isUserOwned: PropTypes.bool,
-  globalRatings: PropTypes.object,
-  hideShowAllButton: PropTypes.bool,
-  showScrollArrows: PropTypes.bool, // Optional prop
-};
-
-// Define defaultProps in case some props are not provided
-ContentList.defaultProps = {
-  isUserOwned: false,
-  globalRatings: {},
-  hideShowAllButton: false,
-  showScrollArrows: true, // Default to showing scroll arrows
-};
-
 export default ContentList;

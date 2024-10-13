@@ -46,9 +46,11 @@ const Settings = () => {
   }, [currentUser]);
 
   const handleUpdate = () => {
+    console.log("handle update called")
     if (!username) {
       setUsernameErrorMessage("Username cannot be empty.");
       setUsernameSuccessMessage("");
+      console.log("!username")
       return;
     }
 
@@ -56,9 +58,11 @@ const Settings = () => {
     if (username.length < 3 || username.length > 15) {
       setUsernameErrorMessage("Username must be between 3 and 15 characters.");
       setUsernameSuccessMessage("");
+      console.log("username.length < 3 || username.length > 15")
       return;
     }
 
+    console.log("metoer call to update profile")
     Meteor.call("users.updateProfile", { username }, (error) => {
       if (error) {
         setUsernameErrorMessage(error.reason);
@@ -145,6 +149,7 @@ const Settings = () => {
             className="bg-darker text-white mt-1 p-3 block w-full shadow-sm sm:text-sm border border-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500"
           />
           <button
+          type="button"
             onClick={handleUpdate}
             className="bg-[#7B1450] text-white px-4 py-2 rounded-md hover:bg-pink-700 transition-colors w-auto"
           >
