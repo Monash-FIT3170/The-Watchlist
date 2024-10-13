@@ -51,43 +51,41 @@ Meteor.publish('allUsers', function () {
 });
 
 Meteor.publish('userLists', function (profileUserId) {
-  // Validate the input
   check(profileUserId, String);
 
-  // If no user is logged in, only publish public lists
   if (!this.userId) {
-    const publicLists = ListCollection.find({ userId: profileUserId, visibility: 'PUBLIC' });
-    return publicLists;
+    return ListCollection.find({ userId: profileUserId, visibility: 'PUBLIC' });
   }
 
-  // If the viewer is the profile owner, publish all their lists
   if (this.userId === profileUserId) {
-    const allLists = ListCollection.find({ userId: profileUserId });
-    return allLists;
+    return ListCollection.find({ userId: profileUserId });
   }
 
-  // Otherwise, check if the viewer is a follower
   const currentUser = Meteor.users.findOne(this.userId);
   if (!currentUser) {
     return this.ready();
   }
 
-  const isFollower = currentUser.following?.some(follow => follow.userId === profileUserId);
+  // Corrected isFollower check
+  const isFollower = currentUser.following?.some(follow => {
+    if (typeof follow.userId === 'string') {
+      return follow.userId === profileUserId;
+    } else if (follow.userId && typeof follow.userId.userId === 'string') {
+      return follow.userId.userId === profileUserId;
+    }
+    return false;
+  });
 
   if (isFollower) {
-    const cursor = ListCollection.find({
+    return ListCollection.find({
       userId: profileUserId,
-      $or: [
-        { visibility: 'PUBLIC' },
-        { visibility: 'FOLLOWERS' }
-      ]
+      visibility: { $in: ['PUBLIC', 'FOLLOWERS'] }
     });
-    return cursor;
   } else {
-    const publicLists = ListCollection.find({ userId: profileUserId, visibility: 'PUBLIC' });
-    return publicLists;
+    return ListCollection.find({ userId: profileUserId, visibility: 'PUBLIC' });
   }
 });
+
 
 Meteor.publish('ratings', function () {
   return RatingCollection.find({ });

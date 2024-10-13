@@ -42,8 +42,16 @@ const UserProfile = ({ currentUser }) => {
   // Derive isFollowing reactively from currentUser.following
   const isFollowing = useMemo(() => {
     if (isOwnProfile || !currentUser.following) return false;
-    return currentUser.following.some(follow => follow.userId === profileUserId);
+    return currentUser.following.some(follow => {
+      if (typeof follow.userId === 'string') {
+        return follow.userId === profileUserId;
+      } else if (follow.userId && typeof follow.userId.userId === 'string') {
+        return follow.userId.userId === profileUserId;
+      }
+      return false;
+    });
   }, [isOwnProfile, currentUser.following, profileUserId]);
+  
 
   const isRequested = useMemo(() => {
     if (isOwnProfile || !currentUser.followingRequests) return false;
