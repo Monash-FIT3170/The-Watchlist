@@ -61,7 +61,7 @@ const LoginPage = () => {
           setError(err.reason);
         } else {
           createDefaultLists(Meteor.userId());
-          navigate('/search'); // Redirect to /search upon successful sign-up
+          navigate('/home'); // Redirect to /home upon successful sign-up
         }
       });
     } else {
@@ -69,7 +69,7 @@ const LoginPage = () => {
         if (err) {
           setError("Username or Password Incorrect");
         } else {
-          navigate('/search'); // Redirect to /search upon successful login
+          navigate('/home'); // Redirect to /home upon successful login
         }
       });
     }
