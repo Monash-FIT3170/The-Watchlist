@@ -371,7 +371,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                         <div className={`
                             flex space-x-3 px-2 pt-2 rounded-full transform transition-transform duration-500
                             ${isShareDropdownOpen ? "bg-[#282525]" : "bg-inherit"}
-                            ${isEditDropdownOpen ? "translate-x-0" : (list.userId === Meteor.userId() ? 'translate-x-[17.5rem]' : 'translate-x-[21.5rem]')}
+                            ${isEditDropdownOpen ? "translate-x-0" : (list.userId === Meteor.userId() ? 'translate-x-[17.5rem]' : 'translate-x-[14.25rem]')}
                         `}>
                             {/* Actual Dropdown */}
                             <div className={`flex flex-row space-x-3`}>
@@ -462,7 +462,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                         className={`
                                             font-bold rounded-full flex items-center justify-center cursor-pointer transform transition-transform duration-500
                                             ${isCurrentUserList ? 'bg-green-500 hover:bg-green-700 text-white' : 'bg-gray-500 text-gray-700 cursor-not-allowed'}
-                                            ${isEditDropdownOpen ? 'translate-x-0' : (list.userId === Meteor.userId() ? 'translate-x-[17.5rem]' : 'translate-x-[21.5rem]')}
+                                            ${isEditDropdownOpen ? 'translate-x-0' : (list.userId === Meteor.userId() ? 'translate-x-[17.5rem]' : 'translate-x-[14rem]')}
                                         `}
                                         style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
                                         title="Upload Image"
@@ -482,7 +482,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                         className={`
                                             font-bold rounded-full flex items-center justify-center transform transition-transform duration-500
                                             ${isCurrentUserList ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-500 text-gray-700 cursor-not-allowed'}
-                                            ${isEditDropdownOpen ? 'translate-x-0' : (list.userId === Meteor.userId() ? 'translate-x-[14rem]' : 'translate-x-[18rem]')}
+                                            ${isEditDropdownOpen ? 'translate-x-0' : (list.userId === Meteor.userId() ? 'translate-x-[14rem]' : 'translate-x-[10.5rem]')}
                                         `}
                                         title="Rename List"
                                         style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
@@ -497,7 +497,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                         className={`
                                             font-bold rounded-full flex items-center justify-center transform transition-transform duration-500
                                             ${isCurrentUserList ? 'bg-red-500 hover:bg-red-700 text-white' : 'bg-gray-500 text-gray-700 cursor-not-allowed'}
-                                            ${isEditDropdownOpen ? 'translate-x-0' : (list.userId === Meteor.userId() ? 'translate-x-[10.5rem]' : 'translate-x-[14.5rem]')}
+                                            ${isEditDropdownOpen ? 'translate-x-0' : (list.userId === Meteor.userId() ? 'translate-x-[10.5rem]' : 'translate-x-[7rem]')}
                                         `}
                                         title="Delete List"
                                         style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
@@ -510,27 +510,13 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                         onClick={() => setIsGridView(!isGridView)}
                                         className= {`
                                             bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center transform transition-transform duration-500
-                                            ${isEditDropdownOpen ? 'translate-x-0' : (list.userId === Meteor.userId() ? 'translate-x-[7rem]' : 'translate-x-[11rem]')}
+                                            ${isEditDropdownOpen ? 'translate-x-0' : (list.userId === Meteor.userId() ? 'translate-x-[7rem]' : 'translate-x-[3.5rem]')}
                                         `}
                                         title={isGridView ? "Switch to List View" : "Switch to Grid View"}
                                         style={{ width: iconSize, height: iconSize }}
                                     >
                                         {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
                                     </button>
-
-                                    {/* Conditionally render subscribe/unsubscribe button */}
-                                    {list.userId !== Meteor.userId() && (
-                                        <button
-                                            onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
-                                            className={`
-                                                px-4 rounded-full font-bold text-white transform transition-transform duration-500 items-center justify-center h-[2.75rem]
-                                                ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white
-                                                ${isEditDropdownOpen ? 'translate-x-0 scale-x-100 scale-y-100' : 'translate-x-[7rem] scale-x-0 scale-y-0'}
-                                            `}
-                                        >
-                                            {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
-                                        </button>
-                                    )}
 
                                     {/* Conditionally render visibility settings */}
                                     {list.userId === Meteor.userId() && (
@@ -558,7 +544,23 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                 >
                                     <FiSettings size="24" />
                                 </button>
+
+                                
                             </div>
+
+                            {/* Conditionally render subscribe/unsubscribe button */}
+                            {list.userId !== Meteor.userId() && (
+                                <button
+                                    onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
+                                    className={`
+                                        px-4 mt-2 rounded-full font-bold text-white transform transition-transform duration-500 items-center justify-center h-[2.75rem]
+                                        ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white
+                                    `}
+                                >
+                                    {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                                </button>
+                            )}
+
                             <button
                                 className="text-2xl font-bold text-gray-500 hover:text-gray-800"
                                 onClick={onClose}
