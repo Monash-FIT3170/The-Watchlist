@@ -56,7 +56,15 @@ const LoginPage = () => {
 
 
     if (isRegistering) {
-      Accounts.createUser({ email, username, password }, (err) => {
+
+      // User Object
+      const newUser = {
+        email: email,
+        username: username,
+        password: password
+      }
+
+      Accounts.createUser(newUser, (err) => {
         if (err) {
           setError(err.reason);
         } else {
