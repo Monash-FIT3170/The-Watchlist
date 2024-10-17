@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTracker } from 'meteor/react-meteor-data';
 import RatingStar from "../ratings/RatingStar";
-import { FiEdit, FiTrash2, FiGrid, FiList, FiLink, FiShare2, FiUpload } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiGrid, FiList, FiLink, FiShare2, FiUpload, FiSettings } from "react-icons/fi";
 import RenameListModal from "../../modals/RenameListModal";
 import { Meteor } from 'meteor/meteor';
 import Scrollbar from '../scrollbar/ScrollBar';
@@ -43,6 +43,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
     const [contentToDelete, setContentToDelete] = useState(null);
     const [shareUrl, setShareUrl] = useState();
     const [isShareDropdownOpen, setShareDropdown] = useState(false);
+    const [isEditDropdownOpen, setEditDropdown] = useState(false);
     const shareQuote = "Check out this watchlist!";
     const iconSize = 44;
     const navigate = useNavigate();
@@ -56,7 +57,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     setList(null);
                 } else {
                     setList(result);
-                    const localhost = "http://localhost:3000";
+                    const localhost = "http://localhost:5000";
                     const domain = "https://www.thewatchlist.xyz"
                     // Change to domain before merging with main
                     setShareUrl(`${domain}/list/${result._id}`);
@@ -350,6 +351,10 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
         setShareDropdown(!isShareDropdownOpen);
     }
 
+    const toggleEditDropdown = () => {
+        setEditDropdown(!isEditDropdownOpen);
+    }
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
             <div
@@ -360,114 +365,199 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                     <h2 className="text-2xl font-bold truncate max-w-full" title={list.title}>
                         {list.title.length > 30 ? `${list.title.slice(0, 30)}...` : list.title}
                     </h2>
-                    <div className="flex space-x-1">
+                    <div className="flex space-x-0">
 
-                        <div className={`flex space-x-3 px-2 pt-2 rounded-full ${isShareDropdownOpen ? "bg-[#282525]" : "bg-inherit"}`}>
+                        {/* Share Options Dropdown */}
+                        <div className={`
+                            flex space-x-3 px-2 pt-2 rounded-full transform transition-transform duration-500
+                            ${isShareDropdownOpen ? "bg-[#282525]" : "bg-inherit"}
+                            ${isEditDropdownOpen ? "translate-x-0" : "translate-x-[17.5rem]"}
+                        `}>
                             {/* Actual Dropdown */}
-                            {isShareDropdownOpen && (
-                                <div className="flex flex-row space-x-3">
-                                    <button
-                                        onClick={() => handleCopy(shareUrl)}
-                                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
-                                        title="Copy Link"
-                                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                                    >
-                                        <FiLink size="24" />
-                                    </button>
-                                    <button title="Share to Facebook">
-                                        <FacebookShareButton url={shareUrl} quote={shareQuote}>
-                                            <FacebookIcon size={iconSize} round />
-                                        </FacebookShareButton>
-                                    </button>
-                                    <button title="Share to Twitter">
-                                        <TwitterShareButton url={shareUrl} title={shareQuote}>
-                                            <TwitterIcon size={iconSize} round />
-                                        </TwitterShareButton>
-                                    </button>
-                                    <button title="Share to Whatsapp">
-                                        <WhatsappShareButton url={shareUrl} title={shareQuote}>
-                                            <WhatsappIcon size={iconSize} round />
-                                        </WhatsappShareButton>
-                                    </button>
-                                    <button title="Send in Email">
-                                        <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
-                                            <EmailIcon size={iconSize} round />
-                                        </EmailShareButton>
-                                    </button>
-                                </div>
-                            )}
+                            <div className={`flex flex-row space-x-3`}>
+
+                                {/* Link */}
+                                <button
+                                    onClick={() => handleCopy(shareUrl)}
+                                    className={`
+                                        bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center transform transition-transform transition-opacity duration-500
+                                        ${isShareDropdownOpen ? 'translate-x-0' : 'translate-x-[17.5rem]'}
+                                    `}
+                                    title="Copy Link"
+                                    style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                                >
+                                    <FiLink size="24" />
+                                </button>
+
+                                {/* Facebook */}
+                                <button
+                                    className={`
+                                        transform transition-transform duration-500
+                                        ${isShareDropdownOpen ? 'translate-x-0' : 'translate-x-[14rem]'}
+                                    `}
+                                    title="Share to Facebook"
+                                >
+                                    <FacebookShareButton url={shareUrl} quote={shareQuote}>
+                                        <FacebookIcon size={iconSize} round />
+                                    </FacebookShareButton>
+                                </button>
+
+                                {/* Twitter */}
+                                <button 
+                                    className={`
+                                        transform transition-transform duration-500
+                                        ${isShareDropdownOpen ? 'translate-x-0' : 'translate-x-[10.5rem]'}
+                                    `}
+                                    title="Share to Twitter"
+                                >
+                                    <TwitterShareButton url={shareUrl} title={shareQuote}>
+                                        <TwitterIcon size={iconSize} round />
+                                    </TwitterShareButton>
+                                </button>
+
+                                {/* Whatsapp */}
+                                <button
+                                    className={`
+                                        transform transition-transform duration-500
+                                        ${isShareDropdownOpen ? 'translate-x-0' : 'translate-x-[7rem]'}
+                                    `}
+                                    title="Share to Whatsapp"
+                                >
+                                    <WhatsappShareButton url={shareUrl} title={shareQuote}>
+                                        <WhatsappIcon size={iconSize} round />
+                                    </WhatsappShareButton>
+                                </button>
+
+                                {/* Email*/}
+                                <button
+                                    className={`
+                                        transform transition-transform duration-500
+                                        ${isShareDropdownOpen ? 'translate-x-0' : 'translate-x-[3.5rem]'}
+                                    `}
+                                    title="Send in Email"
+                                >
+                                    <EmailShareButton url={shareUrl} subject={list.title} body={shareQuote}>
+                                        <EmailIcon size={iconSize} round />
+                                    </EmailShareButton>
+                                </button>
+                            </div>
                             {/* Dropdown Toggle Button */}
                             <button
                                 onClick={() => toggleShareDropdown()}
-                                className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
+                                className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center z-10"
                                 title="Share Options"
-                                style={{ width: iconSize, height: iconSize }}
+                                style={{ width: iconSize, height: iconSize}}
                             >
                                 <FiShare2 size="24" />
                             </button>
                         </div>
+                        
+                        <div className={`flex space-x-3`}>
+                            {/* Edit Options Dropdown*/}
+                            <div className={`flex flex-row space-x-3 px-2 pt-2 rounded-full ${isEditDropdownOpen ? "bg-[#282525]" : "bg-inherit"}`}>
+                                <div className="flex flex-row space-x-3">
 
-                        <div className="pb-2 pt-2 flex space-x-3 items-center">
+                                    {/* Image Change */}
+                                    <label
+                                        className={`
+                                            font-bold rounded-full flex items-center justify-center cursor-pointer transform transition-transform duration-500
+                                            ${isCurrentUserList ? 'bg-green-500 hover:bg-green-700 text-white' : 'bg-gray-500 text-gray-700 cursor-not-allowed'}
+                                            ${isEditDropdownOpen ? 'translate-x-0' : 'translate-x-[17.5rem]'}
+                                        `}
+                                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                                        title="Upload Image"
+                                        >
+                                    <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleAvatarChange}
+                                            className="hidden"                                 />
+                                        <FiUpload size="24" /> 
+                                    </label>
 
-                            <label
-                                className={`font-bold rounded-full flex items-center justify-center cursor-pointer ${isCurrentUserList ? 'bg-green-500 hover:bg-green-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
-                                style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                                title="Upload Image"
-                                >
-                               <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleAvatarChange}
-                                    className="hidden"                                 />
-                                <FiUpload size="24" /> 
-                            </label>
-                            <button
-                                onClick={isCurrentUserList ? handleRenameListClick : null}
-                                disabled={!isCurrentUserList}
-                                className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
-                                title="Rename List"
-                                style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                            >
-                                <FiEdit size="24" />
-                            </button>
-                            <button
-                                onClick={() => isCurrentUserList && confirmDeleteList(list._id)}
-                                disabled={!isCurrentUserList}
-                                className={`font-bold rounded-full flex items-center justify-center ${isCurrentUserList ? 'bg-red-500 hover:bg-red-700 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
-                                title="Delete List"
-                                style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
-                            >
-                                <FiTrash2 size="24" />
-                            </button>
-                            <button
-                                onClick={() => setIsGridView(!isGridView)}
-                                className="bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center"
-                                title={isGridView ? "Switch to List View" : "Switch to Grid View"}
-                                style={{ width: iconSize, height: iconSize }}
-                            >
-                                {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
-                            </button>
-                            {/* Conditionally render subscribe/unsubscribe button */}
-                            {list.userId !== Meteor.userId() && (
+                                    {/* Rename List */}
+                                    <button
+                                        onClick={isCurrentUserList ? handleRenameListClick : null}
+                                        disabled={!isCurrentUserList}
+                                        className={`
+                                            font-bold rounded-full flex items-center justify-center transform transition-transform duration-500
+                                            ${isCurrentUserList ? 'bg-blue-500 hover:bg-blue-700 text-white' : 'bg-gray-500 text-gray-700 cursor-not-allowed'}
+                                            ${isEditDropdownOpen ? 'translate-x-0' : 'translate-x-[14rem]'}
+                                        `}
+                                        title="Rename List"
+                                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                                    >
+                                        <FiEdit size="24" />
+                                    </button>
+
+                                    {/* Delete List */}
+                                    <button
+                                        onClick={() => isCurrentUserList && confirmDeleteList(list._id)}
+                                        disabled={!isCurrentUserList}
+                                        className={`
+                                            font-bold rounded-full flex items-center justify-center transform transition-transform duration-500
+                                            ${isCurrentUserList ? 'bg-red-500 hover:bg-red-700 text-white' : 'bg-gray-500 text-gray-700 cursor-not-allowed'}
+                                            ${isEditDropdownOpen ? 'translate-x-0' : 'translate-x-[10.5rem]'}
+                                        `}
+                                        title="Delete List"
+                                        style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
+                                    >
+                                        <FiTrash2 size="24" />
+                                    </button>
+
+                                    {/* View Change */}
+                                    <button
+                                        onClick={() => setIsGridView(!isGridView)}
+                                        className= {`
+                                            bg-gray-500 hover:bg-gray-700 text-white font-bold rounded-full flex items-center justify-center transform transition-transform duration-500
+                                            ${isEditDropdownOpen ? 'translate-x-0' : 'translate-x-[7rem]'}
+                                        `}
+                                        title={isGridView ? "Switch to List View" : "Switch to Grid View"}
+                                        style={{ width: iconSize, height: iconSize }}
+                                    >
+                                        {isGridView ? <FiList size="24" /> : <FiGrid size="24" />}
+                                    </button>
+                                    {/* Conditionally render subscribe/unsubscribe button */}
+                                    {list.userId !== Meteor.userId() && (
+                                        <button
+                                            onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
+                                            className={`
+                                                px-4 py-2 rounded-full font-bold text-white transform transition-transform duration-500
+                                                ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white
+                                                ${isEditDropdownOpen ? 'translate-x-0' : 'translate-x-[3.5rem]'}
+                                            `}
+                                        >
+                                            {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                                        </button>
+                                    )}
+
+                                    {/* Conditionally render visibility settings */}
+                                    {list.userId === Meteor.userId() && (
+                                        <div className={`
+                                            transform transition-transform duration-500
+                                            ${isEditDropdownOpen ? 'translate-x-0' : 'translate-x-[3.5rem]'}
+                                        `}>
+                                            <VisibilityDropdown
+                                                list={list}
+                                                setVisibility={setVisibility}
+                                                listId={listId}
+                                                currentVisibility={getVisibility}
+                                                defaultText={<FaGlobe size={24} />}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {/* Dropdown Button */}
                                 <button
-                                    onClick={() => isSubscribed ? handleUnsubscribe(list._id) : handleSubscribe(list._id)}
-                                    className={`px-4 py-2 rounded-full font-bold ${isSubscribed ? 'bg-red-500 hover:bg-red-700' : 'bg-blue-500 hover:bg-blue-700'} text-white`}
+                                    onClick={() => toggleEditDropdown()}
+                                    className={`font-bold rounded-full flex items-center justify-center bg-blue-500 hover:bg-blue-700 text-white z-10`}
+                                    title="List Settings"
+                                    style={{ width: iconSize, height: iconSize }} // Ensuring the button has a fixed size
                                 >
-                                    {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
+                                    <FiSettings size="24" />
                                 </button>
-                            )}
-
-                            {/* Conditionally render visibility settings */}
-                            {list.userId === Meteor.userId() && (
-                                <VisibilityDropdown
-                                    list={list}
-                                    setVisibility={setVisibility}
-                                    listId={listId}
-                                    currentVisibility={getVisibility}
-                                    defaultText={<FaGlobe size={24} />}
-                                />
-                            )}
-
+                            </div>
                             <button
                                 className="text-2xl font-bold text-gray-500 hover:text-gray-800"
                                 onClick={onClose}
@@ -482,7 +572,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                         {['all', 'movies', 'tv shows'].map((tab) => (
                             <div
                                 key={tab}
-                                className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-300 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
+                                className={`inline-block px-3 py-1.5 mt-1.5 mb-3 mr-2 rounded-full cursor-pointer transition-all duration-500 ease-in-out ${selectedTab === tab ? 'bg-[#7B1450] text-white border-[#7B1450]' : 'bg-[#282525]'
                                     } border-transparent border`}
                                 onClick={() => setSelectedTab(tab)}
                             >
@@ -495,7 +585,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                             <select
                                 value={sortCriterion}
                                 onChange={(e) => changeSortCriterion(e.target.value)}
-                                className="inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out bg-[#282525] text-white border-transparent border appearance-none pr-8 w-auto" // Changed pr-8 and added w-auto
+                                className="inline-block px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-500 ease-in-out bg-[#282525] text-white border-transparent border appearance-none pr-8 w-auto" // Changed pr-8 and added w-auto
                                 style={{
                                     backgroundImage: `url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"%3E%3Cpath fill="white" d="M7 7l3-3 3 3m-6 4l3 3 3-3" /%3E%3C/svg%3E')`,
                                     backgroundRepeat: 'no-repeat',
@@ -510,7 +600,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
 
                             <button
                                 onClick={toggleSortOrder}
-                                className={`flex items-center justify-center px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-300 ease-in-out 
+                                className={`flex items-center justify-center px-3 py-1.5 mt-1.5 mb-3 rounded-full cursor-pointer transition-all duration-500 ease-in-out 
             ${sortOrder === 'ascending' ? 'bg-[#7B1450] text-white' : 'bg-[#7B1450] text-white'} 
             border-transparent border`}
                             >
@@ -549,7 +639,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                         contentType={item.contentType}
                                     />
                                 ) : (
-                                    <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-300 ease-in-out hover:scale-101" onClick={(e) => handleContentClick(item, e)}>
+                                    <div className="overflow-hidden rounded-lg shadow-lg cursor-pointer transition-transform duration-500 ease-in-out hover:scale-101" onClick={(e) => handleContentClick(item, e)}>
                                         <div className="relative">
                                             <img
                                                 src={item.background_url}
@@ -558,7 +648,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                                 style={imageStyles[item.contentId] || {}}
                                                 onLoad={(e) => handleImageLoad(e, item.contentId)}
                                             />
-                                            <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-300 ease-in-out hover:bg-opacity-60">
+                                            <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-end p-4 rounded-lg transition-opacity duration-500 ease-in-out hover:bg-opacity-60">
                                                 <div className="absolute bottom-4 left-4 text-white">
                                                     <h3 className="text-xl font-bold">{item.title}</h3>
                                                     <div className="flex items-center">
@@ -571,7 +661,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                                     </div>
                                                 </div>
                                                 <button
-                                                    className={`absolute top-4 right-4 rounded-full p-2 ${isCurrentUserList ? 'text-white bg-red-500 hover:bg-red-700' : 'text-gray-500 bg-gray-300 cursor-not-allowed'}`}
+                                                    className={`absolute top-4 right-4 rounded-full p-2 ${isCurrentUserList ? 'text-white bg-red-500 hover:bg-red-700' : 'text-gray-500 bg-gray-500 cursor-not-allowed'}`}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         if (isCurrentUserList) {
@@ -622,7 +712,7 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                         className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <p className="text-gray-300">
+                        <p className="text-gray-500">
                             Are you sure you want to {contentToDelete !== null ? 'remove this content' : 'delete this list'}?
                         </p>
                         <div className="flex justify-end space-x-4">
