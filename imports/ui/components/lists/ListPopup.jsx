@@ -375,6 +375,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                         `}>
                             {/* Actual Dropdown */}
                             <div className={`flex flex-row space-x-3`}>
+
+                                {/* Link */}
                                 <button
                                     onClick={() => handleCopy(shareUrl)}
                                     className={`
@@ -386,6 +388,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                 >
                                     <FiLink size="24" />
                                 </button>
+
+                                {/* Facebook */}
                                 <button
                                     className={`
                                         transform transition-transform duration-500
@@ -397,6 +401,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                         <FacebookIcon size={iconSize} round />
                                     </FacebookShareButton>
                                 </button>
+
+                                {/* Twitter */}
                                 <button 
                                     className={`
                                         transform transition-transform duration-500
@@ -408,6 +414,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                         <TwitterIcon size={iconSize} round />
                                     </TwitterShareButton>
                                 </button>
+
+                                {/* Whatsapp */}
                                 <button
                                     className={`
                                         transform transition-transform duration-500
@@ -419,6 +427,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                         <WhatsappIcon size={iconSize} round />
                                     </WhatsappShareButton>
                                 </button>
+
+                                {/* Email*/}
                                 <button
                                     className={`
                                         transform transition-transform duration-500
@@ -442,10 +452,12 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                             </button>
                         </div>
                         
-                        {/* Edit Options Dropdown*/}
                         <div className={`flex space-x-3`}>
+                            {/* Edit Options Dropdown*/}
                             <div className={`flex flex-row space-x-3 px-2 pt-2 rounded-full ${isEditDropdownOpen ? "bg-[#282525]" : "bg-inherit"}`}>
                                 <div className="flex flex-row space-x-3">
+
+                                    {/* Image Change */}
                                     <label
                                         className={`
                                             font-bold rounded-full flex items-center justify-center cursor-pointer transform transition-transform duration-500
@@ -462,6 +474,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                             className="hidden"                                 />
                                         <FiUpload size="24" /> 
                                     </label>
+
+                                    {/* Rename List */}
                                     <button
                                         onClick={isCurrentUserList ? handleRenameListClick : null}
                                         disabled={!isCurrentUserList}
@@ -475,6 +489,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                     >
                                         <FiEdit size="24" />
                                     </button>
+
+                                    {/* Delete List */}
                                     <button
                                         onClick={() => isCurrentUserList && confirmDeleteList(list._id)}
                                         disabled={!isCurrentUserList}
@@ -488,6 +504,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                     >
                                         <FiTrash2 size="24" />
                                     </button>
+
+                                    {/* View Change */}
                                     <button
                                         onClick={() => setIsGridView(!isGridView)}
                                         className= {`
@@ -529,6 +547,8 @@ const ListPopup = ({ listId, onClose, onRenameList }) => {
                                         </div>
                                     )}
                                 </div>
+                                
+                                {/* Dropdown Button */}
                                 <button
                                     onClick={() => toggleEditDropdown()}
                                     className={`font-bold rounded-full flex items-center justify-center bg-blue-500 hover:bg-blue-700 text-white z-10`}
